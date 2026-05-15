@@ -1,4 +1,8 @@
 {
+  "name": "power-amp",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local workspace for transistor amplifier research, schematics, simulation, OCR, and generated results.",
   "dependencies": {
     "@resvg/resvg-js": "^2.6.2"
   }

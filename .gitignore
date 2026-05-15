@@ -33,6 +33,9 @@ local_tools/
 
 # Browser/headless render leftovers
 results/.browser-profile*/
+results/**/data/tuning*/
+results/**/data/*tuning*/
+results/**/data/bootstrap_eval*/
 
 # OS/editor noise
 .DS_Store

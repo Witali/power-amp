@@ -1,0 +1,22 @@
+* RC low-pass filter ngspice smoke test
+* Cutoff is about 1/(2*pi*1k*100n) = 1.59 kHz.
+
+Vin in 0 DC 0 AC 1 SIN(0 1 1k)
+R1 in out 1k
+C1 out 0 100n
+Rload out 0 100k
+
+.control
+set noaskquit
+set filetype=ascii
+set wr_singlescale
+op
+print v(in) v(out)
+ac dec 40 10 1Meg
+wrdata ac_response.csv frequency vdb(out) vp(out)
+tran 10u 5m
+wrdata transient.csv time v(in) v(out)
+quit
+.endc
+
+.end
