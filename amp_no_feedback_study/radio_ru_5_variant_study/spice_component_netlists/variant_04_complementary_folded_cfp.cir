@@ -1,0 +1,27 @@
+* Variant 04: Complementary folded cascode with CFP/Sziklai output
+* Transistor-level SPICE component netlist for the local component simulation.
+* Source basis: Grechishkin-style BJT front end plus Syrico bias discipline and Rogov output-stage tradeoffs
+* Drive bias spread: 2.18 V, source resistance: 18 ohm, drive trim: 1.04
+.model NPN_SMALL NPN(IS=1.1e-15 BF=95 VAF=90)
+.model PNP_SMALL PNP(IS=1.4e-15 BF=75 VAF=90)
+.model NPN_POWER NPN(IS=4.8e-15 BF=55 VAF=90)
+.model PNP_POWER PNP(IS=5.6e-15 BF=48 VAF=90)
+VCC VCC 0 DC 15
+VEE VEE 0 DC -15
+* VUP/VDN are stepped sine drive sources in the Python component solver.
+RUPDRV UPSRC UP 18
+RDNDRV DNSRC DN 18
+QUDRV OUT UP UBASE PNP_SMALL
+QUOUT VCC UBASE UEMIT NPN_POWER
+QDDRV OUT DN DBASE NPN_SMALL
+QDOUT VEE DBASE DEMIT PNP_POWER
+RLOCALU UBASE OUT 330
+RLOCALD DBASE OUT 330
+REU UEMIT OUT 0.22
+RED DEMIT OUT 0.22
+RLOAD OUT 0 8
+RZ OUT ZOB 10
+CZ ZOB 0 100n
+.tran 0 20m 10m 2u
+.four 1k V(OUT)
+.end

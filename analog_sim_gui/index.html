@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Analog Sketch Lab</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app">
+      <aside class="sidebar">
+        <div class="brand">
+          <h1>Analog Sketch Lab</h1>
+          <p>Small schematic editor and analog simulator</p>
+        </div>
+
+        <section class="panel">
+          <h2>Examples</h2>
+          <div class="row">
+            <select id="exampleSelect" aria-label="Example circuits"></select>
+            <button id="loadExampleBtn" type="button">Load</button>
+          </div>
+          <div class="row">
+            <button id="saveBtn" type="button">Save</button>
+            <button id="restoreBtn" type="button">Restore</button>
+            <button id="exportBtn" type="button">Export</button>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2>Tools</h2>
+          <div class="tool-grid" id="toolGrid"></div>
+        </section>
+
+        <section class="panel">
+          <h2>Parts</h2>
+          <div class="part-grid" id="partGrid"></div>
+        </section>
+
+        <section class="panel inspector">
+          <h2>Inspector</h2>
+          <div id="inspectorEmpty">Select a component to edit it.</div>
+          <div id="inspectorForm" class="hidden">
+            <label>
+              Label
+              <input id="compLabel" />
+            </label>
+            <label>
+              Value / model
+              <input id="compValue" />
+            </label>
+            <div class="two-col">
+              <label>
+                DC
+                <input id="compDc" type="number" step="0.001" />
+              </label>
+              <label>
+                Amplitude
+                <input id="compAmp" type="number" step="0.001" />
+              </label>
+            </div>
+            <div class="two-col">
+              <label>
+                Frequency
+                <input id="compFreq" type="number" step="1" />
+              </label>
+              <label>
+                Gain / Beta
+                <input id="compGain" type="number" step="1" />
+              </label>
+            </div>
+            <div class="row">
+              <button id="applyBtn" type="button">Apply</button>
+              <button id="deleteBtn" type="button">Delete</button>
+            </div>
+          </div>
+        </section>
+      </aside>
+
+      <main class="workspace">
+        <header class="topbar">
+          <div>
+            <h2 id="circuitTitle">Untitled circuit</h2>
+            <p id="statusLine">Select a tool or load an example.</p>
+          </div>
+          <div class="sim-controls">
+            <label>
+              Duration
+              <input id="durationInput" type="number" value="0.01" step="0.001" min="0.001" />
+            </label>
+            <label>
+              Steps
+              <input id="stepsInput" type="number" value="240" step="10" min="20" max="1200" />
+            </label>
+            <label>
+              Probe
+              <select id="probeSelect"></select>
+            </label>
+            <button id="dcBtn" type="button">DC</button>
+            <button id="tranBtn" type="button">Transient</button>
+          </div>
+        </header>
+
+        <section class="canvas-wrap">
+          <canvas id="schematicCanvas" width="1300" height="720"></canvas>
+        </section>
+
+        <section class="bottom">
+          <div class="scope-panel">
+            <div class="panel-title">
+              <h2>Scope</h2>
+              <span id="scopeReadout">No simulation yet</span>
+            </div>
+            <canvas id="scopeCanvas" width="820" height="220"></canvas>
+          </div>
+          <div class="results-panel">
+            <div class="panel-title">
+              <h2>Results / Netlist</h2>
+              <button id="copyNetlistBtn" type="button">Copy netlist</button>
+            </div>
+            <textarea id="resultsText" spellcheck="false"></textarea>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>

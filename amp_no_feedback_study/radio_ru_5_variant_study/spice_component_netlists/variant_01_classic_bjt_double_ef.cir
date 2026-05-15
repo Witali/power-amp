@@ -1,0 +1,27 @@
+* Variant 01: Classic BJT differential amp, double emitter follower
+* Transistor-level SPICE component netlist for the local component simulation.
+* Source basis: Grechishkin 2013 BJT power amp pattern; Syrico 2017 bias/driver ideas
+* Drive bias spread: 2.74 V, source resistance: 56 ohm, drive trim: 1
+.model NPN_SMALL NPN(IS=1.1e-15 BF=95 VAF=90)
+.model PNP_SMALL PNP(IS=1.4e-15 BF=75 VAF=90)
+.model NPN_POWER NPN(IS=4.8e-15 BF=55 VAF=90)
+.model PNP_POWER PNP(IS=5.6e-15 BF=48 VAF=90)
+VCC VCC 0 DC 15
+VEE VEE 0 DC -15
+* VUP/VDN are stepped sine drive sources in the Python component solver.
+RUPDRV UPSRC UP 56
+RDNDRV DNSRC DN 56
+QUDRV VCC UP UBASE NPN_SMALL
+QUOUT VCC UBASE UEMIT NPN_POWER
+QDDRV VEE DN DBASE PNP_SMALL
+QDOUT VEE DBASE DEMIT PNP_POWER
+RLOCALU UBASE OUT 1800
+RLOCALD DBASE OUT 1800
+REU UEMIT OUT 0.22
+RED DEMIT OUT 0.22
+RLOAD OUT 0 8
+RZ OUT ZOB 10
+CZ ZOB 0 100n
+.tran 0 20m 10m 2u
+.four 1k V(OUT)
+.end

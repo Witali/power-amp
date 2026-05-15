@@ -1,0 +1,32 @@
+* Variant 05: Discrete current-feedback BJT power amplifier
+* Radio.ru-inspired BJT topology study.
+* This is a SPICE-like behavioral placeholder; the executable simulation is
+* generate_radio_ru_5_study.py because no ngspice/LTspice binary was found.
+*
+* Source basis: Petrov 2018 current-feedback UMZCH article, implemented as a pure BJT loop
+* Front end:    Low-impedance BJT transimpedance input stage
+* VAS:          Wideband complementary BJT gain stage with current feedback summing
+* Output:       Two-stage complementary emitter follower with output-current sensing
+* Feedback:     Global current feedback from output/sense resistor to input summing node
+*
+* Rails +/-15 V, load 8 ohm, nominal gain Av=10.
+* Behavioral parameters:
+*   headroom_v=11.5
+*   h2=0.00022
+*   h3=0.00022
+*   crossover_v=0.015
+*   rout_ohm=0.035
+*   bandwidth_khz=300.0
+*   feedback=global current feedback
+*
+VCC VCC 0 DC 15
+VEE VEE 0 DC -15
+VIN IN 0 SIN(0 0.1 1000)
+* Expand Q1..Qn according to schematics/05_petrov_current_feedback.svg before transistor-level SPICE.
+ROUT OUT LOAD 0.035
+RLOAD LOAD 0 8
+RZ LOAD ZOB 10
+CZ ZOB 0 100n
+*.tran 0 40m 10m 2u
+*.four 1000 V(LOAD)
+.end

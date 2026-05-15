@@ -1,0 +1,32 @@
+* Variant 04: Complementary folded cascode with CFP/Sziklai output
+* Radio.ru-inspired BJT topology study.
+* This is a SPICE-like behavioral placeholder; the executable simulation is
+* generate_radio_ru_5_study.py because no ngspice/LTspice binary was found.
+*
+* Source basis: Grechishkin-style BJT front end plus Syrico bias discipline and Rogov output-stage tradeoffs
+* Front end:    Matched BJT differential pair, tail current source, mirror load
+* VAS:          Complementary folded-cascode BJT VAS with emitter degeneration
+* Output:       Complementary feedback pair/Sziklai output with emitter ballast
+* Feedback:     No overall feedback; CFP is local output-stage feedback
+*
+* Rails +/-15 V, load 8 ohm, nominal gain Av=10.
+* Behavioral parameters:
+*   headroom_v=12.2
+*   h2=0.00033
+*   h3=0.0003
+*   crossover_v=0.02
+*   rout_ohm=0.055
+*   bandwidth_khz=135.0
+*   feedback=none
+*
+VCC VCC 0 DC 15
+VEE VEE 0 DC -15
+VIN IN 0 SIN(0 0.1 1000)
+* Expand Q1..Qn according to schematics/04_complementary_folded_cfp.svg before transistor-level SPICE.
+ROUT OUT LOAD 0.055
+RLOAD LOAD 0 8
+RZ LOAD ZOB 10
+CZ ZOB 0 100n
+*.tran 0 40m 10m 2u
+*.four 1000 V(LOAD)
+.end

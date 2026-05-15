@@ -1,0 +1,32 @@
+* Variant 03: Low-voltage folded cascode VAS, double emitter follower
+* Radio.ru-inspired BJT topology study.
+* This is a SPICE-like behavioral placeholder; the executable simulation is
+* generate_radio_ru_5_study.py because no ngspice/LTspice binary was found.
+*
+* Source basis: Radio.ru BJT/current-source/mirror practices adapted for low-rail headroom
+* Front end:    Degenerated BJT differential pair with current mirror load
+* VAS:          Folded-cascode BJT VAS with current-source loads
+* Output:       Two-stage complementary emitter follower, Class AB
+* Feedback:     No overall feedback; local VAS/output degeneration only
+*
+* Rails +/-15 V, load 8 ohm, nominal gain Av=10.
+* Behavioral parameters:
+*   headroom_v=11.7
+*   h2=0.00055
+*   h3=0.00043
+*   crossover_v=0.038
+*   rout_ohm=0.1
+*   bandwidth_khz=160.0
+*   feedback=none
+*
+VCC VCC 0 DC 15
+VEE VEE 0 DC -15
+VIN IN 0 SIN(0 0.1 1000)
+* Expand Q1..Qn according to schematics/03_folded_cascode_double_ef.svg before transistor-level SPICE.
+ROUT OUT LOAD 0.1
+RLOAD LOAD 0 8
+RZ LOAD ZOB 10
+CZ ZOB 0 100n
+*.tran 0 40m 10m 2u
+*.four 1000 V(LOAD)
+.end

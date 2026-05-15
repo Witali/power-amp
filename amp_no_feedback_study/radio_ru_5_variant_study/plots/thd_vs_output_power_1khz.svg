@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="500" viewBox="0 0 920 500">
+<rect width="100%" height="100%" fill="#fff"/>
+<text x="78" y="33" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" fill="#111">КНИ от выходной мощности при 1 kHz</text>
+<rect x="78" y="58" width="814" height="376" fill="#fff" stroke="#111" stroke-width="1.4"/>
+<line x1="78.00" y1="58" x2="78.00" y2="434" stroke="#e6e9ee" stroke-width="1"/>
+<text x="78.00" y="456" font-family="Arial, Helvetica, sans-serif" font-size="12" text-anchor="middle" fill="#555">0.05</text>
+<line x1="184.49" y1="58" x2="184.49" y2="434" stroke="#e6e9ee" stroke-width="1"/>
+<text x="184.49" y="456" font-family="Arial, Helvetica, sans-serif" font-size="12" text-anchor="middle" fill="#555">0.1</text>
+<line x1="290.98" y1="58" x2="290.98" y2="434" stroke="#e6e9ee" stroke-width="1"/>
+<text x="290.98" y="456" font-family="Arial, Helvetica, sans-serif" font-size="12" text-anchor="middle" fill="#555">0.2</text>
+<line x1="431.75" y1="58" x2="431.75" y2="434" stroke="#e6e9ee" stroke-width="1"/>
+<text x="431.75" y="456" font-family="Arial, Helvetica, sans-serif" font-size="12" text-anchor="middle" fill="#555">0.5</text>
+<line x1="538.25" y1="58" x2="538.25" y2="434" stroke="#e6e9ee" stroke-width="1"/>
+<text x="538.25" y="456" font-family="Arial, Helvetica, sans-serif" font-size="12" text-anchor="middle" fill="#555">1</text>
+<line x1="644.74" y1="58" x2="644.74" y2="434" stroke="#e6e9ee" stroke-width="1"/>
+<text x="644.74" y="456" font-family="Arial, Helvetica, sans-serif" font-size="12" text-anchor="middle" fill="#555">2</text>
+<line x1="785.51" y1="58" x2="785.51" y2="434" stroke="#e6e9ee" stroke-width="1"/>
+<text x="785.51" y="456" font-family="Arial, Helvetica, sans-serif" font-size="12" text-anchor="middle" fill="#555">5</text>
+<line x1="892.00" y1="58" x2="892.00" y2="434" stroke="#e6e9ee" stroke-width="1"/>
+<text x="892.00" y="456" font-family="Arial, Helvetica, sans-serif" font-size="12" text-anchor="middle" fill="#555">10</text>
+<line x1="78" y1="413.71" x2="892" y2="413.71" stroke="#e6e9ee" stroke-width="1"/>
+<text x="68" y="417.71" font-family="Arial, Helvetica, sans-serif" font-size="12" text-anchor="end" fill="#555">0.001</text>
+<line x1="78" y1="313.82" x2="892" y2="313.82" stroke="#e6e9ee" stroke-width="1"/>
+<text x="68" y="317.82" font-family="Arial, Helvetica, sans-serif" font-size="12" text-anchor="end" fill="#555">0.003</text>
+<line x1="78" y1="204.34" x2="892" y2="204.34" stroke="#e6e9ee" stroke-width="1"/>
+<text x="68" y="208.34" font-family="Arial, Helvetica, sans-serif" font-size="12" text-anchor="end" fill="#555">0.01</text>
+<line x1="78" y1="104.45" x2="892" y2="104.45" stroke="#e6e9ee" stroke-width="1"/>
+<text x="68" y="108.45" font-family="Arial, Helvetica, sans-serif" font-size="12" text-anchor="end" fill="#555">0.03</text>
+<polyline points="78.00,282.92 184.49,304.94 290.98,323.92 431.75,341.93 538.25,346.25 644.74,336.33 707.03,321.40 785.51,292.01 837.20,247.62 857.72,217.08 875.81,178.94 884.12,157.57 892.00,135.15" fill="none" stroke="#13795b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="78.00" cy="282.92" r="3.2" fill="#13795b"/>
+<circle cx="184.49" cy="304.94" r="3.2" fill="#13795b"/>
+<circle cx="290.98" cy="323.92" r="3.2" fill="#13795b"/>
+<circle cx="431.75" cy="341.93" r="3.2" fill="#13795b"/>
+<circle cx="538.25" cy="346.25" r="3.2" fill="#13795b"/>
+<circle cx="644.74" cy="336.33" r="3.2" fill="#13795b"/>
+<circle cx="707.03" cy="321.40" r="3.2" fill="#13795b"/>
+<circle cx="785.51" cy="292.01" r="3.2" fill="#13795b"/>
+<circle cx="837.20" cy="247.62" r="3.2" fill="#13795b"/>
+<circle cx="857.72" cy="217.08" r="3.2" fill="#13795b"/>
+<circle cx="875.81" cy="178.94" r="3.2" fill="#13795b"/>
+<circle cx="884.12" cy="157.57" r="3.2" fill="#13795b"/>
+<circle cx="892.00" cy="135.15" r="3.2" fill="#13795b"/>
+<text x="460.0" y="480" font-family="Arial, Helvetica, sans-serif" font-size="14" text-anchor="middle" fill="#111">Выходная мощность, W / 8 ohm</text>
+<text x="22" y="250.0" font-family="Arial, Helvetica, sans-serif" font-size="14" text-anchor="middle" fill="#111" transform="rotate(-90 22 250.0)">КНИ, %</text>
+<text x="78" y="458" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#666">Клиппинг начинает быстро расти около 9 W на +/-15 V rails.</text>
+</svg>

@@ -1,0 +1,32 @@
+* 01: Single-ended cascoded VAS, double EF AB
+* Behavioral reference netlist. The Python harness in simulate_amp_variants.py
+* is the simulation used for comparison because no local SPICE engine was found.
+* Rails: +/-15 V, load: 8 ohm, no global OUT-to-IN feedback.
+* Output class: Class AB
+*
+* Stage map:
+*   Input:  BJT emitter follower with RF/input reference
+*   VAS:    NPN cascode VAS with transistor current source
+*   Output: 2-stage complementary emitter follower, Class AB
+*
+* Behavioral parameters used by the harness:
+*   target_total_gain=10.0
+*   headroom_v=11.2
+*   h2=0.0016
+*   h3=0.0009
+*   crossover_v=0.055
+*   rout_ohm=0.16
+*   idle_ma=55.0
+*
+VCC VCC 0 DC 15
+VEE VEE 0 DC -15
+VIN IN 0 SIN(0 0.1 1k)
+* Replace BAMP with the expanded transistor schematic before hardware SPICE.
+* BAMP OUT 0 V={ behavioral transfer for 01 }
+ROUT OUT LOAD 0.16
+RLOAD LOAD 0 8
+RZ LOAD ZOB 10
+CZ ZOB 0 100n
+*.tran 0 30m 10m 2u
+*.four 1k V(LOAD)
+.end

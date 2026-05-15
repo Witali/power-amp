@@ -1,0 +1,47 @@
+# Node dependencies and caches
+node_modules/
+node_cache/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Python caches
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Local downloaded/archive scratch data
+_tmp_radio_ru/
+
+# Downloaded installers and binary distributions
+*.exe
+*.msi
+*.msix
+*.appx
+*.nupkg
+*.7z
+*.zip
+*.rar
+*.tar
+*.tar.gz
+*.tgz
+*.iso
+
+# OCR generated output and local OCR runtime
+ocr_tools/output/
+local_tools/
+
+# Browser/headless render leftovers
+results/.browser-profile*/
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+desktop.ini
+*.tmp
+*.bak
+*.swp
+
+# Local secrets/config
+.env
+.env.*

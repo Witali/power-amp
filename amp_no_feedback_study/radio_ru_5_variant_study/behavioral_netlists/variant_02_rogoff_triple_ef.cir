@@ -1,0 +1,32 @@
+* Variant 02: Rogov-style triple emitter follower output
+* Radio.ru-inspired BJT topology study.
+* This is a SPICE-like behavioral placeholder; the executable simulation is
+* generate_radio_ru_5_study.py because no ngspice/LTspice binary was found.
+*
+* Source basis: Rogov 2018 two-vs-three follower discussion; Grechishkin 2013 BJT signal path
+* Front end:    BJT long-tailed pair with current-source tail and mirror load
+* VAS:          BJT VAS buffered by a pre-driver stage
+* Output:       Three-stage complementary emitter follower, Class AB
+* Feedback:     No overall feedback; local emitter degeneration and ballast resistors
+*
+* Rails +/-15 V, load 8 ohm, nominal gain Av=10.
+* Behavioral parameters:
+*   headroom_v=10.1
+*   h2=0.00082
+*   h3=0.00062
+*   crossover_v=0.028
+*   rout_ohm=0.065
+*   bandwidth_khz=130.0
+*   feedback=none
+*
+VCC VCC 0 DC 15
+VEE VEE 0 DC -15
+VIN IN 0 SIN(0 0.1 1000)
+* Expand Q1..Qn according to schematics/02_rogoff_triple_ef.svg before transistor-level SPICE.
+ROUT OUT LOAD 0.065
+RLOAD LOAD 0 8
+RZ LOAD ZOB 10
+CZ ZOB 0 100n
+*.tran 0 40m 10m 2u
+*.four 1000 V(LOAD)
+.end

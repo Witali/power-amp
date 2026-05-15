@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="500" viewBox="0 0 920 500">
+<rect width="100%" height="100%" fill="#fff"/>
+<text x="78" y="33" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" fill="#111">КНИ от частоты при 5 W / 8 ohm</text>
+<rect x="78" y="58" width="814" height="376" fill="#fff" stroke="#111" stroke-width="1.4"/>
+<line x1="78.00" y1="58" x2="78.00" y2="434" stroke="#e6e9ee" stroke-width="1"/>
+<text x="78.00" y="456" font-family="Arial, Helvetica, sans-serif" font-size="12" text-anchor="middle" fill="#555">10Hz</text>
+<line x1="240.80" y1="58" x2="240.80" y2="434" stroke="#e6e9ee" stroke-width="1"/>
+<text x="240.80" y="456" font-family="Arial, Helvetica, sans-serif" font-size="12" text-anchor="middle" fill="#555">100Hz</text>
+<line x1="403.60" y1="58" x2="403.60" y2="434" stroke="#e6e9ee" stroke-width="1"/>
+<text x="403.60" y="456" font-family="Arial, Helvetica, sans-serif" font-size="12" text-anchor="middle" fill="#555">1kHz</text>
+<line x1="566.40" y1="58" x2="566.40" y2="434" stroke="#e6e9ee" stroke-width="1"/>
+<text x="566.40" y="456" font-family="Arial, Helvetica, sans-serif" font-size="12" text-anchor="middle" fill="#555">10kHz</text>
+<line x1="729.20" y1="58" x2="729.20" y2="434" stroke="#e6e9ee" stroke-width="1"/>
+<text x="729.20" y="456" font-family="Arial, Helvetica, sans-serif" font-size="12" text-anchor="middle" fill="#555">100kHz</text>
+<line x1="892.00" y1="58" x2="892.00" y2="434" stroke="#e6e9ee" stroke-width="1"/>
+<text x="892.00" y="456" font-family="Arial, Helvetica, sans-serif" font-size="12" text-anchor="middle" fill="#555">1MHz</text>
+<line x1="78" y1="406.39" x2="892" y2="406.39" stroke="#e6e9ee" stroke-width="1"/>
+<text x="68" y="410.39" font-family="Arial, Helvetica, sans-serif" font-size="12" text-anchor="end" fill="#555">0.003</text>
+<line x1="78" y1="324.40" x2="892" y2="324.40" stroke="#e6e9ee" stroke-width="1"/>
+<text x="68" y="328.40" font-family="Arial, Helvetica, sans-serif" font-size="12" text-anchor="end" fill="#555">0.01</text>
+<line x1="78" y1="249.59" x2="892" y2="249.59" stroke="#e6e9ee" stroke-width="1"/>
+<text x="68" y="253.59" font-family="Arial, Helvetica, sans-serif" font-size="12" text-anchor="end" fill="#555">0.03</text>
+<line x1="78" y1="167.60" x2="892" y2="167.60" stroke="#e6e9ee" stroke-width="1"/>
+<text x="68" y="171.60" font-family="Arial, Helvetica, sans-serif" font-size="12" text-anchor="end" fill="#555">0.1</text>
+<line x1="78" y1="92.79" x2="892" y2="92.79" stroke="#e6e9ee" stroke-width="1"/>
+<text x="68" y="96.79" font-family="Arial, Helvetica, sans-serif" font-size="12" text-anchor="end" fill="#555">0.3</text>
+<polyline points="78.00,380.69 127.01,383.54 191.79,387.45 240.80,389.56 289.81,391.10 354.59,392.33 403.60,392.58 452.61,391.93 517.39,388.38 566.40,381.56 615.41,368.20 680.19,335.72 729.20,299.12 778.21,254.58 842.99,188.65 892.00,136.18" fill="none" stroke="#b54708" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="78.00" cy="380.69" r="3.2" fill="#b54708"/>
+<circle cx="127.01" cy="383.54" r="3.2" fill="#b54708"/>
+<circle cx="191.79" cy="387.45" r="3.2" fill="#b54708"/>
+<circle cx="240.80" cy="389.56" r="3.2" fill="#b54708"/>
+<circle cx="289.81" cy="391.10" r="3.2" fill="#b54708"/>
+<circle cx="354.59" cy="392.33" r="3.2" fill="#b54708"/>
+<circle cx="403.60" cy="392.58" r="3.2" fill="#b54708"/>
+<circle cx="452.61" cy="391.93" r="3.2" fill="#b54708"/>
+<circle cx="517.39" cy="388.38" r="3.2" fill="#b54708"/>
+<circle cx="566.40" cy="381.56" r="3.2" fill="#b54708"/>
+<circle cx="615.41" cy="368.20" r="3.2" fill="#b54708"/>
+<circle cx="680.19" cy="335.72" r="3.2" fill="#b54708"/>
+<circle cx="729.20" cy="299.12" r="3.2" fill="#b54708"/>
+<circle cx="778.21" cy="254.58" r="3.2" fill="#b54708"/>
+<circle cx="842.99" cy="188.65" r="3.2" fill="#b54708"/>
+<circle cx="892.00" cy="136.18" r="3.2" fill="#b54708"/>
+<text x="460.0" y="480" font-family="Arial, Helvetica, sans-serif" font-size="14" text-anchor="middle" fill="#111">Частота, Hz</text>
+<text x="22" y="250.0" font-family="Arial, Helvetica, sans-serif" font-size="14" text-anchor="middle" fill="#111" transform="rotate(-90 22 250.0)">КНИ, %</text>
+<text x="78" y="458" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#666">Опорная точка компонентной симуляции: 5 W, 1 kHz, THD 0.0035%.</text>
+</svg>

@@ -1,0 +1,32 @@
+* Variant 01: Classic BJT differential amp, double emitter follower
+* Radio.ru-inspired BJT topology study.
+* This is a SPICE-like behavioral placeholder; the executable simulation is
+* generate_radio_ru_5_study.py because no ngspice/LTspice binary was found.
+*
+* Source basis: Grechishkin 2013 BJT power amp pattern; Syrico 2017 bias/driver ideas
+* Front end:    BJT long-tailed pair, current mirror load, RF input filter
+* VAS:          Single-ended BJT VAS with current-source load and emitter degeneration
+* Output:       Two-stage complementary emitter follower with 0.22 ohm ballast resistors
+* Feedback:     No overall feedback; local emitter degeneration only
+*
+* Rails +/-15 V, load 8 ohm, nominal gain Av=10.
+* Behavioral parameters:
+*   headroom_v=11.1
+*   h2=0.00115
+*   h3=0.00078
+*   crossover_v=0.052
+*   rout_ohm=0.14
+*   bandwidth_khz=110.0
+*   feedback=none
+*
+VCC VCC 0 DC 15
+VEE VEE 0 DC -15
+VIN IN 0 SIN(0 0.1 1000)
+* Expand Q1..Qn according to schematics/01_classic_bjt_double_ef.svg before transistor-level SPICE.
+ROUT OUT LOAD 0.14
+RLOAD LOAD 0 8
+RZ LOAD ZOB 10
+CZ ZOB 0 100n
+*.tran 0 40m 10m 2u
+*.four 1000 V(LOAD)
+.end

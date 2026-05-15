@@ -1,0 +1,29 @@
+* Variant 02: Rogov-style triple emitter follower output
+* Transistor-level SPICE component netlist for the local component simulation.
+* Source basis: Rogov 2018 two-vs-three follower discussion; Grechishkin 2013 BJT signal path
+* Drive bias spread: 4.02 V, source resistance: 32 ohm, drive trim: 1
+.model NPN_SMALL NPN(IS=1.1e-15 BF=95 VAF=90)
+.model PNP_SMALL PNP(IS=1.4e-15 BF=75 VAF=90)
+.model NPN_POWER NPN(IS=4.8e-15 BF=55 VAF=90)
+.model PNP_POWER PNP(IS=5.6e-15 BF=48 VAF=90)
+VCC VCC 0 DC 15
+VEE VEE 0 DC -15
+* VUP/VDN are stepped sine drive sources in the Python component solver.
+RUPDRV UPSRC UP 32
+RDNDRV DNSRC DN 32
+QUPRE VCC UP UPRE NPN_SMALL
+QUDRV VCC UPRE UBASE NPN_SMALL
+QUOUT VCC UBASE UEMIT NPN_POWER
+QDPRE VEE DN DPRE PNP_SMALL
+QDDRV VEE DPRE DBASE PNP_SMALL
+QDOUT VEE DBASE DEMIT PNP_POWER
+RUPRE UPRE UBASE 4.7
+RDPRE DPRE DBASE 4.7
+REU UEMIT OUT 0.22
+RED DEMIT OUT 0.22
+RLOAD OUT 0 8
+RZ OUT ZOB 10
+CZ ZOB 0 100n
+.tran 0 20m 10m 2u
+.four 1k V(OUT)
+.end
