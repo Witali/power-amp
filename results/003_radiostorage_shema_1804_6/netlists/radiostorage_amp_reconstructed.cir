@@ -14,14 +14,14 @@ VIN vin 0 DC 0 AC 1 SIN(0 1m 1k)
 * Input potentiometer/load and coupling capacitor
 R4 vin 0 470k
 C3 vin b_in 10u
-R3 b_in 0 1k
+R3 b_in 0 10k
 
 * Feedback and voltage-amplifier transistor
-R2 drive b_in 6.98k
+R2 out b_in 6.8k
 Q1 drive b_in 0 KT3102A
 
 * Bias chain and complementary emitter follower
-R1 vcc b_top 2.37k
+R1 vcc b_top 2.4k
 D1 b_top d_mid KD521A
 D2 d_mid drive KD521A
 Q2 vcc b_top out KT817A

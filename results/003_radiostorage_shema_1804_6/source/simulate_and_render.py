@@ -20,8 +20,12 @@ BASE_NETLIST = NETLISTS / "radiostorage_amp_reconstructed.cir"
 RLOAD = 8.0
 VIN_PEAK = 0.001
 C2_VALUE_UF = 4700.0
-R1_VALUE = 2370.0
-R2_VALUE = 6980.0
+R1_VALUE = 2400.0
+R2_VALUE = 6800.0
+R3_VALUE = 10000.0
+R1A_BOOT_VALUE = 560.0
+R1B_BOOT_VALUE = 1800.0
+CBOOT_VALUE_UF = 470.0
 
 
 def esc(value: object) -> str:
@@ -125,15 +129,20 @@ def capacitor_v(x: float, y1: float, y2: float, label: str, side: str = "right")
     ]
 
 
-def capacitor_h(x1: float, y: float, x2: float, label: str) -> list[str]:
+def capacitor_h(x1: float, y: float, x2: float, label: str, positive: str | None = None) -> list[str]:
     mid = (x1 + x2) / 2
-    return [
+    parts = [
         line(x1, y, mid - 14, y),
         line(mid - 14, y - 24, mid - 14, y + 24),
         line(mid + 14, y - 24, mid + 14, y + 24),
         line(mid + 14, y, x2, y),
         text(mid, y - 34, label, 14, 700, "middle"),
     ]
+    if positive == "left":
+        parts.append(text(mid - 30, y - 17, "+", 18, 700, "middle"))
+    elif positive == "right":
+        parts.append(text(mid + 30, y - 17, "+", 18, 700, "middle"))
+    return parts
 
 
 def diode_v(x: float, y1: float, y2: float, label: str) -> list[str]:
@@ -224,7 +233,7 @@ def schematic_svg() -> str:
         *capacitor_v(300, 98, 220, "C1 1000u", "left"),
         text(272, 130, "+", 18, 700, "end"),
         *ground(300, 220),
-        *resistor_v(460, 98, 190, "R1 2.37k"),
+        *resistor_v(460, 98, 190, "R1 2.4k"),
         line(460, 190, 460, 218),
         *diode_v(460, 218, 310, "VD1 KD521A"),
         *diode_v(460, 310, 402, "VD2 KD521A"),
@@ -244,7 +253,7 @@ def schematic_svg() -> str:
         *ground(730, 610),
 
         '<circle cx="820" cy="360" r="5" class="node"/>',
-        *capacitor_h(820, 360, 965, f"C2 {C2_VALUE_UF:g}u +"),
+        *capacitor_h(820, 360, 965, f"C2 {C2_VALUE_UF:g}u", "left"),
         line(965, 360, 1018, 360),
         *resistor_v(1018, 360, 540, "B1 8 ohm"),
         *ground(1018, 540),
@@ -258,7 +267,7 @@ def schematic_svg() -> str:
         *capacitor_h(96, 490, 252, "C3 10u +"),
         line(252, 490, 306, 490),
         '<circle cx="306" cy="490" r="5" class="node"/>',
-        *resistor_v(306, 490, 610, "R3 1k", "left"),
+        *resistor_v(306, 490, 610, "R3 10k", "left"),
         *ground(306, 610),
 
         *npn(486, 490, "VT1 KT3102A"),
@@ -268,9 +277,82 @@ def schematic_svg() -> str:
         line(516, 535, 516, 620),
         *ground(516, 620),
 
-        *resistor_h(306, 360, 460, "R2 6.98k"),
+        *resistor_h(306, 360, 430, "R2 6.8k"),
         line(306, 360, 306, 490),
-        line(460, 360, 460, 402),
+        '<path d="M430 360 V424 H600 Q620 398 640 424 H820 V360" class="wire"/>',
+    ]
+    return base_svg(1100, 680, body)
+
+
+def bootstrap_schematic_svg() -> str:
+    body: list[str] = [
+        text(42, 42, "Reconstructed shema-1804-6 BJT audio amplifier, bootstrap variant", 22, 700),
+        text(42, 68, "Upper bias feed split; C4 adds output swing to the upper transistor bias node", 13),
+        line(300, 98, 965, 98),
+        poly([(965, 90), (982, 98), (965, 106)], "wire"),
+        text(1000, 104, "+12 V", 18, 700),
+        '<circle cx="300" cy="98" r="5" class="node"/>',
+        '<circle cx="460" cy="98" r="5" class="node"/>',
+        '<circle cx="730" cy="98" r="5" class="node"/>',
+        *capacitor_v(300, 98, 220, "C1 1000u", "left"),
+        text(272, 130, "+", 18, 700, "end"),
+        *ground(300, 220),
+
+        *resistor_v(460, 98, 155, "R1A 560", "left"),
+        '<circle cx="460" cy="155" r="5" class="node"/>',
+        *resistor_v(460, 155, 218, "R1B 1.8k", "left"),
+        '<circle cx="460" cy="218" r="5" class="node"/>',
+        *diode_v(460, 218, 310, "VD1 KD521A"),
+        *diode_v(460, 310, 402, "VD2 KD521A"),
+        '<circle cx="460" cy="402" r="5" class="node"/>',
+
+        *capacitor_h(460, 155, 610, f"C4 {CBOOT_VALUE_UF:g}u", "left"),
+        line(610, 155, 900, 155),
+        line(900, 155, 900, 300),
+        line(900, 300, 820, 300),
+        line(820, 300, 820, 360),
+        text(742, 146, "bootstrap", 13, 700, "middle"),
+
+        *npn(700, 240, "VT2 KT817A"),
+        line(730, 195, 730, 98),
+        line(460, 218, 646, 240),
+        line(730, 285, 820, 360),
+
+        *pnp(700, 500, "VT3 KT816A"),
+        line(460, 402, 610, 402),
+        line(610, 402, 646, 500),
+        line(730, 455, 820, 360),
+        line(730, 545, 730, 610),
+        *ground(730, 610),
+
+        '<circle cx="820" cy="360" r="5" class="node"/>',
+        *capacitor_h(820, 360, 965, f"C2 {C2_VALUE_UF:g}u", "left"),
+        line(965, 360, 1018, 360),
+        *resistor_v(1018, 360, 540, "B1 8 ohm"),
+        *ground(1018, 540),
+        text(972, 334, "speaker", 14, 700),
+
+        text(42, 482, "Input", 16, 700),
+        line(42, 490, 96, 490),
+        '<circle cx="96" cy="490" r="5" class="node"/>',
+        *resistor_v(96, 490, 595, "R4 470k", "right"),
+        *ground(96, 595),
+        *capacitor_h(96, 490, 252, "C3 10u +"),
+        line(252, 490, 306, 490),
+        '<circle cx="306" cy="490" r="5" class="node"/>',
+        *resistor_v(306, 490, 610, "R3 10k", "left"),
+        *ground(306, 610),
+
+        *npn(486, 490, "VT1 KT3102A"),
+        line(306, 490, 432, 490),
+        line(516, 445, 516, 402),
+        line(516, 402, 460, 402),
+        line(516, 535, 516, 620),
+        *ground(516, 620),
+
+        *resistor_h(306, 360, 430, "R2 6.8k"),
+        line(306, 360, 306, 490),
+        '<path d="M430 360 V424 H600 Q620 398 640 424 H820 V360" class="wire"/>',
     ]
     return base_svg(1100, 680, body)
 
@@ -348,6 +430,19 @@ def read_rows(path: Path) -> list[list[float]]:
     return rows
 
 
+def read_operating_point(path: Path) -> dict[str, float]:
+    values: dict[str, float] = {}
+    for line_text in path.read_text(encoding="utf-8", errors="ignore").splitlines():
+        if "=" not in line_text:
+            continue
+        key, value = line_text.split("=", 1)
+        try:
+            values[key.strip().lower()] = float(value.split()[0])
+        except (IndexError, ValueError):
+            continue
+    return values
+
+
 def run_ngspice(netlist: Path, log: Path, cwd: Path) -> None:
     if not NGSPICE.exists():
         raise SystemExit(f"ngspice not found: {NGSPICE}")
@@ -373,8 +468,8 @@ VCC vcc 0 12
 VIN vin 0 DC 0 SIN(0 {vin_peak:.8g} {freq:.8g})
 R4 vin 0 470k
 C3 vin b_in 10u
-R3 b_in 0 1k
-R2 drive b_in {R2_VALUE:g}
+R3 b_in 0 {R3_VALUE:g}
+R2 out b_in {R2_VALUE:g}
 Q1 drive b_in 0 KT3102A
 R1 vcc b_top {R1_VALUE:g}
 D1 b_top d_mid KD521A
@@ -418,8 +513,8 @@ VCC vcc 0 12
 VIN vin 0 DC 0 PULSE({-vin_peak:.8g} {vin_peak:.8g} 0 {rise:.8g} {rise:.8g} {period / 2.0:.8g} {period:.8g})
 R4 vin 0 470k
 C3 vin b_in 10u
-R3 b_in 0 1k
-R2 drive b_in {R2_VALUE:g}
+R3 b_in 0 {R3_VALUE:g}
+R2 out b_in {R2_VALUE:g}
 Q1 drive b_in 0 KT3102A
 R1 vcc b_top {R1_VALUE:g}
 D1 b_top d_mid KD521A
@@ -581,6 +676,7 @@ def render_outputs(sweep_rows: list[dict[str, float]], square_rows: list[dict[st
     for folder in [SCHEMATIC, PLOTS]:
         folder.mkdir(parents=True, exist_ok=True)
     (SCHEMATIC / "reconstructed_amplifier.svg").write_text(schematic_svg(), encoding="utf-8")
+    (SCHEMATIC / "reconstructed_amplifier_bootstrap.svg").write_text(bootstrap_schematic_svg(), encoding="utf-8")
 
     ac = read_rows(DATA / "ac_response.csv")
     gain_points = [(row[0], row[4]) for row in ac]
@@ -636,6 +732,15 @@ def write_readme(sweep_rows: list[dict[str, float]], square_rows: list[dict[str,
     sine_amp_out = [row[7] for row in transient]
     sine_load = [row[9] for row in transient]
     sine_headroom = min(min(sine_amp_out), 12.0 - max(sine_amp_out))
+    op = read_operating_point(DATA / "ngspice.log")
+    op_b_in = op.get("v(b_in)", float("nan"))
+    op_drive = op.get("v(drive)", float("nan"))
+    op_b_top = op.get("v(b_top)", float("nan"))
+    op_out = op.get("v(out)", float("nan"))
+    op_load = op.get("v(load)", float("nan"))
+    op_q2_ma = abs(op.get("@q2[ic]", float("nan"))) * 1000.0
+    op_q3_ma = abs(op.get("@q3[ic]", float("nan"))) * 1000.0
+    op_supply_ma = abs(op.get("i(vcc)", float("nan"))) * 1000.0
     text_body = f"""# 003 RadioStorage shema-1804-6 Reconstruction
 
 This folder contains a local reconstruction of the amplifier schematic from:
@@ -648,31 +753,31 @@ This folder contains a local reconstruction of the amplifier schematic from:
 - `VT2`: KT817A NPN upper emitter follower, `Bf = 50`.
 - `VT3`: KT816A PNP lower emitter follower, `Bf = 50`.
 - `VD1`, `VD2`: KD521A bias diodes between output transistor bases.
-- `R1`: recognized as 180 ohm in the image, then tuned to the standard E96 value 2.37 kOhm in this model.
-- `R2`: recognized as 6.2 kOhm in the image, then tuned to the standard E96 value 6.98 kOhm in this model.
-- `R3`: 1 kOhm VT1 base return.
+- `R1`: recognized as 180 ohm in the image, then tuned to the common E24 value 2.4 kOhm in this model.
+- `R2`: recognized as 6.2 kOhm in the image, then tuned to the common E24 value 6.8 kOhm and connected from the output emitter node to the VT1 base in this model.
+- `R3`: 10 kOhm VT1 base return.
 - `R4`: recognized as the input potentiometer/load, modeled as 470 kOhm.
 - `C1`: 1000 uF supply decoupling.
 - `C2`: {C2_VALUE_UF:g} uF output coupling capacitor for this recalculated run.
 - `C3`: 10 uF input coupling capacitor.
 - `B1`: speaker load, modeled as the requested 8 ohm load.
 
-Passive parts use standard value series: E96 for the two bias resistors that set operating point, E24/E12 for the other resistors, and common electrolytic capacitor values for `C1`, `C2`, and `C3`.
+Passive parts use common value series: E24 for resistors and common electrolytic capacitor values for `C1`, `C2`, and `C3`.
 
 ## ngspice Check
 
-The reconstructed model converged in ngspice. With `Bf = 100` for VT1 and `Bf = 50` for VT2/VT3, `R1` and `R2` are tuned for about 10 mA through the output transistors and for the output emitter node to stay near half supply.
+The reconstructed model converged in ngspice. After moving `R2` from the upper bias/drive node to the output emitter node, this is a feedback-bias experiment rather than the earlier half-supply/10 mA tuning. The bias should be retuned if the target remains about half supply at `out` and about 10 mA through the output stage.
 
 Operating point from `data/ngspice.log`:
 
-- `V(b_in)`: about 0.651 V
-- `V(drive)`: about 5.306 V
-- `V(b_top)`: about 6.618 V
-- `V(out)`: about 5.959 V before output capacitor
-- `V(load)`: 0 V DC after output capacitor
-- VT2 collector current: about 10.13 mA
-- VT3 collector current: about 10.13 mA
-- Total supply current in this simplified transistor model: about 12.40 mA
+- `V(b_in)`: about {op_b_in:.3f} V
+- `V(drive)`: about {op_drive:.3f} V
+- `V(b_top)`: about {op_b_top:.3f} V
+- `V(out)`: about {op_out:.3f} V before output capacitor
+- `V(load)`: about {op_load:.3f} V DC after output capacitor
+- VT2 collector current: about {op_q2_ma:.2f} mA
+- VT3 collector current: about {op_q3_ma:.2f} mA
+- Total supply current in this simplified transistor model: about {op_supply_ma:.2f} mA
 
 This no-emitter-resistor diode-biased output stage remains thermally sensitive; the current is very dependent on transistor and diode models.
 
@@ -704,6 +809,7 @@ Square-wave transient runs use a {2 * VIN_PEAK * 1000:.1f} mVpp input and show t
 
 - `source/shema-1804-6.png`: original downloaded image.
 - `schematic/reconstructed_amplifier.svg/png`: redrawn schematic using transistor symbols.
+- `schematic/reconstructed_amplifier_bootstrap.svg/png`: bootstrap/voltage-addition variant with split upper bias resistor and C4.
 - `netlists/radiostorage_amp_reconstructed.cir`: main ngspice netlist.
 - `data/ac_response.csv`: AC gain/phase data from ngspice.
 - `data/transient_1khz.csv`: 1 kHz transient data from ngspice.

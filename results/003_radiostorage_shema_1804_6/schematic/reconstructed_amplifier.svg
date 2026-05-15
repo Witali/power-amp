@@ -30,7 +30,7 @@
 <line x1="283" y1="247" x2="317" y2="247" class="wire"/>
 <line x1="292" y1="260" x2="308" y2="260" class="wire"/>
 <polyline points="460,98 460,109.04 446,116.4 474,127.44 446,138.48 474,149.52 446,160.56 474,171.6 460,178.96 460,190" class="wire" fill="none"/>
-<text x="484" y="149" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" text-anchor="start" fill="#111">R1 2.37k</text>
+<text x="484" y="149" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" text-anchor="start" fill="#111">R1 2.4k</text>
 <line x1="460" y1="190" x2="460" y2="218" class="wire"/>
 <line x1="460" y1="218" x2="460" y2="240" class="wire"/>
 <polyline points="438,240 482,240 460,272 438,240" class="wire" fill="none"/>
@@ -74,7 +74,8 @@
 <line x1="878.5" y1="336" x2="878.5" y2="384" class="wire"/>
 <line x1="906.5" y1="336" x2="906.5" y2="384" class="wire"/>
 <line x1="906.5" y1="360" x2="965" y2="360" class="wire"/>
-<text x="892.5" y="326" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" text-anchor="middle" fill="#111">C2 4700u +</text>
+<text x="892.5" y="326" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" text-anchor="middle" fill="#111">C2 4700u</text>
+<text x="862.5" y="343" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700" text-anchor="middle" fill="#111">+</text>
 <line x1="965" y1="360" x2="1018" y2="360" class="wire"/>
 <polyline points="1018,360 1018,381.6 1004,396 1032,417.6 1004,439.2 1032,460.8 1004,482.4 1032,504 1018,518.4 1018,540" class="wire" fill="none"/>
 <text x="1042" y="455" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" text-anchor="start" fill="#111">B1 8 ohm</text>
@@ -100,7 +101,7 @@
 <line x1="252" y1="490" x2="306" y2="490" class="wire"/>
 <circle cx="306" cy="490" r="5" class="node"/>
 <polyline points="306,490 306,504.4 292,514 320,528.4 292,542.8 320,557.2 292,571.6 320,586 306,595.6 306,610" class="wire" fill="none"/>
-<text x="282" y="555" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" text-anchor="end" fill="#111">R3 1k</text>
+<text x="282" y="555" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" text-anchor="end" fill="#111">R3 10k</text>
 <line x1="306" y1="610" x2="306" y2="624" class="wire"/>
 <line x1="280" y1="624" x2="332" y2="624" class="wire"/>
 <line x1="289" y1="637" x2="323" y2="637" class="wire"/>
@@ -120,8 +121,8 @@
 <line x1="490" y1="634" x2="542" y2="634" class="wire"/>
 <line x1="499" y1="647" x2="533" y2="647" class="wire"/>
 <line x1="508" y1="660" x2="524" y2="660" class="wire"/>
-<polyline points="306,360 324.48,360 336.8,346 355.28,374 373.76,346 392.24,374 410.72,346 429.2,374 441.52,360 460,360" class="wire" fill="none"/>
-<text x="383" y="334" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" text-anchor="middle" fill="#111">R2 6.98k</text>
+<polyline points="306,360 320.88,360 330.8,346 345.68,374 360.56,346 375.44,374 390.32,346 405.2,374 415.12,360 430,360" class="wire" fill="none"/>
+<text x="368" y="334" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" text-anchor="middle" fill="#111">R2 6.8k</text>
 <line x1="306" y1="360" x2="306" y2="490" class="wire"/>
-<line x1="460" y1="360" x2="460" y2="402" class="wire"/>
+<path d="M430 360 V424 H600 Q620 398 640 424 H820 V360" class="wire"/>
 </svg>
