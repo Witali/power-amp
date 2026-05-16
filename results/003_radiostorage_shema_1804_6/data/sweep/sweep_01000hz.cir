@@ -7,8 +7,9 @@ VIN vin 0 DC 0 SIN(0 0.001 1000)
 R4 vin 0 470k
 C3 vin b_in 10u
 R3 b_in 0 10000
-R2 out b_in 6800
-Q1 drive b_in 0 KT3102A
+R2 out b_in 47000
+Q1 drive b_in e_vt1 KT3102A
+R5 e_vt1 0 100
 R1 vcc b_top 2400
 D1 b_top d_mid KD521A
 D2 d_mid drive KD521A

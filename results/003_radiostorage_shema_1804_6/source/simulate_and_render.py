@@ -21,8 +21,9 @@ RLOAD = 8.0
 VIN_PEAK = 0.001
 C2_VALUE_UF = 4700.0
 R1_VALUE = 2400.0
-R2_VALUE = 6800.0
+R2_VALUE = 47000.0
 R3_VALUE = 10000.0
+RE_VT1_VALUE = 100.0
 R1A_BOOT_VALUE = 560.0
 R1B_BOOT_VALUE = 1800.0
 CBOOT_VALUE_UF = 470.0
@@ -80,53 +81,56 @@ def base_svg(width: int, height: int, body: list[str]) -> str:
     ) + "\n"
 
 
+def rect(x: float, y: float, width: float, height: float, klass: str = "wire") -> str:
+    return f'<rect x="{x:g}" y="{y:g}" width="{width:g}" height="{height:g}" class="{klass}"/>'
+
+
 def resistor_h(x1: float, y: float, x2: float, label: str) -> list[str]:
     w = x2 - x1
-    pts = [
-        (x1, y),
-        (x1 + w * 0.12, y),
-        (x1 + w * 0.20, y - 14),
-        (x1 + w * 0.32, y + 14),
-        (x1 + w * 0.44, y - 14),
-        (x1 + w * 0.56, y + 14),
-        (x1 + w * 0.68, y - 14),
-        (x1 + w * 0.80, y + 14),
-        (x1 + w * 0.88, y),
-        (x2, y),
+    body_w = min(76.0, max(48.0, w * 0.56))
+    left = x1 + (w - body_w) / 2.0
+    right = left + body_w
+    body_h = 28.0
+    return [
+        line(x1, y, left, y),
+        rect(left, y - body_h / 2.0, body_w, body_h),
+        line(right, y, x2, y),
+        text((x1 + x2) / 2, y - 26, label, 14, 700, "middle"),
     ]
-    return [poly(pts), text((x1 + x2) / 2, y - 26, label, 14, 700, "middle")]
 
 
 def resistor_v(x: float, y1: float, y2: float, label: str, side: str = "right") -> list[str]:
     h = y2 - y1
-    pts = [
-        (x, y1),
-        (x, y1 + h * 0.12),
-        (x - 14, y1 + h * 0.20),
-        (x + 14, y1 + h * 0.32),
-        (x - 14, y1 + h * 0.44),
-        (x + 14, y1 + h * 0.56),
-        (x - 14, y1 + h * 0.68),
-        (x + 14, y1 + h * 0.80),
-        (x, y1 + h * 0.88),
-        (x, y2),
-    ]
+    body_h = min(76.0, max(36.0, h * 0.62))
+    top = y1 + (h - body_h) / 2.0
+    bottom = top + body_h
+    body_w = 28.0
     dx = 24 if side == "right" else -24
     anchor = "start" if side == "right" else "end"
-    return [poly(pts), text(x + dx, (y1 + y2) / 2 + 5, label, 14, 700, anchor)]
+    return [
+        line(x, y1, x, top),
+        rect(x - body_w / 2.0, top, body_w, body_h),
+        line(x, bottom, x, y2),
+        text(x + dx, (y1 + y2) / 2 + 5, label, 14, 700, anchor),
+    ]
 
 
-def capacitor_v(x: float, y1: float, y2: float, label: str, side: str = "right") -> list[str]:
+def capacitor_v(x: float, y1: float, y2: float, label: str, side: str = "right", positive: str | None = None) -> list[str]:
     mid = (y1 + y2) / 2
     dx = 28 if side == "right" else -28
     anchor = "start" if side == "right" else "end"
-    return [
+    parts = [
         line(x, y1, x, mid - 14),
         line(x - 24, mid - 14, x + 24, mid - 14),
         line(x - 24, mid + 14, x + 24, mid + 14),
         line(x, mid + 14, x, y2),
         text(x + dx, mid + 5, label, 14, 700, anchor),
     ]
+    if positive == "top":
+        parts.append(text(x - 34, mid - 30, "+", 18, 700, "middle"))
+    elif positive == "bottom":
+        parts.append(text(x - 34, mid + 40, "+", 18, 700, "middle"))
+    return parts
 
 
 def capacitor_h(x1: float, y: float, x2: float, label: str, positive: str | None = None) -> list[str]:
@@ -158,6 +162,18 @@ def diode_v(x: float, y1: float, y2: float, label: str) -> list[str]:
 
 def ground(x: float, y: float) -> list[str]:
     return [line(x, y, x, y + 14), line(x - 26, y + 14, x + 26, y + 14), line(x - 17, y + 27, x + 17, y + 27), line(x - 8, y + 40, x + 8, y + 40)]
+
+
+def speaker_v(x: float, y1: float, y2: float, label: str) -> list[str]:
+    top = y1 + 34
+    bottom = y1 + 110
+    return [
+        line(x, y1, x, top),
+        rect(x - 18, top, 36, bottom - top),
+        poly([(x + 18, top + 8), (x + 76, top - 16), (x + 76, bottom + 16), (x + 18, bottom - 8)]),
+        line(x, bottom, x, y2),
+        text(x + 40, bottom + 46, label, 14, 700, "middle"),
+    ]
 
 
 def arrowhead(
@@ -200,7 +216,7 @@ def npn(cx: float, cy: float, label: str) -> list[str]:
         line(base_top[0], base_top[1], top[0], top[1]),
         line(base_bottom[0], base_bottom[1], bottom[0], bottom[1]),
         arrowhead(base_bottom, bottom, "out", 0.70),
-        text(cx, cy + 82, label, 14, 700, "middle"),
+        text(cx - 44, cy + 82, label, 14, 700, "middle"),
     ]
 
 
@@ -216,72 +232,81 @@ def pnp(cx: float, cy: float, label: str) -> list[str]:
         line(base_top[0], base_top[1], top[0], top[1]),
         line(base_bottom[0], base_bottom[1], bottom[0], bottom[1]),
         arrowhead(base_top, top, "in", 0.42),
-        text(cx, cy + 82, label, 14, 700, "middle"),
+        text(cx - 44, cy + 82, label, 14, 700, "middle"),
     ]
 
 
 def schematic_svg() -> str:
     body: list[str] = [
         text(42, 42, "Reconstructed shema-1804-6 BJT audio amplifier", 22, 700),
-        text(42, 68, "Layout redrawn close to the original; standard passive values; load = 8 ohm", 13),
+        text(42, 68, "GOST/ESKD-style UGO; standard passive values; load = 8 ohm", 13),
         line(300, 98, 965, 98),
         poly([(965, 90), (982, 98), (965, 106)], "wire"),
         text(1000, 104, "+12 V", 18, 700),
         '<circle cx="300" cy="98" r="5" class="node"/>',
         '<circle cx="460" cy="98" r="5" class="node"/>',
         '<circle cx="730" cy="98" r="5" class="node"/>',
-        *capacitor_v(300, 98, 220, "C1 1000u", "left"),
-        text(272, 130, "+", 18, 700, "end"),
+        *capacitor_v(300, 98, 220, "C1 1000u", "left", "top"),
         *ground(300, 220),
         *resistor_v(460, 98, 190, "R1 2.4k"),
         line(460, 190, 460, 218),
         *diode_v(460, 218, 310, "VD1 KD521A"),
         *diode_v(460, 310, 402, "VD2 KD521A"),
         '<circle cx="460" cy="190" r="5" class="node"/>',
-        '<circle cx="460" cy="402" r="5" class="node"/>',
 
         *npn(700, 240, "VT2 KT817A"),
         line(730, 195, 730, 98),
-        line(460, 190, 646, 240),
-        line(730, 285, 820, 360),
+        line(460, 190, 620, 190),
+        line(620, 190, 620, 240),
+        line(620, 240, 646, 240),
+        line(730, 285, 730, 455),
+        '<circle cx="730" cy="360" r="5" class="node"/>',
+        '<circle cx="730" cy="430" r="5" class="node"/>',
+        line(730, 360, 820, 360),
 
         *pnp(700, 500, "VT3 KT816A"),
-        line(460, 402, 610, 402),
-        line(610, 402, 646, 500),
-        line(730, 455, 820, 360),
         line(730, 545, 730, 610),
         *ground(730, 610),
 
-        '<circle cx="820" cy="360" r="5" class="node"/>',
         *capacitor_h(820, 360, 965, f"C2 {C2_VALUE_UF:g}u", "left"),
         line(965, 360, 1018, 360),
-        *resistor_v(1018, 360, 540, "B1 8 ohm"),
+        *speaker_v(1018, 360, 540, "B1 8 ohm"),
         *ground(1018, 540),
         text(972, 334, "speaker", 14, 700),
 
-        text(42, 482, "Input", 16, 700),
-        line(42, 490, 96, 490),
-        '<circle cx="96" cy="490" r="5" class="node"/>',
-        *resistor_v(96, 490, 595, "R4 470k", "right"),
-        *ground(96, 595),
-        *capacitor_h(96, 490, 252, "C3 10u +"),
-        line(252, 490, 306, 490),
-        '<circle cx="306" cy="490" r="5" class="node"/>',
-        *resistor_v(306, 490, 610, "R3 10k", "left"),
-        *ground(306, 610),
+        text(42, 532, "Input", 16, 700),
+        line(42, 540, 96, 540),
+        '<circle cx="96" cy="540" r="5" class="node"/>',
+        *resistor_v(96, 540, 650, "R4 470k", "right"),
+        *ground(96, 650),
+        *capacitor_h(96, 540, 252, "C3 10u", "right"),
+        line(252, 540, 306, 540),
+        '<circle cx="306" cy="540" r="5" class="node"/>',
+        *resistor_v(306, 540, 670, "R3 10k", "left"),
+        *ground(306, 670),
 
-        *npn(486, 490, "VT1 KT3102A"),
-        line(306, 490, 432, 490),
-        line(516, 445, 516, 402),
-        line(516, 402, 460, 402),
-        line(516, 535, 516, 620),
-        *ground(516, 620),
+        *npn(486, 540, "VT1 KT3102A"),
+        line(306, 540, 432, 540),
+        line(460, 402, 516, 402),
+        line(516, 402, 516, 495),
+        '<circle cx="516" cy="450" r="5" class="node"/>',
+        line(516, 450, 620, 450),
+        line(620, 450, 620, 500),
+        line(620, 500, 646, 500),
+        line(516, 585, 516, 610),
+        *resistor_v(516, 610, 700, "R5 100", "right"),
+        *ground(516, 700),
 
-        *resistor_h(306, 360, 430, "R2 6.8k"),
-        line(306, 360, 306, 490),
-        '<path d="M430 360 V424 H600 Q620 398 640 424 H820 V360" class="wire"/>',
+        *resistor_h(250, 430, 430, "R2 47k"),
+        line(250, 430, 250, 500),
+        line(250, 500, 306, 500),
+        line(306, 500, 306, 540),
+        line(430, 430, 430, 380),
+        line(430, 380, 600, 380),
+        line(600, 380, 600, 430),
+        line(600, 430, 730, 430),
     ]
-    return base_svg(1100, 680, body)
+    return base_svg(1160, 760, body)
 
 
 def bootstrap_schematic_svg() -> str:
@@ -294,8 +319,7 @@ def bootstrap_schematic_svg() -> str:
         '<circle cx="300" cy="98" r="5" class="node"/>',
         '<circle cx="460" cy="98" r="5" class="node"/>',
         '<circle cx="730" cy="98" r="5" class="node"/>',
-        *capacitor_v(300, 98, 220, "C1 1000u", "left"),
-        text(272, 130, "+", 18, 700, "end"),
+        *capacitor_v(300, 98, 220, "C1 1000u", "left", "top"),
         *ground(300, 220),
 
         *resistor_v(460, 98, 155, "R1A 560", "left"),
@@ -304,57 +328,66 @@ def bootstrap_schematic_svg() -> str:
         '<circle cx="460" cy="218" r="5" class="node"/>',
         *diode_v(460, 218, 310, "VD1 KD521A"),
         *diode_v(460, 310, 402, "VD2 KD521A"),
-        '<circle cx="460" cy="402" r="5" class="node"/>',
 
         *capacitor_h(460, 155, 610, f"C4 {CBOOT_VALUE_UF:g}u", "left"),
-        line(610, 155, 900, 155),
-        line(900, 155, 900, 300),
-        line(900, 300, 820, 300),
-        line(820, 300, 820, 360),
-        text(742, 146, "bootstrap", 13, 700, "middle"),
+        line(610, 155, 790, 155),
+        line(790, 155, 790, 360),
 
         *npn(700, 240, "VT2 KT817A"),
         line(730, 195, 730, 98),
-        line(460, 218, 646, 240),
-        line(730, 285, 820, 360),
+        line(460, 218, 620, 218),
+        line(620, 218, 620, 240),
+        line(620, 240, 646, 240),
+        line(730, 285, 730, 455),
+        '<circle cx="730" cy="360" r="5" class="node"/>',
+        '<circle cx="730" cy="430" r="5" class="node"/>',
+        '<circle cx="790" cy="360" r="5" class="node"/>',
+        line(730, 360, 820, 360),
 
         *pnp(700, 500, "VT3 KT816A"),
-        line(460, 402, 610, 402),
-        line(610, 402, 646, 500),
-        line(730, 455, 820, 360),
         line(730, 545, 730, 610),
         *ground(730, 610),
 
-        '<circle cx="820" cy="360" r="5" class="node"/>',
+        text(838, 390, "OUT", 13, 700),
         *capacitor_h(820, 360, 965, f"C2 {C2_VALUE_UF:g}u", "left"),
         line(965, 360, 1018, 360),
-        *resistor_v(1018, 360, 540, "B1 8 ohm"),
+        *speaker_v(1018, 360, 540, "B1 8 ohm"),
         *ground(1018, 540),
         text(972, 334, "speaker", 14, 700),
 
-        text(42, 482, "Input", 16, 700),
-        line(42, 490, 96, 490),
-        '<circle cx="96" cy="490" r="5" class="node"/>',
-        *resistor_v(96, 490, 595, "R4 470k", "right"),
-        *ground(96, 595),
-        *capacitor_h(96, 490, 252, "C3 10u +"),
-        line(252, 490, 306, 490),
-        '<circle cx="306" cy="490" r="5" class="node"/>',
-        *resistor_v(306, 490, 610, "R3 10k", "left"),
-        *ground(306, 610),
+        text(42, 532, "Input", 16, 700),
+        line(42, 540, 96, 540),
+        '<circle cx="96" cy="540" r="5" class="node"/>',
+        *resistor_v(96, 540, 650, "R4 470k", "right"),
+        *ground(96, 650),
+        *capacitor_h(96, 540, 252, "C3 10u", "right"),
+        line(252, 540, 306, 540),
+        '<circle cx="306" cy="540" r="5" class="node"/>',
+        *resistor_v(306, 540, 670, "R3 10k", "left"),
+        *ground(306, 670),
 
-        *npn(486, 490, "VT1 KT3102A"),
-        line(306, 490, 432, 490),
-        line(516, 445, 516, 402),
-        line(516, 402, 460, 402),
-        line(516, 535, 516, 620),
-        *ground(516, 620),
+        *npn(486, 540, "VT1 KT3102A"),
+        line(306, 540, 432, 540),
+        line(460, 402, 516, 402),
+        line(516, 402, 516, 495),
+        '<circle cx="516" cy="450" r="5" class="node"/>',
+        line(516, 450, 620, 450),
+        line(620, 450, 620, 500),
+        line(620, 500, 646, 500),
+        line(516, 585, 516, 610),
+        *resistor_v(516, 610, 700, "R5 100", "right"),
+        *ground(516, 700),
 
-        *resistor_h(306, 360, 430, "R2 6.8k"),
-        line(306, 360, 306, 490),
-        '<path d="M430 360 V424 H600 Q620 398 640 424 H820 V360" class="wire"/>',
+        *resistor_h(250, 430, 430, "R2 47k"),
+        line(250, 430, 250, 500),
+        line(250, 500, 306, 500),
+        line(306, 500, 306, 540),
+        line(430, 430, 430, 380),
+        line(430, 380, 600, 380),
+        line(600, 380, 600, 430),
+        line(600, 430, 730, 430),
     ]
-    return base_svg(1100, 680, body)
+    return base_svg(1160, 760, body)
 
 
 class Plot:
@@ -459,6 +492,67 @@ def run_ngspice(netlist: Path, log: Path, cwd: Path) -> None:
         raise RuntimeError(f"ngspice failed for {netlist}:\n{tail}")
 
 
+def main_netlist() -> str:
+    return f"""* Reconstructed RadioStorage shema-1804-6 single-supply BJT audio amplifier
+* Original image: https://radiostorage.net/uploads/Image/schemes/18/shema-1804-6.png
+* Load changed from the image's 4 ohm speaker to user's requested 8 ohm speaker.
+* This tuned model uses Bf=100 for the input transistor and Bf=50 for the
+* output transistors. R1/R2/R3/R5 are tuned for about 10 mA output-stage idle
+* current and for the output emitter node to sit near half supply.
+
+.options abstol=1n reltol=0.003 itl1=500 itl4=500
+.temp 27
+
+VCC vcc 0 12
+VIN vin 0 DC 0 AC 1 SIN(0 {VIN_PEAK:g} 1k)
+
+* Input potentiometer/load and coupling capacitor
+R4 vin 0 470k
+C3 vin b_in 10u
+R3 b_in 0 {R3_VALUE:g}
+
+* DC feedback bias and voltage-amplifier transistor
+R2 out b_in {R2_VALUE:g}
+Q1 drive b_in e_vt1 KT3102A
+R5 e_vt1 0 {RE_VT1_VALUE:g}
+
+* Bias chain and complementary emitter follower
+R1 vcc b_top {R1_VALUE:g}
+D1 b_top d_mid KD521A
+D2 d_mid drive KD521A
+Q2 vcc b_top out KT817A
+Q3 0 drive out KT816A
+
+* Output coupling capacitor and speaker
+C2 out load {C2_VALUE_UF:g}u
+RLOAD load 0 8
+C1 vcc 0 1000u
+
+.model KD521A D(Is=2.5n Rs=1.8 N=1.85 Cjo=2p M=0.33 Bv=75 Ibv=5u Tt=4n)
+.model KT3102A NPN(Is=2e-14 Bf=100 Br=6 Vaf=100 Var=20 Ikf=0.12 Ikr=0.02
++ Rc=1 Re=0.35 Rb=60 Cje=9p Cjc=4p Tf=0.4n Tr=35n)
+.model KT817A NPN(Is=9e-14 Bf=50 Br=5 Vaf=70 Var=15 Ikf=3.0 Ikr=0.4
++ Rc=0.12 Re=0.06 Rb=2.5 Cje=140p Cjc=80p Tf=0.45u Tr=6u)
+.model KT816A PNP(Is=1.1e-13 Bf=50 Br=5 Vaf=60 Var=15 Ikf=2.5 Ikr=0.35
++ Rc=0.14 Re=0.07 Rb=2.8 Cje=160p Cjc=90p Tf=0.55u Tr=7u)
+
+.control
+set noaskquit
+op
+print v(b_in) v(e_vt1) v(drive) v(b_top) v(out) v(load)
+print i(vcc)
+print @q1[ic] @q2[ic] @q3[ic]
+ac dec 80 5 200k
+wrdata ac_response.csv frequency vdb(load) vp(load)
+tran 5u 60m 40m
+wrdata transient_1khz.csv time v(vin) v(b_in) v(out) v(load)
+quit
+.endc
+
+.end
+"""
+
+
 def sweep_netlist(freq: float, vin_peak: float, out_csv: str) -> str:
     return f"""* Transient sweep for reconstructed shema-1804-6 amplifier
 .options abstol=1n reltol=0.003 itl1=500 itl4=500
@@ -470,7 +564,8 @@ R4 vin 0 470k
 C3 vin b_in 10u
 R3 b_in 0 {R3_VALUE:g}
 R2 out b_in {R2_VALUE:g}
-Q1 drive b_in 0 KT3102A
+Q1 drive b_in e_vt1 KT3102A
+R5 e_vt1 0 {RE_VT1_VALUE:g}
 R1 vcc b_top {R1_VALUE:g}
 D1 b_top d_mid KD521A
 D2 d_mid drive KD521A
@@ -515,7 +610,8 @@ R4 vin 0 470k
 C3 vin b_in 10u
 R3 b_in 0 {R3_VALUE:g}
 R2 out b_in {R2_VALUE:g}
-Q1 drive b_in 0 KT3102A
+Q1 drive b_in e_vt1 KT3102A
+R5 e_vt1 0 {RE_VT1_VALUE:g}
 R1 vcc b_top {R1_VALUE:g}
 D1 b_top d_mid KD521A
 D2 d_mid drive KD521A
@@ -565,6 +661,26 @@ def harmonic_thd(times: list[float], values: list[float], freq: float, harmonics
         return 0.0, 0.0
     thd = math.sqrt(sum(a * a for a in amps[1:])) / fundamental * 100.0
     return thd, fundamental
+
+
+def waveform_y_limit(max_abs: float, occupancy: float = 0.70) -> float:
+    if max_abs <= 0:
+        return 1.0
+    target = max_abs / occupancy
+    decade = 10 ** math.floor(math.log10(target))
+    for step in [1.0, 1.2, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0, 6.0, 7.5, 10.0]:
+        limit = step * decade
+        if limit >= target:
+            return limit
+    return 10.0 * decade
+
+
+def scale_label(scale: float) -> str:
+    if scale >= 10 or abs(scale - round(scale)) < 0.05:
+        return f"{scale:.0f}"
+    if scale >= 1:
+        return f"{scale:.1f}".rstrip("0").rstrip(".")
+    return f"{scale:.2g}"
 
 
 def run_frequency_sweep() -> list[dict[str, float]]:
@@ -643,9 +759,13 @@ def render_square_plot(freq: float) -> None:
     time_ms = [(row[0] - t0) * 1000.0 for row in rows]
     vin_scaled = [(row[0] - t0) * 1000.0 for row in rows]
     load = [row[5] for row in rows]
-    vin = [row[3] * 50.0 for row in rows]
-    max_abs = max(max(abs(v) for v in load), max(abs(v) for v in vin))
-    ymax = max(0.25, math.ceil(max_abs * 12.0) / 10.0)
+    vin_raw = [row[3] for row in rows]
+    load_max_abs = max(abs(v) for v in load)
+    vin_max_abs = max(abs(v) for v in vin_raw)
+    vin_scale = load_max_abs / vin_max_abs if vin_max_abs > 0 else 1.0
+    vin = [value * vin_scale for value in vin_raw]
+    max_abs = max(load_max_abs, max(abs(v) for v in vin))
+    ymax = waveform_y_limit(max_abs)
     duration_ms = 4.0 / freq * 1000.0
     if freq == 1000.0:
         x_ticks = [0, 1, 2, 3, 4]
@@ -661,13 +781,60 @@ def render_square_plot(freq: float) -> None:
         "Time after 60 ms settling, ms",
         "Voltage, V",
     ).render(
-        [("load output", points, "#1665d8"), ("input x50", input_points, "#b54708")],
+        [("load output", points, "#1665d8"), (f"input x{scale_label(vin_scale)}", input_points, "#b54708")],
         PLOTS / f"square_response_{tag}.svg",
         0,
         duration_ms,
         -ymax,
         ymax,
         x_ticks,
+        y_ticks,
+    )
+
+
+def render_sine_plot(csv_path: Path, output_svg: Path, title: str) -> None:
+    rows = read_rows(csv_path)
+    t0 = rows[0][0]
+    duration_ms = 4.0
+    time_ms = [(row[0] - t0) * 1000.0 for row in rows]
+    vin_raw_mv = [row[3] * 1000.0 for row in rows]
+    amp_out = [row[7] for row in rows]
+    load = [row[9] for row in rows]
+    amp_out_mean = sum(amp_out) / len(amp_out)
+    load_mean = sum(load) / len(load)
+    amp_out_mv = [(value - amp_out_mean) * 1000.0 for value in amp_out]
+    load_mv = [(value - load_mean) * 1000.0 for value in load]
+    output_max_abs = max(max(abs(value) for value in load_mv), max(abs(value) for value in amp_out_mv))
+    vin_max_abs = max(abs(value) for value in vin_raw_mv)
+    vin_scale = output_max_abs / vin_max_abs if vin_max_abs > 0 else 1.0
+    vin_mv = [value * vin_scale for value in vin_raw_mv]
+    visible_values = [
+        value
+        for t, values in zip(time_ms, zip(load_mv, amp_out_mv, vin_mv))
+        if 0 <= t <= duration_ms
+        for value in values
+    ]
+    max_abs = max(abs(value) for value in visible_values)
+    ymax = waveform_y_limit(max_abs)
+    y_ticks = [-ymax, -ymax / 2.0, 0, ymax / 2.0, ymax]
+    Plot(
+        920,
+        520,
+        title,
+        "Time after 40 ms settling, ms",
+        "AC voltage, mV",
+    ).render(
+        [
+            ("amp out AC", list(zip(time_ms, amp_out_mv)), "#13795b"),
+            ("load output", list(zip(time_ms, load_mv)), "#1665d8"),
+            (f"input x{scale_label(vin_scale)}", list(zip(time_ms, vin_mv)), "#b54708"),
+        ],
+        output_svg,
+        0,
+        duration_ms,
+        -ymax,
+        ymax,
+        [0, 1, 2, 3, 4],
         y_ticks,
     )
 
@@ -719,6 +886,11 @@ def render_outputs(sweep_rows: list[dict[str, float]], square_rows: list[dict[st
         [20, 50, 100, 1000, 10000, 20000],
         [0, power_ymax / 4, power_ymax / 2, power_ymax * 3 / 4, power_ymax],
     )
+    render_sine_plot(
+        DATA / "transient_1khz.csv",
+        PLOTS / "sine_response_1khz.svg",
+        f"Sine-wave response, 1 kHz, Vin = {2 * VIN_PEAK * 1000:.1f} mVpp",
+    )
     for row in square_rows:
         render_square_plot(row["frequency_hz"])
 
@@ -734,6 +906,7 @@ def write_readme(sweep_rows: list[dict[str, float]], square_rows: list[dict[str,
     sine_headroom = min(min(sine_amp_out), 12.0 - max(sine_amp_out))
     op = read_operating_point(DATA / "ngspice.log")
     op_b_in = op.get("v(b_in)", float("nan"))
+    op_e_vt1 = op.get("v(e_vt1)", float("nan"))
     op_drive = op.get("v(drive)", float("nan"))
     op_b_top = op.get("v(b_top)", float("nan"))
     op_out = op.get("v(out)", float("nan"))
@@ -754,8 +927,9 @@ This folder contains a local reconstruction of the amplifier schematic from:
 - `VT3`: KT816A PNP lower emitter follower, `Bf = 50`.
 - `VD1`, `VD2`: KD521A bias diodes between output transistor bases.
 - `R1`: recognized as 180 ohm in the image, then tuned to the common E24 value 2.4 kOhm in this model.
-- `R2`: recognized as 6.2 kOhm in the image, then tuned to the common E24 value 6.8 kOhm and connected from the output emitter node to the VT1 base in this model.
+- `R2`: recognized as 6.2 kOhm in the image, then retuned to the common E24 value 47 kOhm for use with `R3 = 10 kOhm` and `R5 = 100 ohm`; connected from the output emitter node to the VT1 base in this model.
 - `R3`: 10 kOhm VT1 base return.
+- `R5`: 100 ohm VT1 emitter degeneration resistor.
 - `R4`: recognized as the input potentiometer/load, modeled as 470 kOhm.
 - `C1`: 1000 uF supply decoupling.
 - `C2`: {C2_VALUE_UF:g} uF output coupling capacitor for this recalculated run.
@@ -766,11 +940,12 @@ Passive parts use common value series: E24 for resistors and common electrolytic
 
 ## ngspice Check
 
-The reconstructed model converged in ngspice. After moving `R2` from the upper bias/drive node to the output emitter node, this is a feedback-bias experiment rather than the earlier half-supply/10 mA tuning. The bias should be retuned if the target remains about half supply at `out` and about 10 mA through the output stage.
+The reconstructed model converged in ngspice. After adding `R5 = 100 ohm` in the VT1 emitter circuit, `R1` and `R2` were retuned for `R3 = 10 kOhm`, about half supply at `out`, and about 10 mA through the output stage.
 
 Operating point from `data/ngspice.log`:
 
 - `V(b_in)`: about {op_b_in:.3f} V
+- `V(e_vt1)`: about {op_e_vt1:.3f} V
 - `V(drive)`: about {op_drive:.3f} V
 - `V(b_top)`: about {op_b_top:.3f} V
 - `V(out)`: about {op_out:.3f} V before output capacitor
@@ -815,6 +990,8 @@ Square-wave transient runs use a {2 * VIN_PEAK * 1000:.1f} mVpp input and show t
 - `data/transient_1khz.csv`: 1 kHz transient data from ngspice.
 - `data/frequency_sweep.csv`: frequency sweep with power and THD estimates.
 - `data/square/*.csv`: 1 kHz and 10 kHz square-wave transient data.
+- `plots/sine_response_1khz.svg/png`: 1 kHz sine-wave transient plot.
+- `plots/bootstrap_sine_response_1khz.svg/png`: 1 kHz sine-wave transient plot for the voltage-addition variant.
 - `plots/*.svg/png`: generated plots.
 """
     (RESULT / "README.md").write_text(text_body, encoding="utf-8")
@@ -823,6 +1000,7 @@ Square-wave transient runs use a {2 * VIN_PEAK * 1000:.1f} mVpp input and show t
 def main() -> None:
     for folder in [DATA, PLOTS, SCHEMATIC, NETLISTS]:
         folder.mkdir(parents=True, exist_ok=True)
+    BASE_NETLIST.write_text(main_netlist(), encoding="utf-8")
     run_ngspice(BASE_NETLIST, DATA / "ngspice.log", DATA)
     sweep_rows = run_frequency_sweep()
     square_rows = run_square_responses()

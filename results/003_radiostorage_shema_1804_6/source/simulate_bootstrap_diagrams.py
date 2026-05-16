@@ -43,7 +43,8 @@ R4 vin 0 470k
 C3 vin b_in 10u
 R3 b_in 0 {base.R3_VALUE:g}
 R2 out b_in {base.R2_VALUE:g}
-Q1 drive b_in 0 KT3102A
+Q1 drive b_in e_vt1 KT3102A
+R5 e_vt1 0 {base.RE_VT1_VALUE:g}
 {bootstrap_bias()}
 D1 b_top d_mid KD521A
 D2 d_mid drive KD521A
@@ -63,7 +64,7 @@ def main_netlist() -> str:
     control = """.control
 set noaskquit
 op
-print v(b_in) v(drive) v(b_top) v(boot) v(out) v(load)
+print v(b_in) v(e_vt1) v(drive) v(b_top) v(boot) v(out) v(load)
 print i(vcc)
 print @q1[ic] @q2[ic] @q3[ic]
 ac dec 80 5 200k
@@ -176,9 +177,13 @@ def render_square_plot(freq: float) -> None:
     t0 = rows[0][0]
     time_ms = [(row[0] - t0) * 1000.0 for row in rows]
     load = [row[5] for row in rows]
-    vin = [row[3] * 50.0 for row in rows]
-    max_abs = max(max(abs(v) for v in load), max(abs(v) for v in vin))
-    ymax = max(0.25, math.ceil(max_abs * 12.0) / 10.0)
+    vin_raw = [row[3] for row in rows]
+    load_max_abs = max(abs(v) for v in load)
+    vin_max_abs = max(abs(v) for v in vin_raw)
+    vin_scale = load_max_abs / vin_max_abs if vin_max_abs > 0 else 1.0
+    vin = [value * vin_scale for value in vin_raw]
+    max_abs = max(load_max_abs, max(abs(v) for v in vin))
+    ymax = base.waveform_y_limit(max_abs)
     duration_ms = 4.0 / freq * 1000.0
     x_ticks = [0, 1, 2, 3, 4] if freq == 1000.0 else [0, 0.1, 0.2, 0.3, 0.4]
     y_ticks = [-ymax, -ymax / 2.0, 0, ymax / 2.0, ymax]
@@ -189,7 +194,7 @@ def render_square_plot(freq: float) -> None:
         "Time after 60 ms settling, ms",
         "Voltage, V",
     ).render(
-        [("load output", list(zip(time_ms, load)), "#1665d8"), ("input x50", list(zip(time_ms, vin)), "#b54708")],
+        [("load output", list(zip(time_ms, load)), "#1665d8"), (f"input x{base.scale_label(vin_scale)}", list(zip(time_ms, vin)), "#b54708")],
         PLOTS / f"bootstrap_square_response_{tag}.svg",
         0,
         duration_ms,
@@ -240,6 +245,11 @@ def render_outputs(sweep_rows: list[dict[str, float]], square_rows: list[dict[st
         power_ymax,
         [20, 50, 100, 1000, 10000, 20000],
         [0, power_ymax / 4, power_ymax / 2, power_ymax * 3 / 4, power_ymax],
+    )
+    base.render_sine_plot(
+        DATA / "transient_1khz.csv",
+        PLOTS / "bootstrap_sine_response_1khz.svg",
+        f"Bootstrap sine-wave response, 1 kHz, Vin = {2 * VIN_PEAK * 1000:.1f} mVpp",
     )
 
     for row in square_rows:

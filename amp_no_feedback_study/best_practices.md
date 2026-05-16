@@ -80,6 +80,17 @@ Expected practical output is roughly single-digit watts into `8R`. In the behavi
 - Test with resistive and reactive loads, not only an `8R` resistor.
 - Check square-wave behavior at several frequencies and with capacitive loading before connecting valuable speakers.
 
+## Schematic Drawing Rules
+
+General reusable drawing rules are stored in [schematic_drawing_rules.md](../docs/schematic_drawing_rules.md).
+
+- Use ESKD/GOST-style UGO for local Russian-language schematics: rectangular resistors, capacitor plates with a separate polarity mark for electrolytics, diode/transistor symbols from the semiconductor UGO family, and a speaker symbol for an actual loudspeaker load.
+- Avoid intersections between parts, wires, and labels. Rearrange the schematic before accepting an ambiguous crossing.
+- Prefer vertical and horizontal wires, and avoid unnecessary bends. Every bend should either route around a symbol/label or align with a meaningful net path.
+- Keep a visible straight lead before each bend at a component terminal; do not turn a wire immediately next to a component body or symbol outline.
+- Mark only junctions where three or more conductors meet with a visible connection dot. Do not draw dots for simple two-terminal/straight-through connections.
+- Use net labels for long feedback or bootstrap links when a physical wire would make the schematic less readable.
+
 ## Practical Selection Guidance
 
 Choose the triple emitter-follower output if:

@@ -35,7 +35,7 @@
 <text x="66" y="163" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="end" fill="#111">7.5</text>
 <line x1="76" y1="60" x2="888" y2="60" class="thin"/>
 <text x="66" y="64" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="end" fill="#111">10</text>
-<polyline points="76.00,455.89 183.71,455.36 265.19,454.12 346.67,452.40 454.38,451.19 535.85,451.01 617.33,451.20 725.04,452.45 806.52,454.18 888.00,455.40" fill="none" stroke="#1665d8" stroke-width="3" stroke-linejoin="round"/>
+<polyline points="76.00,455.98 183.71,455.98 265.19,455.98 346.67,455.98 454.38,455.98 535.85,455.98 617.33,455.98 725.04,455.98 806.52,455.99 888.00,456.00" fill="none" stroke="#1665d8" stroke-width="3" stroke-linejoin="round"/>
 <line x1="660" y1="88" x2="696" y2="88" stroke="#1665d8" stroke-width="3"/>
 <text x="706" y="93" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="start" fill="#111">Pout</text>
 <text x="460" y="502" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" text-anchor="middle" fill="#111">Frequency, Hz</text>

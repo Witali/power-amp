@@ -35,7 +35,7 @@
 <text x="66" y="163" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="end" fill="#111">0.75</text>
 <line x1="76" y1="60" x2="888" y2="60" class="thin"/>
 <text x="66" y="64" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="end" fill="#111">1</text>
-<polyline points="76.00,403.40 183.71,375.97 265.19,328.69 346.67,290.68 454.38,264.11 535.85,261.03 617.33,274.65 725.04,301.43 806.52,289.28 888.00,289.71" fill="none" stroke="#13795b" stroke-width="3" stroke-linejoin="round"/>
+<polyline points="76.00,444.78 183.71,450.72 265.19,451.36 346.67,449.34 454.38,448.37 535.85,446.52 617.33,442.99 725.04,428.59 806.52,411.42 888.00,405.12" fill="none" stroke="#13795b" stroke-width="3" stroke-linejoin="round"/>
 <line x1="660" y1="88" x2="696" y2="88" stroke="#13795b" stroke-width="3"/>
 <text x="706" y="93" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="start" fill="#111">THD</text>
 <text x="460" y="502" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" text-anchor="middle" fill="#111">Frequency, Hz</text>
