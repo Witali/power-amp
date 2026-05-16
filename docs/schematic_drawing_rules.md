@@ -39,6 +39,7 @@ Use these standards as the baseline when drawing Russian-style radio schematics:
 - Use a speaker symbol for a real loudspeaker load, not just a resistor box, when the load is meant to be a speaker.
 - Keep UGO orientation conventional and readable. Rotate symbols by 90 degrees when needed, but do not mirror or distort them in a way that changes terminal meaning.
 - Use separate functional symbols instead of rectangular placeholders for ordinary radio parts whenever the element type is known.
+- After creating or changing any reusable symbol SVG, run the SVG linter immediately. The `part_symbols` generator must lint every written symbol before moving on to the next one.
 
 ## Wiring
 

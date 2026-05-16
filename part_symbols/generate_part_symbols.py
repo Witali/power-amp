@@ -1,9 +1,16 @@
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parent
+PROJECT_ROOT = ROOT.parent
+SCRIPTS_DIR = PROJECT_ROOT / "scripts"
+if str(SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS_DIR))
+
+from lint_svg import lint_svg, rel
 
 
 STYLE = """<defs>
@@ -325,6 +332,17 @@ def net_label(x: int, y: int, label: str, note: str) -> str:
 def write(path: Path, body: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(body, encoding="utf-8", newline="\n")
+    if path.suffix.lower() == ".svg":
+        lint_written_svg(path)
+
+
+def lint_written_svg(path: Path) -> None:
+    issues = lint_svg(path)
+    if not issues:
+        return
+
+    lines = [f"{issue.severity}: {rel(issue.path)}: {issue.message}" for issue in issues]
+    raise SystemExit("SVG linter failed after writing " + rel(path) + "\n" + "\n".join(lines))
 
 
 def resistor_rect_symbol() -> str:

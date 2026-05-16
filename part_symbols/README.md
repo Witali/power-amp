@@ -37,6 +37,16 @@ Each style folder has a `symbols/` directory with one SVG and one PNG per symbol
 
 Use the individual SVG files as the reusable source for future schematic generators. The PNG files are previews.
 
+## Validation
+
+Run the project SVG linter after changing symbol files:
+
+```powershell
+python scripts\lint_svg.py part_symbols
+```
+
+The symbol generator also runs this linter immediately after writing every SVG sheet and every individual symbol file. If a new symbol is malformed, generation stops before stale previews can hide the problem.
+
 ## Drawing Priority
 
 Use the same priority order as the main schematic drawing rules:
