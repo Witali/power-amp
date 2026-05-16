@@ -431,34 +431,27 @@ def use(symbol: str, x: float, y: float, scale: float = 1.0, rotate: int = 0) ->
 
 
 def resistor(x: float, y: float, length: float = 72.0, label: str = "", vertical: bool = False) -> list[str]:
+    body = max(30.0, length - 40.0)
     if vertical:
-        pts = [
-            (x, y),
-            (x, y + 10),
-            (x - 9, y + 18),
-            (x + 9, y + 30),
-            (x - 9, y + 42),
-            (x + 9, y + 54),
-            (x, y + 62),
-            (x, y + length),
+        y1 = y + 20
+        y2 = y1 + body
+        parts = [
+            line(x, y, x, y1),
+            f'<rect x="{x - 10:g}" y="{y1:g}" width="20" height="{body:g}" class="sym"/>',
+            line(x, y2, x, y + length),
         ]
-        parts = [poly(pts)]
         if label:
             parts.append(text(x + 14, y + length / 2 + 5, label, 12))
         return parts
-    pts = [
-        (x, y),
-        (x + 10, y),
-        (x + 18, y - 9),
-        (x + 30, y + 9),
-        (x + 42, y - 9),
-        (x + 54, y + 9),
-        (x + 62, y),
-        (x + length, y),
+    x1 = x + 20
+    x2 = x1 + body
+    parts = [
+        line(x, y, x1, y),
+        f'<rect x="{x1:g}" y="{y - 10:g}" width="{body:g}" height="20" class="sym"/>',
+        line(x2, y, x + length, y),
     ]
-    parts = [poly(pts)]
     if label:
-        parts.append(text(x + 18, y - 14, label, 12))
+        parts.append(text(x + 20, y - 14, label, 12))
     return parts
 
 
@@ -472,8 +465,30 @@ def capacitor(x: float, y: float, label: str = "") -> list[str]:
     return parts
 
 
+def capacitor_vertical(x: float, y: float, label: str = "") -> list[str]:
+    parts = [
+        line(x - 28, y, x + 28, y),
+        line(x - 28, y + 18, x + 28, y + 18),
+    ]
+    if label:
+        parts.append(text(x + 35, y + 13, label, 12))
+    return parts
+
+
 def ground(x: float, y: float) -> list[str]:
     return [use("ground", x, y)]
+
+
+def dot(x: float, y: float, r: float = 4.0) -> str:
+    return f'<circle cx="{x:g}" cy="{y:g}" r="{r:g}" class="dot"/>'
+
+
+def net_port(x: float, y: float, width: float, label: str) -> str:
+    return (
+        f'<rect x="{x:g}" y="{y:g}" width="{width:g}" height="28" fill="#fff" '
+        f'stroke="#111" stroke-width="1.6"/>'
+        + text(x + 6, y + 19, label, 12, 700)
+    )
 
 
 SVG_DEFS = """
@@ -487,22 +502,21 @@ SVG_DEFS = """
     .dot { fill:#111; }
     .panel { fill:#fff; stroke:#111; stroke-width:1.4; }
   </style>
-  <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
-    <path d="M0,0 L8,4 L0,8 z" fill="#111"/>
-  </marker>
   <g id="npn">
     <circle cx="38" cy="45" r="34" class="sym"/>
     <line x1="0" y1="45" x2="22" y2="45" class="sym"/>
     <line x1="22" y1="22" x2="22" y2="68" class="sym"/>
     <line x1="22" y1="35" x2="70" y2="10" class="sym"/>
-    <line x1="22" y1="55" x2="70" y2="80" class="sym" marker-end="url(#arrow)"/>
+    <line x1="22" y1="55" x2="70" y2="80" class="sym"/>
+    <polygon points="56,73 43,72 47,62" fill="#111"/>
   </g>
   <g id="pnp">
     <circle cx="38" cy="45" r="34" class="sym"/>
     <line x1="0" y1="45" x2="22" y2="45" class="sym"/>
     <line x1="22" y1="22" x2="22" y2="68" class="sym"/>
     <line x1="22" y1="55" x2="70" y2="80" class="sym"/>
-    <line x1="70" y1="10" x2="22" y2="35" class="sym" marker-end="url(#arrow)"/>
+    <line x1="70" y1="10" x2="22" y2="35" class="sym"/>
+    <polygon points="40,29 56,26 52,17" fill="#111"/>
   </g>
   <g id="ground">
     <line x1="0" y1="0" x2="44" y2="0" class="wire"/>
@@ -772,7 +786,210 @@ def draw_bias_and_output(parts: list[str], v: Variant) -> None:
     )
 
 
+def schematic_svg_rogov_triple_ef(v: Variant, row: dict[str, str | float]) -> str:
+    top_y = 125
+    bot_y = 900
+    out_x = 1520
+    out_y = 500
+    parts: list[str] = [
+        '<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1080" viewBox="0 0 1800 1080">',
+        SVG_DEFS,
+        '<rect width="100%" height="100%" fill="#fff"/>',
+        text(65, 56, f"Variant {v.ident}: {v.name}", 28, 700),
+        text(65, 88, f"{v.source_basis}. +/-{SUPPLY_RAIL_V:g} V, 8 ohm load, Av target {TARGET_GAIN:g}.", 14),
+        line(65, top_y, 1735, top_y, "rail"),
+        line(65, bot_y, 1735, bot_y, "rail"),
+        text(72, top_y - 14, f"+{SUPPLY_RAIL_V:g} V", 15, 700),
+        text(72, bot_y + 32, f"-{SUPPLY_RAIL_V:g} V", 15, 700),
+        text(80, 178, "Input and differential pair", 17, 700),
+        text(675, 178, "Voltage gain stage", 17, 700),
+        text(1040, 178, "Bias and triple emitter follower output", 17, 700),
+    ]
+
+    # Input stage and active-load differential pair.
+    parts.extend(
+        [
+            text(80, 446, "IN", 14, 700),
+            line(110, 440, 170, 440),
+            *capacitor(170, 440, "C1"),
+            line(188, 440, 320, 440),
+            use("npn", 320, 395),
+            use("npn", 500, 395),
+            text(345, 386, "VT1", 13, 700),
+            text(525, 386, "VT2", 13, 700),
+            text(340, 493, "matched", 12),
+            text(520, 493, "matched", 12),
+            line(390, 475, 390, 535),
+            line(570, 475, 570, 535),
+            line(390, 535, 480, 535),
+            line(480, 535, 570, 535),
+            dot(480, 535),
+            use("npn", 410, 560),
+            text(438, 552, "VT5 tail CCS", 12, 700),
+            line(480, 535, 480, 570),
+            line(480, 640, 480, bot_y),
+            dot(480, bot_y),
+            use("pnp", 320, 220),
+            use("pnp", 500, 220),
+            text(346, 212, "VT3", 13, 700),
+            text(526, 212, "VT4 mirror", 13, 700),
+            line(390, top_y, 390, 230),
+            dot(390, top_y),
+            line(570, top_y, 570, 230),
+            dot(570, top_y),
+            line(390, 300, 390, 405),
+            line(570, 300, 570, 405),
+            poly([(390, 300), (300, 300), (300, 265), (320, 265)]),
+            poly([(320, 265), (300, 265), (300, 190), (480, 190), (480, 265), (500, 265)]),
+            dot(320, 265),
+            dot(300, 265),
+            line(500, 440, 455, 440),
+            net_port(390, 426, 65, "REF/FB"),
+            line(410, 605, 360, 605),
+            net_port(300, 591, 60, "Iset-"),
+        ]
+    )
+
+    # Voltage amplification stage.
+    parts.extend(
+        [
+            use("npn", 700, 385),
+            text(727, 376, "VT6 VAS", 13, 700),
+            poly([(570, 405), (645, 405), (645, 430), (700, 430)]),
+            use("pnp", 760, 210),
+            text(787, 202, "VT7 CCS", 13, 700),
+            line(830, top_y, 830, 220),
+            dot(830, top_y),
+            line(760, 255, 710, 255),
+            net_port(650, 241, 60, "Iset+"),
+            line(830, 290, 830, 395),
+            line(770, 395, 1010, 395),
+            dot(830, 395),
+            dot(1010, 395),
+            line(770, 465, 770, 500),
+            *resistor(770, 500, 90, "R1 Re VAS", vertical=True),
+            line(770, 590, 770, bot_y),
+            dot(770, bot_y),
+        ]
+    )
+
+    # Bias chain that drives the upper and lower output halves.
+    parts.extend(
+        [
+            line(1010, 305, 1080, 305),
+            line(1010, 695, 1080, 695),
+            line(1010, 305, 1010, 440),
+            use("npn", 940, 430),
+            text(968, 422, "VT8 bias", 13, 700),
+            line(940, 475, 900, 475),
+            dot(900, 475),
+            line(900, 475, 900, 440),
+            line(900, 440, 910, 440),
+            *resistor(910, 440, 70, "R2"),
+            line(980, 440, 1010, 440),
+            dot(1010, 440),
+            line(900, 475, 900, 510),
+            line(900, 510, 910, 510),
+            *resistor(910, 510, 70, "R3"),
+            line(980, 510, 1010, 510),
+            dot(1010, 510),
+            line(1010, 510, 1010, 695),
+            text(902, 536, "Vbe multiplier", 12),
+        ]
+    )
+
+    # Upper Rogov-style triple emitter follower.
+    parts.extend(
+        [
+            use("npn", 1080, 260),
+            use("npn", 1210, 295),
+            use("npn", 1340, 330),
+            text(1106, 250, "VT9 pre", 13, 700),
+            text(1236, 285, "VT11 drv", 13, 700),
+            text(1366, 320, "VT13 out", 13, 700),
+            line(1150, top_y, 1150, 270),
+            dot(1150, top_y),
+            line(1280, top_y, 1280, 305),
+            dot(1280, top_y),
+            line(1410, top_y, 1410, 340),
+            dot(1410, top_y),
+            line(1150, 340, 1210, 340),
+            line(1280, 375, 1340, 375),
+            line(1410, 410, out_x, 410),
+            *resistor(out_x, 410, 72, "R4 0R22", vertical=True),
+            line(out_x, 482, out_x, out_y),
+        ]
+    )
+
+    # Lower Rogov-style triple emitter follower.
+    parts.extend(
+        [
+            use("pnp", 1080, 650),
+            use("pnp", 1210, 615),
+            use("pnp", 1340, 580),
+            text(1106, 746, "VT10 pre", 13, 700),
+            text(1236, 711, "VT12 drv", 13, 700),
+            text(1366, 676, "VT14 out", 13, 700),
+            line(1150, 730, 1150, bot_y),
+            dot(1150, bot_y),
+            line(1280, 695, 1280, bot_y),
+            dot(1280, bot_y),
+            line(1410, 660, 1410, bot_y),
+            dot(1410, bot_y),
+            line(1150, 660, 1210, 660),
+            line(1280, 625, 1340, 625),
+            line(1410, 590, out_x, 590),
+            line(out_x, out_y, out_x, 518),
+            *resistor(out_x, 518, 72, "R5 0R22", vertical=True),
+            dot(out_x, out_y),
+        ]
+    )
+
+    # Output load and Zobel network.
+    parts.extend(
+        [
+            line(out_x, out_y, 1680, out_y),
+            text(1692, 505, "OUT", 15, 700),
+            line(1680, out_y, 1680, 560),
+            *resistor(1680, 560, 130, "R6 8 ohm load", vertical=True),
+            line(1680, 690, 1680, 760),
+            *ground(1658, 760),
+            line(1590, out_y, 1590, 560),
+            dot(1590, out_y),
+            *resistor(1590, 560, 82, "R7 10R", vertical=True),
+            line(1590, 642, 1590, 700),
+            *capacitor_vertical(1590, 700, "C2 100n"),
+            line(1590, 718, 1590, 760),
+            *ground(1568, 760),
+            text(1544, 655, "Zobel", 12, 700),
+        ]
+    )
+
+    parts.extend(
+        [
+            '<rect x="70" y="950" width="1660" height="88" class="panel"/>',
+            text(94, 978, f"Feedback: {v.feedback_note}", 14, 700),
+            text(
+                94,
+                1005,
+                (
+                    f"Component sim: THD 1 W {row['thd_1w_pct']}%, THD 5 W {row['thd_5w_pct']}%, "
+                    f"clean power {row['clean_power_1pct_w']} W @ 1% THD, damping {row['damping_factor_8r']}, "
+                    f"score {row['project_score']}/100."
+                ),
+                14,
+            ),
+            text(94, 1026, "Conceptual topology schematic; transistor choices, compensation, protection, and PCB layout still need hardware design.", 12),
+            "</svg>",
+        ]
+    )
+    return "\n".join(parts) + "\n"
+
+
 def schematic_svg(v: Variant, row: dict[str, str | float]) -> str:
+    if v.ident == "02" and v.output_kind == "triple_ef":
+        return schematic_svg_rogov_triple_ef(v, row)
+
     parts: list[str] = [
         '<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="980" viewBox="0 0 1600 980">',
         SVG_DEFS,

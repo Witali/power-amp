@@ -40,6 +40,7 @@ from circuitlib.svg import (
 RESULT_DIR = Path(__file__).resolve().parents[1]
 DATA = RESULT_DIR / "data" / "bootstrap"
 SWEEP = DATA / "sweep"
+POWER_SWEEP = DATA / "power_sweep"
 SQUARE = DATA / "square"
 PLOTS = RESULT_DIR / "plots"
 SCHEMATIC = RESULT_DIR / "schematic"
@@ -49,6 +50,8 @@ NETLIST = NETLISTS / "radiostorage_amp_bootstrap.cir"
 RLOAD = 8.0
 VIN_SWING_MVPP = 1000.0
 VIN_PEAK = input_peak_from_swing_mvpp(VIN_SWING_MVPP)
+POWER_SWEEP_FREQ_HZ = 1000.0
+POWER_SWEEP_INPUT_MVPP = [20.0, 50.0, 100.0, 200.0, 500.0, 1000.0, 2000.0, 5000.0]
 C2_VALUE_UF = 4700.0
 R2_VALUE = 47000.0
 R3_VALUE = 10000.0
@@ -241,6 +244,48 @@ def run_frequency_sweep() -> list[dict[str, float]]:
     return rows
 
 
+def run_power_sweep() -> list[dict[str, float]]:
+    POWER_SWEEP.mkdir(parents=True, exist_ok=True)
+    rows: list[dict[str, float]] = []
+    for swing_mvpp in POWER_SWEEP_INPUT_MVPP:
+        vin_peak = input_peak_from_swing_mvpp(swing_mvpp)
+        tag = f"{int(swing_mvpp):05d}mvpp"
+        netlist = POWER_SWEEP / f"bootstrap_power_sweep_{tag}.cir"
+        csv_path = POWER_SWEEP / f"bootstrap_power_sweep_{tag}.csv"
+        log = POWER_SWEEP / f"bootstrap_power_sweep_{tag}.log"
+        write_text_lf(netlist, sweep_netlist(POWER_SWEEP_FREQ_HZ, vin_peak, csv_path.name))
+        run_ngspice(netlist, log, POWER_SWEEP)
+        normalize_text_file(csv_path)
+        data = read_rows(csv_path)
+        times = [row[0] for row in data]
+        load = [row[3] for row in data]
+        vin = [row[5] for row in data]
+        load_centered = [v - sum(load) / len(load) for v in load]
+        load_rms = rms(load_centered)
+        vin_rms = rms(vin)
+        thd, fundamental_rms = harmonic_thd(times, load, POWER_SWEEP_FREQ_HZ)
+        rows.append(
+            {
+                "frequency_hz": POWER_SWEEP_FREQ_HZ,
+                "vin_swing_mvpp": swing_mvpp,
+                "vin_rms_v": vin_rms,
+                "vout_rms_v": load_rms,
+                "fundamental_rms_v": fundamental_rms,
+                "gain_v_v": load_rms / vin_rms if vin_rms else 0.0,
+                "power_w": load_rms * load_rms / RLOAD,
+                "thd_percent": thd,
+                "load_pp_v": max(load) - min(load),
+            }
+        )
+
+    out = DATA / "power_sweep_1khz.csv"
+    with out.open("w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=list(rows[0].keys()), lineterminator="\n")
+        writer.writeheader()
+        writer.writerows(rows)
+    return rows
+
+
 def run_square_responses() -> list[dict[str, float]]:
     SQUARE.mkdir(parents=True, exist_ok=True)
     summary: list[dict[str, float]] = []
@@ -312,7 +357,11 @@ def render_square_plot(freq: float) -> None:
     )
 
 
-def render_outputs(sweep_rows: list[dict[str, float]], square_rows: list[dict[str, float]]) -> None:
+def render_outputs(
+    sweep_rows: list[dict[str, float]],
+    power_rows: list[dict[str, float]],
+    square_rows: list[dict[str, float]],
+) -> None:
     ac = read_rows(DATA / "ac_response.csv")
     gain_points = [(row[0], row[4]) for row in ac]
     phase_points = [(row[0], row[6]) for row in ac]
@@ -360,6 +409,31 @@ def render_outputs(sweep_rows: list[dict[str, float]], square_rows: list[dict[st
         [0, power_ymax / 4, power_ymax / 2, power_ymax * 3 / 4, power_ymax],
     )
 
+    thd_power_points = [(row["power_w"] * 1000.0, row["thd_percent"]) for row in power_rows if row["power_w"] > 0]
+    min_thd_power = min(x for x, _ in thd_power_points)
+    max_thd_power = max(x for x, _ in thd_power_points)
+    thd_power_ticks = [tick for tick in [0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100, 200, 500, 1000] if min_thd_power <= tick <= max_thd_power]
+    if not thd_power_ticks:
+        thd_power_ticks = [min_thd_power, max_thd_power]
+    thd_power_ymax = ceiling_125(max(1.0, max(y for _, y in thd_power_points) * 1.25))
+    Plot(
+        920,
+        520,
+        "Bootstrap THD vs output power, 1 kHz",
+        "Output power, mW into 8 ohm",
+        "THD, %",
+        True,
+    ).render(
+        [("THD", thd_power_points, "#7c3aed")],
+        PLOTS / "bootstrap_thd_vs_output_power_1khz.svg",
+        min_thd_power,
+        max_thd_power,
+        0,
+        thd_power_ymax,
+        thd_power_ticks,
+        [0, thd_power_ymax / 4, thd_power_ymax / 2, thd_power_ymax * 3 / 4, thd_power_ymax],
+    )
+
     render_sine_plot(
         DATA / "transient_1khz.csv",
         PLOTS / "bootstrap_sine_response_1khz.svg",
@@ -370,8 +444,13 @@ def render_outputs(sweep_rows: list[dict[str, float]], square_rows: list[dict[st
         render_square_plot(row["frequency_hz"])
 
 
-def write_readme(sweep_rows: list[dict[str, float]], square_rows: list[dict[str, float]]) -> None:
+def write_readme(
+    sweep_rows: list[dict[str, float]],
+    power_rows: list[dict[str, float]],
+    square_rows: list[dict[str, float]],
+) -> None:
     at_1k = min(sweep_rows, key=lambda row: abs(row["frequency_hz"] - 1000))
+    max_power_row = max(power_rows, key=lambda row: row["power_w"])
     square_1k = min(square_rows, key=lambda row: abs(row["frequency_hz"] - 1000))
     square_10k = min(square_rows, key=lambda row: abs(row["frequency_hz"] - 10000))
     transient = read_rows(DATA / "transient_1khz.csv")
@@ -417,6 +496,8 @@ Only the voltage-addition/bootstrap variant is kept here. The earlier no-bootstr
 ![AC gain and phase](plots/bootstrap_gain_vs_frequency.png)
 
 ![THD vs frequency](plots/bootstrap_thd_vs_frequency.png)
+
+![THD vs output power](plots/bootstrap_thd_vs_output_power_1khz.png)
 
 ![Output power vs frequency](plots/bootstrap_output_power_vs_frequency.png)
 
@@ -468,6 +549,10 @@ For a {VIN_SWING_MVPP:g} mVpp sine input, selected from the 1-2-5 input swing se
 - Load RMS voltage at 1 kHz: `{at_1k["vout_rms_v"]:.3f} V`
 - THD estimate at 1 kHz, harmonics 2-5 from ngspice transient data: `{at_1k["thd_percent"]:.3f} %`
 
+## 1 kHz THD vs Output Power
+
+The new power sweep uses 1-2-5 input steps from `{POWER_SWEEP_INPUT_MVPP[0]:g}` to `{POWER_SWEEP_INPUT_MVPP[-1]:g}` mVpp at 1 kHz. The largest simulated point is about `{max_power_row["power_w"] * 1000:.2f} mW` into 8 ohm with `{max_power_row["thd_percent"]:.2f} %` THD. The graph is intended as a comparative simulation result for this simplified transistor model, not as a guaranteed measurement for real KT816/KT817 parts.
+
 ## Input Level Choice
 
 The DC output node is close to half supply, so the theoretical rail-limited symmetric swing is about `{rail_limited_pp:.2f} Vpp`, and half of that would be about `{rail_half_pp:.2f} Vpp`. This simplified model compresses before it can produce that cleanly. A 1-2-5 series input-level sweep selected `{VIN_SWING_MVPP:g} mVpp` as the practical larger-signal test point; it gives about `{sine_load_pp:.2f} Vpp` at the load on the 1 kHz sine plot, roughly half of the largest useful simulated swing before strong compression.
@@ -506,6 +591,7 @@ python scripts\\run_circuit_result.py results\\003_radiostorage_shema_1804_6\\va
 - `data/bootstrap/ac_response.csv`: AC gain/phase data from ngspice.
 - `data/bootstrap/transient_1khz.csv`: 1 kHz transient data from ngspice.
 - `data/bootstrap/frequency_sweep.csv`: frequency sweep with power and THD estimates.
+- `data/bootstrap/power_sweep_1khz.csv`: 1 kHz input-level sweep with THD versus output power.
 - `data/bootstrap/square/*.csv`: 1 kHz and 10 kHz square-wave transient data.
 - `plots/bootstrap_*.svg/png`: generated plots for the voltage-addition variant.
 """
@@ -513,7 +599,7 @@ python scripts\\run_circuit_result.py results\\003_radiostorage_shema_1804_6\\va
 
 
 def run() -> None:
-    for folder in [DATA, SWEEP, SQUARE, PLOTS, SCHEMATIC, NETLISTS]:
+    for folder in [DATA, SWEEP, POWER_SWEEP, SQUARE, PLOTS, SCHEMATIC, NETLISTS]:
         folder.mkdir(parents=True, exist_ok=True)
     write_text_lf(SCHEMATIC / "reconstructed_amplifier_bootstrap.svg", bootstrap_schematic_svg())
     write_text_lf(NETLIST, main_netlist())
@@ -521,9 +607,10 @@ def run() -> None:
     normalize_text_file(DATA / "ac_response.csv")
     normalize_text_file(DATA / "transient_1khz.csv")
     sweep_rows = run_frequency_sweep()
+    power_rows = run_power_sweep()
     square_rows = run_square_responses()
-    render_outputs(sweep_rows, square_rows)
-    write_readme(sweep_rows, square_rows)
+    render_outputs(sweep_rows, power_rows, square_rows)
+    write_readme(sweep_rows, power_rows, square_rows)
 
 
 if __name__ == "__main__":

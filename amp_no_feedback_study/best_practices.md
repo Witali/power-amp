@@ -127,6 +127,17 @@ Before building hardware, create a transistor-level SPICE model and verify:
 - startup and shutdown behavior,
 - DC protection behavior.
 
+## Distortion And Load Testing Addendum
+
+Detailed distortion-test notes from the MusicForums article are stored in [musicforums_amplifier_distortion_notes.md](musicforums_amplifier_distortion_notes.md).
+
+- Do not rank an amplifier by `THD @ 1 kHz` alone. Check distortion spectrum, level dependence, and frequency dependence.
+- Add low-power Class AB tests; crossover distortion can look worse as the signal level falls.
+- Add two-tone IMD tests when possible, because music is not a single sine wave.
+- Inspect output-device current waveforms in BJT output stages to catch charge-storage and commutation behavior.
+- Test with `4R` short-duration load when the nominal target is `8R`, and add reactive/capacitive load checks.
+- Treat thermal bias behavior dynamically: verify after warm-up, high-power soak, and abrupt transition back to low power.
+
 ## Source References
 
 - [Pass DIY, The Zen Amplifier](https://www.passdiy.com/project/amplifiers/the-zen-amplifier)
@@ -134,3 +145,4 @@ Before building hardware, create a transistor-level SPICE model and verify:
 - [Pass DIY, Zen Variations 6](https://www.passdiy.com/project/amplifiers/zen-variations-6)
 - [First Watt F4](https://www.firstwatt.com/product/f4/)
 - [Andiha, Class A Cascode Power Amplifier](https://www.andiha.no/audio/projects/cascode.html)
+- [MusicForums, "Усилитель: что мешает звучать правильно? (часть 1)"](http://www.musicforums.ru/article/1312403108.html)

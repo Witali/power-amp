@@ -114,7 +114,7 @@
 <body>
   <header>
     <h1>003 radiostorage shema 1804 6</h1>
-    <p class="muted">Generated 2026-05-16 16:07:56 from local result files.</p>
+    <p class="muted">Generated 2026-05-17 03:04:12 from local result files.</p>
   </header>
   <main>
     <section><h2>Source Image</h2><div class="image-grid"><figure class="image-card">
@@ -137,6 +137,7 @@
 <p><img src="plots/bootstrap_sine_response_1khz.png" alt="1 kHz sine-wave response" loading="lazy"></p>
 <p><img src="plots/bootstrap_gain_vs_frequency.png" alt="AC gain and phase" loading="lazy"></p>
 <p><img src="plots/bootstrap_thd_vs_frequency.png" alt="THD vs frequency" loading="lazy"></p>
+<p><img src="plots/bootstrap_thd_vs_output_power_1khz.png" alt="THD vs output power" loading="lazy"></p>
 <p><img src="plots/bootstrap_output_power_vs_frequency.png" alt="Output power vs frequency" loading="lazy"></p>
 <p><img src="plots/bootstrap_square_response_1khz.png" alt="1 kHz square-wave response" loading="lazy"></p>
 <p><img src="plots/bootstrap_square_response_10khz.png" alt="10 kHz square-wave response" loading="lazy"></p>
@@ -179,6 +180,8 @@
 <li>Load RMS voltage at 1 kHz: <code>0.958 V</code></li>
 <li>THD estimate at 1 kHz, harmonics 2-5 from ngspice transient data: <code>18.805 %</code></li>
 </ul>
+<h2>1 kHz THD vs Output Power</h2>
+<p>The new power sweep uses 1-2-5 input steps from <code>20</code> to <code>5000</code> mVpp at 1 kHz. The largest simulated point is about <code>402.11 mW</code> into 8 ohm with <code>55.97 %</code> THD. The graph is intended as a comparative simulation result for this simplified transistor model, not as a guaranteed measurement for real KT816/KT817 parts.</p>
 <h2>Input Level Choice</h2>
 <p>The DC output node is close to half supply, so the theoretical rail-limited symmetric swing is about <code>11.82 Vpp</code>, and half of that would be about <code>5.91 Vpp</code>. This simplified model compresses before it can produce that cleanly. A 1-2-5 series input-level sweep selected <code>1000 mVpp</code> as the practical larger-signal test point; it gives about <code>2.44 Vpp</code> at the load on the 1 kHz sine plot, roughly half of the largest useful simulated swing before strong compression.</p>
 <h2>Non-Clipping Check</h2>
@@ -207,6 +210,7 @@
 <li><code>data/bootstrap/ac_response.csv</code>: AC gain/phase data from ngspice.</li>
 <li><code>data/bootstrap/transient_1khz.csv</code>: 1 kHz transient data from ngspice.</li>
 <li><code>data/bootstrap/frequency_sweep.csv</code>: frequency sweep with power and THD estimates.</li>
+<li><code>data/bootstrap/power_sweep_1khz.csv</code>: 1 kHz input-level sweep with THD versus output power.</li>
 <li><code>data/bootstrap/square/*.csv</code>: 1 kHz and 10 kHz square-wave transient data.</li>
 <li><code>plots/bootstrap_*.svg/png</code>: generated plots for the voltage-addition variant.</li>
 </ul>
@@ -239,6 +243,10 @@
 <figure class="image-card">
   <a href="plots/bootstrap_thd_vs_frequency.png"><img src="plots/bootstrap_thd_vs_frequency.png" alt="bootstrap thd vs frequency" loading="lazy"></a>
   <figcaption>bootstrap thd vs frequency</figcaption>
+</figure>
+<figure class="image-card">
+  <a href="plots/bootstrap_thd_vs_output_power_1khz.png"><img src="plots/bootstrap_thd_vs_output_power_1khz.png" alt="bootstrap thd vs output power 1khz" loading="lazy"></a>
+  <figcaption>bootstrap thd vs output power 1khz</figcaption>
 </figure></div></section>
   </main>
 </body>

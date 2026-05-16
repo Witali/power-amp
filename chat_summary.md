@@ -1,100 +1,122 @@
-# Power Amplifier Chat Summary
+# Power Amp Project Context
 
-This folder contains the local artifacts from a design exploration for an audio power amplifier without overall/global feedback.
+Last updated: 2026-05-16.
 
-## Final Working Constraints
+This repository is a working notebook and generator/simulation workspace for audio power amplifier schematics, mostly transistor-based designs, with Codex helping to research, redraw, simulate, document, and publish results.
 
-- Amplifier class: `Class AB`
-- Power supply: `+15 V / 0 / -15 V`
-- Load used in comparison: `8 ohm`
-- Total voltage gain target: `Av = 10`
-- Global feedback: none. No `OUT` to input/VAS feedback path.
-- Local feedback/linearization is allowed: emitter/source degeneration, output emitter resistors, current sources, base/gate stoppers, and local CFP/Sziklai action.
+## How To Continue Later
 
-## Current Best Topology
+Start by reading this file, then:
 
-The latest behavioral comparison selected:
+- `AGENTS.md` for project-specific working rules.
+- `README.md` for the public project description and generated result links.
+- `amp_no_feedback_study/radio_ru_bjt_amplifier_knowledge.md` for distilled Radio magazine amplifier knowledge.
+- `amp_no_feedback_study/archive_radio_ru_umzch_20_article_study.md` for the newest OCR-backed archive.radio.ru study of 20 UMZCH publications.
+- `results/001_rogov_triple_ef_amplifier/README.md` for the current first full schematic/result package.
+
+## Project Rules Already Established
+
+- Work in Russian by default unless the user asks otherwise.
+- Ordinary non-destructive local commands in this project can be run without asking.
+- Do not revert user changes.
+- Save meaningful progress to git periodically; `AGENTS.md` says to check after every fifth user prompt.
+- Temporary OCR/downloaded magazine scans stay under `_tmp_radio_ru/`, which is ignored by git.
+- Do not store copyrighted scans as permanent project knowledge; store links and distilled notes only.
+
+## Current Main Result
+
+The active schematic/result package is:
+
+- `results/001_rogov_triple_ef_amplifier/`
+
+It contains the first Rogov-style amplifier schematic and generated outputs:
+
+- `schematic/rogov_triple_ef_amplifier.svg`
+- `schematic/rogov_triple_ef_amplifier.png`
+- `source/generate_radio_ru_5_study.py`
+- `README.md`
+
+Recent fixes there:
+
+- Added/kept the official source pointer to I. Rogov, "Выходной каскад УМЗЧ - две или три ступени повторителя?", `Радио`, 2018 №12, p.27.
+- Fixed several floating transistor-base connections in the generated schematic.
+- The schematic drawing rules should avoid part/wire/text overlaps, avoid unnecessary bends, prefer horizontal/vertical wiring, and show junction dots only where three or more conductors meet.
+
+## Radio.ru Research State
+
+I studied and saved a new archive-focused knowledge pass:
+
+- `amp_no_feedback_study/archive_radio_ru_umzch_20_article_study.md`
+
+Method:
+
+- Used official `archive.radio.ru` scans and issue contents pages.
+- Started with newer archive years and moved backward.
+- Preferred transistor-only or transistor-dominant UMZCH articles over IC-only articles.
+- Used local Tesseract OCR with Russian and English models.
+
+Best reusable candidates from that pass:
+
+1. `1989 №9` - Khoroshev/Shadrov, "УМЗЧ без общей ООС".
+2. `1999 №10` - Levitsky, "УМЗЧ с индуктивной коррекцией".
+3. `1994 №8` - Maltsev, "УМЗЧ с параллельной обратной связью".
+4. `2000 №10` - Petrov, "Два усилителя мощности ЗЧ".
+5. `1995 №4` - Vinokurov, "УМЗЧ с питанием от низковольтного источника".
+
+Related older knowledge:
+
+- `amp_no_feedback_study/radio_ru_bjt_amplifier_knowledge.md`
+- `amp_no_feedback_study/musicforums_amplifier_distortion_notes.md`
+- `amp_no_feedback_study/best_practices.md`
+
+## Design Direction
+
+For the no-overall-feedback study, the favored conceptual architecture remains:
 
 ```text
-Complementary folded cascode VAS
-  -> CFP/Sziklai local Class AB output stage
-  -> output relay / Zobel / protection
+input pair or buffer
+  -> low-voltage folded/cascoded transistor voltage amplifier
+  -> thermally tracked Class AB bias network
+  -> CFP/Sziklai or double complementary emitter-follower output
+  -> output relay, Zobel, output inductor, and protection
 ```
 
-Why it won under the `+/-15 V` constraint:
+Important constraints from earlier work:
 
-- It preserves more output swing than a triple emitter-follower output.
-- The folded cascode works better with low supply voltage than a taller cascoded VAS.
-- The CFP/Sziklai output has strong local linearity and low estimated output impedance.
-- It still has no overall/global output-to-input feedback path.
+- Class AB.
+- Low rails are important; `+15 V / 0 / -15 V` was used in the no-global-feedback comparison.
+- Load target was typically `8 ohm`.
+- Avoid any overall/global `OUT` to input/VAS feedback path when the goal is explicitly no-global-feedback.
+- Local feedback and linearization are allowed: emitter degeneration, CFP/Sziklai action, emitter resistors, base stoppers, current sources, and local compensation.
 
-Main caveat:
+## Tools Already Present
 
-The CFP/Sziklai output stage must be validated for stability with real transistors, PCB parasitics, and capacitive speaker loads.
+- Local Tesseract OCR:
+  - `local_tools/Tesseract-extracted/tesseract.exe`
+  - Russian language data exists in `local_tools/Tesseract-extracted/tessdata/rus.traineddata`
+  - Helper script: `ocr_tools/ocr_image.ps1`
+- Local ngspice exists under:
+  - `local_tools/ngspice/Spice64/`
+- Node tooling is present for SVG/PNG generation:
+  - `tools/render_svg_png.js`
+- Generated project docs are under:
+  - `docs/`
+  - `scripts/`
 
-## Latest Estimated Results
+## Current Git State Reminder
 
-From the local Python behavioral comparison:
+At the time this context was saved, there were meaningful uncommitted changes from recent schematic fixes, Radio/MusicForums research notes, and this context update. Before starting a new larger task, run:
 
-- Best variant: `07`
-- Name: `Complementary folded cascode, CFP AB output`
-- `1 W / 8R` THD estimate: `0.1025%`
-- `5 W / 8R` THD estimate: `0.0501%`
-- Clean power before `1%` THD estimate: about `9 W / 8R`
-- `10 W / 8R` is near/into clipping on `+/-15 V` rails: estimated `2.1535%` THD
+```powershell
+git status --short
+```
 
-These are topology-screening estimates only, not transistor-level SPICE signoff.
+Then decide whether to commit the current progress before making unrelated changes.
 
-## Important Files
+## Good Next Steps
 
-- `amp_no_feedback_study/simulate_amp_variants.py`  
-  Python behavioral comparison script.
-
-- `amp_no_feedback_study/results.csv`  
-  Ranked numeric results for the latest candidates.
-
-- `amp_no_feedback_study/summary.md`  
-  Human-readable report of the latest comparison.
-
-- `amp_no_feedback_study/selected_topology.svg`  
-  SVG block/schematic-style drawing of the selected topology.
-
-- `amp_no_feedback_study/ten_topologies.svg`  
-  SVG overview of all compared candidates.
-
-- `amp_no_feedback_study/best_practices.md`  
-  Design lessons and best-practice notes gathered during the discussion.
-
-- `amp_no_feedback_study/behavioral_netlists/`  
-  Placeholder SPICE-like netlist notes for the compared variants.
-
-- `no_global_feedback_cascode_amp.svg`  
-  Earlier conceptual schematic drawing.
-
-## Design Notes
-
-- Cascode is useful in the voltage amplifier stage, not usually in the large-current output devices.
-- With `+/-15 V` rails, avoid output stages that waste too many Vbe drops.
-- A triple emitter follower scored well at higher rails, but became less attractive at `+/-15 V`.
-- A double emitter follower is the safer fallback if CFP/Sziklai stability is a concern.
-- Use a Vbe multiplier or equivalent thermally coupled bias network for AB idle current.
-- Use output emitter resistors, typically around `0.1R` to `0.33R`.
-- Add speaker DC protection and a relay.
-- Add a Zobel network at the output, then confirm stability on the bench.
-- Keep power and signal grounds deliberately separated and joined at a controlled point.
-
-## Required Next Step Before Hardware
-
-Create a real transistor-level SPICE design and test:
-
-- operating points,
-- output swing on `+/-15 V`,
-- bias thermal drift,
-- crossover distortion,
-- clipping symmetry,
-- stability with capacitive loads,
-- reactive speaker load behavior,
-- SOA protection,
-- startup/shutdown DC behavior.
-
-Local `ngspice`/`ltspice` was not available during this session, so all current results are from the local Python behavioral model.
+- Commit the current research/context/schematic progress when ready.
+- Extract normalized SPICE netlists for the top archive.radio.ru transistor-only candidates.
+- Simulate each candidate with `8R`, `4R`, speaker-cable capacitance, Zobel, output inductor, and a simple RLC loudspeaker equivalent.
+- Compare gain, clipping, THD spectrum, IMD, output power, square-wave response, and stability with capacitive loads.
+- Keep generated result packages under `results/NNN_short_name/` with PNG schematic, plots, simulation files, and a local README.

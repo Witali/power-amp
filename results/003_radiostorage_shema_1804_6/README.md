@@ -24,6 +24,8 @@ Only the voltage-addition/bootstrap variant is kept here. The earlier no-bootstr
 
 ![THD vs frequency](plots/bootstrap_thd_vs_frequency.png)
 
+![THD vs output power](plots/bootstrap_thd_vs_output_power_1khz.png)
+
 ![Output power vs frequency](plots/bootstrap_output_power_vs_frequency.png)
 
 ![1 kHz square-wave response](plots/bootstrap_square_response_1khz.png)
@@ -74,6 +76,10 @@ For a 1000 mVpp sine input, selected from the 1-2-5 input swing series:
 - Load RMS voltage at 1 kHz: `0.958 V`
 - THD estimate at 1 kHz, harmonics 2-5 from ngspice transient data: `18.805 %`
 
+## 1 kHz THD vs Output Power
+
+The new power sweep uses 1-2-5 input steps from `20` to `5000` mVpp at 1 kHz. The largest simulated point is about `402.11 mW` into 8 ohm with `55.97 %` THD. The graph is intended as a comparative simulation result for this simplified transistor model, not as a guaranteed measurement for real KT816/KT817 parts.
+
 ## Input Level Choice
 
 The DC output node is close to half supply, so the theoretical rail-limited symmetric swing is about `11.82 Vpp`, and half of that would be about `5.91 Vpp`. This simplified model compresses before it can produce that cleanly. A 1-2-5 series input-level sweep selected `1000 mVpp` as the practical larger-signal test point; it gives about `2.44 Vpp` at the load on the 1 kHz sine plot, roughly half of the largest useful simulated swing before strong compression.
@@ -112,5 +118,6 @@ python scripts\run_circuit_result.py results\003_radiostorage_shema_1804_6\varia
 - `data/bootstrap/ac_response.csv`: AC gain/phase data from ngspice.
 - `data/bootstrap/transient_1khz.csv`: 1 kHz transient data from ngspice.
 - `data/bootstrap/frequency_sweep.csv`: frequency sweep with power and THD estimates.
+- `data/bootstrap/power_sweep_1khz.csv`: 1 kHz input-level sweep with THD versus output power.
 - `data/bootstrap/square/*.csv`: 1 kHz and 10 kHz square-wave transient data.
 - `plots/bootstrap_*.svg/png`: generated plots for the voltage-addition variant.

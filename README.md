@@ -32,6 +32,29 @@ Before committing generated SVG schematics or symbol files, run the local SVG li
 npm run lint:svg
 ```
 
+For repeatable project maintenance without relying on Codex context, use the task runner:
+
+```powershell
+npm run symbols     # regenerate part_symbols, render PNG previews, lint every SVG
+npm test            # Python unit tests for project scripts
+npm run check       # tests, SVG lint, and git whitespace checks
+npm run build       # symbols workflow plus project checks
+```
+
+More details are collected in [docs/automation.md](docs/automation.md).
+
+To render PNG previews for any SVG folder:
+
+```powershell
+python scripts\project_tasks.py render results\003_radiostorage_shema_1804_6 --force-png
+```
+
+To run a circuit variant through the shared result workflow:
+
+```powershell
+python scripts\project_tasks.py result results\003_radiostorage_shema_1804_6\variants\bootstrap.py
+```
+
 # Симуляция аналоговых схем с помощью Codex
 
 Этот проект является локальным рабочим пространством для восстановления, отрисовки, моделирования и документирования аналоговых схем вместе с Codex. Сейчас основной фокус сделан на транзисторных звуковых усилителях по мотивам русскоязычных радиотехнических статей и отсканированных схем, но структура проекта подходит и для фильтров, блоков питания, тестовых цепей и других аналоговых узлов. Codex помогает превращать исходные изображения и заметки из статей в редактируемые SVG-схемы, SPICE-netlist’ы, расчеты ngspice, PNG-графики и Markdown-отчеты. Каждый результат хранится в отдельной папке, чтобы схема, данные моделирования, графики, исходные скрипты и принятые допущения не разъезжались. В проекте предпочтительны воспроизводимые локальные инструменты: ngspice для моделирования, SVG как редактируемый источник рисунка и PNG для удобного просмотра. Правила отрисовки схем собраны в [docs/schematic_drawing_rules.md](docs/schematic_drawing_rules.md), включая локальные соглашения по ГОСТ/ЕСКД для радиосхем, а правила генерации графиков собраны в [docs/plot_drawing_rules.md](docs/plot_drawing_rules.md). Цель проекта не заменить проверку на макете, а ускорить и лучше задокументировать цикл проектирования до сборки железа.
@@ -64,4 +87,27 @@ python scripts\run_circuit_result.py results\003_radiostorage_shema_1804_6\varia
 
 ```powershell
 npm run lint:svg
+```
+
+Для воспроизводимого обслуживания проекта без зависимости от контекста Codex используйте общий запускатель задач:
+
+```powershell
+npm run symbols     # пересоздать part_symbols, PNG-превью и проверить все SVG
+npm test            # Python unit-тесты для проектных скриптов
+npm run check       # тесты, SVG-линтер и проверка пробельных ошибок git
+npm run build       # workflow символов и проверки проекта
+```
+
+Подробности собраны в [docs/automation.md](docs/automation.md).
+
+Чтобы отрендерить PNG-превью для любой папки с SVG:
+
+```powershell
+python scripts\project_tasks.py render results\003_radiostorage_shema_1804_6 --force-png
+```
+
+Чтобы запустить вариант схемы через общий workflow результата:
+
+```powershell
+python scripts\project_tasks.py result results\003_radiostorage_shema_1804_6\variants\bootstrap.py
 ```

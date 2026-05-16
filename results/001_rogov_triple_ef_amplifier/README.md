@@ -14,12 +14,19 @@ Context:
 - Output stage: three-stage complementary emitter follower
 - Source basis: Rogov 2018 two-vs-three emitter-follower discussion plus Grechishkin 2013 BJT signal-path pattern
 
+## Sources
+
+- I. Rogov, "Выходной каскад УМЗЧ - две или три ступени повторителя?", `Радио`, 2018 №12, p.27. Official Radio annual table of contents: [ftp.radio.ru/pub/2018/12/2018.pdf](https://ftp.radio.ru/pub/2018/12/2018.pdf).
+- Local collected notes: [amp_no_feedback_study/radio_ru_bjt_amplifier_knowledge.md](../../amp_no_feedback_study/radio_ru_bjt_amplifier_knowledge.md).
+
 ## Main Files
 
 Schematic:
 
 - `schematic/rogov_triple_ef_amplifier.svg`
-- `schematic/rogov_triple_ef_amplifier.png` (`3200x1960`)
+- `schematic/rogov_triple_ef_amplifier.png` (`3600x2160`)
+
+The current schematic redraw uses transistor symbols, rectangular resistor UGO style, explicit junction dots, and mostly orthogonal wiring for readability.
 
 Plots:
 

@@ -4,6 +4,8 @@ Source focus: Russian `Радио` magazine material, with official `radio.ru`, 
 
 Copyright note: these are distilled engineering notes and source pointers, not article copies.
 
+Extended archive pass: see [`archive_radio_ru_umzch_20_article_study.md`](archive_radio_ru_umzch_20_article_study.md) for the OCR-backed study of 20 UMZCH publications from `archive.radio.ru`, with newer articles ranked first and transistor-only/transistor-dominant schematics ranked higher than IC-heavy designs.
+
 ## Source Ranking
 
 Scoring bias used here:

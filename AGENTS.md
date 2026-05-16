@@ -5,3 +5,4 @@
 - Prefer coherent commits with working generated outputs. If the user explicitly asks to save progress, a small WIP-style commit is acceptable.
 - For ordinary non-destructive local commands inside this project, proceed without asking first. Still honor required sandbox or system approval prompts.
 - Do not revert user changes unless the user explicitly asks for that.
+- Automate repeated project actions in scripts instead of relying on chat context. Prefer `scripts/project_tasks.py` and the npm wrappers `npm run symbols`, `npm run check`, and `npm run build`.
