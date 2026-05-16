@@ -19,6 +19,7 @@ Use these standards as the baseline when drawing Russian-style radio schematics:
 - Use standardized UGO families consistently: resistors and capacitors from `GOST 2.728-74`, semiconductor devices from `GOST 2.730-73`, and grounding/connection/common marks from `GOST 2.721-74`.
 - Keep component symbols in fixed proportions. Do not stretch parts horizontally or vertically to solve layout problems.
 - Draw resistors as rectangles, not zig-zags.
+- Keep resistor UGO rectangles at a consistent aspect ratio; move neighboring parts or enlarge the schematic instead of compressing a resistor body.
 - Draw electrolytic capacitors as capacitor plates plus a separate polarity mark.
 - Draw bipolar transistors with clear NPN/PNP arrows. The arrow must stay inside the transistor circle and be visually symmetric around the emitter line.
 - Use a speaker symbol for a real loudspeaker load, not just a resistor box, when the load is meant to be a speaker.
@@ -30,6 +31,7 @@ Use these standards as the baseline when drawing Russian-style radio schematics:
 - Prefer vertical and horizontal conductors.
 - Use diagonal conductors only where the established schematic shape expects them, or where an orthogonal route would be less readable.
 - Avoid unnecessary bends. Each bend should route around a component, avoid a label, or align with a meaningful net path.
+- Avoid compact nested hook shapes at junctions or crossings. If a route starts to look like a folded symbol, redraw it as a plain vertical/horizontal trunk with one clear T-connection.
 - Keep a visible straight lead before each bend at a component terminal. Do not turn a wire immediately next to a component body or symbol outline.
 - Avoid crossing components, wires, and labels. Rearrange the schematic before accepting an ambiguous crossing.
 - Leave readable clearance around component bodies, transistor circles, labels, polarity marks, and node dots.

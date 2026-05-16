@@ -61,7 +61,7 @@ def base_svg(width: int, height: int, body: list[str]) -> str:
 
 def resistor_h(x1: float, y: float, x2: float, label: str) -> list[str]:
     w = x2 - x1
-    body_w = min(76.0, max(48.0, w * 0.56))
+    body_w = 76.0
     left = x1 + (w - body_w) / 2.0
     right = left + body_w
     body_h = 28.0
@@ -75,7 +75,7 @@ def resistor_h(x1: float, y: float, x2: float, label: str) -> list[str]:
 
 def resistor_v(x: float, y1: float, y2: float, label: str, side: str = "right") -> list[str]:
     h = y2 - y1
-    body_h = min(76.0, max(36.0, h * 0.62))
+    body_h = 76.0
     top = y1 + (h - body_h) / 2.0
     bottom = top + body_h
     body_w = 28.0
