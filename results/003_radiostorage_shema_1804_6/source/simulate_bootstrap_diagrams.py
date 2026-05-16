@@ -39,12 +39,11 @@ def circuit(vin_line: str, control: str) -> str:
 
 VCC vcc 0 12
 {vin_line}
-R4 vin 0 470k
 C3 vin b_in 10u
 R3 b_in 0 {base.R3_VALUE:g}
 R2 out b_in {base.R2_VALUE:g}
 Q1 drive b_in e_vt1 KT3102A
-R5 e_vt1 0 {base.RE_VT1_VALUE:g}
+R4 e_vt1 0 {base.RE_VT1_VALUE:g}
 {bootstrap_bias()}
 D1 b_top d_mid KD521A
 D2 d_mid drive KD521A
@@ -111,7 +110,7 @@ def run_frequency_sweep() -> list[dict[str, float]]:
         netlist = SWEEP / f"bootstrap_sweep_{tag}.cir"
         csv_path = SWEEP / f"bootstrap_sweep_{tag}.csv"
         log = SWEEP / f"bootstrap_sweep_{tag}.log"
-        netlist.write_text(sweep_netlist(freq, VIN_PEAK, csv_path.name), encoding="utf-8")
+        base.write_text_lf(netlist, sweep_netlist(freq, VIN_PEAK, csv_path.name))
         base.run_ngspice(netlist, log, SWEEP)
         data = base.read_rows(csv_path)
         times = [row[0] for row in data]
@@ -147,7 +146,7 @@ def run_square_responses() -> list[dict[str, float]]:
         netlist = SQUARE / f"bootstrap_square_response_{tag}.cir"
         csv_path = SQUARE / f"bootstrap_square_response_{tag}.csv"
         log = SQUARE / f"bootstrap_square_response_{tag}.log"
-        netlist.write_text(square_netlist(freq, VIN_PEAK, csv_path.name), encoding="utf-8")
+        base.write_text_lf(netlist, square_netlist(freq, VIN_PEAK, csv_path.name))
         base.run_ngspice(netlist, log, SQUARE)
         rows = base.read_rows(csv_path)
         vin = [row[3] for row in rows]
@@ -259,7 +258,7 @@ def render_outputs(sweep_rows: list[dict[str, float]], square_rows: list[dict[st
 def main() -> None:
     for folder in [DATA, SWEEP, SQUARE, PLOTS, base.NETLISTS]:
         folder.mkdir(parents=True, exist_ok=True)
-    NETLIST.write_text(main_netlist(), encoding="utf-8")
+    base.write_text_lf(NETLIST, main_netlist())
     base.run_ngspice(NETLIST, DATA / "ngspice.log", DATA)
     sweep_rows = run_frequency_sweep()
     square_rows = run_square_responses()

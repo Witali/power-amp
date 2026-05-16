@@ -11,10 +11,9 @@ This folder contains a local reconstruction of the amplifier schematic from:
 - `VT3`: KT816A PNP lower emitter follower, `Bf = 50`.
 - `VD1`, `VD2`: KD521A bias diodes between output transistor bases.
 - `R1`: recognized as 180 ohm in the image, then tuned to the common E24 value 2.4 kOhm in this model.
-- `R2`: recognized as 6.2 kOhm in the image, then retuned to the common E24 value 47 kOhm for use with `R3 = 10 kOhm` and `R5 = 100 ohm`; connected from the output emitter node to the VT1 base in this model.
+- `R2`: recognized as 6.2 kOhm in the image, then retuned to the common E24 value 47 kOhm for use with `R3 = 10 kOhm` and `R4 = 100 ohm`; connected from the output emitter node to the VT1 base in this model.
 - `R3`: 10 kOhm VT1 base return.
-- `R5`: 100 ohm VT1 emitter degeneration resistor.
-- `R4`: recognized as the input potentiometer/load, modeled as 470 kOhm.
+- `R4`: 100 ohm VT1 emitter degeneration resistor.
 - `C1`: 1000 uF supply decoupling.
 - `C2`: 4700 uF output coupling capacitor for this recalculated run.
 - `C3`: 10 uF input coupling capacitor.
@@ -24,7 +23,7 @@ Passive parts use common value series: E24 for resistors and common electrolytic
 
 ## ngspice Check
 
-The reconstructed model converged in ngspice. After adding `R5 = 100 ohm` in the VT1 emitter circuit, `R1` and `R2` were retuned for `R3 = 10 kOhm`, about half supply at `out`, and about 10 mA through the output stage.
+The reconstructed model converged in ngspice. After adding `R4 = 100 ohm` in the VT1 emitter circuit, `R1` and `R2` were retuned for `R3 = 10 kOhm`, about half supply at `out`, and about 10 mA through the output stage.
 
 Operating point from `data/ngspice.log`:
 

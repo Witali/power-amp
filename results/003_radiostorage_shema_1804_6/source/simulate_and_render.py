@@ -39,6 +39,15 @@ def esc(value: object) -> str:
     )
 
 
+def write_text_lf(path: Path, content: str) -> None:
+    path.write_text(content.rstrip() + "\n", encoding="utf-8", newline="\n")
+
+
+def normalize_text_file(path: Path) -> None:
+    if path.exists():
+        write_text_lf(path, path.read_text(encoding="utf-8", errors="replace"))
+
+
 def text(x: float, y: float, body: object, size: int = 14, weight: int = 400, anchor: str = "start") -> str:
     return (
         f'<text x="{x:g}" y="{y:g}" font-family="Arial, Helvetica, sans-serif" '
@@ -276,9 +285,6 @@ def schematic_svg() -> str:
 
         text(42, 532, "Input", 16, 700),
         line(42, 540, 96, 540),
-        '<circle cx="96" cy="540" r="5" class="node"/>',
-        *resistor_v(96, 540, 650, "R4 470k", "right"),
-        *ground(96, 650),
         *capacitor_h(96, 540, 252, "C3 10u", "right"),
         line(252, 540, 306, 540),
         '<circle cx="306" cy="540" r="5" class="node"/>',
@@ -294,7 +300,7 @@ def schematic_svg() -> str:
         line(620, 450, 620, 500),
         line(620, 500, 646, 500),
         line(516, 585, 516, 610),
-        *resistor_v(516, 610, 700, "R5 100", "right"),
+        *resistor_v(516, 610, 700, "R4 100", "right"),
         *ground(516, 700),
 
         *resistor_h(250, 430, 430, "R2 47k"),
@@ -357,9 +363,6 @@ def bootstrap_schematic_svg() -> str:
 
         text(42, 532, "Input", 16, 700),
         line(42, 540, 96, 540),
-        '<circle cx="96" cy="540" r="5" class="node"/>',
-        *resistor_v(96, 540, 650, "R4 470k", "right"),
-        *ground(96, 650),
         *capacitor_h(96, 540, 252, "C3 10u", "right"),
         line(252, 540, 306, 540),
         '<circle cx="306" cy="540" r="5" class="node"/>',
@@ -375,7 +378,7 @@ def bootstrap_schematic_svg() -> str:
         line(620, 450, 620, 500),
         line(620, 500, 646, 500),
         line(516, 585, 516, 610),
-        *resistor_v(516, 610, 700, "R5 100", "right"),
+        *resistor_v(516, 610, 700, "R4 100", "right"),
         *ground(516, 700),
 
         *resistor_h(250, 430, 430, "R2 47k"),
@@ -451,7 +454,7 @@ class Plot:
             f'<text x="22" y="{self.height / 2:g}" font-family="Arial, Helvetica, sans-serif" font-size="14" '
             f'text-anchor="middle" fill="#111" transform="rotate(-90 22 {self.height / 2:g})">{esc(self.y_label)}</text>'
         )
-        path.write_text(base_svg(self.width, self.height, body), encoding="utf-8")
+        write_text_lf(path, base_svg(self.width, self.height, body))
 
 
 def read_rows(path: Path) -> list[list[float]]:
@@ -487,6 +490,7 @@ def run_ngspice(netlist: Path, log: Path, cwd: Path) -> None:
         stderr=subprocess.STDOUT,
         check=False,
     )
+    normalize_text_file(log)
     if result.returncode != 0:
         tail = log.read_text(encoding="utf-8", errors="replace")[-4000:] if log.exists() else result.stdout
         raise RuntimeError(f"ngspice failed for {netlist}:\n{tail}")
@@ -497,7 +501,7 @@ def main_netlist() -> str:
 * Original image: https://radiostorage.net/uploads/Image/schemes/18/shema-1804-6.png
 * Load changed from the image's 4 ohm speaker to user's requested 8 ohm speaker.
 * This tuned model uses Bf=100 for the input transistor and Bf=50 for the
-* output transistors. R1/R2/R3/R5 are tuned for about 10 mA output-stage idle
+* output transistors. R1/R2/R3/R4 are tuned for about 10 mA output-stage idle
 * current and for the output emitter node to sit near half supply.
 
 .options abstol=1n reltol=0.003 itl1=500 itl4=500
@@ -506,15 +510,14 @@ def main_netlist() -> str:
 VCC vcc 0 12
 VIN vin 0 DC 0 AC 1 SIN(0 {VIN_PEAK:g} 1k)
 
-* Input potentiometer/load and coupling capacitor
-R4 vin 0 470k
+* Input coupling capacitor
 C3 vin b_in 10u
 R3 b_in 0 {R3_VALUE:g}
 
 * DC feedback bias and voltage-amplifier transistor
 R2 out b_in {R2_VALUE:g}
 Q1 drive b_in e_vt1 KT3102A
-R5 e_vt1 0 {RE_VT1_VALUE:g}
+R4 e_vt1 0 {RE_VT1_VALUE:g}
 
 * Bias chain and complementary emitter follower
 R1 vcc b_top {R1_VALUE:g}
@@ -560,12 +563,11 @@ def sweep_netlist(freq: float, vin_peak: float, out_csv: str) -> str:
 
 VCC vcc 0 12
 VIN vin 0 DC 0 SIN(0 {vin_peak:.8g} {freq:.8g})
-R4 vin 0 470k
 C3 vin b_in 10u
 R3 b_in 0 {R3_VALUE:g}
 R2 out b_in {R2_VALUE:g}
 Q1 drive b_in e_vt1 KT3102A
-R5 e_vt1 0 {RE_VT1_VALUE:g}
+R4 e_vt1 0 {RE_VT1_VALUE:g}
 R1 vcc b_top {R1_VALUE:g}
 D1 b_top d_mid KD521A
 D2 d_mid drive KD521A
@@ -606,12 +608,11 @@ def square_netlist(freq: float, vin_peak: float, out_csv: str) -> str:
 
 VCC vcc 0 12
 VIN vin 0 DC 0 PULSE({-vin_peak:.8g} {vin_peak:.8g} 0 {rise:.8g} {rise:.8g} {period / 2.0:.8g} {period:.8g})
-R4 vin 0 470k
 C3 vin b_in 10u
 R3 b_in 0 {R3_VALUE:g}
 R2 out b_in {R2_VALUE:g}
 Q1 drive b_in e_vt1 KT3102A
-R5 e_vt1 0 {RE_VT1_VALUE:g}
+R4 e_vt1 0 {RE_VT1_VALUE:g}
 R1 vcc b_top {R1_VALUE:g}
 D1 b_top d_mid KD521A
 D2 d_mid drive KD521A
@@ -692,7 +693,7 @@ def run_frequency_sweep() -> list[dict[str, float]]:
         netlist = SWEEP / f"sweep_{tag}.cir"
         csv_path = SWEEP / f"sweep_{tag}.csv"
         log = SWEEP / f"sweep_{tag}.log"
-        netlist.write_text(sweep_netlist(freq, VIN_PEAK, csv_path.name), encoding="utf-8")
+        write_text_lf(netlist, sweep_netlist(freq, VIN_PEAK, csv_path.name))
         run_ngspice(netlist, log, SWEEP)
         data = read_rows(csv_path)
         times = [row[0] for row in data]
@@ -728,7 +729,7 @@ def run_square_responses() -> list[dict[str, float]]:
         netlist = SQUARE / f"square_response_{tag}.cir"
         csv_path = SQUARE / f"square_response_{tag}.csv"
         log = SQUARE / f"square_response_{tag}.log"
-        netlist.write_text(square_netlist(freq, VIN_PEAK, csv_path.name), encoding="utf-8")
+        write_text_lf(netlist, square_netlist(freq, VIN_PEAK, csv_path.name))
         run_ngspice(netlist, log, SQUARE)
         rows = read_rows(csv_path)
         vin = [row[3] for row in rows]
@@ -842,8 +843,8 @@ def render_sine_plot(csv_path: Path, output_svg: Path, title: str) -> None:
 def render_outputs(sweep_rows: list[dict[str, float]], square_rows: list[dict[str, float]]) -> None:
     for folder in [SCHEMATIC, PLOTS]:
         folder.mkdir(parents=True, exist_ok=True)
-    (SCHEMATIC / "reconstructed_amplifier.svg").write_text(schematic_svg(), encoding="utf-8")
-    (SCHEMATIC / "reconstructed_amplifier_bootstrap.svg").write_text(bootstrap_schematic_svg(), encoding="utf-8")
+    write_text_lf(SCHEMATIC / "reconstructed_amplifier.svg", schematic_svg())
+    write_text_lf(SCHEMATIC / "reconstructed_amplifier_bootstrap.svg", bootstrap_schematic_svg())
 
     ac = read_rows(DATA / "ac_response.csv")
     gain_points = [(row[0], row[4]) for row in ac]
@@ -927,10 +928,9 @@ This folder contains a local reconstruction of the amplifier schematic from:
 - `VT3`: KT816A PNP lower emitter follower, `Bf = 50`.
 - `VD1`, `VD2`: KD521A bias diodes between output transistor bases.
 - `R1`: recognized as 180 ohm in the image, then tuned to the common E24 value 2.4 kOhm in this model.
-- `R2`: recognized as 6.2 kOhm in the image, then retuned to the common E24 value 47 kOhm for use with `R3 = 10 kOhm` and `R5 = 100 ohm`; connected from the output emitter node to the VT1 base in this model.
+- `R2`: recognized as 6.2 kOhm in the image, then retuned to the common E24 value 47 kOhm for use with `R3 = 10 kOhm` and `R4 = 100 ohm`; connected from the output emitter node to the VT1 base in this model.
 - `R3`: 10 kOhm VT1 base return.
-- `R5`: 100 ohm VT1 emitter degeneration resistor.
-- `R4`: recognized as the input potentiometer/load, modeled as 470 kOhm.
+- `R4`: 100 ohm VT1 emitter degeneration resistor.
 - `C1`: 1000 uF supply decoupling.
 - `C2`: {C2_VALUE_UF:g} uF output coupling capacitor for this recalculated run.
 - `C3`: 10 uF input coupling capacitor.
@@ -940,7 +940,7 @@ Passive parts use common value series: E24 for resistors and common electrolytic
 
 ## ngspice Check
 
-The reconstructed model converged in ngspice. After adding `R5 = 100 ohm` in the VT1 emitter circuit, `R1` and `R2` were retuned for `R3 = 10 kOhm`, about half supply at `out`, and about 10 mA through the output stage.
+The reconstructed model converged in ngspice. After adding `R4 = 100 ohm` in the VT1 emitter circuit, `R1` and `R2` were retuned for `R3 = 10 kOhm`, about half supply at `out`, and about 10 mA through the output stage.
 
 Operating point from `data/ngspice.log`:
 
@@ -994,13 +994,13 @@ Square-wave transient runs use a {2 * VIN_PEAK * 1000:.1f} mVpp input and show t
 - `plots/bootstrap_sine_response_1khz.svg/png`: 1 kHz sine-wave transient plot for the voltage-addition variant.
 - `plots/*.svg/png`: generated plots.
 """
-    (RESULT / "README.md").write_text(text_body, encoding="utf-8")
+    write_text_lf(RESULT / "README.md", text_body)
 
 
 def main() -> None:
     for folder in [DATA, PLOTS, SCHEMATIC, NETLISTS]:
         folder.mkdir(parents=True, exist_ok=True)
-    BASE_NETLIST.write_text(main_netlist(), encoding="utf-8")
+    write_text_lf(BASE_NETLIST, main_netlist())
     run_ngspice(BASE_NETLIST, DATA / "ngspice.log", DATA)
     sweep_rows = run_frequency_sweep()
     square_rows = run_square_responses()

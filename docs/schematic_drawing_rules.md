@@ -5,6 +5,7 @@ Reusable rules for generated schematic images in this project.
 ## Symbols
 
 - Prefer GOST/ESKD-style UGO for Russian-language radio schematics.
+- Keep component symbols in fixed proportions. Do not stretch parts horizontally or vertically to solve layout problems.
 - Draw resistors as rectangles, not zig-zags.
 - Draw electrolytic capacitors as capacitor plates plus a separate polarity mark.
 - Draw bipolar transistors with clear NPN/PNP arrows. The arrow must stay inside the transistor circle and be visually symmetric around the emitter line.
@@ -30,8 +31,8 @@ Reusable rules for generated schematic images in this project.
 ## Layout
 
 - Preserve the functional flow of the circuit: input on the left, output/load on the right, supply rails above, ground below.
+- If the drawing becomes crowded, enlarge the schematic canvas or increase spacing between stages instead of changing component proportions.
 - Place bias chains and feedback/bias resistors close to the stage they control, but with enough routing clearance.
 - Keep related transistor pairs visually paired and aligned when possible.
 - Prefer one clean trunk for shared output or supply nodes, with branches leaving at right angles.
 - If the schematic is based on an original scan, keep the topology recognizable while still improving readability.
-

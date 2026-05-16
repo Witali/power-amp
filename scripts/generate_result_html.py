@@ -271,7 +271,7 @@ def main() -> None:
         raise SystemExit(f"Result folder not found: {result_dir}")
 
     output = args.output.resolve() if args.output else result_dir / "index.html"
-    output.write_text(build_html(result_dir), encoding="utf-8")
+    output.write_text(build_html(result_dir).rstrip() + "\n", encoding="utf-8", newline="\n")
     print(output)
 
 

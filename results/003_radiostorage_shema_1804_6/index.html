@@ -100,7 +100,7 @@
 <body>
   <header>
     <h1>003 radiostorage shema 1804 6</h1>
-    <p class="muted">Generated 2026-05-16 14:31:54 from local result files.</p>
+    <p class="muted">Generated 2026-05-16 14:43:29 from local result files.</p>
   </header>
   <main>
     <section><h2>Source Image</h2><div class="image-grid"><figure class="image-card">
@@ -120,10 +120,9 @@
 <li><code>VT3</code>: KT816A PNP lower emitter follower, <code>Bf = 50</code>.</li>
 <li><code>VD1</code>, <code>VD2</code>: KD521A bias diodes between output transistor bases.</li>
 <li><code>R1</code>: recognized as 180 ohm in the image, then tuned to the common E24 value 2.4 kOhm in this model.</li>
-<li><code>R2</code>: recognized as 6.2 kOhm in the image, then retuned to the common E24 value 47 kOhm for use with <code>R3 = 10 kOhm</code> and <code>R5 = 100 ohm</code>; connected from the output emitter node to the VT1 base in this model.</li>
+<li><code>R2</code>: recognized as 6.2 kOhm in the image, then retuned to the common E24 value 47 kOhm for use with <code>R3 = 10 kOhm</code> and <code>R4 = 100 ohm</code>; connected from the output emitter node to the VT1 base in this model.</li>
 <li><code>R3</code>: 10 kOhm VT1 base return.</li>
-<li><code>R5</code>: 100 ohm VT1 emitter degeneration resistor.</li>
-<li><code>R4</code>: recognized as the input potentiometer/load, modeled as 470 kOhm.</li>
+<li><code>R4</code>: 100 ohm VT1 emitter degeneration resistor.</li>
 <li><code>C1</code>: 1000 uF supply decoupling.</li>
 <li><code>C2</code>: 4700 uF output coupling capacitor for this recalculated run.</li>
 <li><code>C3</code>: 10 uF input coupling capacitor.</li>
@@ -131,7 +130,7 @@
 </ul>
 <p>Passive parts use common value series: E24 for resistors and common electrolytic capacitor values for <code>C1</code>, <code>C2</code>, and <code>C3</code>.</p>
 <h2>ngspice Check</h2>
-<p>The reconstructed model converged in ngspice. After adding <code>R5 = 100 ohm</code> in the VT1 emitter circuit, <code>R1</code> and <code>R2</code> were retuned for <code>R3 = 10 kOhm</code>, about half supply at <code>out</code>, and about 10 mA through the output stage.</p>
+<p>The reconstructed model converged in ngspice. After adding <code>R4 = 100 ohm</code> in the VT1 emitter circuit, <code>R1</code> and <code>R2</code> were retuned for <code>R3 = 10 kOhm</code>, about half supply at <code>out</code>, and about 10 mA through the output stage.</p>
 <p>Operating point from <code>data/ngspice.log</code>:</p>
 <ul>
 <li><code>V(b_in)</code>: about 0.882 V</li>
