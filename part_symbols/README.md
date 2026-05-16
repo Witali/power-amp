@@ -11,6 +11,7 @@ The SVG symbols in this folder are project-local redrawings. They are intended a
 - [gost](gost/README.md): GOST/ESKD-style symbols for Russian schematics.
 - [iec](iec/README.md): IEC-style symbols for international/European schematics.
 - [ansi](ansi/README.md): ANSI/IEEE-style symbols for American schematics.
+- [common](common/README.md): symbols that are identical in the current local GOST, IEC, and ANSI redrawings.
 - [part_symbols.svg](part_symbols.svg): older combined overview sheet.
 - [part_symbols.png](part_symbols.png): rendered PNG version of the combined overview sheet.
 - [symbol_sources.md](symbol_sources.md): source links for standards and practical references.
@@ -20,20 +21,21 @@ The SVG symbols in this folder are project-local redrawings. They are intended a
 
 | Style | SVG | PNG | Main use |
 |---|---|---|---|
+| Common | [part_symbols_common.svg](common/part_symbols_common.svg) | [part_symbols_common.png](common/part_symbols_common.png) | Canonical shared symbols used by all current local style families. |
 | GOST / ESKD | [part_symbols_gost.svg](gost/part_symbols_gost.svg) | [part_symbols_gost.png](gost/part_symbols_gost.png) | Russian radio schematics, `archive.radio.ru`, project default. |
 | IEC | [part_symbols_iec.svg](iec/part_symbols_iec.svg) | [part_symbols_iec.png](iec/part_symbols_iec.png) | European/international-style schematics. |
 | ANSI / IEEE | [part_symbols_ansi.svg](ansi/part_symbols_ansi.svg) | [part_symbols_ansi.png](ansi/part_symbols_ansi.png) | American-style schematics and older English-language magazines. |
 
 ## Individual Symbols
 
-Each style folder has a `symbols/` directory with one SVG and one PNG per symbol. Example paths:
+The [common/symbols](common/symbols/) folder is the canonical home for symbols that are identical in all current local style families. Each style folder also has a `symbols/` directory for style-specific symbols and compatibility copies. Example paths:
 
+- `common/symbols/capacitor.svg`
+- `common/symbols/bjt_npn.svg`
 - `gost/symbols/resistor.svg`
-- `iec/symbols/capacitor.svg`
 - `ansi/symbols/resistor.svg`
-- `gost/symbols/bjt_npn.svg`
-- `gost/symbols/diode.svg`
-- `gost/symbols/loudspeaker.svg`
+- `common/symbols/diode.svg`
+- `common/symbols/loudspeaker.svg`
 
 Use the individual SVG files as the reusable source for future schematic generators. The PNG files are previews.
 

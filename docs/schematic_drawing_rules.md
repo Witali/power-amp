@@ -3,6 +3,7 @@
 Reusable rules for generated schematic images in this project.
 
 Project-local symbol library and source links are stored in [part_symbols](../part_symbols/README.md).
+Symbols that are identical across the current local GOST, IEC, and ANSI redrawings are stored once in [part_symbols/common](../part_symbols/common/README.md); style folders should link to those files rather than redefining them when no standard-specific difference is needed.
 
 ## Drawing Priorities
 

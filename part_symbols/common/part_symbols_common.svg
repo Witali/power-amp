@@ -1,0 +1,147 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">
+<defs>
+<style>
+.wire{stroke:#111;stroke-width:2.6;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.thin{stroke:#111;stroke-width:1.7;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.node{fill:#111;stroke:none}
+.label{font-family:Arial, Helvetica, sans-serif;font-size:16px;font-weight:700;fill:#111}
+.note{font-family:Arial, Helvetica, sans-serif;font-size:13px;font-weight:400;fill:#333}
+.title{font-family:Arial, Helvetica, sans-serif;font-size:24px;font-weight:700;fill:#111}
+.small{font-family:Arial, Helvetica, sans-serif;font-size:12px;font-weight:400;fill:#444}
+</style>
+</defs>
+<rect width="100%" height="100%" fill="#fff"/>
+<text x="40" y="42" class="title">Common part symbols</text>
+<text x="40" y="66" class="note">Project-local redrawings; verify exact symbols against the cited standard when strict compliance is needed.</text>
+<g transform="translate(50 110)">
+<text x="0" y="-18" class="label">Capacitor</text>
+<line x1="0" y1="30" x2="70" y2="30" class="wire"/>
+<line x1="70" y1="2" x2="70" y2="58" class="wire"/>
+<line x1="100" y1="2" x2="100" y2="58" class="wire"/>
+<line x1="100" y1="30" x2="170" y2="30" class="wire"/>
+<text x="0" y="78" class="note">Shared local symbol.</text>
+</g>
+<g transform="translate(330 110)">
+<text x="0" y="-18" class="label">Polarized capacitor</text>
+<line x1="0" y1="30" x2="70" y2="30" class="wire"/>
+<line x1="70" y1="2" x2="70" y2="58" class="wire"/>
+<line x1="100" y1="2" x2="100" y2="58" class="wire"/>
+<line x1="100" y1="30" x2="170" y2="30" class="wire"/>
+<text x="54" y="-8" class="label">+</text>
+<text x="0" y="78" class="note">Shared plus-mark convention.</text>
+</g>
+<g transform="translate(620 110)">
+<text x="0" y="-18" class="label">Inductor</text>
+<line x1="0" y1="30" x2="35" y2="30" class="wire"/>
+<path d="M35 30 C35 4 65 4 65 30 C65 4 95 4 95 30 C95 4 125 4 125 30 C125 4 155 4 155 30" class="wire"/>
+<line x1="155" y1="30" x2="190" y2="30" class="wire"/>
+<text x="0" y="78" class="note">Shared coil form.</text>
+</g>
+<g transform="translate(50 255)">
+<text x="0" y="-18" class="label">Diode / Zener / LED</text>
+<line x1="0" y1="30" x2="40" y2="30" class="wire"/>
+<polygon points="40,4 40,56 86,30" class="wire"/>
+<line x1="90" y1="4" x2="90" y2="56" class="wire"/>
+<line x1="90" y1="30" x2="130" y2="30" class="wire"/>
+<g transform="translate(160 0)">
+<line x1="0" y1="30" x2="40" y2="30" class="wire"/>
+<polygon points="40,4 40,56 86,30" class="wire"/>
+<polyline points="90,4 90,22 102,22" class="wire"/>
+<polyline points="90,56 90,38 78,38" class="wire"/>
+<line x1="90" y1="30" x2="130" y2="30" class="wire"/>
+</g>
+<g transform="translate(325 0)">
+<line x1="0" y1="30" x2="40" y2="30" class="wire"/>
+<polygon points="40,4 40,56 86,30" class="wire"/>
+<line x1="90" y1="4" x2="90" y2="56" class="wire"/>
+<line x1="90" y1="30" x2="130" y2="30" class="wire"/>
+<line x1="116" y1="-2" x2="132" y2="-18" class="thin"/>
+<polyline points="126,-18 132,-18 132,-12" class="thin"/>
+<line x1="104" y1="-18" x2="120" y2="-34" class="thin"/>
+<polyline points="114,-34 120,-34 120,-28" class="thin"/>
+</g>
+<text x="0" y="78" class="note">Shared semiconductor symbols.</text>
+</g>
+<g transform="translate(390 255)">
+<text x="0" y="-18" class="label">BJT NPN / PNP</text>
+<g transform="translate(55 54)">
+<circle cx="0" cy="0" r="48" class="wire"/>
+<line x1="-48" y1="0" x2="-14" y2="0" class="wire"/>
+<line x1="-14" y1="-30" x2="-14" y2="30" class="wire"/>
+<line x1="-14" y1="-20" x2="30" y2="-42" class="wire"/>
+<line x1="-14" y1="20" x2="30" y2="42" class="wire"/>
+<polygon points="20,37 5,35 11,24" fill="#111"/>
+<text x="-34" y="74" class="small">NPN</text>
+</g>
+<g transform="translate(190 54)">
+<circle cx="0" cy="0" r="48" class="wire"/>
+<line x1="-48" y1="0" x2="-14" y2="0" class="wire"/>
+<line x1="-14" y1="-30" x2="-14" y2="30" class="wire"/>
+<line x1="-14" y1="-20" x2="30" y2="-42" class="wire"/>
+<line x1="-14" y1="20" x2="30" y2="42" class="wire"/>
+<polygon points="-3,-25 12,-24 6,-13" fill="#111"/>
+<text x="-34" y="74" class="small">PNP</text>
+</g>
+<text x="0" y="150" class="note">Shared transistor drawing.</text>
+</g>
+<g transform="translate(730 255)">
+<text x="0" y="-18" class="label">Operational amplifier</text>
+<polygon points="40,10 40,110 150,60" class="wire"/>
+<line x1="0" y1="35" x2="40" y2="35" class="wire"/>
+<line x1="0" y1="85" x2="40" y2="85" class="wire"/>
+<line x1="150" y1="60" x2="200" y2="60" class="wire"/>
+<text x="22" y="39" class="label">+</text>
+<text x="24" y="89" class="label">-</text>
+<text x="0" y="150" class="note">Shared practical triangle form.</text>
+</g>
+<g transform="translate(50 460)">
+<text x="0" y="-18" class="label">Switch and fuse</text>
+<line x1="0" y1="55" x2="45" y2="55" class="wire"/>
+<circle cx="45" cy="55" r="4" class="node"/>
+<line x1="45" y1="55" x2="102" y2="22" class="wire"/>
+<circle cx="128" cy="55" r="4" class="node"/>
+<line x1="128" y1="55" x2="170" y2="55" class="wire"/>
+<g transform="translate(210 0)">
+<line x1="0" y1="55" x2="40" y2="55" class="wire"/>
+<rect x="40" y="35" width="86" height="40" class="wire"/>
+<line x1="126" y1="55" x2="170" y2="55" class="wire"/>
+</g>
+<text x="0" y="130" class="note">Shared contact and fuse forms.</text>
+</g>
+<g transform="translate(390 460)">
+<text x="0" y="-18" class="label">Ground and junction</text>
+<line x1="45" y1="0" x2="45" y2="34" class="wire"/>
+<line x1="15" y1="34" x2="75" y2="34" class="wire"/>
+<line x1="25" y1="50" x2="65" y2="50" class="wire"/>
+<line x1="35" y1="66" x2="55" y2="66" class="wire"/>
+<g transform="translate(135 12)">
+<line x1="0" y1="40" x2="120" y2="40" class="wire"/>
+<line x1="60" y1="0" x2="60" y2="80" class="wire"/>
+<circle cx="60" cy="40" r="5" class="node"/>
+</g>
+<text x="0" y="120" class="note">Shared ground and node marks.</text>
+</g>
+<g transform="translate(690 460)">
+<text x="0" y="-18" class="label">Battery / DC source</text>
+<line x1="0" y1="40" x2="58" y2="40" class="wire"/>
+<line x1="58" y1="4" x2="58" y2="76" class="wire"/>
+<line x1="86" y1="18" x2="86" y2="62" class="wire"/>
+<line x1="86" y1="40" x2="145" y2="40" class="wire"/>
+<text x="46" y="-4" class="label">+</text>
+<text x="0" y="120" class="note">Shared source symbol.</text>
+</g>
+<g transform="translate(50 660)">
+<text x="0" y="-18" class="label">Loudspeaker</text>
+<line x1="0" y1="40" x2="55" y2="40" class="wire"/>
+<rect x="55" y="8" width="36" height="64" class="wire"/>
+<polygon points="91,18 150,-10 150,90 91,62" class="wire"/>
+<line x1="150" y1="40" x2="195" y2="40" class="wire"/>
+<text x="0" y="120" class="note">Shared electroacoustic load.</text>
+</g>
+<g transform="translate(390 660)">
+<text x="0" y="-18" class="label">Net label</text>
+<line x1="0" y1="40" x2="90" y2="40" class="wire"/>
+<text x="100" y="45" class="label">OUT</text>
+<text x="0" y="120" class="note">Shared project routing aid.</text>
+</g>
+</svg>

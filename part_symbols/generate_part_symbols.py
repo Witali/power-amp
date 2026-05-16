@@ -535,6 +535,21 @@ def write_symbols(style: str, symbols: dict[str, str]) -> None:
 def main() -> None:
     common_note = "Project-local redrawings; verify exact symbols against the cited standard when strict compliance is needed."
 
+    common_groups = [
+        capacitor(50, 110, "Capacitor", "Shared local symbol."),
+        capacitor(330, 110, "Polarized capacitor", "Shared plus-mark convention.", True),
+        inductor(620, 110, "Inductor", "Shared coil form."),
+        diode_group(50, 255, "Diode / Zener / LED", "Shared semiconductor symbols."),
+        bjt_pair(390, 255, "BJT NPN / PNP", "Shared transistor drawing."),
+        opamp(730, 255, "Operational amplifier", "Shared practical triangle form."),
+        switch_fuse(50, 460, "Switch and fuse", "Shared contact and fuse forms."),
+        ground_junction(390, 460, "Ground and junction", "Shared ground and node marks."),
+        battery(690, 460, "Battery / DC source", "Shared source symbol."),
+        loudspeaker(50, 660, "Loudspeaker", "Shared electroacoustic load."),
+        net_label(390, 660, "Net label", "Shared project routing aid."),
+    ]
+    write(ROOT / "common" / "part_symbols_common.svg", sheet("Common part symbols", common_note, common_groups, 800))
+
     gost_groups = [
         resistor_rect(50, 110, "Resistor, R", "GOST/IEC rectangle; keep aspect ratio."),
         variable_resistor_rect(330, 110, "Variable resistor, RP", "Diagonal arrow marks adjustment."),
@@ -605,6 +620,8 @@ def main() -> None:
         "loudspeaker": loudspeaker_symbol(),
         "net_label": net_label_symbol(),
     }
+    write_symbols("common", shared)
+
     rectangular = {
         "resistor": resistor_rect_symbol(),
         "variable_resistor": variable_resistor_rect_symbol(),
