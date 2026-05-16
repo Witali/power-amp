@@ -200,6 +200,7 @@ def build_html_document(markdown: str, title: str, source_name: str | None = Non
       --panel: #f6f8fb;
       --code-bg: #edf1f7;
       --accent: #1665d8;
+      --image-max-width: 920px;
     }}
     * {{ box-sizing: border-box; }}
     body {{
@@ -250,8 +251,11 @@ def build_html_document(markdown: str, title: str, source_name: str | None = Non
       color: inherit;
     }}
     img {{
-      max-width: 100%;
+      display: block;
+      width: auto;
+      max-width: min(100%, var(--image-max-width));
       height: auto;
+      margin: 12px auto 18px;
       border: 1px solid var(--line);
       border-radius: 8px;
       background: #fff;

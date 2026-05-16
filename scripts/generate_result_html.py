@@ -68,6 +68,7 @@ def build_html(result_dir: Path) -> str:
       --line: #d8dee8;
       --panel: #f6f8fb;
       --accent: #1665d8;
+      --image-max-width: 920px;
     }}
     * {{ box-sizing: border-box; }}
     body {{
@@ -127,13 +128,26 @@ def build_html(result_dir: Path) -> str:
       border-radius: 8px;
       background: #fff;
     }}
+    .description img {{
+      display: block;
+      width: auto;
+      max-width: min(100%, var(--image-max-width));
+      height: auto;
+      margin: 12px auto 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+    }}
     .image-grid {{
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
       gap: 16px;
+      justify-items: center;
     }}
     .image-card {{
       margin: 0;
+      width: 100%;
+      max-width: var(--image-max-width);
       border: 1px solid var(--line);
       border-radius: 8px;
       background: #fff;

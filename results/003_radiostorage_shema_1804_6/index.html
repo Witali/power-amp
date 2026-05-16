@@ -12,6 +12,7 @@
       --line: #d8dee8;
       --panel: #f6f8fb;
       --accent: #1665d8;
+      --image-max-width: 920px;
     }
     * { box-sizing: border-box; }
     body {
@@ -71,13 +72,26 @@
       border-radius: 8px;
       background: #fff;
     }
+    .description img {
+      display: block;
+      width: auto;
+      max-width: min(100%, var(--image-max-width));
+      height: auto;
+      margin: 12px auto 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+    }
     .image-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
       gap: 16px;
+      justify-items: center;
     }
     .image-card {
       margin: 0;
+      width: 100%;
+      max-width: var(--image-max-width);
       border: 1px solid var(--line);
       border-radius: 8px;
       background: #fff;
@@ -100,7 +114,7 @@
 <body>
   <header>
     <h1>003 radiostorage shema 1804 6</h1>
-    <p class="muted">Generated 2026-05-16 15:57:40 from local result files.</p>
+    <p class="muted">Generated 2026-05-16 16:07:56 from local result files.</p>
   </header>
   <main>
     <section><h2>Source Image</h2><div class="image-grid"><figure class="image-card">
