@@ -1,96 +1,13 @@
 from __future__ import annotations
 
 import argparse
-import html
 from datetime import datetime
 from pathlib import Path
 
+from markdown_html import esc, markdown_to_html
+
 
 IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg"}
-
-
-def esc(value: object) -> str:
-    return html.escape(str(value), quote=True)
-
-
-def inline_markdown(text: str) -> str:
-    parts = text.split("`")
-    for index in range(1, len(parts), 2):
-        parts[index] = f"<code>{esc(parts[index])}</code>"
-    for index in range(0, len(parts), 2):
-        parts[index] = esc(parts[index])
-    return "".join(parts)
-
-
-def markdown_to_html(markdown: str) -> str:
-    html_lines: list[str] = []
-    paragraph: list[str] = []
-    in_list = False
-    in_code = False
-    code_lines: list[str] = []
-
-    def flush_paragraph() -> None:
-        nonlocal paragraph
-        if paragraph:
-            html_lines.append(f"<p>{inline_markdown(' '.join(paragraph))}</p>")
-            paragraph = []
-
-    def close_list() -> None:
-        nonlocal in_list
-        if in_list:
-            html_lines.append("</ul>")
-            in_list = False
-
-    for raw_line in markdown.splitlines():
-        line = raw_line.rstrip()
-
-        if line.startswith("```"):
-            flush_paragraph()
-            close_list()
-            if in_code:
-                html_lines.append(f"<pre><code>{esc(chr(10).join(code_lines))}</code></pre>")
-                code_lines = []
-                in_code = False
-            else:
-                in_code = True
-            continue
-
-        if in_code:
-            code_lines.append(raw_line)
-            continue
-
-        stripped = line.strip()
-        if not stripped:
-            flush_paragraph()
-            close_list()
-            continue
-
-        if stripped.startswith("#"):
-            flush_paragraph()
-            close_list()
-            level = len(stripped) - len(stripped.lstrip("#"))
-            title = stripped[level:].strip()
-            level = min(max(level, 1), 3)
-            html_lines.append(f"<h{level}>{inline_markdown(title)}</h{level}>")
-            continue
-
-        if stripped.startswith("- "):
-            flush_paragraph()
-            if not in_list:
-                html_lines.append("<ul>")
-                in_list = True
-            html_lines.append(f"<li>{inline_markdown(stripped[2:].strip())}</li>")
-            continue
-
-        close_list()
-        paragraph.append(stripped)
-
-    flush_paragraph()
-    close_list()
-    if in_code:
-        html_lines.append(f"<pre><code>{esc(chr(10).join(code_lines))}</code></pre>")
-
-    return "\n".join(html_lines)
 
 
 def find_images(folder: Path) -> list[Path]:

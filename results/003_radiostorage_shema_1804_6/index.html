@@ -100,7 +100,7 @@
 <body>
   <header>
     <h1>003 radiostorage shema 1804 6</h1>
-    <p class="muted">Generated 2026-05-16 15:01:18 from local result files.</p>
+    <p class="muted">Generated 2026-05-16 15:24:45 from local result files.</p>
   </header>
   <main>
     <section><h2>Source Image</h2><div class="image-grid"><figure class="image-card">
@@ -167,9 +167,13 @@
 <li>1 kHz: load swing about <code>0.007 Vpp</code>.</li>
 <li>10 kHz: load swing about <code>0.005 Vpp</code>.</li>
 </ul>
+<h2>Reusable Runner</h2>
+<p>The concrete circuit variant lives in <code>variants/bootstrap.py</code>, while the shared runner and helpers live under <code>scripts/</code>. Run the complete regeneration flow from the repository root with:</p>
+<pre><code class="language-powershell">python scripts\run_circuit_result.py results\003_radiostorage_shema_1804_6\variants\bootstrap.py</code></pre>
 <h2>Files</h2>
 <ul>
 <li><code>source/shema-1804-6.png</code>: original downloaded image.</li>
+<li><code>variants/bootstrap.py</code>: reusable circuit variant with schematic drawing, SPICE netlists, measurements, and result description.</li>
 <li><code>schematic/reconstructed_amplifier_bootstrap.svg/png</code>: redrawn bootstrap/voltage-addition schematic using transistor symbols.</li>
 <li><code>netlists/radiostorage_amp_bootstrap.cir</code>: main ngspice netlist.</li>
 <li><code>data/bootstrap/ac_response.csv</code>: AC gain/phase data from ngspice.</li>

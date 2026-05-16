@@ -66,9 +66,19 @@ Square-wave transient runs use the same 2 mVpp input and show the load voltage a
 - 1 kHz: load swing about `0.007 Vpp`.
 - 10 kHz: load swing about `0.005 Vpp`.
 
+## Reusable Runner
+
+The concrete circuit variant lives in `variants/bootstrap.py`, while the shared runner and helpers live under `scripts/`.
+Run the complete regeneration flow from the repository root with:
+
+```powershell
+python scripts\run_circuit_result.py results\003_radiostorage_shema_1804_6\variants\bootstrap.py
+```
+
 ## Files
 
 - `source/shema-1804-6.png`: original downloaded image.
+- `variants/bootstrap.py`: reusable circuit variant with schematic drawing, SPICE netlists, measurements, and result description.
 - `schematic/reconstructed_amplifier_bootstrap.svg/png`: redrawn bootstrap/voltage-addition schematic using transistor symbols.
 - `netlists/radiostorage_amp_bootstrap.cir`: main ngspice netlist.
 - `data/bootstrap/ac_response.csv`: AC gain/phase data from ngspice.
