@@ -2,6 +2,20 @@
 
 Reusable rules for generated schematic images in this project.
 
+Project-local symbol library and source links are stored in [part_symbols](../part_symbols/README.md).
+
+## Drawing Priorities
+
+When rules conflict, use this order:
+
+1. Preserve symbol proportions and terminal meaning. Do not resize, squash, stretch, mirror, or distort UGO symbols to make the layout fit.
+2. Prevent overlaps and ambiguous reading. Components, wires, node dots, polarity marks, and labels must not cross each other; keep readable clearance around them.
+3. Prefer short, simple conductors. After the first two priorities are satisfied, route wires with minimum practical length and minimum bends.
+
+If a compact route would require distorted symbols or tight overlaps, move parts apart or enlarge the schematic instead.
+
+Draw element symbols with maximum practical fidelity. Match the required arrow directions, dot placement, polarity marks, terminal positions, plate/line shapes, and small distinguishing details; do not replace them with merely similar-looking approximations.
+
 ## GOST/ESKD References
 
 Use these standards as the baseline when drawing Russian-style radio schematics:
