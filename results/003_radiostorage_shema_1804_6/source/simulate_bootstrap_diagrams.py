@@ -14,6 +14,7 @@ PLOTS = base.PLOTS
 NETLIST = base.NETLISTS / "radiostorage_amp_bootstrap.cir"
 RLOAD = base.RLOAD
 VIN_PEAK = base.VIN_PEAK
+VIN_SWING_MVPP = base.VIN_SWING_MVPP
 
 
 MODELS = """.model KD521A D(Is=2.5n Rs=1.8 N=1.85 Cjo=2p M=0.33 Bv=75 Ibv=5u Tt=4n)
@@ -72,7 +73,7 @@ tran 5u 60m 40m
 wrdata transient_1khz.csv time v(vin) v(b_in) v(out) v(load)
 quit
 .endc"""
-    return circuit("VIN vin 0 DC 0 AC 1 SIN(0 1m 1k)", control)
+    return circuit(f"VIN vin 0 DC 0 AC 1 SIN(0 {VIN_PEAK:.8g} 1k)", control)
 
 
 def sweep_netlist(freq: float, vin_peak: float, out_csv: str) -> str:
@@ -189,7 +190,7 @@ def render_square_plot(freq: float) -> None:
     base.Plot(
         920,
         520,
-        f"Bootstrap square response, {freq / 1000:g} kHz, Vin = {2 * VIN_PEAK * 1000:.1f} mVpp",
+        f"Bootstrap square response, {freq / 1000:g} kHz, Vin = {VIN_SWING_MVPP:g} mVpp",
         "Time after 60 ms settling, ms",
         "Voltage, V",
     ).render(
@@ -221,7 +222,7 @@ def render_outputs(sweep_rows: list[dict[str, float]], square_rows: list[dict[st
 
     max_thd = max(row["thd_percent"] for row in sweep_rows)
     thd_ymax = max(1.0, math.ceil(max_thd * 1.25))
-    base.Plot(920, 520, f"Bootstrap THD vs frequency, Vin = {VIN_PEAK * 1000:.0f} mV peak", "Frequency, Hz", "THD, %", True).render(
+    base.Plot(920, 520, f"Bootstrap THD vs frequency, Vin = {VIN_SWING_MVPP:g} mVpp", "Frequency, Hz", "THD, %", True).render(
         [("THD", [(row["frequency_hz"], row["thd_percent"]) for row in sweep_rows], "#13795b")],
         PLOTS / "bootstrap_thd_vs_frequency.svg",
         20,
@@ -235,7 +236,7 @@ def render_outputs(sweep_rows: list[dict[str, float]], square_rows: list[dict[st
     power_points = [(row["frequency_hz"], row["power_w"] * 1000.0) for row in sweep_rows]
     max_power = max(y for _, y in power_points)
     power_ymax = max(10.0, math.ceil(max_power * 1.25 / 10.0) * 10.0)
-    base.Plot(920, 520, f"Bootstrap output power vs frequency, Vin = {VIN_PEAK * 1000:.0f} mV peak", "Frequency, Hz", "Power, mW into 8 ohm", True).render(
+    base.Plot(920, 520, f"Bootstrap output power vs frequency, Vin = {VIN_SWING_MVPP:g} mVpp", "Frequency, Hz", "Power, mW into 8 ohm", True).render(
         [("Pout", power_points, "#1665d8")],
         PLOTS / "bootstrap_output_power_vs_frequency.svg",
         20,
@@ -248,7 +249,7 @@ def render_outputs(sweep_rows: list[dict[str, float]], square_rows: list[dict[st
     base.render_sine_plot(
         DATA / "transient_1khz.csv",
         PLOTS / "bootstrap_sine_response_1khz.svg",
-        f"Bootstrap sine-wave response, 1 kHz, Vin = {2 * VIN_PEAK * 1000:.1f} mVpp",
+        f"Bootstrap sine-wave response, 1 kHz, Vin = {VIN_SWING_MVPP:g} mVpp",
     )
 
     for row in square_rows:
@@ -256,13 +257,15 @@ def render_outputs(sweep_rows: list[dict[str, float]], square_rows: list[dict[st
 
 
 def main() -> None:
-    for folder in [DATA, SWEEP, SQUARE, PLOTS, base.NETLISTS]:
+    for folder in [DATA, SWEEP, SQUARE, PLOTS, base.SCHEMATIC, base.NETLISTS]:
         folder.mkdir(parents=True, exist_ok=True)
+    base.write_text_lf(base.SCHEMATIC / "reconstructed_amplifier_bootstrap.svg", base.bootstrap_schematic_svg())
     base.write_text_lf(NETLIST, main_netlist())
     base.run_ngspice(NETLIST, DATA / "ngspice.log", DATA)
     sweep_rows = run_frequency_sweep()
     square_rows = run_square_responses()
     render_outputs(sweep_rows, square_rows)
+    base.write_readme(sweep_rows, square_rows)
 
 
 if __name__ == "__main__":

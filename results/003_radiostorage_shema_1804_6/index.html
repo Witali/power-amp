@@ -100,7 +100,7 @@
 <body>
   <header>
     <h1>003 radiostorage shema 1804 6</h1>
-    <p class="muted">Generated 2026-05-16 14:43:29 from local result files.</p>
+    <p class="muted">Generated 2026-05-16 15:01:18 from local result files.</p>
   </header>
   <main>
     <section><h2>Source Image</h2><div class="image-grid"><figure class="image-card">
@@ -110,82 +110,77 @@
     <section>
       <h2>Description</h2>
       <article class="description">
-        <h1>003 RadioStorage shema-1804-6 Reconstruction</h1>
+        <h1>003 RadioStorage shema-1804-6 Bootstrap Reconstruction</h1>
 <p>This folder contains a local reconstruction of the amplifier schematic from:</p>
 <p><code>https://radiostorage.net/uploads/Image/schemes/18/shema-1804-6.png</code></p>
+<p>Only the voltage-addition/bootstrap variant is kept here. The earlier no-bootstrap reconstruction was removed from the published schematic, plots, netlists, and main result data because this variant is now the working design.</p>
 <h2>Recognized Circuit</h2>
 <ul>
 <li><code>VT1</code>: KT3102A NPN common-emitter voltage amplifier, <code>Bf = 100</code>.</li>
 <li><code>VT2</code>: KT817A NPN upper emitter follower, <code>Bf = 50</code>.</li>
 <li><code>VT3</code>: KT816A PNP lower emitter follower, <code>Bf = 50</code>.</li>
 <li><code>VD1</code>, <code>VD2</code>: KD521A bias diodes between output transistor bases.</li>
-<li><code>R1</code>: recognized as 180 ohm in the image, then tuned to the common E24 value 2.4 kOhm in this model.</li>
+<li><code>R1A</code>, <code>R1B</code>: split upper bias resistor, 560 ohm and 1.8 kOhm, with bootstrap drive applied to their junction.</li>
 <li><code>R2</code>: recognized as 6.2 kOhm in the image, then retuned to the common E24 value 47 kOhm for use with <code>R3 = 10 kOhm</code> and <code>R4 = 100 ohm</code>; connected from the output emitter node to the VT1 base in this model.</li>
 <li><code>R3</code>: 10 kOhm VT1 base return.</li>
 <li><code>R4</code>: 100 ohm VT1 emitter degeneration resistor.</li>
 <li><code>C1</code>: 1000 uF supply decoupling.</li>
 <li><code>C2</code>: 4700 uF output coupling capacitor for this recalculated run.</li>
 <li><code>C3</code>: 10 uF input coupling capacitor.</li>
+<li><code>C4</code>: 470 uF bootstrap capacitor from the output emitter node to the <code>R1A</code>/<code>R1B</code> junction.</li>
 <li><code>B1</code>: speaker load, modeled as the requested 8 ohm load.</li>
 </ul>
-<p>Passive parts use common value series: E24 for resistors and common electrolytic capacitor values for <code>C1</code>, <code>C2</code>, and <code>C3</code>.</p>
+<p>Passive parts use common value series: E24 for resistors and common electrolytic capacitor values for <code>C1</code>, <code>C2</code>, <code>C3</code>, and <code>C4</code>.</p>
 <h2>ngspice Check</h2>
-<p>The reconstructed model converged in ngspice. After adding <code>R4 = 100 ohm</code> in the VT1 emitter circuit, <code>R1</code> and <code>R2</code> were retuned for <code>R3 = 10 kOhm</code>, about half supply at <code>out</code>, and about 10 mA through the output stage.</p>
-<p>Operating point from <code>data/ngspice.log</code>:</p>
+<p>The bootstrap model converged in ngspice. After adding <code>R4 = 100 ohm</code> in the VT1 emitter circuit, <code>R1A</code>, <code>R1B</code>, and <code>R2</code> were retuned for <code>R3 = 10 kOhm</code>, about half supply at <code>out</code>, and about 10 mA through the output stage.</p>
+<p>Operating point from <code>data/bootstrap/ngspice.log</code>:</p>
 <ul>
-<li><code>V(b_in)</code>: about 0.882 V</li>
-<li><code>V(e_vt1)</code>: about 0.222 V</li>
-<li><code>V(drive)</code>: about 5.411 V</li>
-<li><code>V(b_top)</code>: about 6.720 V</li>
-<li><code>V(out)</code>: about 6.062 V before output capacitor</li>
+<li><code>V(b_in)</code>: about 0.884 V</li>
+<li><code>V(e_vt1)</code>: about 0.224 V</li>
+<li><code>V(drive)</code>: about 5.438 V</li>
+<li><code>V(b_top)</code>: about 6.748 V</li>
+<li><code>V(out)</code>: about 6.090 V before output capacitor</li>
 <li><code>V(load)</code>: about 0.000 V DC after output capacitor</li>
-<li>VT2 collector current: about 9.62 mA</li>
-<li>VT3 collector current: about 9.52 mA</li>
-<li>Total supply current in this simplified transistor model: about 11.82 mA</li>
+<li>VT2 collector current: about 9.82 mA</li>
+<li>VT3 collector current: about 9.71 mA</li>
+<li>Total supply current in this simplified transistor model: about 12.04 mA</li>
 </ul>
 <p>This no-emitter-resistor diode-biased output stage remains thermally sensitive; the current is very dependent on transistor and diode models.</p>
 <h2>Key 1 kHz Result</h2>
-<p>For a 1.0 mV peak sine input:</p>
+<p>For a 2 mVpp sine input, selected from the 1-2-5 input swing series:</p>
 <ul>
-<li>Output power at 1 kHz into 8 ohm: <code>0.0006 mW</code></li>
+<li>Output power at 1 kHz into 8 ohm: <code>0.0008 mW</code></li>
 <li>Load RMS voltage at 1 kHz: <code>0.002 V</code></li>
-<li>THD estimate at 1 kHz, harmonics 2-5 from ngspice transient data: <code>0.024 %</code></li>
+<li>THD estimate at 1 kHz, harmonics 2-5 from ngspice transient data: <code>0.026 %</code></li>
 </ul>
 <h2>Non-Clipping Check</h2>
 <p>The selected transient input level is intentionally small so the simulated output does not clip.</p>
 <ul>
 <li>Sine input swing: <code>0.0020 Vpp</code>.</li>
-<li>Output node before C2: <code>6.0594..6.0655 V</code>.</li>
-<li>Rail headroom at that node: at least <code>5.9345 V</code>.</li>
-<li>Speaker/load swing after C2: <code>0.0061 Vpp</code>.</li>
+<li>Output node before C2: <code>6.0869..6.0939 V</code>.</li>
+<li>Rail headroom at that node: at least <code>5.9061 V</code>.</li>
+<li>Speaker/load swing after C2: <code>0.0069 Vpp</code>.</li>
 </ul>
 <h2>Square-Wave Response</h2>
-<p>Square-wave transient runs use a 2.0 mVpp input and show the load voltage after 60 ms of settling.</p>
+<p>Square-wave transient runs use the same 2 mVpp input and show the load voltage after 60 ms of settling.</p>
 <ul>
-<li>1 kHz: load swing about <code>0.006 Vpp</code>.</li>
+<li>1 kHz: load swing about <code>0.007 Vpp</code>.</li>
 <li>10 kHz: load swing about <code>0.005 Vpp</code>.</li>
 </ul>
 <h2>Files</h2>
 <ul>
 <li><code>source/shema-1804-6.png</code>: original downloaded image.</li>
-<li><code>schematic/reconstructed_amplifier.svg/png</code>: redrawn schematic using transistor symbols.</li>
-<li><code>schematic/reconstructed_amplifier_bootstrap.svg/png</code>: bootstrap/voltage-addition variant with split upper bias resistor and C4.</li>
-<li><code>netlists/radiostorage_amp_reconstructed.cir</code>: main ngspice netlist.</li>
-<li><code>data/ac_response.csv</code>: AC gain/phase data from ngspice.</li>
-<li><code>data/transient_1khz.csv</code>: 1 kHz transient data from ngspice.</li>
-<li><code>data/frequency_sweep.csv</code>: frequency sweep with power and THD estimates.</li>
-<li><code>data/square/*.csv</code>: 1 kHz and 10 kHz square-wave transient data.</li>
-<li><code>plots/sine_response_1khz.svg/png</code>: 1 kHz sine-wave transient plot.</li>
-<li><code>plots/bootstrap_sine_response_1khz.svg/png</code>: 1 kHz sine-wave transient plot for the voltage-addition variant.</li>
-<li><code>plots/*.svg/png</code>: generated plots.</li>
+<li><code>schematic/reconstructed_amplifier_bootstrap.svg/png</code>: redrawn bootstrap/voltage-addition schematic using transistor symbols.</li>
+<li><code>netlists/radiostorage_amp_bootstrap.cir</code>: main ngspice netlist.</li>
+<li><code>data/bootstrap/ac_response.csv</code>: AC gain/phase data from ngspice.</li>
+<li><code>data/bootstrap/transient_1khz.csv</code>: 1 kHz transient data from ngspice.</li>
+<li><code>data/bootstrap/frequency_sweep.csv</code>: frequency sweep with power and THD estimates.</li>
+<li><code>data/bootstrap/square/*.csv</code>: 1 kHz and 10 kHz square-wave transient data.</li>
+<li><code>plots/bootstrap_*.svg/png</code>: generated plots for the voltage-addition variant.</li>
 </ul>
       </article>
     </section>
     <section><h2>Reconstructed Schematic</h2><div class="image-grid"><figure class="image-card">
-  <a href="schematic/reconstructed_amplifier.png"><img src="schematic/reconstructed_amplifier.png" alt="reconstructed amplifier" loading="lazy"></a>
-  <figcaption>reconstructed amplifier</figcaption>
-</figure>
-<figure class="image-card">
   <a href="schematic/reconstructed_amplifier_bootstrap.png"><img src="schematic/reconstructed_amplifier_bootstrap.png" alt="reconstructed amplifier bootstrap" loading="lazy"></a>
   <figcaption>reconstructed amplifier bootstrap</figcaption>
 </figure></div></section>
@@ -212,30 +207,6 @@
 <figure class="image-card">
   <a href="plots/bootstrap_thd_vs_frequency.png"><img src="plots/bootstrap_thd_vs_frequency.png" alt="bootstrap thd vs frequency" loading="lazy"></a>
   <figcaption>bootstrap thd vs frequency</figcaption>
-</figure>
-<figure class="image-card">
-  <a href="plots/gain_vs_frequency.png"><img src="plots/gain_vs_frequency.png" alt="gain vs frequency" loading="lazy"></a>
-  <figcaption>gain vs frequency</figcaption>
-</figure>
-<figure class="image-card">
-  <a href="plots/output_power_vs_frequency.png"><img src="plots/output_power_vs_frequency.png" alt="output power vs frequency" loading="lazy"></a>
-  <figcaption>output power vs frequency</figcaption>
-</figure>
-<figure class="image-card">
-  <a href="plots/sine_response_1khz.png"><img src="plots/sine_response_1khz.png" alt="sine response 1khz" loading="lazy"></a>
-  <figcaption>sine response 1khz</figcaption>
-</figure>
-<figure class="image-card">
-  <a href="plots/square_response_10khz.png"><img src="plots/square_response_10khz.png" alt="square response 10khz" loading="lazy"></a>
-  <figcaption>square response 10khz</figcaption>
-</figure>
-<figure class="image-card">
-  <a href="plots/square_response_1khz.png"><img src="plots/square_response_1khz.png" alt="square response 1khz" loading="lazy"></a>
-  <figcaption>square response 1khz</figcaption>
-</figure>
-<figure class="image-card">
-  <a href="plots/thd_vs_frequency.png"><img src="plots/thd_vs_frequency.png" alt="thd vs frequency" loading="lazy"></a>
-  <figcaption>thd vs frequency</figcaption>
 </figure></div></section>
   </main>
 </body>
