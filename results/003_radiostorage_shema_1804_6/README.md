@@ -6,6 +6,30 @@ This folder contains a local reconstruction of the amplifier schematic from:
 
 Only the voltage-addition/bootstrap variant is kept here. The earlier no-bootstrap reconstruction was removed from the published schematic, plots, netlists, and main result data because this variant is now the working design.
 
+## GitHub Preview
+
+### Source Image
+
+![Original RadioStorage schematic](source/shema-1804-6.png)
+
+### Reconstructed Schematic
+
+![Reconstructed bootstrap amplifier schematic](schematic/reconstructed_amplifier_bootstrap.png)
+
+### Simulation Plots
+
+![1 kHz sine-wave response](plots/bootstrap_sine_response_1khz.png)
+
+![AC gain and phase](plots/bootstrap_gain_vs_frequency.png)
+
+![THD vs frequency](plots/bootstrap_thd_vs_frequency.png)
+
+![Output power vs frequency](plots/bootstrap_output_power_vs_frequency.png)
+
+![1 kHz square-wave response](plots/bootstrap_square_response_1khz.png)
+
+![10 kHz square-wave response](plots/bootstrap_square_response_10khz.png)
+
 ## Recognized Circuit
 
 - `VT1`: KT3102A NPN common-emitter voltage amplifier, `Bf = 100`.
