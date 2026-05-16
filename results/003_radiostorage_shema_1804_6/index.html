@@ -100,7 +100,7 @@
 <body>
   <header>
     <h1>003 radiostorage shema 1804 6</h1>
-    <p class="muted">Generated 2026-05-16 15:24:45 from local result files.</p>
+    <p class="muted">Generated 2026-05-16 15:47:18 from local result files.</p>
   </header>
   <main>
     <section><h2>Source Image</h2><div class="image-grid"><figure class="image-card">
@@ -147,25 +147,27 @@
 </ul>
 <p>This no-emitter-resistor diode-biased output stage remains thermally sensitive; the current is very dependent on transistor and diode models.</p>
 <h2>Key 1 kHz Result</h2>
-<p>For a 2 mVpp sine input, selected from the 1-2-5 input swing series:</p>
+<p>For a 1000 mVpp sine input, selected from the 1-2-5 input swing series:</p>
 <ul>
-<li>Output power at 1 kHz into 8 ohm: <code>0.0008 mW</code></li>
-<li>Load RMS voltage at 1 kHz: <code>0.002 V</code></li>
-<li>THD estimate at 1 kHz, harmonics 2-5 from ngspice transient data: <code>0.026 %</code></li>
+<li>Output power at 1 kHz into 8 ohm: <code>114.8082 mW</code></li>
+<li>Load RMS voltage at 1 kHz: <code>0.958 V</code></li>
+<li>THD estimate at 1 kHz, harmonics 2-5 from ngspice transient data: <code>18.805 %</code></li>
 </ul>
+<h2>Input Level Choice</h2>
+<p>The DC output node is close to half supply, so the theoretical rail-limited symmetric swing is about <code>11.82 Vpp</code>, and half of that would be about <code>5.91 Vpp</code>. This simplified model compresses before it can produce that cleanly. A 1-2-5 series input-level sweep selected <code>1000 mVpp</code> as the practical larger-signal test point; it gives about <code>2.44 Vpp</code> at the load on the 1 kHz sine plot, roughly half of the largest useful simulated swing before strong compression.</p>
 <h2>Non-Clipping Check</h2>
 <p>The selected transient input level is intentionally small so the simulated output does not clip.</p>
 <ul>
-<li>Sine input swing: <code>0.0020 Vpp</code>.</li>
-<li>Output node before C2: <code>6.0869..6.0939 V</code>.</li>
-<li>Rail headroom at that node: at least <code>5.9061 V</code>.</li>
-<li>Speaker/load swing after C2: <code>0.0069 Vpp</code>.</li>
+<li>Sine input swing: <code>1.0000 Vpp</code>.</li>
+<li>Output node before C2: <code>4.3455..6.7944 V</code>.</li>
+<li>Rail headroom at that node: at least <code>4.3455 V</code>.</li>
+<li>Speaker/load swing after C2: <code>2.4410 Vpp</code>.</li>
 </ul>
 <h2>Square-Wave Response</h2>
-<p>Square-wave transient runs use the same 2 mVpp input and show the load voltage after 60 ms of settling.</p>
+<p>Square-wave transient runs use the same 1000 mVpp input and show the load voltage after 60 ms of settling.</p>
 <ul>
-<li>1 kHz: load swing about <code>0.007 Vpp</code>.</li>
-<li>10 kHz: load swing about <code>0.005 Vpp</code>.</li>
+<li>1 kHz: load swing about <code>2.535 Vpp</code>.</li>
+<li>10 kHz: load swing about <code>1.947 Vpp</code>.</li>
 </ul>
 <h2>Reusable Runner</h2>
 <p>The concrete circuit variant lives in <code>variants/bootstrap.py</code>, while the shared runner and helpers live under <code>scripts/</code>. Run the complete regeneration flow from the repository root with:</p>

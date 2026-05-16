@@ -6,7 +6,23 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 NGSPICE = PROJECT_ROOT / "local_tools" / "ngspice" / "Spice64" / "bin" / "ngspice_con.exe"
 
-INPUT_SWING_SERIES_MVPP = (1.0, 2.0, 5.0, 10.0, 20.0, 50.0, 100.0, 200.0, 500.0)
+INPUT_SWING_SERIES_MVPP = (
+    1.0,
+    2.0,
+    5.0,
+    10.0,
+    20.0,
+    50.0,
+    100.0,
+    200.0,
+    500.0,
+    1000.0,
+    2000.0,
+    5000.0,
+    10000.0,
+    20000.0,
+    50000.0,
+)
 
 
 def input_peak_from_swing_mvpp(swing_mvpp: float) -> float:
@@ -21,5 +37,5 @@ def write_text_lf(path: Path, content: str) -> None:
 
 def normalize_text_file(path: Path) -> None:
     if path.exists():
-        write_text_lf(path, path.read_text(encoding="utf-8", errors="replace"))
-
+        text = path.read_text(encoding="utf-8", errors="replace")
+        write_text_lf(path, "\n".join(line.rstrip() for line in text.splitlines()))

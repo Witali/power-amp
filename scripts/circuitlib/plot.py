@@ -3,7 +3,7 @@ from __future__ import annotations
 import math
 from pathlib import Path
 
-from .analysis import read_rows, scale_label, waveform_y_limit
+from .analysis import nearest_125_scale, read_rows, scale_label, waveform_y_limit
 from .common import write_text_lf
 from .svg import base_svg, esc, line, text
 
@@ -95,7 +95,7 @@ def render_sine_plot(csv_path: Path, output_svg: Path, title: str) -> None:
     load_mv = [(value - load_mean) * 1000.0 for value in load]
     output_max_abs = max(max(abs(value) for value in load_mv), max(abs(value) for value in amp_out_mv))
     vin_max_abs = max(abs(value) for value in vin_raw_mv)
-    vin_scale = output_max_abs / vin_max_abs if vin_max_abs > 0 else 1.0
+    vin_scale = nearest_125_scale(output_max_abs / vin_max_abs) if vin_max_abs > 0 else 1.0
     vin_mv = [value * vin_scale for value in vin_raw_mv]
     visible_values = [
         value

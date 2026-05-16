@@ -53,13 +53,31 @@ def harmonic_thd(times: list[float], values: list[float], freq: float, harmonics
 def waveform_y_limit(max_abs: float, occupancy: float = 0.70) -> float:
     if max_abs <= 0:
         return 1.0
-    target = max_abs / occupancy
-    decade = 10 ** math.floor(math.log10(target))
-    for step in [1.0, 1.2, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0, 6.0, 7.5, 10.0]:
+    return ceiling_125(max_abs / occupancy)
+
+
+def ceiling_125(value: float) -> float:
+    if value <= 0:
+        return 1.0
+    decade = 10 ** math.floor(math.log10(value))
+    for step in [1.0, 2.0, 5.0, 10.0]:
         limit = step * decade
-        if limit >= target:
+        if limit >= value:
             return limit
     return 10.0 * decade
+
+
+def nearest_125_scale(value: float) -> float:
+    if value <= 0:
+        return 1.0
+    decade = 10 ** math.floor(math.log10(value))
+    candidates = [
+        step * (10 ** exponent)
+        for exponent in range(math.floor(math.log10(value)) - 1, math.floor(math.log10(value)) + 2)
+        for step in [1.0, 2.0, 5.0]
+    ]
+    candidates.append(10.0 * decade)
+    return min(candidates, key=lambda candidate: abs(math.log10(candidate / value)))
 
 
 def scale_label(scale: float) -> str:
@@ -68,4 +86,3 @@ def scale_label(scale: float) -> str:
     if scale >= 1:
         return f"{scale:.1f}".rstrip("0").rstrip(".")
     return f"{scale:.2g}"
-

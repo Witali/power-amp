@@ -1,15 +1,23 @@
 from __future__ import annotations
 
 import csv
-import math
 import sys
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(PROJECT_ROOT / "scripts"))
 
-from circuitlib.analysis import harmonic_thd, read_operating_point, read_rows, rms, scale_label, waveform_y_limit
-from circuitlib.common import input_peak_from_swing_mvpp, write_text_lf
+from circuitlib.analysis import (
+    ceiling_125,
+    harmonic_thd,
+    nearest_125_scale,
+    read_operating_point,
+    read_rows,
+    rms,
+    scale_label,
+    waveform_y_limit,
+)
+from circuitlib.common import input_peak_from_swing_mvpp, normalize_text_file, write_text_lf
 from circuitlib.plot import Plot, render_sine_plot
 from circuitlib.spice import run_ngspice
 from circuitlib.svg import (
@@ -39,7 +47,7 @@ NETLISTS = RESULT_DIR / "netlists"
 NETLIST = NETLISTS / "radiostorage_amp_bootstrap.cir"
 
 RLOAD = 8.0
-VIN_SWING_MVPP = 2.0
+VIN_SWING_MVPP = 1000.0
 VIN_PEAK = input_peak_from_swing_mvpp(VIN_SWING_MVPP)
 C2_VALUE_UF = 4700.0
 R2_VALUE = 47000.0
@@ -216,6 +224,7 @@ def run_frequency_sweep() -> list[dict[str, float]]:
         log = SWEEP / f"bootstrap_sweep_{tag}.log"
         write_text_lf(netlist, sweep_netlist(freq, VIN_PEAK, csv_path.name))
         run_ngspice(netlist, log, SWEEP)
+        normalize_text_file(csv_path)
         data = read_rows(csv_path)
         times = [row[0] for row in data]
         load = [row[3] for row in data]
@@ -237,7 +246,7 @@ def run_frequency_sweep() -> list[dict[str, float]]:
 
     out = DATA / "frequency_sweep.csv"
     with out.open("w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=list(rows[0].keys()))
+        writer = csv.DictWriter(f, fieldnames=list(rows[0].keys()), lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
     return rows
@@ -253,6 +262,7 @@ def run_square_responses() -> list[dict[str, float]]:
         log = SQUARE / f"bootstrap_square_response_{tag}.log"
         write_text_lf(netlist, square_netlist(freq, VIN_PEAK, csv_path.name))
         run_ngspice(netlist, log, SQUARE)
+        normalize_text_file(csv_path)
         rows = read_rows(csv_path)
         vin = [row[3] for row in rows]
         load = [row[5] for row in rows]
@@ -270,7 +280,7 @@ def run_square_responses() -> list[dict[str, float]]:
 
     out = DATA / "square_response_summary.csv"
     with out.open("w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=list(summary[0].keys()))
+        writer = csv.DictWriter(f, fieldnames=list(summary[0].keys()), lineterminator="\n")
         writer.writeheader()
         writer.writerows(summary)
     return summary
@@ -285,7 +295,7 @@ def render_square_plot(freq: float) -> None:
     vin_raw = [row[3] for row in rows]
     load_max_abs = max(abs(v) for v in load)
     vin_max_abs = max(abs(v) for v in vin_raw)
-    vin_scale = load_max_abs / vin_max_abs if vin_max_abs > 0 else 1.0
+    vin_scale = nearest_125_scale(load_max_abs / vin_max_abs) if vin_max_abs > 0 else 1.0
     vin = [value * vin_scale for value in vin_raw]
     max_abs = max(load_max_abs, max(abs(v) for v in vin))
     ymax = waveform_y_limit(max_abs)
@@ -329,7 +339,7 @@ def render_outputs(sweep_rows: list[dict[str, float]], square_rows: list[dict[st
     )
 
     max_thd = max(row["thd_percent"] for row in sweep_rows)
-    thd_ymax = max(1.0, math.ceil(max_thd * 1.25))
+    thd_ymax = ceiling_125(max(1.0, max_thd * 1.25))
     Plot(920, 520, f"Bootstrap THD vs frequency, Vin = {VIN_SWING_MVPP:g} mVpp", "Frequency, Hz", "THD, %", True).render(
         [("THD", [(row["frequency_hz"], row["thd_percent"]) for row in sweep_rows], "#13795b")],
         PLOTS / "bootstrap_thd_vs_frequency.svg",
@@ -343,8 +353,14 @@ def render_outputs(sweep_rows: list[dict[str, float]], square_rows: list[dict[st
 
     power_points = [(row["frequency_hz"], row["power_w"] * 1000.0) for row in sweep_rows]
     max_power = max(y for _, y in power_points)
-    power_ymax = max(10.0, math.ceil(max_power * 1.25 / 10.0) * 10.0)
-    Plot(920, 520, f"Bootstrap output power vs frequency, Vin = {VIN_SWING_MVPP:g} mVpp", "Frequency, Hz", "Power, mW into 8 ohm", True).render(
+    if max_power < 0.01:
+        power_points = [(row["frequency_hz"], row["power_w"] * 1_000_000.0) for row in sweep_rows]
+        power_unit = "uW"
+    else:
+        power_unit = "mW"
+    max_power = max(y for _, y in power_points)
+    power_ymax = ceiling_125(max_power * 1.25)
+    Plot(920, 520, f"Bootstrap output power vs frequency, Vin = {VIN_SWING_MVPP:g} mVpp", "Frequency, Hz", f"Power, {power_unit} into 8 ohm", True).render(
         [("Pout", power_points, "#1665d8")],
         PLOTS / "bootstrap_output_power_vs_frequency.svg",
         20,
@@ -374,6 +390,7 @@ def write_readme(sweep_rows: list[dict[str, float]], square_rows: list[dict[str,
     sine_amp_out = [row[7] for row in transient]
     sine_load = [row[9] for row in transient]
     sine_headroom = min(min(sine_amp_out), 12.0 - max(sine_amp_out))
+    sine_load_pp = max(sine_load) - min(sine_load)
     op = read_operating_point(DATA / "ngspice.log")
     op_b_in = op.get("v(b_in)", float("nan"))
     op_e_vt1 = op.get("v(e_vt1)", float("nan"))
@@ -384,6 +401,8 @@ def write_readme(sweep_rows: list[dict[str, float]], square_rows: list[dict[str,
     op_q2_ma = abs(op.get("@q2[ic]", float("nan"))) * 1000.0
     op_q3_ma = abs(op.get("@q3[ic]", float("nan"))) * 1000.0
     op_supply_ma = abs(op.get("i(vcc)", float("nan"))) * 1000.0
+    rail_limited_pp = 2.0 * min(op_out, 12.0 - op_out)
+    rail_half_pp = rail_limited_pp / 2.0
     text_body = f"""# 003 RadioStorage shema-1804-6 Bootstrap Reconstruction
 
 This folder contains a local reconstruction of the amplifier schematic from:
@@ -436,6 +455,10 @@ For a {VIN_SWING_MVPP:g} mVpp sine input, selected from the 1-2-5 input swing se
 - Load RMS voltage at 1 kHz: `{at_1k["vout_rms_v"]:.3f} V`
 - THD estimate at 1 kHz, harmonics 2-5 from ngspice transient data: `{at_1k["thd_percent"]:.3f} %`
 
+## Input Level Choice
+
+The DC output node is close to half supply, so the theoretical rail-limited symmetric swing is about `{rail_limited_pp:.2f} Vpp`, and half of that would be about `{rail_half_pp:.2f} Vpp`. This simplified model compresses before it can produce that cleanly. A 1-2-5 series input-level sweep selected `{VIN_SWING_MVPP:g} mVpp` as the practical larger-signal test point; it gives about `{sine_load_pp:.2f} Vpp` at the load on the 1 kHz sine plot, roughly half of the largest useful simulated swing before strong compression.
+
 ## Non-Clipping Check
 
 The selected transient input level is intentionally small so the simulated output does not clip.
@@ -443,7 +466,7 @@ The selected transient input level is intentionally small so the simulated outpu
 - Sine input swing: `{max(sine_vin) - min(sine_vin):.4f} Vpp`.
 - Output node before C2: `{min(sine_amp_out):.4f}..{max(sine_amp_out):.4f} V`.
 - Rail headroom at that node: at least `{sine_headroom:.4f} V`.
-- Speaker/load swing after C2: `{max(sine_load) - min(sine_load):.4f} Vpp`.
+- Speaker/load swing after C2: `{sine_load_pp:.4f} Vpp`.
 
 ## Square-Wave Response
 
@@ -482,6 +505,8 @@ def run() -> None:
     write_text_lf(SCHEMATIC / "reconstructed_amplifier_bootstrap.svg", bootstrap_schematic_svg())
     write_text_lf(NETLIST, main_netlist())
     run_ngspice(NETLIST, DATA / "ngspice.log", DATA)
+    normalize_text_file(DATA / "ac_response.csv")
+    normalize_text_file(DATA / "transient_1khz.csv")
     sweep_rows = run_frequency_sweep()
     square_rows = run_square_responses()
     render_outputs(sweep_rows, square_rows)

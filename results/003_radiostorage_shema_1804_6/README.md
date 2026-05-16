@@ -44,27 +44,31 @@ This no-emitter-resistor diode-biased output stage remains thermally sensitive; 
 
 ## Key 1 kHz Result
 
-For a 2 mVpp sine input, selected from the 1-2-5 input swing series:
+For a 1000 mVpp sine input, selected from the 1-2-5 input swing series:
 
-- Output power at 1 kHz into 8 ohm: `0.0008 mW`
-- Load RMS voltage at 1 kHz: `0.002 V`
-- THD estimate at 1 kHz, harmonics 2-5 from ngspice transient data: `0.026 %`
+- Output power at 1 kHz into 8 ohm: `114.8082 mW`
+- Load RMS voltage at 1 kHz: `0.958 V`
+- THD estimate at 1 kHz, harmonics 2-5 from ngspice transient data: `18.805 %`
+
+## Input Level Choice
+
+The DC output node is close to half supply, so the theoretical rail-limited symmetric swing is about `11.82 Vpp`, and half of that would be about `5.91 Vpp`. This simplified model compresses before it can produce that cleanly. A 1-2-5 series input-level sweep selected `1000 mVpp` as the practical larger-signal test point; it gives about `2.44 Vpp` at the load on the 1 kHz sine plot, roughly half of the largest useful simulated swing before strong compression.
 
 ## Non-Clipping Check
 
 The selected transient input level is intentionally small so the simulated output does not clip.
 
-- Sine input swing: `0.0020 Vpp`.
-- Output node before C2: `6.0869..6.0939 V`.
-- Rail headroom at that node: at least `5.9061 V`.
-- Speaker/load swing after C2: `0.0069 Vpp`.
+- Sine input swing: `1.0000 Vpp`.
+- Output node before C2: `4.3455..6.7944 V`.
+- Rail headroom at that node: at least `4.3455 V`.
+- Speaker/load swing after C2: `2.4410 Vpp`.
 
 ## Square-Wave Response
 
-Square-wave transient runs use the same 2 mVpp input and show the load voltage after 60 ms of settling.
+Square-wave transient runs use the same 1000 mVpp input and show the load voltage after 60 ms of settling.
 
-- 1 kHz: load swing about `0.007 Vpp`.
-- 10 kHz: load swing about `0.005 Vpp`.
+- 1 kHz: load swing about `2.535 Vpp`.
+- 10 kHz: load swing about `1.947 Vpp`.
 
 ## Reusable Runner
 

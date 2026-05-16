@@ -3,7 +3,7 @@
 .temp 27
 
 VCC vcc 0 12
-VIN vin 0 DC 0 SIN(0 0.001 20)
+VIN vin 0 DC 0 SIN(0 0.5 20)
 C3 vin b_in 10u
 R3 b_in 0 10000
 R2 out b_in 47000
