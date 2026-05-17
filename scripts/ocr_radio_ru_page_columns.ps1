@@ -530,6 +530,15 @@ function Get-FigureRefFromText {
     return "Рис. $($match.Groups[1].Value)"
 }
 
+function Get-LayoutDisplayLabel {
+    param([string]$Label)
+
+    if ($Label -eq "schematic/circuit") {
+        return "schematic"
+    }
+    return $Label
+}
+
 function Export-FigureLinks {
     param(
         [System.Drawing.Bitmap]$Image,
@@ -562,7 +571,7 @@ function Export-FigureLinks {
 
         $entry = [pscustomobject]@{
             Block = $block.ident
-            Label = $block.label
+            Label = Get-LayoutDisplayLabel -Label $block.label
             FigureImageName = $figureImageName
             FigureCrop = $figureCrop
             CaptionBlock = ""

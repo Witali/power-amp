@@ -255,6 +255,39 @@ class DetectPageLayoutTests(unittest.TestCase):
 
         self.assertEqual([block.ident for block in filtered], ["001_schematic", "003_text"])
 
+    def test_suppresses_text_block_nested_inside_larger_text_block(self) -> None:
+        parent = detect_page_layout.Block(
+            ident="001_text",
+            label="text",
+            orientation="horizontal",
+            confidence=0.90,
+            bbox=[1550, 32, 762, 3275],
+            outline=None,
+            features={},
+        )
+        nested = detect_page_layout.Block(
+            ident="006_text",
+            label="text",
+            orientation="horizontal",
+            confidence=0.86,
+            bbox=[1567, 1168, 734, 74],
+            outline=None,
+            features={},
+        )
+        sibling = detect_page_layout.Block(
+            ident="003_text",
+            label="text",
+            orientation="horizontal",
+            confidence=0.90,
+            bbox=[20, 82, 770, 1561],
+            outline=None,
+            features={},
+        )
+
+        filtered = detect_page_layout.suppress_nested_text_blocks([parent, nested, sibling])
+
+        self.assertEqual([block.ident for block in filtered], ["001_text", "003_text"])
+
     def test_visual_outline_uses_simple_text_cutout(self) -> None:
         figure = detect_page_layout.Block(
             ident="001_schematic",
@@ -308,6 +341,58 @@ class DetectPageLayoutTests(unittest.TestCase):
 
         self.assertEqual(outline, [[[10, 10], [310, 10], [310, 210], [10, 210]]])
         self.assertTrue(detect_page_layout.point_inside_outline((35, 28), outline))
+
+    def test_block_preview_label_includes_block_number(self) -> None:
+        block = detect_page_layout.Block(
+            ident="023_text",
+            label="text",
+            orientation="vertical",
+            confidence=0.876,
+            bbox=[0, 0, 10, 10],
+            outline=None,
+            features={},
+        )
+
+        self.assertEqual(detect_page_layout.block_preview_label(block), "#023 text vertical 0.88")
+
+    def test_block_preview_label_shortens_schematic_label(self) -> None:
+        block = detect_page_layout.Block(
+            ident="007_schematic_circuit",
+            label="schematic/circuit",
+            orientation="unknown",
+            confidence=0.89,
+            bbox=[0, 0, 10, 10],
+            outline=None,
+            features={},
+        )
+
+        self.assertEqual(detect_page_layout.block_preview_label(block), "#007 schematic 0.89")
+
+    def test_caption_highlight_boxes_deduplicates_candidates(self) -> None:
+        first = detect_page_layout.Block(
+            ident="001_schematic",
+            label="schematic/circuit",
+            orientation="unknown",
+            confidence=0.90,
+            bbox=[0, 0, 10, 10],
+            outline=None,
+            features={},
+            caption_candidates=[{"bbox": [10, 20, 30, 12], "block": "010_text"}],
+        )
+        second = detect_page_layout.Block(
+            ident="002_schematic",
+            label="schematic/circuit",
+            orientation="unknown",
+            confidence=0.88,
+            bbox=[0, 20, 10, 10],
+            outline=None,
+            features={},
+            caption_candidates=[{"bbox": [10, 20, 30, 12], "block": "010_text"}],
+        )
+
+        boxes = detect_page_layout.caption_highlight_boxes([first, second])
+
+        self.assertEqual([box.to_list() for box in boxes], [[10, 20, 30, 12]])
 
     def test_attaches_caption_candidates_to_visual_blocks(self) -> None:
         figure = detect_page_layout.Block(
@@ -369,6 +454,23 @@ class DetectPageLayoutTests(unittest.TestCase):
         self.assertIsNotNone(figure.caption_candidates)
         self.assertEqual(figure.caption_candidates[0]["block"], "026_text")
         self.assertEqual(figure.caption_candidates[0]["position"], "below")
+
+    def test_adds_internal_caption_probe_for_unmatched_schematic(self) -> None:
+        figure = detect_page_layout.Block(
+            ident="007_schematic_circuit",
+            label="schematic/circuit",
+            orientation="unknown",
+            confidence=0.89,
+            bbox=[40, 1700, 1500, 1550],
+            outline=None,
+            features={},
+        )
+
+        detect_page_layout.attach_caption_candidates([figure], [])
+
+        self.assertIsNotNone(figure.caption_candidates)
+        self.assertEqual(figure.caption_candidates[0]["block"], "internal_caption_probe")
+        self.assertEqual(figure.caption_candidates[0]["position"], "inside-bottom-left-probe")
 
     def test_synthetic_page_writes_layout_preview_and_crops(self) -> None:
         cv2 = detect_page_layout.cv2

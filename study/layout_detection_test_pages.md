@@ -6,7 +6,7 @@ This file lists useful `archive.radio.ru` pages for checking page-block detectio
 
 | Page | Source scan | Why it is useful |
 | --- | --- | --- |
-| `2000-11-013` | https://archive.radio.ru/web/img/2000/b.2000-11.013.jpg | Strong mixed test: large circuit fragments, a photo/advert-like image block, tables, text columns, and vertical page-margin labels. Current detector finds `image`, `schematic/circuit`, `table`, and `text`. |
+| `2000-11-013` | https://archive.radio.ru/web/img/2000/b.2000-11.013.jpg | Strong mixed test: large circuit fragments, a photo/advert-like image block, tables, text columns, and vertical page-margin labels. Current preview shows `image`, `schematic`, `table`, and `text`. |
 | `2000-02-036` | https://archive.radio.ru/web/img/2000/b.2000-02.036.jpg | Dense switched-mode power-supply article page with several schematic fragments, tables, and narrow labels. Good stress test for not merging all drawings into one huge block. |
 | `1999-10-017` | https://archive.radio.ru/web/img/1999/b.1999-10.017.jpg | UMZCH article start with big title text, two schematics, normal prose columns, and right-side vertical margin material. Good for display-text vs schematic separation. |
 | `2000-10-014` | https://archive.radio.ru/web/img/2000/b.2000-10.014.jpg | Text-heavy amplifier article with a large circuit near the bottom. Useful for checking whether a schematic embedded below text is separated cleanly. |

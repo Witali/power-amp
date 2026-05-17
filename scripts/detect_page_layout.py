@@ -45,6 +45,9 @@ CLASS_COLORS = {
     "table": (171, 71, 188),
     "other": (128, 128, 128),
 }
+CAPTION_HIGHLIGHT_COLOR = (0, 255, 255)
+CAPTION_HIGHLIGHT_OPACITY = 0.30
+CAPTION_HIGHLIGHT_PADDING = 4
 
 
 @dataclass(frozen=True)
@@ -882,6 +885,31 @@ def assign_visual_outlines(blocks: list[Block]) -> None:
             block.outline = visual_outline_from_text_cutouts(block, text_blocks)
 
 
+def block_preview_label(block: Block) -> str:
+    block_number = block.ident.split("_", 1)[0] if block.ident else "?"
+    label = "schematic" if block.label == "schematic/circuit" else block.label
+    if block.label == "text" and block.orientation != "unknown":
+        label = f"{label} {block.orientation}"
+    return f"#{block_number} {label} {block.confidence:.2f}"
+
+
+def caption_highlight_boxes(blocks: list[Block]) -> list[Box]:
+    boxes: list[Box] = []
+    seen: set[tuple[int, int, int, int]] = set()
+    for block in blocks:
+        for candidate in block.caption_candidates or []:
+            bbox = candidate.get("bbox") if isinstance(candidate, dict) else None
+            if not bbox or len(bbox) != 4:
+                continue
+            box = box_from_list([int(value) for value in bbox])
+            key = (box.x, box.y, box.w, box.h)
+            if key in seen:
+                continue
+            seen.add(key)
+            boxes.append(box)
+    return boxes
+
+
 def horizontal_overlap_fraction(first: Box, second: Box) -> float:
     left = max(first.x, second.x)
     right = min(first.x2, second.x2)
@@ -951,6 +979,40 @@ def suppress_text_inside_schematics(blocks: list[Block]) -> list[Block]:
     return filtered
 
 
+def text_block_inside_text_block(inner_block: Block, outer_block: Block) -> bool:
+    if inner_block.ident == outer_block.ident or inner_block.label != "text" or outer_block.label != "text":
+        return False
+
+    inner_box = box_from_list(inner_block.bbox)
+    outer_box = box_from_list(outer_block.bbox)
+    if inner_box.area <= 0 or outer_box.area <= inner_box.area:
+        return False
+
+    overlap_fraction = intersection_area(inner_box, outer_box) / max(1, inner_box.area)
+    if overlap_fraction < 0.92:
+        return False
+
+    much_larger_area = outer_box.area >= inner_box.area * 2.5
+    wider_or_equal = outer_box.w >= inner_box.w * 0.95
+    much_taller = outer_box.h >= inner_box.h * 2.0
+    return much_larger_area and wider_or_equal and much_taller
+
+
+def suppress_nested_text_blocks(blocks: list[Block]) -> list[Block]:
+    text_blocks = [block for block in blocks if block.label == "text"]
+    if len(text_blocks) < 2:
+        return blocks
+
+    nested_idents = {
+        inner.ident
+        for inner in text_blocks
+        if any(text_block_inside_text_block(inner, outer) for outer in text_blocks)
+    }
+    if not nested_idents:
+        return blocks
+    return [block for block in blocks if block.ident not in nested_idents]
+
+
 def caption_candidate_for_figure(figure_block: Block, text_block: Block) -> dict[str, object] | None:
     figure_box = box_from_list(figure_block.bbox)
     text_box = box_from_list(text_block.bbox)
@@ -1011,6 +1073,26 @@ def caption_candidate_for_figure(figure_block: Block, text_block: Block) -> dict
     }
 
 
+def internal_caption_probe_candidate(figure_block: Block) -> dict[str, object] | None:
+    if figure_block.label not in {"schematic/circuit", "diagram"}:
+        return None
+
+    figure_box = box_from_list(figure_block.bbox)
+    if figure_box.w < 80 or figure_box.h < 45:
+        return None
+
+    probe_w = min(figure_box.w, max(140, int(round(figure_box.w * 0.32))))
+    probe_h = min(figure_box.h, max(36, int(round(figure_box.h * 0.075))))
+    pad_x = max(6, int(round(figure_box.w * 0.015)))
+    pad_bottom = max(6, int(round(figure_box.h * 0.018)))
+    return {
+        "block": "internal_caption_probe",
+        "bbox": [figure_box.x + pad_x, figure_box.y2 - probe_h - pad_bottom, probe_w, probe_h],
+        "position": "inside-bottom-left-probe",
+        "score": 0.01,
+    }
+
+
 def attach_caption_candidates(blocks: list[Block], candidate_text_blocks: list[Block]) -> None:
     for figure_block in blocks:
         if figure_block.label not in FIGURE_LABELS:
@@ -1023,6 +1105,10 @@ def attach_caption_candidates(blocks: list[Block], candidate_text_blocks: list[B
         candidates.sort(key=lambda item: (-float(item["score"]), str(item["block"])))
         if candidates:
             figure_block.caption_candidates = candidates[:4]
+        else:
+            fallback = internal_caption_probe_candidate(figure_block)
+            if fallback is not None:
+                figure_block.caption_candidates = [fallback]
 
 
 def classify_blocks(image, boxes: list[Box], scale: float, save_crops: bool, page_dir: Path) -> list[Block]:
@@ -1062,10 +1148,10 @@ def classify_blocks(image, boxes: list[Box], scale: float, save_crops: bool, pag
             )
         )
 
-    all_blocks = [block for block, _ in classified]
+    all_blocks = suppress_nested_text_blocks([block for block, _ in classified])
     assign_visual_outlines(all_blocks)
     blocks = suppress_text_inside_schematics(all_blocks)
-    attach_caption_candidates(blocks, [block for block, _ in classified if block.label == "text"])
+    attach_caption_candidates(blocks, [block for block in all_blocks if block.label == "text"])
     kept_idents = {block.ident for block in blocks}
     if save_crops:
         blocks_dir = page_dir / "blocks"
@@ -1087,6 +1173,19 @@ def draw_preview(image, blocks: list[Block], preview_width: int, page_dir: Path)
     height, width = image.shape[:2]
     scale = min(1.0, preview_width / float(width))
     preview = image.copy() if scale >= 0.999 else cv2.resize(image, (int(width * scale), int(height * scale)), interpolation=cv2.INTER_AREA)
+    preview_h, preview_w = preview.shape[:2]
+
+    caption_boxes = caption_highlight_boxes(blocks)
+    if caption_boxes:
+        overlay = preview.copy()
+        for caption_box in caption_boxes:
+            x1 = max(0, int(round((caption_box.x - CAPTION_HIGHLIGHT_PADDING) * scale)))
+            y1 = max(0, int(round((caption_box.y - CAPTION_HIGHLIGHT_PADDING) * scale)))
+            x2 = min(preview_w, int(round((caption_box.x2 + CAPTION_HIGHLIGHT_PADDING) * scale)))
+            y2 = min(preview_h, int(round((caption_box.y2 + CAPTION_HIGHLIGHT_PADDING) * scale)))
+            if x2 > x1 and y2 > y1:
+                cv2.rectangle(overlay, (x1, y1), (x2, y2), CAPTION_HIGHLIGHT_COLOR, -1)
+        preview = cv2.addWeighted(overlay, CAPTION_HIGHLIGHT_OPACITY, preview, 1.0 - CAPTION_HIGHLIGHT_OPACITY, 0)
 
     for block in blocks:
         x, y, w, h = block.bbox
@@ -1104,10 +1203,7 @@ def draw_preview(image, blocks: list[Block], preview_width: int, page_dir: Path)
         else:
             cv2.rectangle(preview, (x1, y1), (x2, y2), color, thickness)
 
-        label = block.label
-        if block.label == "text" and block.orientation != "unknown":
-            label = f"{label} {block.orientation}"
-        label = f"{label} {block.confidence:.2f}"
+        label = block_preview_label(block)
         (text_w, text_h), baseline = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.52, 1)
         top = max(0, y1 - text_h - baseline - 5)
         cv2.rectangle(preview, (x1, top), (x1 + text_w + 6, top + text_h + baseline + 5), color, -1)
