@@ -15,8 +15,10 @@ npm run build
 - `npm run symbols`: regenerates `part_symbols`, renders PNG previews, and runs the SVG linter with warnings treated as failures.
 - `npm test`: runs the Python unit tests for project scripts.
 - `npm run check`: runs tests, the SVG linter, and `git diff --check`.
-- `npm run spellcheck`: checks OCR text under `_tmp_radio_ru` with Hunspell when available, otherwise with OCR-focused heuristics.
+- `npm run spellcheck`: checks OCR text under `.tmp` with Hunspell when available, otherwise with OCR-focused heuristics.
 - `npm run build`: runs the symbols workflow and then project checks.
+
+Run `.\init.ps1 -InstallHunspell` to install the optional local Hunspell backend and `ru_RU`/`en_US` dictionaries under `local_tools/`.
 
 ## Direct Python Commands
 
@@ -25,7 +27,7 @@ python scripts\project_tasks.py symbols --force-png
 python scripts\project_tasks.py test
 python scripts\project_tasks.py render part_symbols results\003_radiostorage_shema_1804_6 --force-png
 python scripts\project_tasks.py result results\003_radiostorage_shema_1804_6\variants\bootstrap.py
-python scripts\project_tasks.py spellcheck _tmp_radio_ru --out _tmp_radio_ru\spellcheck_report.tsv
+python scripts\project_tasks.py spellcheck .tmp --out .tmp\spellcheck_report.tsv
 python scripts\lint_svg.py --fail-on-warning
 ```
 
@@ -55,8 +57,10 @@ npm run build
 - `npm run symbols`: пересоздает `part_symbols`, рендерит PNG-превью и запускает SVG-линтер с ошибкой на предупреждениях.
 - `npm test`: запускает Python unit-тесты для проектных скриптов.
 - `npm run check`: запускает тесты, SVG-линтер и `git diff --check`.
-- `npm run spellcheck`: проверяет OCR-текст в `_tmp_radio_ru`, используя Hunspell при наличии или OCR-эвристики без внешних зависимостей.
+- `npm run spellcheck`: проверяет OCR-текст в `.tmp`, используя Hunspell при наличии или OCR-эвристики без внешних зависимостей.
 - `npm run build`: выполняет workflow символов и затем проверки проекта.
+
+Для установки локального Hunspell backend и словарей `ru_RU`/`en_US` в `local_tools/` запустите `.\init.ps1 -InstallHunspell`.
 
 ## Прямые Python-Команды
 
@@ -65,7 +69,7 @@ python scripts\project_tasks.py symbols --force-png
 python scripts\project_tasks.py test
 python scripts\project_tasks.py render part_symbols results\003_radiostorage_shema_1804_6 --force-png
 python scripts\project_tasks.py result results\003_radiostorage_shema_1804_6\variants\bootstrap.py
-python scripts\project_tasks.py spellcheck _tmp_radio_ru --out _tmp_radio_ru\spellcheck_report.tsv
+python scripts\project_tasks.py spellcheck .tmp --out .tmp\spellcheck_report.tsv
 python scripts\lint_svg.py --fail-on-warning
 ```
 

@@ -9,7 +9,7 @@ Copyright note: this file contains distilled engineering notes, OCR-derived poin
 - OCR tool: local Tesseract 5.5 with `rus+eng`.
 - Issue contents pages were scanned from 2000 down to 1989 using `archive.radio.ru/web/img/YYYY/f.YYYY-MM.002.jpg`.
 - Article pages were then OCR-read selectively around the relevant page ranges.
-- Temporary OCR and downloaded scans are under `_tmp_radio_ru/archive_study/`; they are scratch files, not project knowledge.
+- Temporary OCR and downloaded scans are under `.tmp/archive_study/`; they are scratch files, not project knowledge.
 - The source link in each row points to the article start or nearest verified article page in the official archive.
 
 ## Selection Bias

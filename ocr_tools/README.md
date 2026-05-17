@@ -14,7 +14,7 @@ Installed locally in this project:
 OCR a local image:
 
 ```powershell
-.\ocr_tools\ocr_image.ps1 -InputPath .\_tmp_radio_ru\some_page.jpg -Lang rus+eng -Psm 6
+.\ocr_tools\ocr_image.ps1 -InputPath .\.tmp\some_page.jpg -Lang rus+eng -Psm 6
 ```
 
 OCR an image URL:

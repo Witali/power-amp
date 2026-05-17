@@ -4,10 +4,10 @@
 
 ## Local Evidence
 
-- Annual contents OCR: `_tmp_radio_ru/latest_available_two_years/hits.tsv`
-- Annual contents report: `_tmp_radio_ru/latest_available_two_years/hits.md`
-- Downloaded article scans: `_tmp_radio_ru/latest_available_two_years/article_pages/`
-- Column OCR of selected articles: `_tmp_radio_ru/latest_available_two_years/article_ocr/`
+- Annual contents OCR: `.tmp/latest_available_two_years/hits.tsv`
+- Annual contents report: `.tmp/latest_available_two_years/hits.md`
+- Downloaded article scans: `.tmp/latest_available_two_years/article_pages/`
+- Column OCR of selected articles: `.tmp/latest_available_two_years/article_ocr/`
 
 Primary archive entry points:
 

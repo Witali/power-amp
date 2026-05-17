@@ -20,7 +20,7 @@ Start by reading this file, then:
 - Ordinary non-destructive local commands in this project can be run without asking.
 - Do not revert user changes.
 - Save meaningful progress to git periodically; `AGENTS.md` says to check after every fifth user prompt.
-- Temporary OCR/downloaded magazine scans stay under `_tmp_radio_ru/`, which is ignored by git.
+- Temporary OCR/downloaded magazine scans stay under `.tmp/`, which is ignored by git.
 - Do not store copyrighted scans as permanent project knowledge; store links and distilled notes only.
 
 ## Current Main Result

@@ -57,14 +57,14 @@ class ProjectTasksTests(unittest.TestCase):
         calls: list[list[str]] = []
 
         with mock.patch("project_tasks.run", side_effect=lambda command: calls.append(command)):
-            project_tasks.spellcheck_text([PROJECT_ROOT / "_tmp_radio_ru"], "heuristic", PROJECT_ROOT / "spell.tsv", True)
+            project_tasks.spellcheck_text([PROJECT_ROOT / ".tmp"], "heuristic", PROJECT_ROOT / "spell.tsv", True)
 
         self.assertEqual(
             calls[0],
             [
                 sys.executable,
                 "scripts/spellcheck_text.py",
-                "_tmp_radio_ru",
+                ".tmp",
                 "--backend",
                 "heuristic",
                 "--out",

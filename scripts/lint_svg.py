@@ -17,7 +17,7 @@ XLINK_NS = "http://www.w3.org/1999/xlink"
 SKIP_DIRS = {
     ".git",
     "__pycache__",
-    "_tmp_radio_ru",
+    ".tmp",
     "local_tools",
     "node_cache",
     "node_modules",

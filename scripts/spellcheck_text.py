@@ -12,6 +12,11 @@ from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_ALLOWLIST = PROJECT_ROOT / "ocr_tools" / "radio_ru_user_words.txt"
+LOCAL_HUNSPELL_DIRS = (
+    PROJECT_ROOT / "local_tools" / "hunspell",
+    PROJECT_ROOT / "local_tools" / "hunspell" / "tools",
+)
+LOCAL_DICTIONARY_DIR = PROJECT_ROOT / "local_tools" / "hunspell-dictionaries"
 DEFAULT_SUFFIXES = (".txt", ".md")
 SKIP_DIRS = {
     ".git",
@@ -160,14 +165,37 @@ def scan_file(path: Path, allowlist: set[str]) -> tuple[list[Issue], dict[str, l
 def find_hunspell(executable: str | None) -> str | None:
     if executable:
         return executable
+    for folder in LOCAL_HUNSPELL_DIRS:
+        candidate = folder / "hunspell.exe"
+        if candidate.exists():
+            return str(candidate)
+    for candidate in (PROJECT_ROOT / "local_tools" / "hunspell").rglob("hunspell.exe"):
+        return str(candidate)
     return shutil.which("hunspell")
+
+
+def resolve_dictionary(dictionary: str) -> str:
+    parts: list[str] = []
+    for part in dictionary.split(","):
+        clean = part.strip()
+        if not clean:
+            continue
+        if any(separator in clean for separator in ("/", "\\")):
+            parts.append(clean)
+            continue
+        local_base = LOCAL_DICTIONARY_DIR / clean
+        if local_base.with_suffix(".dic").exists() and local_base.with_suffix(".aff").exists():
+            parts.append(str(local_base))
+        else:
+            parts.append(clean)
+    return ",".join(parts) if parts else dictionary
 
 
 def run_hunspell(words: list[str], dictionary: str, executable: str) -> set[str]:
     if not words:
         return set()
     result = subprocess.run(
-        [executable, "-d", dictionary, "-l"],
+        [executable, "-d", resolve_dictionary(dictionary), "-l"],
         input="\n".join(words) + "\n",
         text=True,
         stdout=subprocess.PIPE,
@@ -198,7 +226,7 @@ def write_report(path: Path, issues: list[Issue]) -> None:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Spell-check and OCR-quality check for generated text files.")
-    parser.add_argument("paths", nargs="*", type=Path, default=[Path("_tmp_radio_ru")], help="Text files or folders.")
+    parser.add_argument("paths", nargs="*", type=Path, default=[Path(".tmp")], help="Text files or folders.")
     parser.add_argument("--backend", choices=["auto", "hunspell", "heuristic"], default="auto")
     parser.add_argument("--hunspell", help="Path to hunspell executable. Defaults to PATH lookup.")
     parser.add_argument("--dictionary", default="ru_RU", help="Hunspell dictionary name. Default: ru_RU.")

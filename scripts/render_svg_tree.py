@@ -13,7 +13,7 @@ RENDERER = PROJECT_ROOT / "tools" / "render_svg_png.js"
 SKIP_DIRS = {
     ".git",
     "__pycache__",
-    "_tmp_radio_ru",
+    ".tmp",
     "local_tools",
     "node_cache",
     "node_modules",

@@ -1,7 +1,7 @@
 param(
     [Parameter(Mandatory = $true)]
     [string]$InputPath,
-    [string]$OutDir = "_tmp_radio_ru\ocr_column_trials",
+    [string]$OutDir = ".tmp\ocr_column_trials",
     [object[]]$ColumnCounts = @(1, 2, 3),
     [object[]]$PsmModes = @(3, 4, 6),
     [object[]]$OcrProfiles = @("prose", "technical", "sauvola"),

@@ -97,7 +97,7 @@ def parse_args() -> argparse.Namespace:
     result.add_argument("--no-html", action="store_true", help="Skip index.html generation.")
 
     spellcheck = subparsers.add_parser("spellcheck", help="Run OCR text spell/OCR-quality checks.")
-    spellcheck.add_argument("paths", nargs="*", type=Path, default=[Path("_tmp_radio_ru")], help="Text files or folders.")
+    spellcheck.add_argument("paths", nargs="*", type=Path, default=[Path(".tmp")], help="Text files or folders.")
     spellcheck.add_argument("--backend", choices=["auto", "hunspell", "heuristic"], default="auto")
     spellcheck.add_argument("--out", type=Path, help="Optional TSV report path.")
     spellcheck.add_argument("--fail-on-issues", action="store_true", help="Exit non-zero if issues are found.")

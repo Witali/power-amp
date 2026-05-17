@@ -6,7 +6,7 @@ param(
     [int]$MaxParallelOcr = 0,
     [int]$TesseractThreadLimit = 1,
     [int]$OcrPollMilliseconds = 250,
-    [string]$OutDir = "_tmp_radio_ru\pre1971\annual_contents",
+    [string]$OutDir = ".tmp\pre1971\annual_contents",
     [ValidateSet("prose", "technical", "sauvola")]
     [string]$OcrProfile = "prose",
     [switch]$Refresh,

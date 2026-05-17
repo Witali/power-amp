@@ -77,6 +77,29 @@ class SpellcheckTextTests(unittest.TestCase):
         self.assertEqual(words, {spellcheck_text.normalize_word("Искаженне")})
         self.assertEqual(run.call_args.args[0], ["hunspell", "-d", "ru_RU", "-l"])
 
+    def test_resolve_dictionary_prefers_local_dictionary_files(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            dictionary_dir = Path(temp)
+            (dictionary_dir / "ru_RU.aff").write_text("SET UTF-8\n", encoding="utf-8")
+            (dictionary_dir / "ru_RU.dic").write_text("1\nтест\n", encoding="utf-8")
+
+            with mock.patch("spellcheck_text.LOCAL_DICTIONARY_DIR", dictionary_dir):
+                resolved = spellcheck_text.resolve_dictionary("ru_RU")
+
+        self.assertEqual(resolved, str(dictionary_dir / "ru_RU"))
+
+    def test_find_hunspell_prefers_local_executable(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            local_dir = Path(temp)
+            exe = local_dir / "hunspell.exe"
+            exe.write_text("", encoding="utf-8")
+
+            with mock.patch("spellcheck_text.LOCAL_HUNSPELL_DIRS", (local_dir,)):
+                with mock.patch("spellcheck_text.shutil.which", return_value="system-hunspell"):
+                    found = spellcheck_text.find_hunspell(None)
+
+        self.assertEqual(found, str(exe))
+
 
 def subprocess_result(stdout: str = "", stderr: str = "", returncode: int = 0):
     return type("Completed", (), {"stdout": stdout, "stderr": stderr, "returncode": returncode})()

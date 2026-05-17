@@ -2,6 +2,8 @@ param(
     [switch]$Force,
     [switch]$SkipNgspice,
     [switch]$SkipOcr,
+    [switch]$SkipSpellcheck,
+    [switch]$InstallHunspell,
     [switch]$SkipNode,
     [string]$SevenZipPath
 )
@@ -35,6 +37,18 @@ $TesseractPackageUrl = "https://community.chocolatey.org/api/v2/package/tesserac
 $TesseractExtracted = Join-Path $Tools "Tesseract-extracted"
 $TesseractExe = Join-Path $TesseractExtracted "tesseract.exe"
 $TessData = Join-Path $TesseractExtracted "tessdata"
+
+$HunspellVersion = "1.7.0"
+$HunspellPackage = "hunspell.portable.$HunspellVersion.nupkg"
+$HunspellPackageUrl = "https://community.chocolatey.org/api/v2/package/hunspell.portable/$HunspellVersion"
+$HunspellExtracted = Join-Path $Tools "hunspell"
+$HunspellDictDir = Join-Path $Tools "hunspell-dictionaries"
+$HunspellDictionaryUrls = @{
+    "ru_RU.aff" = "https://cgit.freedesktop.org/libreoffice/dictionaries/plain/ru_RU/ru_RU.aff"
+    "ru_RU.dic" = "https://cgit.freedesktop.org/libreoffice/dictionaries/plain/ru_RU/ru_RU.dic"
+    "en_US.aff" = "https://cgit.freedesktop.org/libreoffice/dictionaries/plain/en/en_US.aff"
+    "en_US.dic" = "https://cgit.freedesktop.org/libreoffice/dictionaries/plain/en/en_US.dic"
+}
 
 function Write-Step {
     param([string]$Message)
@@ -233,6 +247,111 @@ function Install-Tesseract {
     & $TesseractExe --tessdata-dir $TessData --list-langs
 }
 
+function Find-LocalHunspell {
+    if (!(Test-Path -LiteralPath $HunspellExtracted)) {
+        return $null
+    }
+
+    $exe = Get-ChildItem -Path $HunspellExtracted -Recurse -Filter "hunspell.exe" -ErrorAction SilentlyContinue |
+        Select-Object -First 1
+    if ($exe) {
+        return $exe.FullName
+    }
+
+    return $null
+}
+
+function Find-Hunspell {
+    $local = Find-LocalHunspell
+    if ($local) {
+        return $local
+    }
+
+    $cmd = Get-Command hunspell.exe -ErrorAction SilentlyContinue | Select-Object -First 1
+    if ($cmd) {
+        return $cmd.Source
+    }
+
+    return $null
+}
+
+function Test-HunspellDictionaries {
+    return (
+        (Test-Path -LiteralPath (Join-Path $HunspellDictDir "ru_RU.aff")) -and
+        (Test-Path -LiteralPath (Join-Path $HunspellDictDir "ru_RU.dic")) -and
+        (Test-Path -LiteralPath (Join-Path $HunspellDictDir "en_US.aff")) -and
+        (Test-Path -LiteralPath (Join-Path $HunspellDictDir "en_US.dic"))
+    )
+}
+
+function Confirm-HunspellInstall {
+    if ($InstallHunspell) {
+        return $true
+    }
+
+    if (![Environment]::UserInteractive) {
+        return $false
+    }
+
+    Write-Host ""
+    Write-Host "Hunspell can improve OCR text spell checking for Russian radio articles."
+    Write-Host "Install a local portable Hunspell plus ru_RU/en_US dictionaries under local_tools/?"
+    $answer = Read-Host "Install Hunspell now? [y/N]"
+    return ($answer -match "^(y|yes|д|да)$")
+}
+
+function Install-Hunspell {
+    param([string]$SevenZip)
+
+    Write-Step "Installing Hunspell spell checker"
+    $nupkg = Join-Path $Downloads $HunspellPackage
+    Invoke-Download -Uri $HunspellPackageUrl -OutFile $nupkg
+
+    if ($Force -and (Test-Path -LiteralPath $HunspellExtracted)) {
+        Remove-Item -LiteralPath $HunspellExtracted -Recurse -Force
+    }
+    Ensure-Directory $HunspellExtracted
+    & $SevenZip x -y "-o$HunspellExtracted" $nupkg | Out-Null
+
+    $hunspell = Find-LocalHunspell
+    if (!$hunspell) {
+        throw "hunspell.exe was not found after extracting $nupkg"
+    }
+
+    Ensure-Directory $HunspellDictDir
+    foreach ($name in $HunspellDictionaryUrls.Keys) {
+        Invoke-Download -Uri $HunspellDictionaryUrls[$name] -OutFile (Join-Path $HunspellDictDir $name)
+    }
+
+    & $hunspell --version
+}
+
+function Ensure-Hunspell {
+    param([string]$SevenZip)
+
+    Write-Step "Checking Hunspell spell checker"
+    $hunspell = Find-Hunspell
+    $hasDictionaries = Test-HunspellDictionaries
+    if ($hunspell -and $hasDictionaries -and !$Force) {
+        Write-Host "Hunspell: $hunspell"
+        Write-Host "Dictionaries: $HunspellDictDir"
+        return
+    }
+
+    if (Confirm-HunspellInstall) {
+        Install-Hunspell -SevenZip $SevenZip
+        return
+    }
+
+    if ($hunspell) {
+        Write-Host "Hunspell found, but local ru_RU dictionaries are missing: $hunspell"
+    }
+    else {
+        Write-Host "Hunspell not installed. Spellcheck will use OCR heuristics until Hunspell is available."
+    }
+    Write-Host "Run '.\init.ps1 -InstallHunspell' to install it later."
+}
+
 function Find-Node {
     if (Test-Path -LiteralPath $LocalNodeExe) {
         return $LocalNodeExe
@@ -304,6 +423,13 @@ function Show-Summary {
         Write-Host "Tesseract: $TesseractExe"
         Write-Host "tessdata:  $TessData"
     }
+    $hunspell = Find-Hunspell
+    if ($hunspell) {
+        Write-Host "Hunspell:  $hunspell"
+    }
+    if (Test-HunspellDictionaries) {
+        Write-Host "Hun dicts: $HunspellDictDir"
+    }
     if (Test-Path -LiteralPath (Join-Path $Root "node_modules\@resvg\resvg-js")) {
         Write-Host "Node deps: node_modules installed"
     }
@@ -322,6 +448,9 @@ if (!$SkipNgspice) {
 }
 if (!$SkipOcr) {
     Install-Tesseract -SevenZip $sevenZip
+}
+if (!$SkipSpellcheck) {
+    Ensure-Hunspell -SevenZip $sevenZip
 }
 if (!$SkipNode) {
     Install-NodeDependencies

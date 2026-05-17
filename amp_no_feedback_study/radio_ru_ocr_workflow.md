@@ -17,10 +17,10 @@ scripts\ocr_radio_ru_page_columns.ps1
 Useful sample command:
 
 ```powershell
-& 'C:\Program Files\PowerShell\7\pwsh.exe' -NoProfile -ExecutionPolicy Bypass -File scripts\ocr_radio_ru_page_columns.ps1 -InputPath _tmp_radio_ru\pre1971\annual_contents\1970-12\f.1970-12.064.jpg -AutoColumns -AutoOnly -PsmModes 6 -OcrProfiles prose,technical,sauvola -Refresh
+& 'C:\Program Files\PowerShell\7\pwsh.exe' -NoProfile -ExecutionPolicy Bypass -File scripts\ocr_radio_ru_page_columns.ps1 -InputPath .tmp\pre1971\annual_contents\1970-12\f.1970-12.064.jpg -AutoColumns -AutoOnly -PsmModes 6 -OcrProfiles prose,technical,sauvola -Refresh
 ```
 
-The script crops margins, can try fixed 1, 2, and 3 column layouts, and can also find column breaks automatically with `-AutoColumns`. It runs Tesseract on each column and writes merged text variants under `_tmp_radio_ru\ocr_column_trials\...`.
+The script crops margins, can try fixed 1, 2, and 3 column layouts, and can also find column breaks automatically with `-AutoColumns`. It runs Tesseract on each column and writes merged text variants under `.tmp\ocr_column_trials\...`.
 
 Tesseract runs are parallelized by default. If `-MaxParallelOcr` is not set, the scripts use half of the available logical CPU threads, rounded down but never below one process. Each Tesseract process is started with `OMP_THREAD_LIMIT=1` by default, so the external process count is the main load limiter. Override it when needed:
 
@@ -110,7 +110,7 @@ Disable text correction only when debugging the raw OCR:
 After OCR, run the text checker on the output folder:
 
 ```powershell
-python scripts\project_tasks.py spellcheck _tmp_radio_ru\ocr_column_trials --out _tmp_radio_ru\spellcheck_report.tsv
+python scripts\project_tasks.py spellcheck .tmp\ocr_column_trials --out .tmp\spellcheck_report.tsv
 ```
 
 The checker uses Hunspell with `ru_RU` if it is installed. Without Hunspell it falls back to OCR-focused heuristics: mixed Cyrillic/Latin words, digits inside Russian words, and unusually long Cyrillic tokens that often indicate a bad column split. Technical terms are allowed through `ocr_tools\radio_ru_user_words.txt`.

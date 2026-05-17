@@ -11,7 +11,7 @@ __pycache__/
 *$py.class
 
 # Local downloaded/archive scratch data
-_tmp_radio_ru/
+.tmp/
 
 # Downloaded installers and binary distributions
 *.exe

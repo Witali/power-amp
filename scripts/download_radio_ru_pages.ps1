@@ -1,7 +1,7 @@
 param(
     [Parameter(Mandatory = $true)]
     [string[]]$Pages,
-    [string]$OutDir = "_tmp_radio_ru\article_pages",
+    [string]$OutDir = ".tmp\article_pages",
     [switch]$Refresh
 )
 
