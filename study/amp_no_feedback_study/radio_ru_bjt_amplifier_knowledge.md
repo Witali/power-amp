@@ -4,7 +4,7 @@ Source focus: Russian `Радио` magazine material, with official `radio.ru`, 
 
 Copyright note: these are distilled engineering notes and source pointers, not article copies.
 
-Extended archive pass: see [`archive_radio_ru_umzch_20_article_study.md`](archive_radio_ru_umzch_20_article_study.md) for the OCR-backed study of 20 UMZCH publications from `archive.radio.ru`, with newer articles ranked first and transistor-only/transistor-dominant schematics ranked higher than IC-heavy designs.
+Extended archive passes: see [`archive_radio_ru_umzch_20_article_study.md`](archive_radio_ru_umzch_20_article_study.md) for the OCR-backed study of 20 UMZCH publications from `archive.radio.ru`, [`archive_radio_ru_amp_articles_1997_1998.md`](archive_radio_ru_amp_articles_1997_1998.md) for the 1997-1998 follow-up pass, and [`archive_radio_ru_amp_articles_1997_2000.md`](archive_radio_ru_amp_articles_1997_2000.md) for the unified four-year 1997-2000 amplifier study. Newer articles are ranked first, and transistor-only/transistor-dominant schematics are ranked higher than IC-heavy designs.
 
 ## Source Ranking
 

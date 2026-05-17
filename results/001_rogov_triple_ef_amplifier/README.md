@@ -17,7 +17,7 @@ Context:
 ## Sources
 
 - I. Rogov, "Выходной каскад УМЗЧ - две или три ступени повторителя?", `Радио`, 2018 №12, p.27. Official Radio annual table of contents: [ftp.radio.ru/pub/2018/12/2018.pdf](https://ftp.radio.ru/pub/2018/12/2018.pdf).
-- Local collected notes: [amp_no_feedback_study/radio_ru_bjt_amplifier_knowledge.md](../../amp_no_feedback_study/radio_ru_bjt_amplifier_knowledge.md).
+- Local collected notes: [study/amp_no_feedback_study/radio_ru_bjt_amplifier_knowledge.md](../../study/amp_no_feedback_study/radio_ru_bjt_amplifier_knowledge.md).
 
 ## Main Files
 

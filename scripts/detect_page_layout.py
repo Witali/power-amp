@@ -1,0 +1,792 @@
+#!/usr/bin/env python3
+"""Detect coarse page layout blocks before OCR.
+
+The detector is intentionally small: OpenCV finds candidate blocks, a tiny
+OpenCV ANN_MLP classifies each block from visual features, and the script writes
+JSON, crops, and a colored preview overlay.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import math
+import re
+import sys
+from dataclasses import asdict, dataclass
+from pathlib import Path
+from typing import Iterable
+
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+LOCAL_PACKAGES = PROJECT_ROOT / "local_tools" / "python_packages"
+if LOCAL_PACKAGES.exists():
+    sys.path.insert(0, str(LOCAL_PACKAGES))
+
+try:
+    import cv2  # type: ignore
+    import numpy as np  # type: ignore
+
+    OPENCV_AVAILABLE = True
+except ImportError:
+    cv2 = None  # type: ignore
+    np = None  # type: ignore
+    OPENCV_AVAILABLE = False
+
+
+CLASS_NAMES = ["text", "image", "schematic/circuit", "diagram", "table", "other"]
+CLASS_COLORS = {
+    "text": (52, 168, 83),
+    "image": (66, 133, 244),
+    "schematic/circuit": (234, 67, 53),
+    "diagram": (251, 188, 5),
+    "table": (171, 71, 188),
+    "other": (128, 128, 128),
+}
+
+
+@dataclass(frozen=True)
+class Box:
+    x: int
+    y: int
+    w: int
+    h: int
+
+    @property
+    def x2(self) -> int:
+        return self.x + self.w
+
+    @property
+    def y2(self) -> int:
+        return self.y + self.h
+
+    @property
+    def area(self) -> int:
+        return max(0, self.w) * max(0, self.h)
+
+    def clamp(self, width: int, height: int) -> "Box":
+        x1 = max(0, min(width - 1, self.x))
+        y1 = max(0, min(height - 1, self.y))
+        x2 = max(x1 + 1, min(width, self.x2))
+        y2 = max(y1 + 1, min(height, self.y2))
+        return Box(x1, y1, x2 - x1, y2 - y1)
+
+    def inflate(self, pixels: int, width: int, height: int) -> "Box":
+        return Box(self.x - pixels, self.y - pixels, self.w + 2 * pixels, self.h + 2 * pixels).clamp(width, height)
+
+    def to_list(self) -> list[int]:
+        return [self.x, self.y, self.w, self.h]
+
+
+@dataclass
+class Block:
+    ident: str
+    label: str
+    orientation: str
+    confidence: float
+    bbox: list[int]
+    features: dict[str, float]
+    crop_path: str | None = None
+
+
+def require_dependencies() -> None:
+    if OPENCV_AVAILABLE:
+        return
+    raise SystemExit(
+        "OpenCV layout detector dependencies are missing. "
+        "Run: python -m pip install --target local_tools\\python_packages "
+        "opencv-python-headless numpy pillow"
+    )
+
+
+def read_image(path: Path):
+    require_dependencies()
+    data = np.fromfile(str(path), dtype=np.uint8)
+    image = cv2.imdecode(data, cv2.IMREAD_COLOR)
+    if image is None:
+        raise ValueError(f"Could not read image: {path}")
+    return image
+
+
+def write_image(path: Path, image) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    suffix = path.suffix.lower() or ".png"
+    ok, encoded = cv2.imencode(suffix, image)
+    if not ok:
+        raise ValueError(f"Could not encode image as {suffix}: {path}")
+    encoded.tofile(str(path))
+
+
+def resize_for_analysis(image, max_side: int):
+    height, width = image.shape[:2]
+    scale = min(1.0, max_side / float(max(width, height)))
+    if scale >= 0.999:
+        return image.copy(), 1.0
+    resized = cv2.resize(image, (int(round(width * scale)), int(round(height * scale))), interpolation=cv2.INTER_AREA)
+    return resized, scale
+
+
+def foreground_mask(gray):
+    blurred = cv2.GaussianBlur(gray, (3, 3), 0)
+    threshold, binary = cv2.threshold(blurred, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+    dark = gray <= threshold
+    light = gray > threshold
+    dark_count = int(dark.sum())
+    light_count = int(light.sum())
+    bright_foreground = light_count < dark_count
+    mask = light if bright_foreground else dark
+    return (mask.astype(np.uint8) * 255), int(threshold), bright_foreground
+
+
+def make_block_mask(gray, mask):
+    height, width = gray.shape[:2]
+    line_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (max(9, width // 90), max(2, height // 550)))
+    block_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (max(15, width // 65), max(7, height // 180)))
+    textish = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, line_kernel, iterations=1)
+    textish = cv2.dilate(textish, block_kernel, iterations=1)
+
+    edges = cv2.Canny(gray, 60, 160)
+    edge_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (max(6, width // 180), max(6, height // 220)))
+    edge_blocks = cv2.dilate(edges, edge_kernel, iterations=1)
+    return cv2.bitwise_or(textish, edge_blocks)
+
+
+def overlap_area(a: Box, b: Box) -> int:
+    x1 = max(a.x, b.x)
+    y1 = max(a.y, b.y)
+    x2 = min(a.x2, b.x2)
+    y2 = min(a.y2, b.y2)
+    return max(0, x2 - x1) * max(0, y2 - y1)
+
+
+def union_box(a: Box, b: Box) -> Box:
+    x1 = min(a.x, b.x)
+    y1 = min(a.y, b.y)
+    x2 = max(a.x2, b.x2)
+    y2 = max(a.y2, b.y2)
+    return Box(x1, y1, x2 - x1, y2 - y1)
+
+
+def close_or_overlapping(a: Box, b: Box, margin: int) -> bool:
+    expanded = a.inflate(margin, 1_000_000, 1_000_000)
+    if overlap_area(expanded, b) <= 0:
+        return False
+    smaller = max(1, min(a.area, b.area))
+    overlap = overlap_area(a, b)
+    if overlap / smaller > 0.15:
+        return True
+    horizontal_gap = max(0, max(a.x, b.x) - min(a.x2, b.x2))
+    vertical_overlap = min(a.y2, b.y2) - max(a.y, b.y)
+    if horizontal_gap <= margin and vertical_overlap > min(a.h, b.h) * 0.25:
+        return True
+    vertical_gap = max(0, max(a.y, b.y) - min(a.y2, b.y2))
+    horizontal_overlap = min(a.x2, b.x2) - max(a.x, b.x)
+    return vertical_gap <= margin and horizontal_overlap > min(a.w, b.w) * 0.25
+
+
+def merge_boxes(boxes: Iterable[Box], width: int, height: int, margin: int) -> list[Box]:
+    merged = [box.clamp(width, height) for box in boxes]
+    changed = True
+    while changed:
+        changed = False
+        result: list[Box] = []
+        used = [False] * len(merged)
+        for index, box in enumerate(merged):
+            if used[index]:
+                continue
+            current = box
+            used[index] = True
+            for other_index in range(index + 1, len(merged)):
+                if used[other_index]:
+                    continue
+                other = merged[other_index]
+                if close_or_overlapping(current, other, margin):
+                    current = union_box(current, other).clamp(width, height)
+                    used[other_index] = True
+                    changed = True
+            result.append(current)
+        merged = result
+
+    final: list[Box] = []
+    for box in sorted(merged, key=lambda item: item.area, reverse=True):
+        if any(overlap_area(box, kept) / max(1, box.area) > 0.92 for kept in final):
+            continue
+        final.append(box)
+    return sorted(final, key=lambda item: (item.y, item.x))
+
+
+def smooth_projection(values, radius: int):
+    if len(values) == 0:
+        return values
+    radius = max(1, radius)
+    kernel = np.ones(radius * 2 + 1, dtype=np.float32) / float(radius * 2 + 1)
+    return np.convolve(values.astype(np.float32), kernel, mode="same")
+
+
+def split_box_by_vertical_gaps(mask, box: Box, page_width: int, page_height: int) -> list[Box]:
+    if box.h < page_height * 0.18 or box.w < page_width * 0.20:
+        return [box]
+
+    roi = mask[box.y : box.y2, box.x : box.x2]
+    if roi.size == 0:
+        return [box]
+
+    column_projection = (roi > 0).sum(axis=0)
+    smoothed = smooth_projection(column_projection, max(2, box.w // 90))
+    low_limit = max(2.0, box.h * 0.022)
+    min_gap = max(5, int(box.w * 0.015))
+    min_piece = max(22, int(page_width * 0.035))
+
+    runs: list[tuple[int, int, float]] = []
+    start = -1
+    for index, value in enumerate(smoothed):
+        low = value <= low_limit
+        if low and start < 0:
+            start = index
+        elif not low and start >= 0:
+            end = index - 1
+            if end - start + 1 >= min_gap:
+                runs.append((start, end, float(smoothed[start : end + 1].mean())))
+            start = -1
+    if start >= 0:
+        end = len(smoothed) - 1
+        if end - start + 1 >= min_gap:
+            runs.append((start, end, float(smoothed[start : end + 1].mean())))
+
+    candidates = []
+    for start, end, mean_density in runs:
+        center = (start + end) // 2
+        if center < min_piece or box.w - center < min_piece:
+            continue
+        width = end - start + 1
+        candidates.append((width, -mean_density, center))
+    if not candidates:
+        return [box]
+
+    _, _, center = max(candidates)
+    left = Box(box.x, box.y, center, box.h)
+    right = Box(box.x + center, box.y, box.w - center, box.h)
+    return [piece for piece in (left, right) if piece.area > 0]
+
+
+def split_boxes_by_internal_gaps(mask, boxes: list[Box], width: int, height: int) -> list[Box]:
+    split: list[Box] = []
+    for box in boxes:
+        split.extend(split_box_by_vertical_gaps(mask, box, width, height))
+    return sorted(split, key=lambda item: (item.y, item.x))
+
+
+def split_box_by_side_color_strip(image, box: Box, page_width: int, page_height: int) -> list[Box]:
+    if box.h < page_height * 0.35 or box.w < page_width * 0.22:
+        return [box]
+
+    roi = image[box.y : box.y2, box.x : box.x2]
+    if roi.size == 0:
+        return [box]
+
+    hsv = cv2.cvtColor(roi, cv2.COLOR_BGR2HSV)
+    saturation = hsv[:, :, 1].mean(axis=0)
+    value = hsv[:, :, 2].mean(axis=0)
+    smoothed_saturation = smooth_projection(saturation, max(2, box.w // 120))
+    smoothed_value = smooth_projection(value, max(2, box.w // 120))
+
+    median_saturation = float(np.median(smoothed_saturation))
+    median_value = float(np.median(smoothed_value))
+    color_threshold = max(30.0, median_saturation + 18.0)
+    dark_threshold = min(220.0, median_value - 18.0)
+    side_candidate = (smoothed_saturation > color_threshold) | (smoothed_value < dark_threshold)
+
+    min_strip = max(18, int(page_width * 0.035))
+    max_strip = max(min_strip + 1, int(box.w * 0.38))
+    min_main = max(80, int(page_width * 0.16))
+
+    right_start = None
+    index = box.w - 1
+    while index >= 0 and side_candidate[index]:
+        right_start = index
+        index -= 1
+    if right_start is not None:
+        strip_width = box.w - right_start
+        if min_strip <= strip_width <= max_strip and right_start >= min_main:
+            return [Box(box.x, box.y, right_start, box.h), Box(box.x + right_start, box.y, strip_width, box.h)]
+
+    left_end = None
+    index = 0
+    while index < box.w and side_candidate[index]:
+        left_end = index + 1
+        index += 1
+    if left_end is not None:
+        strip_width = left_end
+        if min_strip <= strip_width <= max_strip and box.w - left_end >= min_main:
+            return [Box(box.x, box.y, strip_width, box.h), Box(box.x + left_end, box.y, box.w - left_end, box.h)]
+
+    return [box]
+
+
+def split_boxes_by_side_color_strips(image, boxes: list[Box], width: int, height: int) -> list[Box]:
+    split: list[Box] = []
+    for box in boxes:
+        split.extend(split_box_by_side_color_strip(image, box, width, height))
+    return sorted(split, key=lambda item: (item.y, item.x))
+
+
+def detect_candidate_boxes(image, min_area_ratio: float = 0.00035, max_area_ratio: float = 0.85) -> tuple[list[Box], dict[str, object]]:
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    mask, threshold, bright_foreground = foreground_mask(gray)
+    block_mask = make_block_mask(gray, mask)
+    height, width = gray.shape[:2]
+    page_area = width * height
+    border_x = max(4, width // 80)
+    border_y = max(4, height // 80)
+    block_mask[:border_y, :] = 0
+    block_mask[height - border_y :, :] = 0
+    block_mask[:, :border_x] = 0
+    block_mask[:, width - border_x :] = 0
+
+    contours, _ = cv2.findContours(block_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    raw_boxes: list[Box] = []
+    boxes: list[Box] = []
+    for contour in contours:
+        x, y, w, h = cv2.boundingRect(contour)
+        box = Box(x, y, w, h).inflate(max(3, min(width, height) // 250), width, height)
+        area_ratio = box.area / page_area
+        if area_ratio < min_area_ratio or area_ratio > max_area_ratio:
+            continue
+        if box.w < 8 or box.h < 8:
+            continue
+        raw_boxes.append(box)
+        boxes.append(box)
+
+    boxes = merge_boxes(boxes, width, height, max(5, min(width, height) // 170))
+    boxes = [box for box in boxes if min_area_ratio <= box.area / page_area <= max_area_ratio]
+    if not boxes:
+        boxes = raw_boxes
+    boxes = split_boxes_by_internal_gaps(mask, boxes, width, height)
+    boxes = split_boxes_by_side_color_strips(image, boxes, width, height)
+    if not boxes:
+        boxes = raw_boxes
+    metadata = {
+        "threshold": threshold,
+        "bright_foreground": bright_foreground,
+        "analysis_width": width,
+        "analysis_height": height,
+    }
+    return boxes, metadata
+
+
+def count_projection_runs(values, threshold: float) -> int:
+    runs = 0
+    in_run = False
+    for value in values:
+        active = value >= threshold
+        if active and not in_run:
+            runs += 1
+        in_run = active
+    return runs
+
+
+def projection_text_score(binary, width: int, height: int) -> float:
+    if width <= 0 or height <= 0:
+        return 0.0
+    row_projection = (binary > 0).sum(axis=1)
+    threshold = max(2, width * 0.035)
+    runs = count_projection_runs(row_projection, threshold)
+    return min(runs / max(1.0, height / 18.0), 1.0)
+
+
+def rotate_mask_for_orientation(mask, angle: float):
+    height, width = mask.shape[:2]
+    center = (width / 2.0, height / 2.0)
+    matrix = cv2.getRotationMatrix2D(center, angle, 1.0)
+    cos = abs(matrix[0, 0])
+    sin = abs(matrix[0, 1])
+    new_width = int((height * sin) + (width * cos))
+    new_height = int((height * cos) + (width * sin))
+    matrix[0, 2] += (new_width / 2.0) - center[0]
+    matrix[1, 2] += (new_height / 2.0) - center[1]
+    return cv2.warpAffine(mask, matrix, (new_width, new_height), flags=cv2.INTER_NEAREST, borderValue=0)
+
+
+def text_orientation_scores(roi_mask) -> dict[str, float]:
+    horizontal = projection_text_score(roi_mask, roi_mask.shape[1], roi_mask.shape[0])
+    vertical_mask = cv2.rotate(roi_mask, cv2.ROTATE_90_CLOCKWISE)
+    vertical = projection_text_score(vertical_mask, vertical_mask.shape[1], vertical_mask.shape[0])
+
+    diagonal_scores = []
+    for angle in (-45.0, -30.0, 30.0, 45.0):
+        rotated = rotate_mask_for_orientation(roi_mask, angle)
+        diagonal_scores.append(projection_text_score(rotated, rotated.shape[1], rotated.shape[0]))
+    diagonal = max(diagonal_scores) if diagonal_scores else 0.0
+    return {
+        "horizontal_text_score": horizontal,
+        "vertical_text_score": vertical,
+        "diagonal_text_score": diagonal,
+        "max_text_score": max(horizontal, vertical, diagonal),
+    }
+
+
+def infer_orientation(features: dict[str, float]) -> str:
+    horizontal = features["horizontal_text_score"]
+    vertical = features["vertical_text_score"]
+    diagonal = features["diagonal_text_score"]
+    best = max(horizontal, vertical, diagonal)
+    if best < 0.18:
+        return "unknown"
+
+    if features["tall_aspect"] > 0.65 and vertical >= max(horizontal, diagonal) * 0.78:
+        return "vertical"
+    if features["wide_aspect"] > 0.35 and horizontal >= 0.18:
+        return "horizontal"
+    if diagonal >= best * 0.95 and diagonal > max(horizontal, vertical) + 0.08:
+        return "diagonal"
+    if vertical >= horizontal + 0.08:
+        return "vertical"
+    return "horizontal"
+
+
+def feature_dict(image, mask, edges, box: Box) -> dict[str, float]:
+    page_h, page_w = mask.shape[:2]
+    roi_gray = cv2.cvtColor(image[box.y : box.y2, box.x : box.x2], cv2.COLOR_BGR2GRAY)
+    roi_mask = mask[box.y : box.y2, box.x : box.x2]
+    roi_edges = edges[box.y : box.y2, box.x : box.x2]
+    area = max(1, box.area)
+
+    components, labels, stats, _ = cv2.connectedComponentsWithStats((roi_mask > 0).astype(np.uint8), 8)
+    component_count = 0
+    for index in range(1, components):
+        if stats[index, cv2.CC_STAT_AREA] >= 4:
+            component_count += 1
+
+    h_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (max(8, box.w // 6), 1))
+    v_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1, max(8, box.h // 6)))
+    h_lines = cv2.morphologyEx(roi_mask, cv2.MORPH_OPEN, h_kernel)
+    v_lines = cv2.morphologyEx(roi_mask, cv2.MORPH_OPEN, v_kernel)
+
+    orientation_scores = text_orientation_scores(roi_mask)
+
+    gray_bins = np.unique((roi_gray // 8).astype(np.uint8)).size
+    h_density = float((h_lines > 0).sum()) / area
+    v_density = float((v_lines > 0).sum()) / area
+    line_balance = min(h_density, v_density) / max(h_density, v_density, 1e-6)
+
+    return {
+        "width_ratio": box.w / max(1, page_w),
+        "height_ratio": box.h / max(1, page_h),
+        "area_ratio": area / max(1, page_w * page_h),
+        "wide_aspect": min((box.w / max(1, box.h)) / 5.0, 1.0),
+        "tall_aspect": min((box.h / max(1, box.w)) / 5.0, 1.0),
+        "ink_density": float((roi_mask > 0).sum()) / area,
+        "edge_density": min(float((roi_edges > 0).sum()) / area * 4.0, 1.0),
+        "gray_std": min(float(roi_gray.std()) / 90.0, 1.0),
+        "gray_levels": min(float(gray_bins) / 32.0, 1.0),
+        "component_density": min(component_count / max(1.0, area / 1000.0), 1.0),
+        "hline_density": min(h_density * 9.0, 1.0),
+        "vline_density": min(v_density * 9.0, 1.0),
+        "line_balance": line_balance,
+        "textline_density": orientation_scores["horizontal_text_score"],
+        "horizontal_text_score": orientation_scores["horizontal_text_score"],
+        "vertical_text_score": orientation_scores["vertical_text_score"],
+        "diagonal_text_score": orientation_scores["diagonal_text_score"],
+        "max_text_score": orientation_scores["max_text_score"],
+    }
+
+
+FEATURE_ORDER = [
+    "width_ratio",
+    "height_ratio",
+    "area_ratio",
+    "wide_aspect",
+    "tall_aspect",
+    "ink_density",
+    "edge_density",
+    "gray_std",
+    "gray_levels",
+    "component_density",
+    "hline_density",
+    "vline_density",
+    "line_balance",
+    "textline_density",
+    "horizontal_text_score",
+    "vertical_text_score",
+    "diagonal_text_score",
+    "max_text_score",
+]
+
+
+def vector_from_features(features: dict[str, float]):
+    return np.array([features[name] for name in FEATURE_ORDER], dtype=np.float32)
+
+
+def jittered_samples(prototype: list[float], count: int, rng):
+    base = np.array(prototype, dtype=np.float32)
+    noise = rng.normal(0.0, 0.07, size=(count, base.size)).astype(np.float32)
+    return np.clip(base + noise, 0.0, 1.0)
+
+
+def train_bootstrap_ann():
+    prototypes = {
+        "text": [0.42, 0.26, 0.10, 0.55, 0.10, 0.10, 0.10, 0.14, 0.18, 0.78, 0.10, 0.02, 0.12, 0.82, 0.82, 0.18, 0.20, 0.82],
+        "image": [0.28, 0.25, 0.08, 0.25, 0.22, 0.43, 0.58, 0.78, 0.95, 0.18, 0.04, 0.04, 0.25, 0.18, 0.18, 0.16, 0.16, 0.18],
+        "schematic/circuit": [0.36, 0.30, 0.09, 0.42, 0.18, 0.07, 0.18, 0.20, 0.34, 0.45, 0.42, 0.34, 0.78, 0.38, 0.38, 0.28, 0.32, 0.38],
+        "diagram": [0.32, 0.24, 0.08, 0.36, 0.20, 0.13, 0.28, 0.36, 0.55, 0.52, 0.20, 0.14, 0.45, 0.45, 0.45, 0.28, 0.35, 0.45],
+        "table": [0.40, 0.24, 0.10, 0.70, 0.08, 0.08, 0.12, 0.16, 0.24, 0.35, 0.58, 0.52, 0.88, 0.68, 0.68, 0.30, 0.22, 0.68],
+        "other": [0.08, 0.06, 0.01, 0.18, 0.12, 0.02, 0.04, 0.06, 0.12, 0.08, 0.02, 0.02, 0.08, 0.08, 0.08, 0.08, 0.08, 0.08],
+    }
+    rng = np.random.default_rng(42)
+    rows = []
+    labels = []
+    for class_index, class_name in enumerate(CLASS_NAMES):
+        samples = jittered_samples(prototypes[class_name], 90, rng)
+        rows.append(samples)
+        response = np.full((samples.shape[0], len(CLASS_NAMES)), -1.0, dtype=np.float32)
+        response[:, class_index] = 1.0
+        labels.append(response)
+
+    train_data = np.vstack(rows).astype(np.float32)
+    responses = np.vstack(labels).astype(np.float32)
+
+    ann = cv2.ml.ANN_MLP_create()
+    ann.setLayerSizes(np.array([len(FEATURE_ORDER), 18, len(CLASS_NAMES)], dtype=np.int32))
+    ann.setActivationFunction(cv2.ml.ANN_MLP_SIGMOID_SYM, 1.0, 1.0)
+    ann.setTrainMethod(cv2.ml.ANN_MLP_BACKPROP, 0.04)
+    ann.setTermCriteria((cv2.TERM_CRITERIA_MAX_ITER | cv2.TERM_CRITERIA_EPS, 700, 1e-5))
+    ann.train(train_data, cv2.ml.ROW_SAMPLE, responses)
+    return ann
+
+
+def rule_scores(features: dict[str, float]) -> np.ndarray:
+    scores = np.zeros(len(CLASS_NAMES), dtype=np.float32)
+    ink = features["ink_density"]
+    edge = features["edge_density"]
+    std = features["gray_std"]
+    levels = features["gray_levels"]
+    components = features["component_density"]
+    hline = features["hline_density"]
+    vline = features["vline_density"]
+    balance = features["line_balance"]
+    textlines = features["textline_density"]
+    max_text = features["max_text_score"]
+    vertical_text = features["vertical_text_score"]
+    diagonal_text = features["diagonal_text_score"]
+    area = features["area_ratio"]
+
+    scores[0] = 1.8 * max_text + 1.1 * components + 0.4 * ink + 0.3 * max(vertical_text, diagonal_text) - 0.45 * balance
+    scores[1] = 1.6 * std + 1.3 * levels + 0.9 * edge + 0.5 * ink - 0.75 * max_text
+    scores[2] = 1.1 * hline + 1.1 * vline + 0.8 * balance + 0.5 * edge - 0.5 * std
+    scores[3] = 0.8 * edge + 0.6 * hline + 0.25 * max_text + 0.5 * levels
+    scores[4] = 1.4 * hline + 1.4 * vline + 1.2 * balance + 0.25 * max_text - 0.4 * std
+    scores[5] = 0.5 + (0.08 > area) * 0.2 - 0.4 * ink - 0.2 * edge
+    scores = np.maximum(scores, 0.001)
+    return scores / scores.sum()
+
+
+def classify_features(ann, features: dict[str, float]) -> tuple[str, float]:
+    vector = vector_from_features(features)
+    _, raw = ann.predict(vector.reshape(1, -1))
+    ann_scores = raw[0].astype(np.float32)
+    ann_scores = np.exp(ann_scores - ann_scores.max())
+    ann_scores = ann_scores / max(float(ann_scores.sum()), 1e-6)
+    scores = 0.65 * ann_scores + 0.35 * rule_scores(features)
+    max_text = features["max_text_score"]
+
+    if features["area_ratio"] < 0.002 and features["textline_density"] < 0.25:
+        scores *= 0.65
+        scores[CLASS_NAMES.index("other")] += 0.35
+    if features["gray_std"] > 0.55 and features["gray_levels"] > 0.75 and features["area_ratio"] > 0.01 and max_text < 0.45:
+        scores[CLASS_NAMES.index("image")] += 0.25
+    if features["hline_density"] > 0.30 and features["vline_density"] > 0.24 and features["line_balance"] > 0.55:
+        scores[CLASS_NAMES.index("table")] += 0.15
+        scores[CLASS_NAMES.index("schematic/circuit")] += 0.10
+    if (
+        features["tall_aspect"] > 0.80
+        and features["width_ratio"] < 0.12
+        and features["ink_density"] > 0.45
+        and features["gray_std"] > 0.45
+    ):
+        scores[CLASS_NAMES.index("image")] += 0.75
+        scores[CLASS_NAMES.index("schematic/circuit")] *= 0.35
+        scores[CLASS_NAMES.index("table")] *= 0.55
+    if (
+        features["max_text_score"] > 0.50
+        and features["component_density"] > 0.60
+        and max(features["hline_density"], features["vline_density"]) < 0.18
+    ):
+        scores[CLASS_NAMES.index("text")] += 1.15
+        scores[CLASS_NAMES.index("image")] *= 0.25
+    if (
+        features["max_text_score"] > 0.22
+        and features["component_density"] > 0.45
+        and features["line_balance"] < 0.35
+        and max(features["hline_density"], features["vline_density"]) < 0.72
+    ):
+        scores[CLASS_NAMES.index("text")] += 0.45
+        scores[CLASS_NAMES.index("table")] *= 0.72
+        scores[CLASS_NAMES.index("diagram")] *= 0.72
+    if (
+        features["height_ratio"] < 0.065
+        and features["area_ratio"] < 0.030
+        and features["max_text_score"] > 0.30
+        and features["component_density"] > 0.25
+        and features["ink_density"] > 0.12
+        and features["gray_std"] > 0.50
+    ):
+        scores[CLASS_NAMES.index("text")] += 0.95
+        scores[CLASS_NAMES.index("image")] *= 0.35
+        scores[CLASS_NAMES.index("diagram")] *= 0.45
+        scores[CLASS_NAMES.index("table")] *= 0.45
+        scores[CLASS_NAMES.index("schematic/circuit")] *= 0.45
+    if features["max_text_score"] > 0.48 and features["line_balance"] < 0.20:
+        scores[CLASS_NAMES.index("text")] += 0.70
+        scores[CLASS_NAMES.index("diagram")] *= 0.55
+        scores[CLASS_NAMES.index("table")] *= 0.65
+    scores = scores / max(float(scores.sum()), 1e-6)
+
+    index = int(scores.argmax())
+    return CLASS_NAMES[index], float(scores[index])
+
+
+def safe_label(label: str) -> str:
+    return re.sub(r"[^a-z0-9_-]+", "_", label.lower()).strip("_") or "block"
+
+
+def classify_blocks(image, boxes: list[Box], scale: float, save_crops: bool, page_dir: Path) -> list[Block]:
+    analysis_h, analysis_w = image.shape[:2]
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    mask, _, _ = foreground_mask(gray)
+    edges = cv2.Canny(gray, 60, 160)
+    ann = train_bootstrap_ann()
+
+    blocks: list[Block] = []
+    counters: dict[str, int] = {}
+    for index, box in enumerate(boxes, start=1):
+        features = feature_dict(image, mask, edges, box)
+        label, confidence = classify_features(ann, features)
+        orientation = infer_orientation(features) if label == "text" else "unknown"
+        counters[label] = counters.get(label, 0) + 1
+        ident = f"{index:03d}_{safe_label(label)}"
+
+        original_box = Box(
+            int(round(box.x / scale)),
+            int(round(box.y / scale)),
+            int(round(box.w / scale)),
+            int(round(box.h / scale)),
+        )
+        crop_path: str | None = None
+        if save_crops:
+            crop_dir = page_dir / "blocks" / safe_label(label)
+            crop_path_obj = crop_dir / f"{ident}.png"
+            crop = image[box.y : box.y2, box.x : box.x2]
+            write_image(crop_path_obj, crop)
+            crop_path = crop_path_obj.relative_to(page_dir).as_posix()
+
+        blocks.append(
+            Block(
+                ident=ident,
+                label=label,
+                orientation=orientation,
+                confidence=round(confidence, 4),
+                bbox=original_box.to_list(),
+                features={key: round(float(value), 5) for key, value in features.items()},
+                crop_path=crop_path,
+            )
+        )
+
+    return blocks
+
+
+def draw_preview(image, blocks: list[Block], preview_width: int, page_dir: Path) -> Path:
+    height, width = image.shape[:2]
+    scale = min(1.0, preview_width / float(width))
+    preview = image.copy() if scale >= 0.999 else cv2.resize(image, (int(width * scale), int(height * scale)), interpolation=cv2.INTER_AREA)
+
+    for block in blocks:
+        x, y, w, h = block.bbox
+        x1 = int(round(x * scale))
+        y1 = int(round(y * scale))
+        x2 = int(round((x + w) * scale))
+        y2 = int(round((y + h) * scale))
+        color = CLASS_COLORS.get(block.label, CLASS_COLORS["other"])
+        thickness = max(2, int(round(2 * scale)))
+        cv2.rectangle(preview, (x1, y1), (x2, y2), color, thickness)
+
+        label = block.label
+        if block.label == "text" and block.orientation != "unknown":
+            label = f"{label} {block.orientation}"
+        label = f"{label} {block.confidence:.2f}"
+        (text_w, text_h), baseline = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.52, 1)
+        top = max(0, y1 - text_h - baseline - 5)
+        cv2.rectangle(preview, (x1, top), (x1 + text_w + 6, top + text_h + baseline + 5), color, -1)
+        cv2.putText(preview, label, (x1 + 3, top + text_h + 2), cv2.FONT_HERSHEY_SIMPLEX, 0.52, (255, 255, 255), 1, cv2.LINE_AA)
+
+    path = page_dir / "preview.png"
+    write_image(path, preview)
+    return path
+
+
+def detect_page_layout(
+    image_path: Path,
+    out_dir: Path,
+    max_analysis_side: int = 1800,
+    preview_width: int = 1400,
+    min_area_ratio: float = 0.00035,
+    save_crops: bool = True,
+) -> dict[str, object]:
+    original = read_image(image_path)
+    analysis_image, scale = resize_for_analysis(original, max_analysis_side)
+    page_name = image_path.stem
+    page_dir = out_dir / page_name
+    page_dir.mkdir(parents=True, exist_ok=True)
+
+    boxes, metadata = detect_candidate_boxes(analysis_image, min_area_ratio=min_area_ratio)
+    blocks = classify_blocks(analysis_image, boxes, scale=scale, save_crops=save_crops, page_dir=page_dir)
+    preview_path = draw_preview(original, blocks, preview_width=preview_width, page_dir=page_dir)
+
+    result = {
+        "source": str(image_path),
+        "page": page_name,
+        "width": int(original.shape[1]),
+        "height": int(original.shape[0]),
+        "analysis_scale": scale,
+        "classes": CLASS_NAMES,
+        "metadata": metadata,
+        "preview": preview_path.relative_to(page_dir).as_posix(),
+        "blocks": [asdict(block) for block in blocks],
+    }
+    (page_dir / "layout.json").write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
+    return result
+
+
+def parse_args(argv: list[str]) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--image", required=True, help="Input page image.")
+    parser.add_argument("--out-dir", default=".tmp/page_layout", help="Output root for layout JSON, crops and preview.")
+    parser.add_argument("--max-analysis-side", type=int, default=1800, help="Largest side used during detection.")
+    parser.add_argument("--preview-width", type=int, default=1400, help="Preview overlay width in pixels.")
+    parser.add_argument("--min-area-ratio", type=float, default=0.00035, help="Smallest candidate block area relative to page.")
+    parser.add_argument("--no-crops", action="store_true", help="Do not write block crop images.")
+    return parser.parse_args(argv)
+
+
+def main(argv: list[str]) -> int:
+    require_dependencies()
+    args = parse_args(argv)
+    result = detect_page_layout(
+        image_path=Path(args.image),
+        out_dir=Path(args.out_dir),
+        max_analysis_side=args.max_analysis_side,
+        preview_width=args.preview_width,
+        min_area_ratio=args.min_area_ratio,
+        save_crops=not args.no_crops,
+    )
+    counts: dict[str, int] = {}
+    for block in result["blocks"]:
+        counts[block["label"]] = counts.get(block["label"], 0) + 1
+    counts_text = ", ".join(f"{key}={value}" for key, value in sorted(counts.items())) or "none"
+    print(f"Layout blocks: {len(result['blocks'])} ({counts_text})")
+    print(Path(args.out_dir) / result["page"] / "layout.json")
+    print(Path(args.out_dir) / result["page"] / result["preview"])
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main(sys.argv[1:]))

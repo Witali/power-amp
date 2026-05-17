@@ -71,8 +71,11 @@ class SpellcheckTextTests(unittest.TestCase):
 
     def test_run_hunspell_returns_normalized_words(self) -> None:
         completed = subprocess_result(stdout="Искаженне\n")
-        with mock.patch("spellcheck_text.subprocess.run", return_value=completed) as run:
-            words = spellcheck_text.run_hunspell(["искаженне"], "ru_RU", "hunspell")
+        with tempfile.TemporaryDirectory() as temp:
+            missing_dictionary_dir = Path(temp) / "missing"
+            with mock.patch("spellcheck_text.LOCAL_DICTIONARY_DIR", missing_dictionary_dir):
+                with mock.patch("spellcheck_text.subprocess.run", return_value=completed) as run:
+                    words = spellcheck_text.run_hunspell(["искаженне"], "ru_RU", "hunspell")
 
         self.assertEqual(words, {spellcheck_text.normalize_word("Искаженне")})
         self.assertEqual(run.call_args.args[0], ["hunspell", "-d", "ru_RU", "-l"])

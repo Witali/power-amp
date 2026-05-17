@@ -4,6 +4,7 @@ param(
     [switch]$SkipOcr,
     [switch]$SkipSpellcheck,
     [switch]$InstallHunspell,
+    [switch]$SkipLayoutCv,
     [switch]$SkipNode,
     [string]$SevenZipPath
 )
@@ -14,6 +15,8 @@ $Root = Split-Path -Parent $PSScriptRoot
 $Tools = Join-Path $Root "local_tools"
 $Downloads = Join-Path $Tools "downloads"
 $NodeCache = Join-Path $Root "node_cache"
+$PythonPackages = Join-Path $Tools "python_packages"
+$LayoutPythonPackages = @("opencv-python-headless", "numpy", "pillow")
 
 $SevenZipPackage = "7zip.portable.nupkg"
 $SevenZipPackageUrl = "https://community.chocolatey.org/api/v2/package/7zip.portable"
@@ -41,13 +44,15 @@ $TessData = Join-Path $TesseractExtracted "tessdata"
 $HunspellVersion = "1.7.0"
 $HunspellPackage = "hunspell.portable.$HunspellVersion.nupkg"
 $HunspellPackageUrl = "https://community.chocolatey.org/api/v2/package/hunspell.portable/$HunspellVersion"
+$HunspellBinaryZip = "hunspell-msvc-Release-x64.zip"
+$HunspellBinaryUrl = "https://github.com/mlt/hunspell/releases/download/appveyor_v1.7.0/$HunspellBinaryZip"
 $HunspellExtracted = Join-Path $Tools "hunspell"
 $HunspellDictDir = Join-Path $Tools "hunspell-dictionaries"
 $HunspellDictionaryUrls = @{
-    "ru_RU.aff" = "https://cgit.freedesktop.org/libreoffice/dictionaries/plain/ru_RU/ru_RU.aff"
-    "ru_RU.dic" = "https://cgit.freedesktop.org/libreoffice/dictionaries/plain/ru_RU/ru_RU.dic"
-    "en_US.aff" = "https://cgit.freedesktop.org/libreoffice/dictionaries/plain/en/en_US.aff"
-    "en_US.dic" = "https://cgit.freedesktop.org/libreoffice/dictionaries/plain/en/en_US.dic"
+    "ru_RU.aff" = "https://raw.githubusercontent.com/LibreOffice/dictionaries/master/ru_RU/ru_RU.aff"
+    "ru_RU.dic" = "https://raw.githubusercontent.com/LibreOffice/dictionaries/master/ru_RU/ru_RU.dic"
+    "en_US.aff" = "https://raw.githubusercontent.com/LibreOffice/dictionaries/master/en/en_US.aff"
+    "en_US.dic" = "https://raw.githubusercontent.com/LibreOffice/dictionaries/master/en/en_US.dic"
 }
 
 function Write-Step {
@@ -315,6 +320,13 @@ function Install-Hunspell {
 
     $hunspell = Find-LocalHunspell
     if (!$hunspell) {
+        $binaryZip = Join-Path $Downloads $HunspellBinaryZip
+        Invoke-Download -Uri $HunspellBinaryUrl -OutFile $binaryZip
+        & $SevenZip x -y "-o$HunspellExtracted" $binaryZip | Out-Null
+        $hunspell = Find-LocalHunspell
+    }
+
+    if (!$hunspell) {
         throw "hunspell.exe was not found after extracting $nupkg"
     }
 
@@ -414,6 +426,46 @@ function Install-NodeDependencies {
     }
 }
 
+function Test-LocalPythonPackage {
+    param([string]$PackageName)
+
+    if (!(Test-Path -LiteralPath $PythonPackages)) {
+        return $false
+    }
+
+    $oldPythonPath = $env:PYTHONPATH
+    try {
+        $env:PYTHONPATH = if ($oldPythonPath) { "$PythonPackages;$oldPythonPath" } else { $PythonPackages }
+        & python -c "import importlib.util, sys; sys.exit(0 if importlib.util.find_spec('$PackageName') else 1)"
+        return $LASTEXITCODE -eq 0
+    }
+    finally {
+        $env:PYTHONPATH = $oldPythonPath
+    }
+}
+
+function Install-PythonLayoutDependencies {
+    Write-Step "Checking Python OpenCV layout dependencies"
+
+    $missing = @()
+    foreach ($packageName in @("cv2", "numpy", "PIL")) {
+        if (!(Test-LocalPythonPackage -PackageName $packageName)) {
+            $missing += $packageName
+        }
+    }
+
+    if (!$Force -and $missing.Count -eq 0) {
+        Write-Host "Python layout dependencies are already installed in $PythonPackages"
+        return
+    }
+
+    Ensure-Directory $PythonPackages
+    & python -m pip install --target $PythonPackages @LayoutPythonPackages
+    if ($LASTEXITCODE -ne 0) {
+        throw "pip install for Python layout dependencies failed with exit code $LASTEXITCODE"
+    }
+}
+
 function Show-Summary {
     Write-Step "Setup summary"
     if (Test-Path -LiteralPath $NgspiceExe) {
@@ -433,6 +485,9 @@ function Show-Summary {
     if (Test-Path -LiteralPath (Join-Path $Root "node_modules\@resvg\resvg-js")) {
         Write-Host "Node deps: node_modules installed"
     }
+    if (Test-LocalPythonPackage -PackageName "cv2") {
+        Write-Host "Layout CV: $PythonPackages"
+    }
     Write-Host ""
     Write-Host "Local tools are under local_tools/ and are ignored by Git."
 }
@@ -451,6 +506,9 @@ if (!$SkipOcr) {
 }
 if (!$SkipSpellcheck) {
     Ensure-Hunspell -SevenZip $sevenZip
+}
+if (!$SkipLayoutCv) {
+    Install-PythonLayoutDependencies
 }
 if (!$SkipNode) {
     Install-NodeDependencies

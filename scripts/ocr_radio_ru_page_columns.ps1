@@ -20,6 +20,8 @@ param(
     [int]$AutoSplitPaddingPx = 8,
     [switch]$NoAutoInvert,
     [switch]$NoTextCorrection,
+    [switch]$DetectLayout,
+    [string]$LayoutOutDir = ".tmp\page_layout",
     [int]$MaxParallelOcr = 0,
     [int]$TesseractThreadLimit = 1,
     [int]$OcrPollMilliseconds = 250,
@@ -755,6 +757,15 @@ $resolvedInput = (Resolve-Path -LiteralPath $InputPath).Path
 $imageName = [IO.Path]::GetFileNameWithoutExtension($resolvedInput)
 $pageOutDir = Join-Path $OutputRoot $imageName
 New-Directory $pageOutDir
+
+if ($DetectLayout) {
+    $layoutScript = Join-Path $PSScriptRoot "detect_page_layout.py"
+    Write-ProgressLog "Running OpenCV layout detector before OCR."
+    & python $layoutScript --image $resolvedInput --out-dir $LayoutOutDir
+    if ($LASTEXITCODE -ne 0) {
+        throw "OpenCV layout detector failed with exit code $LASTEXITCODE"
+    }
+}
 
 $image = [System.Drawing.Bitmap]::FromFile($resolvedInput)
 try {

@@ -22,6 +22,14 @@ Useful sample command:
 
 The script crops margins, can try fixed 1, 2, and 3 column layouts, and can also find column breaks automatically with `-AutoColumns`. It runs Tesseract on each column and writes merged text variants under `.tmp\ocr_column_trials\...`.
 
+Before running OCR, the script can also call the OpenCV page-layout detector:
+
+```powershell
+& 'C:\Program Files\PowerShell\7\pwsh.exe' -NoProfile -ExecutionPolicy Bypass -File scripts\ocr_radio_ru_page_columns.ps1 -InputPath <scan.jpg> -DetectLayout -ColumnCounts 2 -PsmModes 4 -OcrProfiles prose,technical
+```
+
+This writes a preliminary page split to `.tmp\page_layout\<page>\layout.json`, block crops under `.tmp\page_layout\<page>\blocks\`, and a preview overlay `.tmp\page_layout\<page>\preview.png`. Block labels currently include `text`, `image`, `schematic/circuit`, `diagram`, `table`, and `other`. Text blocks also include an `orientation` field (`horizontal`, `vertical`, `diagonal`, or `unknown`) so large titles, sideways margin labels and rotated captions can be handled separately from normal prose columns. The detector is a lightweight hybrid: OpenCV extracts candidate rectangles, splits likely margin strips at internal vertical gaps or colored side bands, and a small OpenCV `ANN_MLP` classifies blocks from visual features. Use the preview image as a quick sanity check before trusting an OCR run.
+
 Tesseract runs are parallelized by default. If `-MaxParallelOcr` is not set, the scripts use half of the available logical CPU threads, rounded down but never below one process. Each Tesseract process is started with `OMP_THREAD_LIMIT=1` by default, so the external process count is the main load limiter. Override it when needed:
 
 ```powershell
@@ -69,6 +77,26 @@ Profiles:
 All profiles use the local word list `ocr_tools\radio_ru_user_words.txt`. Add amplifier terms, part designators and transistor names there when recurring OCR mistakes appear.
 
 Column OCR output includes both profile and page segmentation mode in the file name, for example `merged.technical.psm6.txt`. The summary table also reports `Profile` and `Psm`, so compare variants by score before reading the best text.
+
+## Reference-text calibration
+
+When an article has an online text reprint, use it only as a temporary OCR calibration reference. Keep downloaded reference HTML files under `.tmp\ocr_reference_texts\`, not in the repository. The helper script compares local OCR variants with reference text and writes a TSV report:
+
+```powershell
+python scripts\compare_ocr_reference.py `
+  --reference .tmp\ocr_reference_texts\ageev_superlinear_diagram.html `
+  --candidate-root .tmp\radio_ru_1997_2000\article_ocr_fixed2 `
+  --glob "merged*.txt" `
+  --out .tmp\ocr_reference_texts\comparison.tsv
+```
+
+For the checked 1999 amplifier pages, fixed two-column OCR with `psm 4` matched online references better than `psm 6`. Use this as the default for normal article pages:
+
+```powershell
+& 'C:\Program Files\PowerShell\7\pwsh.exe' -NoProfile -ExecutionPolicy Bypass -File scripts\ocr_radio_ru_page_columns.ps1 -InputPath <scan.jpg> -ColumnCounts 2 -PsmModes 4 -OcrProfiles prose,technical -MaxParallelOcr 2 -TesseractThreadLimit 1
+```
+
+See `study/amp_no_feedback_study/radio_ru_ocr_reference_sources_1997_2000.md` for the current source list and calibration notes.
 
 ## Automatic column detection
 

@@ -10,8 +10,8 @@ Start by reading this file, then:
 
 - `AGENTS.md` for project-specific working rules.
 - `README.md` for the public project description and generated result links.
-- `amp_no_feedback_study/radio_ru_bjt_amplifier_knowledge.md` for distilled Radio magazine amplifier knowledge.
-- `amp_no_feedback_study/archive_radio_ru_umzch_20_article_study.md` for the newest OCR-backed archive.radio.ru study of 20 UMZCH publications.
+- `study/amp_no_feedback_study/radio_ru_bjt_amplifier_knowledge.md` for distilled Radio magazine amplifier knowledge.
+- `study/amp_no_feedback_study/archive_radio_ru_umzch_20_article_study.md` for the newest OCR-backed archive.radio.ru study of 20 UMZCH publications.
 - `results/001_rogov_triple_ef_amplifier/README.md` for the current first full schematic/result package.
 
 ## Project Rules Already Established
@@ -46,7 +46,7 @@ Recent fixes there:
 
 I studied and saved a new archive-focused knowledge pass:
 
-- `amp_no_feedback_study/archive_radio_ru_umzch_20_article_study.md`
+- `study/amp_no_feedback_study/archive_radio_ru_umzch_20_article_study.md`
 
 Method:
 
@@ -65,9 +65,9 @@ Best reusable candidates from that pass:
 
 Related older knowledge:
 
-- `amp_no_feedback_study/radio_ru_bjt_amplifier_knowledge.md`
-- `amp_no_feedback_study/musicforums_amplifier_distortion_notes.md`
-- `amp_no_feedback_study/best_practices.md`
+- `study/amp_no_feedback_study/radio_ru_bjt_amplifier_knowledge.md`
+- `study/amp_no_feedback_study/musicforums_amplifier_distortion_notes.md`
+- `study/amp_no_feedback_study/best_practices.md`
 
 ## Design Direction
 
