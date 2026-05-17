@@ -12,6 +12,7 @@ import argparse
 import json
 import math
 import re
+import shutil
 import sys
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -35,6 +36,7 @@ except ImportError:
 
 
 CLASS_NAMES = ["text", "image", "schematic/circuit", "diagram", "table", "other"]
+FIGURE_LABELS = {"image", "schematic/circuit", "diagram"}
 CLASS_COLORS = {
     "text": (52, 168, 83),
     "image": (66, 133, 244),
@@ -85,8 +87,11 @@ class Block:
     orientation: str
     confidence: float
     bbox: list[int]
+    outline: list[list[list[int]]] | None
     features: dict[str, float]
     crop_path: str | None = None
+    figure_ref: str | None = None
+    caption_candidates: list[dict[str, object]] | None = None
 
 
 def require_dependencies() -> None:
@@ -447,6 +452,7 @@ def infer_orientation(features: dict[str, float]) -> str:
 def feature_dict(image, mask, edges, box: Box) -> dict[str, float]:
     page_h, page_w = mask.shape[:2]
     roi_gray = cv2.cvtColor(image[box.y : box.y2, box.x : box.x2], cv2.COLOR_BGR2GRAY)
+    roi_bgr = image[box.y : box.y2, box.x : box.x2]
     roi_mask = mask[box.y : box.y2, box.x : box.x2]
     roi_edges = edges[box.y : box.y2, box.x : box.x2]
     area = max(1, box.area)
@@ -461,12 +467,19 @@ def feature_dict(image, mask, edges, box: Box) -> dict[str, float]:
     v_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1, max(8, box.h // 6)))
     h_lines = cv2.morphologyEx(roi_mask, cv2.MORPH_OPEN, h_kernel)
     v_lines = cv2.morphologyEx(roi_mask, cv2.MORPH_OPEN, v_kernel)
+    local_h_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (max(5, box.w // 35), 1))
+    local_v_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1, max(5, box.h // 35)))
+    local_h_lines = cv2.morphologyEx(roi_mask, cv2.MORPH_OPEN, local_h_kernel)
+    local_v_lines = cv2.morphologyEx(roi_mask, cv2.MORPH_OPEN, local_v_kernel)
 
     orientation_scores = text_orientation_scores(roi_mask)
 
+    hsv = cv2.cvtColor(roi_bgr, cv2.COLOR_BGR2HSV)
+    saturation = hsv[:, :, 1].astype(np.float32) / 255.0
     gray_bins = np.unique((roi_gray // 8).astype(np.uint8)).size
     h_density = float((h_lines > 0).sum()) / area
     v_density = float((v_lines > 0).sum()) / area
+    local_line_density = float(((local_h_lines > 0) | (local_v_lines > 0)).sum()) / area
     line_balance = min(h_density, v_density) / max(h_density, v_density, 1e-6)
 
     return {
@@ -482,7 +495,10 @@ def feature_dict(image, mask, edges, box: Box) -> dict[str, float]:
         "component_density": min(component_count / max(1.0, area / 1000.0), 1.0),
         "hline_density": min(h_density * 9.0, 1.0),
         "vline_density": min(v_density * 9.0, 1.0),
+        "line_art_score": min(local_line_density * 6.0, 1.0),
         "line_balance": line_balance,
+        "saturation_mean": float(saturation.mean()),
+        "saturation_p80": float(np.percentile(saturation, 80)),
         "textline_density": orientation_scores["horizontal_text_score"],
         "horizontal_text_score": orientation_scores["horizontal_text_score"],
         "vertical_text_score": orientation_scores["vertical_text_score"],
@@ -588,12 +604,61 @@ def classify_features(ann, features: dict[str, float]) -> tuple[str, float]:
     ann_scores = ann_scores / max(float(ann_scores.sum()), 1e-6)
     scores = 0.65 * ann_scores + 0.35 * rule_scores(features)
     max_text = features["max_text_score"]
+    line_art = features.get("line_art_score", 0.0)
+    saturation_p80 = features.get("saturation_p80", 0.0)
 
     if features["area_ratio"] < 0.002 and features["textline_density"] < 0.25:
         scores *= 0.65
         scores[CLASS_NAMES.index("other")] += 0.35
     if features["gray_std"] > 0.55 and features["gray_levels"] > 0.75 and features["area_ratio"] > 0.01 and max_text < 0.45:
         scores[CLASS_NAMES.index("image")] += 0.25
+    if (
+        features["area_ratio"] > 0.035
+        and line_art > 0.16
+        and saturation_p80 < 0.08
+        and features["component_density"] > 0.45
+        and features["ink_density"] < 0.32
+        and max_text < 0.38
+    ):
+        scores[CLASS_NAMES.index("schematic/circuit")] += 1.15
+        scores[CLASS_NAMES.index("image")] *= 0.30
+        scores[CLASS_NAMES.index("diagram")] *= 0.65
+    if (
+        features["area_ratio"] > 0.10
+        and line_art > 0.22
+        and saturation_p80 < 0.08
+        and features["component_density"] > 0.50
+        and features["ink_density"] < 0.22
+        and features["line_balance"] > 0.25
+        and features["edge_density"] > 0.22
+    ):
+        scores[CLASS_NAMES.index("schematic/circuit")] += 1.65
+        scores[CLASS_NAMES.index("text")] *= 0.32
+        scores[CLASS_NAMES.index("image")] *= 0.35
+        scores[CLASS_NAMES.index("diagram")] *= 0.70
+    if (
+        0.004 < features["area_ratio"] < 0.040
+        and line_art > 0.30
+        and saturation_p80 < 0.08
+        and features["component_density"] > 0.30
+        and features["edge_density"] > 0.18
+        and features["ink_density"] < 0.16
+        and 0.20 < features["line_balance"] < 0.70
+    ):
+        scores[CLASS_NAMES.index("schematic/circuit")] += 1.10
+        scores[CLASS_NAMES.index("diagram")] *= 0.35
+        scores[CLASS_NAMES.index("table")] *= 0.55
+        scores[CLASS_NAMES.index("image")] *= 0.60
+    if (
+        saturation_p80 > 0.16
+        and features["gray_std"] > 0.45
+        and features["area_ratio"] > 0.008
+        and features["component_density"] > 0.20
+        and max_text < 0.45
+    ):
+        scores[CLASS_NAMES.index("image")] += 1.00
+        scores[CLASS_NAMES.index("schematic/circuit")] *= 0.35
+        scores[CLASS_NAMES.index("table")] *= 0.60
     if features["hline_density"] > 0.30 and features["vline_density"] > 0.24 and features["line_balance"] > 0.55:
         scores[CLASS_NAMES.index("table")] += 0.15
         scores[CLASS_NAMES.index("schematic/circuit")] += 0.10
@@ -649,6 +714,317 @@ def safe_label(label: str) -> str:
     return re.sub(r"[^a-z0-9_-]+", "_", label.lower()).strip("_") or "block"
 
 
+def box_from_list(values: list[int]) -> Box:
+    return Box(int(values[0]), int(values[1]), int(values[2]), int(values[3]))
+
+
+def rectangle_polygon(box: Box) -> list[list[list[int]]]:
+    return [[[box.x, box.y], [box.x2, box.y], [box.x2, box.y2], [box.x, box.y2]]]
+
+
+def intersection_box(first: Box, second: Box) -> Box | None:
+    left = max(first.x, second.x)
+    top = max(first.y, second.y)
+    right = min(first.x2, second.x2)
+    bottom = min(first.y2, second.y2)
+    if right <= left or bottom <= top:
+        return None
+    return Box(left, top, right - left, bottom - top)
+
+
+def intersection_area(first: Box, second: Box) -> int:
+    intersection = intersection_box(first, second)
+    return 0 if intersection is None else intersection.area
+
+
+def simplify_axis_aligned_polygon(points: list[list[int]]) -> list[list[int]]:
+    if len(points) < 3:
+        return points
+
+    compact: list[list[int]] = []
+    for point in points:
+        if not compact or compact[-1] != point:
+            compact.append(point)
+    if len(compact) > 1 and compact[0] == compact[-1]:
+        compact.pop()
+
+    changed = True
+    while changed and len(compact) >= 3:
+        changed = False
+        filtered: list[list[int]] = []
+        count = len(compact)
+        for index, point in enumerate(compact):
+            previous = compact[(index - 1) % count]
+            next_point = compact[(index + 1) % count]
+            if (previous[0] == point[0] == next_point[0]) or (previous[1] == point[1] == next_point[1]):
+                changed = True
+                continue
+            filtered.append(point)
+        compact = filtered
+
+    return compact
+
+
+def collapse_tiny_stair_steps(points: list[list[int]], tolerance: int = 2) -> list[list[int]]:
+    compact = points[:]
+    changed = True
+    while changed and len(compact) >= 4:
+        changed = False
+        for index in range(len(compact) - 2):
+            first = compact[index]
+            middle = compact[index + 1]
+            third = compact[index + 2]
+            first_step = abs(first[0] - middle[0]) + abs(first[1] - middle[1])
+            second_step = abs(middle[0] - third[0]) + abs(middle[1] - third[1])
+            if first_step <= tolerance and second_step <= tolerance and first[0] != third[0] and first[1] != third[1]:
+                corner = [third[0], first[1]]
+                compact = compact[:index] + [corner] + compact[index + 3 :]
+                changed = True
+                break
+    return compact
+
+
+def orthogonalize_polygon(points: list[list[int]]) -> list[list[int]]:
+    if len(points) < 2:
+        return points
+
+    result: list[list[int]] = [points[0]]
+    for point in points[1:]:
+        previous = result[-1]
+        if previous[0] != point[0] and previous[1] != point[1]:
+            result.append([point[0], previous[1]])
+        result.append(point)
+
+    first = result[0]
+    last = result[-1]
+    if first[0] != last[0] and first[1] != last[1]:
+        result.append([first[0], last[1]])
+
+    return simplify_axis_aligned_polygon(collapse_tiny_stair_steps(result))
+
+
+def text_block_should_cut_visual_outline(visual_box: Box, text_box: Box) -> bool:
+    overlap = intersection_box(visual_box, text_box)
+    if overlap is None:
+        return False
+
+    text_overlap_fraction = overlap.area / max(1, text_box.area)
+    visual_overlap_fraction = overlap.area / max(1, visual_box.area)
+    if text_overlap_fraction < 0.18 and visual_overlap_fraction < 0.01:
+        return False
+
+    edge_margin = max(10, min(60, int(round(min(visual_box.w, visual_box.h) * 0.12))))
+    touches_edge = (
+        overlap.x <= visual_box.x + edge_margin
+        or overlap.x2 >= visual_box.x2 - edge_margin
+        or overlap.y <= visual_box.y + edge_margin
+        or overlap.y2 >= visual_box.y2 - edge_margin
+    )
+    if not touches_edge:
+        return False
+
+    # Small labels inside a circuit are part of the drawing. Large prose blocks
+    # touching a visual block edge are what should carve the preview outline.
+    small_internal_label = (
+        text_box.area < visual_box.area * 0.012
+        and text_box.h < max(42, int(round(visual_box.h * 0.12)))
+        and text_box.w < max(180, int(round(visual_box.w * 0.35)))
+    )
+    return not small_internal_label
+
+
+def visual_outline_from_text_cutouts(visual_block: Block, text_blocks: list[Block]) -> list[list[list[int]]]:
+    visual_box = box_from_list(visual_block.bbox)
+    if visual_box.area <= 0:
+        return []
+
+    mask = np.full((visual_box.h, visual_box.w), 255, dtype=np.uint8)
+    cutouts = 0
+    pad = max(3, min(14, int(round(min(visual_box.w, visual_box.h) * 0.025))))
+    for text_block in text_blocks:
+        text_box = box_from_list(text_block.bbox)
+        if not text_block_should_cut_visual_outline(visual_box, text_box):
+            continue
+        padded = text_box.inflate(pad, visual_box.x2 + pad + 1, visual_box.y2 + pad + 1)
+        cutout = intersection_box(visual_box, padded)
+        if cutout is None:
+            continue
+        x1 = max(0, cutout.x - visual_box.x)
+        y1 = max(0, cutout.y - visual_box.y)
+        x2 = min(visual_box.w, cutout.x2 - visual_box.x)
+        y2 = min(visual_box.h, cutout.y2 - visual_box.y)
+        if x2 <= x1 or y2 <= y1:
+            continue
+        mask[y1:y2, x1:x2] = 0
+        cutouts += 1
+
+    if cutouts == 0:
+        return rectangle_polygon(visual_box)
+
+    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    min_area = max(25.0, visual_box.area * 0.002)
+    selected = sorted((contour for contour in contours if cv2.contourArea(contour) >= min_area), key=cv2.contourArea, reverse=True)
+    polygons: list[list[list[int]]] = []
+    for contour in selected[:8]:
+        approx = cv2.approxPolyDP(contour, 4.0, True)
+        points = [[visual_box.x + int(point[0]), visual_box.y + int(point[1])] for point in approx.reshape(-1, 2)]
+        points = orthogonalize_polygon(points)
+        if len(points) >= 3:
+            polygons.append(points)
+
+    return polygons or rectangle_polygon(visual_box)
+
+
+def assign_visual_outlines(blocks: list[Block]) -> None:
+    text_blocks = [block for block in blocks if block.label == "text"]
+    for block in blocks:
+        if block.label in FIGURE_LABELS:
+            block.outline = visual_outline_from_text_cutouts(block, text_blocks)
+
+
+def horizontal_overlap_fraction(first: Box, second: Box) -> float:
+    left = max(first.x, second.x)
+    right = min(first.x2, second.x2)
+    if right <= left:
+        return 0.0
+    return (right - left) / max(1, first.w)
+
+
+def point_inside_outline(point: tuple[float, float], outline: list[list[list[int]]] | None) -> bool:
+    if not outline:
+        return False
+    for polygon in outline:
+        if len(polygon) < 3:
+            continue
+        contour = np.array(polygon, dtype=np.float32)
+        if cv2.pointPolygonTest(contour, point, False) >= 0:
+            return True
+    return False
+
+
+def text_block_inside_schematic(text_block: Block, schematic_block: Block) -> bool:
+    text_box = box_from_list(text_block.bbox)
+    schematic_box = box_from_list(schematic_block.bbox)
+    if text_box.area <= 0 or schematic_box.area <= text_box.area:
+        return False
+
+    overlap_fraction = intersection_area(text_box, schematic_box) / max(1, text_box.area)
+    top_margin = max(24, int(round(schematic_box.h * 0.055)))
+    touches_schematic_top = text_box.y < schematic_box.y and text_box.y2 >= schematic_box.y - top_margin
+    small_top_label = (
+        touches_schematic_top
+        and text_box.area < schematic_box.area * 0.015
+        and text_box.h < schematic_box.h * 0.08
+        and horizontal_overlap_fraction(text_box, schematic_box) >= 0.60
+    )
+    if overlap_fraction < 0.35:
+        return bool(schematic_block.outline and small_top_label)
+
+    center = (text_box.x + text_box.w / 2.0, text_box.y + text_box.h / 2.0)
+    if schematic_block.outline:
+        corners = [
+            (float(text_box.x), float(text_box.y)),
+            (float(text_box.x2), float(text_box.y)),
+            (float(text_box.x), float(text_box.y2)),
+            (float(text_box.x2), float(text_box.y2)),
+        ]
+        inside_points = int(point_inside_outline(center, schematic_block.outline))
+        inside_points += sum(1 for corner in corners if point_inside_outline(corner, schematic_block.outline))
+        if inside_points >= 1 and overlap_fraction >= 0.45:
+            return True
+
+        return small_top_label
+
+    return overlap_fraction >= 0.75
+
+
+def suppress_text_inside_schematics(blocks: list[Block]) -> list[Block]:
+    schematic_blocks = [block for block in blocks if block.label == "schematic/circuit"]
+    if not schematic_blocks:
+        return blocks
+
+    filtered: list[Block] = []
+    for block in blocks:
+        if block.label == "text" and any(text_block_inside_schematic(block, schematic) for schematic in schematic_blocks):
+            continue
+        filtered.append(block)
+    return filtered
+
+
+def caption_candidate_for_figure(figure_block: Block, text_block: Block) -> dict[str, object] | None:
+    figure_box = box_from_list(figure_block.bbox)
+    text_box = box_from_list(text_block.bbox)
+    if figure_box.area <= 0 or text_box.area <= 0:
+        return None
+    max_caption_area_fraction = 0.18 if figure_box.h < 140 else 0.055
+    if text_box.area > figure_box.area * max_caption_area_fraction:
+        return None
+    if text_box.h > max(80, int(round(figure_box.h * 0.20))):
+        return None
+
+    center_x = text_box.x + text_box.w / 2.0
+    center_y = text_box.y + text_box.h / 2.0
+    horizontal_touch = horizontal_overlap_fraction(text_box, figure_box)
+    extended_left = figure_box.x - max(35, int(round(figure_box.w * 0.08)))
+    extended_right = figure_box.x2 + max(35, int(round(figure_box.w * 0.08)))
+    center_near_figure_x = extended_left <= center_x <= extended_right
+    if horizontal_touch < 0.08 and not center_near_figure_x:
+        return None
+
+    margin_y = max(90 if figure_box.h < 140 else 50, int(round(figure_box.h * 0.13)))
+    position = ""
+    distance = 0
+    if 0 <= text_box.y - figure_box.y2 <= margin_y:
+        position = "below"
+        distance = text_box.y - figure_box.y2
+    elif 0 <= figure_box.y - text_box.y2 <= margin_y:
+        position = "above"
+        distance = figure_box.y - text_box.y2
+    elif intersection_area(text_box, figure_box) / max(1, text_box.area) >= 0.40:
+        bottom_band = center_y >= figure_box.y + figure_box.h * 0.70
+        top_band = center_y <= figure_box.y + figure_box.h * 0.18
+        left_band = center_x <= figure_box.x + figure_box.w * 0.40
+        if bottom_band and left_band:
+            position = "inside-bottom-left"
+            distance = int(round(abs(figure_box.y2 - center_y)))
+        elif top_band and left_band:
+            position = "inside-top-left"
+            distance = int(round(abs(center_y - figure_box.y)))
+        else:
+            return None
+    else:
+        return None
+
+    score = 1.0 / (1.0 + distance)
+    if position.startswith("inside"):
+        score += 0.04
+    if text_box.w <= figure_box.w * 0.25:
+        score += 0.03
+    if horizontal_touch >= 0.30:
+        score += 0.02
+
+    return {
+        "block": text_block.ident,
+        "bbox": text_block.bbox,
+        "position": position,
+        "score": round(score, 5),
+    }
+
+
+def attach_caption_candidates(blocks: list[Block], candidate_text_blocks: list[Block]) -> None:
+    for figure_block in blocks:
+        if figure_block.label not in FIGURE_LABELS:
+            continue
+        candidates = []
+        for text_block in candidate_text_blocks:
+            candidate = caption_candidate_for_figure(figure_block, text_block)
+            if candidate is not None:
+                candidates.append(candidate)
+        candidates.sort(key=lambda item: (-float(item["score"]), str(item["block"])))
+        if candidates:
+            figure_block.caption_candidates = candidates[:4]
+
+
 def classify_blocks(image, boxes: list[Box], scale: float, save_crops: bool, page_dir: Path) -> list[Block]:
     analysis_h, analysis_w = image.shape[:2]
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -656,7 +1032,7 @@ def classify_blocks(image, boxes: list[Box], scale: float, save_crops: bool, pag
     edges = cv2.Canny(gray, 60, 160)
     ann = train_bootstrap_ann()
 
-    blocks: list[Block] = []
+    classified: list[tuple[Block, Box]] = []
     counters: dict[str, int] = {}
     for index, box in enumerate(boxes, start=1):
         features = feature_dict(image, mask, edges, box)
@@ -671,25 +1047,38 @@ def classify_blocks(image, boxes: list[Box], scale: float, save_crops: bool, pag
             int(round(box.w / scale)),
             int(round(box.h / scale)),
         )
-        crop_path: str | None = None
-        if save_crops:
-            crop_dir = page_dir / "blocks" / safe_label(label)
-            crop_path_obj = crop_dir / f"{ident}.png"
-            crop = image[box.y : box.y2, box.x : box.x2]
-            write_image(crop_path_obj, crop)
-            crop_path = crop_path_obj.relative_to(page_dir).as_posix()
-
-        blocks.append(
-            Block(
-                ident=ident,
-                label=label,
-                orientation=orientation,
-                confidence=round(confidence, 4),
-                bbox=original_box.to_list(),
-                features={key: round(float(value), 5) for key, value in features.items()},
-                crop_path=crop_path,
+        classified.append(
+            (
+                Block(
+                    ident=ident,
+                    label=label,
+                    orientation=orientation,
+                    confidence=round(confidence, 4),
+                    bbox=original_box.to_list(),
+                    outline=None,
+                    features={key: round(float(value), 5) for key, value in features.items()},
+                ),
+                box,
             )
         )
+
+    all_blocks = [block for block, _ in classified]
+    assign_visual_outlines(all_blocks)
+    blocks = suppress_text_inside_schematics(all_blocks)
+    attach_caption_candidates(blocks, [block for block, _ in classified if block.label == "text"])
+    kept_idents = {block.ident for block in blocks}
+    if save_crops:
+        blocks_dir = page_dir / "blocks"
+        if blocks_dir.exists():
+            shutil.rmtree(blocks_dir)
+        for block, box in classified:
+            if block.ident not in kept_idents:
+                continue
+            crop_dir = blocks_dir / safe_label(block.label)
+            crop_path_obj = crop_dir / f"{block.ident}.png"
+            crop = image[box.y : box.y2, box.x : box.x2]
+            write_image(crop_path_obj, crop)
+            block.crop_path = crop_path_obj.relative_to(page_dir).as_posix()
 
     return blocks
 
@@ -707,7 +1096,13 @@ def draw_preview(image, blocks: list[Block], preview_width: int, page_dir: Path)
         y2 = int(round((y + h) * scale))
         color = CLASS_COLORS.get(block.label, CLASS_COLORS["other"])
         thickness = max(2, int(round(2 * scale)))
-        cv2.rectangle(preview, (x1, y1), (x2, y2), color, thickness)
+        if block.outline:
+            for polygon in block.outline:
+                points = np.array([[int(round(px * scale)), int(round(py * scale))] for px, py in polygon], dtype=np.int32)
+                if points.shape[0] >= 3:
+                    cv2.polylines(preview, [points], True, color, thickness)
+        else:
+            cv2.rectangle(preview, (x1, y1), (x2, y2), color, thickness)
 
         label = block.label
         if block.label == "text" and block.orientation != "unknown":

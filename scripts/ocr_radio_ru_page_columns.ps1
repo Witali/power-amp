@@ -342,6 +342,7 @@ $script:OcrTotal = 0
 $script:OcrStarted = 0
 $script:OcrCompleted = 0
 $script:OcrSkipped = 0
+$script:FigureLinksText = ""
 
 function Convert-ToStringList {
     param(
@@ -487,6 +488,164 @@ function Save-Crop {
     )
 
     [RadioRuOcrLayout]::SaveCropNormalized($Image, $Rect, $Path, !$NoAutoInvert)
+}
+
+function Save-LayoutCrop {
+    param(
+        [System.Drawing.Bitmap]$Image,
+        [object[]]$Bbox,
+        [string]$Path,
+        [switch]$AutoInvert
+    )
+
+    $rect = [System.Drawing.Rectangle]::new(
+        [int]$Bbox[0],
+        [int]$Bbox[1],
+        [int]$Bbox[2],
+        [int]$Bbox[3]
+    )
+    [RadioRuOcrLayout]::SaveCropNormalized($Image, $rect, $Path, [bool]$AutoInvert)
+}
+
+function Escape-MarkdownCell {
+    param([string]$Text)
+
+    if ($null -eq $Text) {
+        return ""
+    }
+    return (($Text -replace "\r?\n", " ").Replace("|", "\|")).Trim()
+}
+
+function Get-FigureRefFromText {
+    param([string]$Text)
+
+    if (!$Text) {
+        return ""
+    }
+    $normalized = $Text -replace "\s+", " "
+    $match = [regex]::Match($normalized, "(?i)(?:рис(?:унок)?|pic|fig(?:ure)?)\.?\s*[-–—]?\s*(\d+[a-zа-я]?)")
+    if (!$match.Success) {
+        return ""
+    }
+    return "Рис. $($match.Groups[1].Value)"
+}
+
+function Export-FigureLinks {
+    param(
+        [System.Drawing.Bitmap]$Image,
+        [string]$LayoutPath,
+        [string]$PageOutDir
+    )
+
+    $script:FigureLinksText = ""
+    if (!(Test-Path -LiteralPath $LayoutPath)) {
+        return
+    }
+
+    $layout = Get-Content -LiteralPath $LayoutPath -Raw -Encoding UTF8 | ConvertFrom-Json
+    $figureBlocks = @($layout.blocks | Where-Object { $_.label -in @("image", "schematic/circuit", "diagram") })
+    if ($figureBlocks.Count -eq 0) {
+        return
+    }
+
+    $figureDir = Join-Path $PageOutDir "layout_figures"
+    New-Directory $figureDir
+    $tasks = New-Object System.Collections.Generic.List[object]
+    $entries = New-Object System.Collections.Generic.List[object]
+    $captionProfile = Get-OcrProfileConfig -Name "technical"
+
+    foreach ($block in $figureBlocks) {
+        $figureImageName = "$($block.ident).png"
+        $figureImagePath = Join-Path $figureDir $figureImageName
+        Save-LayoutCrop -Image $Image -Bbox $block.bbox -Path $figureImagePath
+        $figureCrop = "layout_figures/$figureImageName"
+
+        $entry = [pscustomobject]@{
+            Block = $block.ident
+            Label = $block.label
+            FigureImageName = $figureImageName
+            FigureCrop = $figureCrop
+            CaptionBlock = ""
+            CaptionText = ""
+            FigureRef = ""
+            CaptionImageName = ""
+            CaptionCrop = ""
+            CaptionPosition = ""
+        }
+        $entries.Add($entry)
+
+        foreach ($candidate in @($block.caption_candidates)) {
+            if ($null -eq $candidate) {
+                continue
+            }
+            $captionBlock = $candidate.block.ToString()
+            $captionBaseName = "$($block.ident).$captionBlock.caption"
+            $captionImageName = "$captionBaseName.png"
+            $captionImagePath = Join-Path $figureDir $captionImageName
+            Save-LayoutCrop -Image $Image -Bbox $candidate.bbox -Path $captionImagePath -AutoInvert
+            $task = New-TesseractTask -ImagePath $captionImagePath -OutBase (Join-Path $figureDir $captionBaseName) -Psm 7 -Profile $captionProfile
+            $task | Add-Member -NotePropertyName FigureEntry -NotePropertyValue $entry -Force
+            $task | Add-Member -NotePropertyName CaptionBlock -NotePropertyValue $captionBlock -Force
+            $task | Add-Member -NotePropertyName CaptionImageName -NotePropertyValue $captionImageName -Force
+            $task | Add-Member -NotePropertyName CaptionPosition -NotePropertyValue $candidate.position.ToString() -Force
+            $tasks.Add($task)
+        }
+    }
+
+    if ($tasks.Count -gt 0) {
+        Write-ProgressLog "OCR figure caption candidates: $($tasks.Count) crop(s)."
+        Invoke-TesseractBatch -Tasks $tasks.ToArray()
+        foreach ($task in $tasks) {
+            if (!(Test-Path -LiteralPath $task.TextPath)) {
+                continue
+            }
+            $captionText = (Get-Content -LiteralPath $task.TextPath -Raw -Encoding UTF8).Trim()
+            $figureRef = Get-FigureRefFromText -Text $captionText
+            if ($figureRef -and !$task.FigureEntry.FigureRef) {
+                $task.FigureEntry.FigureRef = $figureRef
+                $task.FigureEntry.CaptionText = $captionText
+                $task.FigureEntry.CaptionBlock = $task.CaptionBlock
+                $task.FigureEntry.CaptionImageName = $task.CaptionImageName
+                $task.FigureEntry.CaptionCrop = "layout_figures/$($task.CaptionImageName)"
+                $task.FigureEntry.CaptionPosition = $task.CaptionPosition
+            }
+            elseif (!$task.FigureEntry.CaptionText) {
+                $task.FigureEntry.CaptionText = $captionText
+                $task.FigureEntry.CaptionBlock = $task.CaptionBlock
+                $task.FigureEntry.CaptionImageName = $task.CaptionImageName
+                $task.FigureEntry.CaptionCrop = "layout_figures/$($task.CaptionImageName)"
+                $task.FigureEntry.CaptionPosition = $task.CaptionPosition
+            }
+        }
+    }
+
+    $lines = New-Object System.Collections.Generic.List[string]
+    $lines.Add("## Figure links")
+    $lines.Add("")
+    $lines.Add("| Figure | Layout block | Label | Crop | Caption OCR |")
+    $lines.Add("| --- | --- | --- | --- | --- |")
+    foreach ($entry in $entries) {
+        $figureRef = if ($entry.FigureRef) { $entry.FigureRef } else { "(unrecognized)" }
+        $lines.Add("| $(Escape-MarkdownCell $figureRef) | $(Escape-MarkdownCell $entry.Block) | $(Escape-MarkdownCell $entry.Label) | [$($entry.FigureImageName)]($($entry.FigureCrop)) | $(Escape-MarkdownCell $entry.CaptionText) |")
+    }
+
+    $figureLinksPath = Join-Path $PageOutDir "figure_links.md"
+    $figureLinksJsonPath = Join-Path $PageOutDir "figure_links.json"
+    $script:FigureLinksText = ($lines -join "`r`n")
+    $script:FigureLinksText | Set-Content -LiteralPath $figureLinksPath -Encoding UTF8
+    @($entries | ForEach-Object {
+        [pscustomobject]@{
+            figure_ref = $_.FigureRef
+            layout_block = $_.Block
+            label = $_.Label
+            crop = $_.FigureCrop
+            caption_block = $_.CaptionBlock
+            caption_position = $_.CaptionPosition
+            caption_text = $_.CaptionText
+            caption_crop = $_.CaptionCrop
+        }
+    }) | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $figureLinksJsonPath -Encoding UTF8
+    Write-ProgressLog "Wrote figure links: $figureLinksPath"
 }
 
 function New-TesseractTask {
@@ -745,7 +904,11 @@ function Invoke-OcrVariant {
             }
 
             $mergedPath = Join-Path $VariantDir ("merged.{0}.psm{1}.txt" -f $profile.Name, $psm)
-            ($parts -join "`r`n`r`n--- column ---`r`n`r`n") | Set-Content -LiteralPath $mergedPath -Encoding UTF8
+            $mergedText = $parts -join "`r`n`r`n--- column ---`r`n`r`n"
+            if ($script:FigureLinksText) {
+                $mergedText = "$mergedText`r`n`r`n--- figures ---`r`n`r`n$script:FigureLinksText"
+            }
+            $mergedText | Set-Content -LiteralPath $mergedPath -Encoding UTF8
             if (!$NoTextCorrection) {
                 Repair-RadioRuOcrFile -InputPath $mergedPath | Out-Null
             }
@@ -771,6 +934,11 @@ $image = [System.Drawing.Bitmap]::FromFile($resolvedInput)
 try {
     Write-ProgressLog "Processing page image: $resolvedInput"
     Write-ProgressLog "Image size: $($image.Width)x$($image.Height). Output: $pageOutDir"
+    if ($DetectLayout) {
+        $resolvedLayoutOutDir = if ([IO.Path]::IsPathRooted($LayoutOutDir)) { $LayoutOutDir } else { Join-Path $Root $LayoutOutDir }
+        $layoutJsonPath = Join-Path (Join-Path $resolvedLayoutOutDir $imageName) "layout.json"
+        Export-FigureLinks -Image $image -LayoutPath $layoutJsonPath -PageOutDir $pageOutDir
+    }
     $left = [int][Math]::Round($image.Width * $LeftCrop)
     $top = [int][Math]::Round($image.Height * $TopCrop)
     $right = [int][Math]::Round($image.Width * (1.0 - $RightCrop))

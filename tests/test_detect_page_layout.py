@@ -65,6 +65,311 @@ class DetectPageLayoutTests(unittest.TestCase):
         self.assertEqual(detect_page_layout.infer_orientation(features), "vertical")
         self.assertGreater(confidence, 0.25)
 
+    def test_feature_classifier_prefers_large_grayscale_line_art_as_schematic(self) -> None:
+        ann = detect_page_layout.train_bootstrap_ann()
+        features = {
+            "width_ratio": 0.91,
+            "height_ratio": 0.46,
+            "area_ratio": 0.42,
+            "wide_aspect": 0.30,
+            "tall_aspect": 0.14,
+            "ink_density": 0.15,
+            "edge_density": 0.40,
+            "gray_std": 0.65,
+            "gray_levels": 0.97,
+            "component_density": 0.94,
+            "hline_density": 0.06,
+            "vline_density": 0.12,
+            "line_balance": 0.54,
+            "textline_density": 0.22,
+            "horizontal_text_score": 0.22,
+            "vertical_text_score": 0.10,
+            "diagonal_text_score": 0.20,
+            "max_text_score": 0.22,
+            "line_art_score": 0.35,
+            "saturation_mean": 0.00,
+            "saturation_p80": 0.00,
+        }
+
+        label, confidence = detect_page_layout.classify_features(ann, features)
+
+        self.assertEqual(label, "schematic/circuit")
+        self.assertGreater(confidence, 0.35)
+
+    def test_feature_classifier_prefers_labeled_line_art_page_region_as_schematic(self) -> None:
+        ann = detect_page_layout.train_bootstrap_ann()
+        features = {
+            "width_ratio": 0.92,
+            "height_ratio": 0.49,
+            "area_ratio": 0.45,
+            "wide_aspect": 0.28,
+            "tall_aspect": 0.14,
+            "ink_density": 0.11,
+            "edge_density": 0.32,
+            "gray_std": 0.54,
+            "gray_levels": 0.97,
+            "component_density": 0.61,
+            "hline_density": 0.03,
+            "vline_density": 0.06,
+            "line_balance": 0.57,
+            "textline_density": 0.57,
+            "horizontal_text_score": 0.57,
+            "vertical_text_score": 0.38,
+            "diagonal_text_score": 0.16,
+            "max_text_score": 0.57,
+            "line_art_score": 0.25,
+            "saturation_mean": 0.00,
+            "saturation_p80": 0.00,
+        }
+
+        label, confidence = detect_page_layout.classify_features(ann, features)
+
+        self.assertEqual(label, "schematic/circuit")
+        self.assertGreater(confidence, 0.35)
+
+    def test_feature_classifier_prefers_small_technical_line_art_as_schematic(self) -> None:
+        ann = detect_page_layout.train_bootstrap_ann()
+        features = {
+            "width_ratio": 0.42,
+            "height_ratio": 0.03,
+            "area_ratio": 0.01,
+            "wide_aspect": 1.00,
+            "tall_aspect": 0.02,
+            "ink_density": 0.08,
+            "edge_density": 0.24,
+            "gray_std": 0.44,
+            "gray_levels": 0.88,
+            "component_density": 0.47,
+            "hline_density": 0.12,
+            "vline_density": 0.25,
+            "line_balance": 0.47,
+            "textline_density": 0.80,
+            "horizontal_text_score": 0.80,
+            "vertical_text_score": 0.45,
+            "diagonal_text_score": 0.08,
+            "max_text_score": 0.80,
+            "line_art_score": 0.41,
+            "saturation_mean": 0.00,
+            "saturation_p80": 0.00,
+        }
+
+        label, confidence = detect_page_layout.classify_features(ann, features)
+
+        self.assertEqual(label, "schematic/circuit")
+        self.assertGreater(confidence, 0.25)
+
+    def test_feature_classifier_prefers_color_photo_over_schematic(self) -> None:
+        ann = detect_page_layout.train_bootstrap_ann()
+        features = {
+            "width_ratio": 0.30,
+            "height_ratio": 0.17,
+            "area_ratio": 0.05,
+            "wide_aspect": 0.28,
+            "tall_aspect": 0.15,
+            "ink_density": 0.51,
+            "edge_density": 0.47,
+            "gray_std": 0.76,
+            "gray_levels": 0.94,
+            "component_density": 0.81,
+            "hline_density": 1.00,
+            "vline_density": 1.00,
+            "line_balance": 0.85,
+            "textline_density": 0.06,
+            "horizontal_text_score": 0.06,
+            "vertical_text_score": 0.04,
+            "diagonal_text_score": 0.04,
+            "max_text_score": 0.06,
+            "line_art_score": 1.00,
+            "saturation_mean": 0.22,
+            "saturation_p80": 0.38,
+        }
+
+        label, confidence = detect_page_layout.classify_features(ann, features)
+
+        self.assertEqual(label, "image")
+        self.assertGreater(confidence, 0.35)
+
+    def test_suppresses_text_inside_schematic_outline(self) -> None:
+        schematic = detect_page_layout.Block(
+            ident="001_schematic",
+            label="schematic/circuit",
+            orientation="unknown",
+            confidence=0.90,
+            bbox=[10, 10, 260, 180],
+            outline=[[[20, 20], [250, 20], [250, 160], [20, 160]]],
+            features={},
+        )
+        internal_text = detect_page_layout.Block(
+            ident="002_text",
+            label="text",
+            orientation="horizontal",
+            confidence=0.91,
+            bbox=[70, 55, 70, 18],
+            outline=None,
+            features={},
+        )
+        wrapping_text = detect_page_layout.Block(
+            ident="003_text",
+            label="text",
+            orientation="horizontal",
+            confidence=0.91,
+            bbox=[220, 165, 80, 22],
+            outline=None,
+            features={},
+        )
+
+        filtered = detect_page_layout.suppress_text_inside_schematics([schematic, internal_text, wrapping_text])
+
+        self.assertEqual([block.ident for block in filtered], ["001_schematic", "003_text"])
+
+    def test_suppresses_small_text_touching_schematic_top_edge(self) -> None:
+        schematic = detect_page_layout.Block(
+            ident="001_schematic",
+            label="schematic/circuit",
+            orientation="unknown",
+            confidence=0.90,
+            bbox=[50, 100, 500, 360],
+            outline=[[[50, 100], [550, 100], [550, 460], [50, 460]]],
+            features={},
+        )
+        top_label = detect_page_layout.Block(
+            ident="002_text",
+            label="text",
+            orientation="horizontal",
+            confidence=0.91,
+            bbox=[120, 80, 120, 20],
+            outline=None,
+            features={},
+        )
+        side_text = detect_page_layout.Block(
+            ident="003_text",
+            label="text",
+            orientation="horizontal",
+            confidence=0.91,
+            bbox=[570, 80, 120, 20],
+            outline=None,
+            features={},
+        )
+
+        filtered = detect_page_layout.suppress_text_inside_schematics([schematic, top_label, side_text])
+
+        self.assertEqual([block.ident for block in filtered], ["001_schematic", "003_text"])
+
+    def test_visual_outline_uses_simple_text_cutout(self) -> None:
+        figure = detect_page_layout.Block(
+            ident="001_schematic",
+            label="schematic/circuit",
+            orientation="unknown",
+            confidence=0.90,
+            bbox=[10, 10, 200, 100],
+            outline=None,
+            features={},
+        )
+        prose = detect_page_layout.Block(
+            ident="002_text",
+            label="text",
+            orientation="horizontal",
+            confidence=0.91,
+            bbox=[150, 20, 80, 50],
+            outline=None,
+            features={},
+        )
+
+        outline = detect_page_layout.visual_outline_from_text_cutouts(figure, [prose])
+        points = outline[0]
+
+        self.assertLessEqual(len(points), 8)
+        self.assertFalse(detect_page_layout.point_inside_outline((170, 40), outline))
+        self.assertTrue(detect_page_layout.point_inside_outline((40, 40), outline))
+        for first, second in zip(points, points[1:] + points[:1]):
+            self.assertTrue(first[0] == second[0] or first[1] == second[1])
+
+    def test_visual_outline_keeps_small_internal_labels(self) -> None:
+        figure = detect_page_layout.Block(
+            ident="001_schematic",
+            label="schematic/circuit",
+            orientation="unknown",
+            confidence=0.90,
+            bbox=[10, 10, 300, 200],
+            outline=None,
+            features={},
+        )
+        component_label = detect_page_layout.Block(
+            ident="002_text",
+            label="text",
+            orientation="horizontal",
+            confidence=0.91,
+            bbox=[22, 20, 40, 15],
+            outline=None,
+            features={},
+        )
+
+        outline = detect_page_layout.visual_outline_from_text_cutouts(figure, [component_label])
+
+        self.assertEqual(outline, [[[10, 10], [310, 10], [310, 210], [10, 210]]])
+        self.assertTrue(detect_page_layout.point_inside_outline((35, 28), outline))
+
+    def test_attaches_caption_candidates_to_visual_blocks(self) -> None:
+        figure = detect_page_layout.Block(
+            ident="001_schematic",
+            label="schematic/circuit",
+            orientation="unknown",
+            confidence=0.90,
+            bbox=[100, 100, 300, 180],
+            outline=None,
+            features={},
+        )
+        caption = detect_page_layout.Block(
+            ident="002_text",
+            label="text",
+            orientation="horizontal",
+            confidence=0.91,
+            bbox=[110, 286, 70, 24],
+            outline=None,
+            features={},
+        )
+        far_text = detect_page_layout.Block(
+            ident="003_text",
+            label="text",
+            orientation="horizontal",
+            confidence=0.91,
+            bbox=[520, 286, 70, 24],
+            outline=None,
+            features={},
+        )
+
+        detect_page_layout.attach_caption_candidates([figure], [caption, far_text])
+
+        self.assertIsNotNone(figure.caption_candidates)
+        self.assertEqual(figure.caption_candidates[0]["block"], "002_text")
+        self.assertEqual(figure.caption_candidates[0]["position"], "below")
+
+    def test_attaches_caption_to_short_technical_figure(self) -> None:
+        figure = detect_page_layout.Block(
+            ident="024_schematic_circuit",
+            label="schematic/circuit",
+            orientation="unknown",
+            confidence=0.90,
+            bbox=[54, 3028, 1046, 83],
+            outline=None,
+            features={},
+        )
+        caption = detect_page_layout.Block(
+            ident="026_text",
+            label="text",
+            orientation="horizontal",
+            confidence=0.90,
+            bbox=[63, 3182, 184, 69],
+            outline=None,
+            features={},
+        )
+
+        detect_page_layout.attach_caption_candidates([figure], [caption])
+
+        self.assertIsNotNone(figure.caption_candidates)
+        self.assertEqual(figure.caption_candidates[0]["block"], "026_text")
+        self.assertEqual(figure.caption_candidates[0]["position"], "below")
+
     def test_synthetic_page_writes_layout_preview_and_crops(self) -> None:
         cv2 = detect_page_layout.cv2
         np = detect_page_layout.np
@@ -107,6 +412,7 @@ class DetectPageLayoutTests(unittest.TestCase):
             labels = {block["label"] for block in saved["blocks"]}
             self.assertTrue(labels & {"text", "image", "schematic/circuit", "diagram", "table"})
             self.assertTrue(all("orientation" in block for block in saved["blocks"]))
+            self.assertTrue(all("caption_candidates" in block for block in saved["blocks"]))
 
     def test_split_box_by_vertical_gap_separates_margin_strip(self) -> None:
         np = detect_page_layout.np
