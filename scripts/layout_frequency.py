@@ -144,6 +144,35 @@ def write_image(path: Path, image) -> None:
     encoded.tofile(str(path))
 
 
+def put_fitted_text(image, text: str, origin: tuple[int, int], max_width: int, font_scale: float, color, thickness: int) -> None:
+    if not text or max_width <= 0:
+        return
+    scale = font_scale
+    while scale > 0.36 and cv2.getTextSize(text, cv2.FONT_HERSHEY_SIMPLEX, scale, thickness)[0][0] > max_width:
+        scale -= 0.04
+    while text and cv2.getTextSize(text, cv2.FONT_HERSHEY_SIMPLEX, scale, thickness)[0][0] > max_width:
+        text = text[:-4].rstrip() + "..."
+    if text:
+        cv2.putText(image, text, origin, cv2.FONT_HERSHEY_SIMPLEX, scale, color, thickness, cv2.LINE_AA)
+
+
+def add_title_header(image, title: str, subtitle: str = ""):
+    require_dependencies()
+    if len(image.shape) == 2:
+        image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
+
+    header_height = 104
+    height, width = image.shape[:2]
+    result = np.full((height + header_height, width, 3), 255, dtype=np.uint8)
+    result[header_height:, :] = image
+    text_width = max(20, width - 48)
+    put_fitted_text(result, title, (24, 38), text_width, 1.0, (20, 20, 20), 2)
+    if subtitle:
+        put_fitted_text(result, subtitle, (24, 76), text_width, 0.58, (70, 70, 70), 1)
+    cv2.line(result, (0, header_height - 1), (width, header_height - 1), (215, 215, 215), 1)
+    return result
+
+
 def resize_for_analysis(image, max_side: int):
     height, width = image.shape[:2]
     scale = min(1.0, max_side / float(max(width, height)))
@@ -875,7 +904,15 @@ def validate_layout_blocks(blocks: list[dict[str, object]], hints: list[dict[str
     return warnings
 
 
-def draw_frequency_preview(image, result: dict[str, object], preview_width: int, out_path: Path) -> Path:
+def draw_frequency_preview(
+    image,
+    result: dict[str, object],
+    preview_width: int,
+    out_path: Path,
+    title: str | None = None,
+    subtitle: str | None = None,
+    add_header: bool = True,
+) -> Path:
     height, width = image.shape[:2]
     scale = min(1.0, preview_width / float(width))
     preview = image.copy() if scale >= 0.999 else cv2.resize(image, (int(width * scale), int(height * scale)), interpolation=cv2.INTER_AREA)
@@ -930,6 +967,13 @@ def draw_frequency_preview(image, result: dict[str, object], preview_width: int,
             cv2.rectangle(preview, (x1, top), (x1 + text_w + 6, top + text_h + baseline + 5), (255, 255, 255), -1)
             cv2.rectangle(preview, (x1, top), (x1 + text_w + 6, top + text_h + baseline + 5), color, 1)
             cv2.putText(preview, label, (x1 + 3, top + text_h + 2), cv2.FONT_HERSHEY_SIMPLEX, 0.52, color, 1, cv2.LINE_AA)
+
+    if add_header:
+        hint_counts = ", ".join(f"{key}={value}" for key, value in label_counts(result.get("hints", [])).items()) or "none"
+        cluster_counts = ", ".join(f"{key}={value}" for key, value in label_counts(result.get("cluster_hints", [])).items()) or "none"
+        preview_title = title or "Frequency analysis layout hints"
+        preview_subtitle = subtitle if subtitle is not None else f"{result.get('page', out_path.parent.name)} | hints: {hint_counts} | clusters: {cluster_counts}"
+        preview = add_title_header(preview, preview_title, preview_subtitle)
 
     write_image(out_path, preview)
     return out_path

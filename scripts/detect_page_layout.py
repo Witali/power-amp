@@ -135,6 +135,34 @@ def write_image(path: Path, image) -> None:
     encoded.tofile(str(path))
 
 
+def put_fitted_text(image, text: str, origin: tuple[int, int], max_width: int, font_scale: float, color, thickness: int) -> None:
+    if not text or max_width <= 0:
+        return
+    scale = font_scale
+    while scale > 0.36 and cv2.getTextSize(text, cv2.FONT_HERSHEY_SIMPLEX, scale, thickness)[0][0] > max_width:
+        scale -= 0.04
+    while text and cv2.getTextSize(text, cv2.FONT_HERSHEY_SIMPLEX, scale, thickness)[0][0] > max_width:
+        text = text[:-4].rstrip() + "..."
+    if text:
+        cv2.putText(image, text, origin, cv2.FONT_HERSHEY_SIMPLEX, scale, color, thickness, cv2.LINE_AA)
+
+
+def add_title_header(image, title: str, subtitle: str = ""):
+    if len(image.shape) == 2:
+        image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
+
+    header_height = 104
+    height, width = image.shape[:2]
+    result = np.full((height + header_height, width, 3), 255, dtype=np.uint8)
+    result[header_height:, :] = image
+    text_width = max(20, width - 48)
+    put_fitted_text(result, title, (24, 38), text_width, 1.0, (20, 20, 20), 2)
+    if subtitle:
+        put_fitted_text(result, subtitle, (24, 76), text_width, 0.58, (70, 70, 70), 1)
+    cv2.line(result, (0, header_height - 1), (width, header_height - 1), (215, 215, 215), 1)
+    return result
+
+
 def opencl_is_available() -> bool:
     return bool(hasattr(cv2, "ocl") and cv2.ocl.haveOpenCL())
 
@@ -1193,6 +1221,21 @@ def classify_features(ann, features: dict[str, float]) -> tuple[str, float]:
         scores[CLASS_NAMES.index("table")] *= 0.55
         scores[CLASS_NAMES.index("image")] *= 0.60
     if (
+        0.006 < features["area_ratio"] < 0.030
+        and line_art > 0.42
+        and saturation_p80 < 0.08
+        and features["edge_density"] > 0.30
+        and features["ink_density"] < 0.18
+        and features["hline_density"] > 0.055
+        and features["vline_density"] > 0.080
+        and 0.18 < features["line_balance"] < 0.78
+    ):
+        scores[CLASS_NAMES.index("schematic/circuit")] += 2.10
+        scores[CLASS_NAMES.index("text")] *= 0.34
+        scores[CLASS_NAMES.index("image")] *= 0.45
+        scores[CLASS_NAMES.index("diagram")] *= 0.62
+        scores[CLASS_NAMES.index("table")] *= 0.72
+    if (
         saturation_p80 > 0.16
         and features["gray_std"] > 0.45
         and features["area_ratio"] > 0.008
@@ -1372,7 +1415,9 @@ def orthogonalize_polygon(points: list[list[int]]) -> list[list[int]]:
     return simplify_axis_aligned_polygon(collapse_tiny_stair_steps(result))
 
 
-def text_block_should_cut_visual_outline(visual_box: Box, text_box: Box) -> bool:
+def text_block_should_cut_visual_outline(visual_block: Block, text_block: Block) -> bool:
+    visual_box = box_from_list(visual_block.bbox)
+    text_box = box_from_list(text_block.bbox)
     overlap = intersection_box(visual_box, text_box)
     if overlap is None:
         return False
@@ -1391,6 +1436,15 @@ def text_block_should_cut_visual_outline(visual_box: Box, text_box: Box) -> bool
     )
     if not touches_edge:
         return False
+
+    if visual_block.label in {"schematic/circuit", "diagram"}:
+        text_extends_past_visual = (
+            text_box.h > visual_box.h * 1.20
+            and text_box.y < visual_box.y - edge_margin
+            and text_box.y2 >= visual_box.y2 - edge_margin
+        )
+        if text_extends_past_visual and visual_overlap_fraction < 0.45:
+            return False
 
     # Small labels inside a circuit are part of the drawing. Large prose blocks
     # touching a visual block edge are what should carve the preview outline.
@@ -1412,7 +1466,7 @@ def visual_outline_from_text_cutouts(visual_block: Block, text_blocks: list[Bloc
     pad = max(3, min(14, int(round(min(visual_box.w, visual_box.h) * 0.025))))
     for text_block in text_blocks:
         text_box = box_from_list(text_block.bbox)
-        if not text_block_should_cut_visual_outline(visual_box, text_box):
+        if not text_block_should_cut_visual_outline(visual_block, text_block):
             continue
         padded = text_box.inflate(pad, visual_box.x2 + pad + 1, visual_box.y2 + pad + 1)
         cutout = intersection_box(visual_box, padded)
@@ -1457,6 +1511,14 @@ def block_preview_label(block: Block) -> str:
     if block.label == "text" and block.orientation != "unknown":
         label = f"{label} {block.orientation}"
     return f"#{block_number} {label} {block.confidence:.2f}"
+
+
+def block_counts_text(blocks: Iterable[Block]) -> str:
+    counts: dict[str, int] = {}
+    for block in blocks:
+        label = "schematic" if block.label == "schematic/circuit" else block.label
+        counts[label] = counts.get(label, 0) + 1
+    return ", ".join(f"{key}={value}" for key, value in sorted(counts.items())) or "none"
 
 
 def caption_highlight_boxes(blocks: list[Block]) -> list[Box]:
@@ -1634,6 +1696,49 @@ def line_bridge_between_schematic_boxes(line_mask, first: Box, second: Box, widt
     return False
 
 
+def merged_classified_item(
+    items: list[tuple[Block, Box]],
+    label: str,
+    ident: str,
+    image,
+    mask,
+    edges,
+    ann,
+    scale: float,
+    width: int,
+    height: int,
+    marker: str,
+) -> tuple[Block, Box]:
+    merged_box = items[0][1]
+    for _, box in items[1:]:
+        merged_box = union_box(merged_box, box)
+    merged_box = merged_box.clamp(width, height)
+    original_box = Box(
+        int(round(merged_box.x / scale)),
+        int(round(merged_box.y / scale)),
+        int(round(merged_box.w / scale)),
+        int(round(merged_box.h / scale)),
+    )
+    features = feature_dict(image, mask, edges, merged_box)
+    _, merged_confidence = classify_features(ann, features)
+    rounded_features = {key: round(float(value), 5) for key, value in features.items()}
+    rounded_features["merged_block_count"] = round(
+        sum(float(block.features.get("merged_block_count", 1.0)) for block, _ in items),
+        5,
+    )
+    rounded_features[marker] = 1.0
+    block = Block(
+        ident=ident,
+        label=label,
+        orientation="unknown",
+        confidence=round(max([block.confidence for block, _ in items] + [merged_confidence]), 4),
+        bbox=original_box.to_list(),
+        outline=None,
+        features=rounded_features,
+    )
+    return block, merged_box
+
+
 def merge_connected_schematic_blocks(
     classified: list[tuple[Block, Box]],
     image,
@@ -1663,30 +1768,18 @@ def merge_connected_schematic_blocks(
                 if not line_bridge_between_schematic_boxes(line_mask, first_box, second_box, width, height):
                     continue
 
-                merged_box = union_box(first_box, second_box).clamp(width, height)
-                original_box = Box(
-                    int(round(merged_box.x / scale)),
-                    int(round(merged_box.y / scale)),
-                    int(round(merged_box.w / scale)),
-                    int(round(merged_box.h / scale)),
-                )
-                features = feature_dict(image, mask, edges, merged_box)
-                _, merged_confidence = classify_features(ann, features)
-                merged_count = (
-                    float(first_block.features.get("merged_block_count", 1.0))
-                    + float(second_block.features.get("merged_block_count", 1.0))
-                )
-                rounded_features = {key: round(float(value), 5) for key, value in features.items()}
-                rounded_features["merged_block_count"] = round(merged_count, 5)
-                rounded_features["line_bridge_merge"] = 1.0
-                merged_block = Block(
-                    ident=first_block.ident,
-                    label="schematic/circuit",
-                    orientation="unknown",
-                    confidence=round(max(first_block.confidence, second_block.confidence, merged_confidence), 4),
-                    bbox=original_box.to_list(),
-                    outline=None,
-                    features=rounded_features,
+                merged_block, merged_box = merged_classified_item(
+                    [items[first_index], items[second_index]],
+                    "schematic/circuit",
+                    first_block.ident,
+                    image,
+                    mask,
+                    edges,
+                    ann,
+                    scale,
+                    width,
+                    height,
+                    "line_bridge_merge",
                 )
                 items[first_index] = (merged_block, merged_box)
                 del items[second_index]
@@ -1696,6 +1789,240 @@ def merge_connected_schematic_blocks(
                 break
 
     return sorted(items, key=lambda item: (item[1].y, item[1].x))
+
+
+def schematic_attachment_candidate(block: Block, box: Box, width: int, height: int) -> bool:
+    if block.label == "schematic/circuit":
+        return False
+    features = block.features
+    line_art = float(features.get("line_art_score", 0.0))
+    edge = float(features.get("edge_density", 0.0))
+    ink = float(features.get("ink_density", 1.0))
+    saturation = float(features.get("saturation_p80", 1.0))
+    low_confidence_text = block.label == "text" and block.confidence < 0.45
+    visual_label = block.label in {"diagram", "table", "image", "other"}
+    if not (low_confidence_text or visual_label):
+        return False
+    if box.h > height * 0.18:
+        return False
+    return line_art > 0.24 and edge > 0.16 and ink < 0.22 and saturation < 0.08
+
+
+def schematic_attachment_touches(candidate: Box, schematic: Box, width: int, height: int) -> bool:
+    margin = max(8, min(width, height) // 120)
+    vertical_gap = max(0, max(candidate.y, schematic.y) - min(candidate.y2, schematic.y2))
+    horizontal_overlap = box_horizontal_overlap_width(candidate, schematic)
+    if (
+        vertical_gap <= margin
+        and horizontal_overlap >= min(candidate.w, schematic.w) * 0.58
+        and horizontal_overlap >= schematic.w * 0.38
+    ):
+        return True
+
+    horizontal_gap = max(0, max(candidate.x, schematic.x) - min(candidate.x2, schematic.x2))
+    vertical_overlap = box_vertical_overlap_height(candidate, schematic)
+    return (
+        horizontal_gap <= margin
+        and vertical_overlap >= min(candidate.h, schematic.h) * 0.45
+        and vertical_overlap >= schematic.h * 0.18
+    )
+
+
+def merge_line_art_attachments_into_schematics(
+    classified: list[tuple[Block, Box]],
+    image,
+    mask,
+    edges,
+    ann,
+    scale: float,
+    width: int,
+    height: int,
+) -> list[tuple[Block, Box]]:
+    if len(classified) < 2:
+        return classified
+
+    items = classified[:]
+    changed = True
+    while changed:
+        changed = False
+        for schematic_index, (schematic_block, schematic_box) in enumerate(items):
+            if schematic_block.label != "schematic/circuit":
+                continue
+            for other_index, (other_block, other_box) in enumerate(items):
+                if other_index == schematic_index:
+                    continue
+                if not schematic_attachment_candidate(other_block, other_box, width, height):
+                    continue
+                if not schematic_attachment_touches(other_box, schematic_box, width, height):
+                    continue
+                merged_block, merged_box = merged_classified_item(
+                    [items[schematic_index], items[other_index]],
+                    "schematic/circuit",
+                    schematic_block.ident,
+                    image,
+                    mask,
+                    edges,
+                    ann,
+                    scale,
+                    width,
+                    height,
+                    "line_art_attachment_merge",
+                )
+                items[schematic_index] = (merged_block, merged_box)
+                del items[other_index]
+                changed = True
+                break
+            if changed:
+                break
+
+    return sorted(items, key=lambda item: (item[1].y, item[1].x))
+
+
+def stacked_diagram_seed(block: Block, box: Box, width: int, height: int) -> bool:
+    features = block.features
+    if box.w < width * 0.25 or box.h > height * 0.075:
+        return False
+    if box.w / max(1, box.h) < 3.2:
+        return False
+    if float(features.get("saturation_p80", 1.0)) > 0.08:
+        return False
+    return (
+        block.label in {"diagram", "table", "schematic/circuit", "image"}
+        or float(features.get("line_art_score", 0.0)) > 0.32
+    ) and float(features.get("edge_density", 0.0)) > 0.18
+
+
+def stacked_diagram_neighbor(group_box: Box, candidate: Box, width: int, height: int) -> bool:
+    vertical_gap = max(0, max(group_box.y, candidate.y) - min(group_box.y2, candidate.y2))
+    horizontal_overlap = box_horizontal_overlap_width(group_box, candidate)
+    margin = max(8, min(width, height) // 100)
+    centers_close = abs((group_box.x + group_box.w / 2.0) - (candidate.x + candidate.w / 2.0)) <= max(group_box.w, candidate.w) * 0.18
+    return (
+        vertical_gap <= margin
+        and horizontal_overlap >= min(group_box.w, candidate.w) * 0.58
+        and centers_close
+    )
+
+
+def caption_touching_diagram(caption: Box, diagram: Box, width: int, height: int) -> bool:
+    margin = max(8, min(width, height) // 120)
+    if caption.y < diagram.y2 or caption.y - diagram.y2 > margin:
+        return False
+    if caption.x > diagram.x + diagram.w * 0.35:
+        return False
+    return caption.w <= diagram.w * 0.35 and caption.h <= max(50, diagram.h * 0.22)
+
+
+def merge_stacked_diagram_blocks(
+    classified: list[tuple[Block, Box]],
+    image,
+    mask,
+    edges,
+    ann,
+    scale: float,
+    width: int,
+    height: int,
+) -> list[tuple[Block, Box]]:
+    seeds = [index for index, (block, box) in enumerate(classified) if stacked_diagram_seed(block, box, width, height)]
+    if len(seeds) < 3:
+        return classified
+
+    used: set[int] = set()
+    groups: list[list[int]] = []
+    for seed in seeds:
+        if seed in used:
+            continue
+        group = [seed]
+        group_box = classified[seed][1]
+        changed = True
+        while changed:
+            changed = False
+            for candidate in seeds:
+                if candidate in group:
+                    continue
+                candidate_box = classified[candidate][1]
+                if stacked_diagram_neighbor(group_box, candidate_box, width, height):
+                    group.append(candidate)
+                    group_box = union_box(group_box, candidate_box)
+                    changed = True
+        if len(group) >= 3:
+            used.update(group)
+            groups.append(sorted(group, key=lambda index: (classified[index][1].y, classified[index][1].x)))
+
+    if not groups:
+        return classified
+
+    consumed: set[int] = set()
+    replacements: dict[int, tuple[Block, Box]] = {}
+    for group in groups:
+        group_items = [classified[index] for index in group]
+        group_box = group_items[0][1]
+        for _, box in group_items[1:]:
+            group_box = union_box(group_box, box)
+        for index, (block, box) in enumerate(classified):
+            if index in group or block.label != "text":
+                continue
+            if caption_touching_diagram(box, group_box, width, height):
+                group.append(index)
+                group_items.append((block, box))
+                group_box = union_box(group_box, box)
+        first_index = min(group, key=lambda index: (classified[index][1].y, classified[index][1].x))
+        first_number = classified[first_index][0].ident.split("_", 1)[0]
+        merged = merged_classified_item(
+            group_items,
+            "diagram",
+            f"{first_number}_diagram",
+            image,
+            mask,
+            edges,
+            ann,
+            scale,
+            width,
+            height,
+            "stacked_diagram_merge",
+        )
+        replacements[first_index] = merged
+        consumed.update(group)
+
+    result: list[tuple[Block, Box]] = []
+    for index, item in enumerate(classified):
+        if index in replacements:
+            result.append(replacements[index])
+        elif index not in consumed:
+            result.append(item)
+    return sorted(result, key=lambda item: (item[1].y, item[1].x))
+
+
+def demote_textual_diagram_wrappers(classified: list[tuple[Block, Box]]) -> list[tuple[Block, Box]]:
+    result: list[tuple[Block, Box]] = []
+    for block, box in classified:
+        features = block.features
+        looks_like_bold_heading = (
+            block.label == "diagram"
+            and float(features.get("stacked_diagram_merge", 0.0)) >= 0.5
+            and float(features.get("hline_density", 0.0)) < 0.02
+            and float(features.get("vline_density", 0.0)) < 0.02
+            and float(features.get("textline_density", 0.0)) > 0.25
+            and float(features.get("ink_density", 0.0)) > 0.08
+            and float(features.get("area_ratio", 1.0)) < 0.12
+        )
+        if looks_like_bold_heading:
+            demoted_features = dict(features)
+            demoted_features["textual_diagram_wrapper_demote"] = 1.0
+            block = Block(
+                ident=block.ident.replace("_diagram", "_text"),
+                label="text",
+                orientation="horizontal",
+                confidence=block.confidence,
+                bbox=block.bbox,
+                outline=None,
+                features=demoted_features,
+                crop_path=block.crop_path,
+                figure_ref=block.figure_ref,
+                caption_candidates=block.caption_candidates,
+            )
+        result.append((block, box))
+    return result
 
 
 def small_artifact_inside_or_touching_schematic(block: Block, schematic: Block) -> bool:
@@ -1890,6 +2217,13 @@ def classify_blocks(
     classified = merge_connected_schematic_blocks(
         classified, image, mask, edges, ann, scale=scale, width=analysis_w, height=analysis_h
     )
+    classified = merge_stacked_diagram_blocks(
+        classified, image, mask, edges, ann, scale=scale, width=analysis_w, height=analysis_h
+    )
+    classified = demote_textual_diagram_wrappers(classified)
+    classified = merge_line_art_attachments_into_schematics(
+        classified, image, mask, edges, ann, scale=scale, width=analysis_w, height=analysis_h
+    )
     all_blocks = suppress_nested_text_blocks([block for block, _ in classified])
     assign_visual_outlines(all_blocks)
     blocks = suppress_text_inside_schematics(all_blocks)
@@ -1912,7 +2246,15 @@ def classify_blocks(
     return blocks
 
 
-def draw_preview(image, blocks: list[Block], preview_width: int, page_dir: Path) -> Path:
+def draw_preview(
+    image,
+    blocks: list[Block],
+    preview_width: int,
+    page_dir: Path,
+    title: str = "OpenCV layout detector",
+    subtitle: str | None = None,
+    add_header: bool = True,
+) -> Path:
     height, width = image.shape[:2]
     scale = min(1.0, preview_width / float(width))
     preview = image.copy() if scale >= 0.999 else cv2.resize(image, (int(width * scale), int(height * scale)), interpolation=cv2.INTER_AREA)
@@ -1952,6 +2294,10 @@ def draw_preview(image, blocks: list[Block], preview_width: int, page_dir: Path)
         cv2.rectangle(preview, (x1, top), (x1 + text_w + 6, top + text_h + baseline + 5), color, -1)
         cv2.putText(preview, label, (x1 + 3, top + text_h + 2), cv2.FONT_HERSHEY_SIMPLEX, 0.52, (255, 255, 255), 1, cv2.LINE_AA)
 
+    if add_header:
+        preview_subtitle = subtitle if subtitle is not None else f"{page_dir.name} | blocks: {block_counts_text(blocks)}"
+        preview = add_title_header(preview, title, preview_subtitle)
+
     path = page_dir / "preview.png"
     write_image(path, preview)
     return path
@@ -1966,6 +2312,7 @@ def detect_page_layout(
     save_crops: bool = True,
     accelerator: str = "cpu",
     frequency_hints: str = "validate",
+    preview_header: bool = True,
 ) -> dict[str, object]:
     accelerator = configure_accelerator(accelerator)
     original = read_image(image_path)
@@ -1993,7 +2340,7 @@ def detect_page_layout(
     original_frequency_cluster_hints = scale_frequency_hints_to_original(frequency_result, scale, "cluster_hints")
     frequency_warnings = frequency_validation_warnings(blocks, original_frequency_hints)
     frequency_cluster_warnings = frequency_validation_warnings(blocks, original_frequency_cluster_hints)
-    preview_path = draw_preview(original, blocks, preview_width=preview_width, page_dir=page_dir)
+    preview_path = draw_preview(original, blocks, preview_width=preview_width, page_dir=page_dir, add_header=preview_header)
 
     result = {
         "source": str(image_path),
@@ -2006,6 +2353,7 @@ def detect_page_layout(
         "accelerator": accelerator,
         "frequency_hints_enabled": frequency_hints != "off",
         "frequency_mode": frequency_hints,
+        "preview_header": preview_header,
         "frequency_hints": original_frequency_hints,
         "frequency_cluster_hints": original_frequency_cluster_hints,
         "frequency_warnings": frequency_warnings,
@@ -2036,6 +2384,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         default="validate",
         help="Use 1D frequency analysis: off, validate-only, or hints as extra OpenCV candidate boxes.",
     )
+    parser.add_argument("--no-preview-header", action="store_true", help="Write raw annotated preview without the title header.")
     parser.add_argument("--no-crops", action="store_true", help="Do not write block crop images.")
     return parser.parse_args(argv)
 
@@ -2052,6 +2401,7 @@ def main(argv: list[str]) -> int:
         save_crops=not args.no_crops,
         accelerator=args.accelerator,
         frequency_hints=args.frequency_hints,
+        preview_header=not args.no_preview_header,
     )
     counts: dict[str, int] = {}
     for block in result["blocks"]:

@@ -1,0 +1,660 @@
+{
+  "source": ".tmp\\radio_ru_2000_power_pages\\b.2000-01.041.jpg",
+  "page": "b.2000-01.041",
+  "width": 2500,
+  "height": 3338,
+  "analysis_scale": 0.5392450569203115,
+  "classes": [
+    "text",
+    "image",
+    "schematic/circuit",
+    "diagram",
+    "table",
+    "other"
+  ],
+  "metadata": {
+    "threshold": 184,
+    "bright_foreground": false,
+    "analysis_width": 1348,
+    "analysis_height": 1800,
+    "accelerator": "cpu",
+    "frequency_hint_count": 6,
+    "frequency_cluster_hint_count": 7,
+    "frequency_visual_hint_count": 0,
+    "frequency_text_hint_count": 0,
+    "frequency_mode": "validate"
+  },
+  "accelerator": "cpu",
+  "frequency_hints_enabled": true,
+  "frequency_mode": "validate",
+  "frequency_hints": [
+    {
+      "label": "schematic/circuit",
+      "confidence": 0.90169,
+      "bbox": [
+        0,
+        0,
+        890,
+        3338
+      ],
+      "area_ratio": 0.35608
+    },
+    {
+      "label": "schematic/circuit",
+      "confidence": 0.91442,
+      "bbox": [
+        475,
+        59,
+        593,
+        178
+      ],
+      "area_ratio": 0.01266
+    },
+    {
+      "label": "text",
+      "confidence": 0.79962,
+      "bbox": [
+        61,
+        61,
+        2439,
+        3277
+      ],
+      "area_ratio": 0.95763
+    },
+    {
+      "label": "schematic/circuit",
+      "confidence": 0.80325,
+      "bbox": [
+        297,
+        1365,
+        297,
+        178
+      ],
+      "area_ratio": 0.00633
+    },
+    {
+      "label": "schematic/circuit",
+      "confidence": 0.58497,
+      "bbox": [
+        1899,
+        2374,
+        475,
+        119
+      ],
+      "area_ratio": 0.00675
+    },
+    {
+      "label": "schematic/circuit",
+      "confidence": 0.75797,
+      "bbox": [
+        2018,
+        2730,
+        356,
+        237
+      ],
+      "area_ratio": 0.01013
+    }
+  ],
+  "frequency_cluster_hints": [
+    {
+      "label": "schematic/circuit",
+      "family": "line_art",
+      "confidence": 0.91578,
+      "bbox": [
+        0,
+        0,
+        890,
+        3338
+      ],
+      "area_ratio": 0.35608,
+      "tile_count": 155,
+      "mean_feature_distance": 0.15766
+    },
+    {
+      "label": "schematic/circuit",
+      "family": "line_art",
+      "confidence": 0.91412,
+      "bbox": [
+        475,
+        59,
+        593,
+        178
+      ],
+      "area_ratio": 0.01266,
+      "tile_count": 19,
+      "mean_feature_distance": 0.1231
+    },
+    {
+      "label": "schematic/circuit",
+      "family": "line_art",
+      "confidence": 0.80325,
+      "bbox": [
+        297,
+        1365,
+        297,
+        178
+      ],
+      "area_ratio": 0.00633,
+      "tile_count": 6,
+      "mean_feature_distance": 0.14026
+    },
+    {
+      "label": "image",
+      "family": "image",
+      "confidence": 0.70247,
+      "bbox": [
+        59,
+        2314,
+        119,
+        356
+      ],
+      "area_ratio": 0.00506,
+      "tile_count": 8,
+      "mean_feature_distance": 0.1172
+    },
+    {
+      "label": "schematic/circuit",
+      "family": "line_art",
+      "confidence": 0.58497,
+      "bbox": [
+        1899,
+        2374,
+        475,
+        119
+      ],
+      "area_ratio": 0.00675,
+      "tile_count": 10,
+      "mean_feature_distance": 0.12956
+    },
+    {
+      "label": "schematic/circuit",
+      "family": "line_art",
+      "confidence": 0.77729,
+      "bbox": [
+        1899,
+        2730,
+        475,
+        237
+      ],
+      "area_ratio": 0.0135,
+      "tile_count": 17,
+      "mean_feature_distance": 0.15919
+    },
+    {
+      "label": "schematic/circuit",
+      "family": "line_art",
+      "confidence": 0.83704,
+      "bbox": [
+        1899,
+        3026,
+        475,
+        119
+      ],
+      "area_ratio": 0.00675,
+      "tile_count": 13,
+      "mean_feature_distance": 0.15868
+    }
+  ],
+  "frequency_warnings": [
+    {
+      "block": "001_image",
+      "block_label": "image",
+      "hint_label": "schematic/circuit",
+      "hint_confidence": 0.90169,
+      "block_overlap": 1.0,
+      "hint_overlap": 0.17418,
+      "bbox": [
+        20,
+        32,
+        158,
+        3275
+      ],
+      "hint_bbox": [
+        0,
+        0,
+        890,
+        3338
+      ]
+    },
+    {
+      "block": "001_image",
+      "block_label": "image",
+      "hint_label": "text",
+      "hint_confidence": 0.79962,
+      "block_overlap": 0.73395,
+      "hint_overlap": 0.04752,
+      "bbox": [
+        20,
+        32,
+        158,
+        3275
+      ],
+      "hint_bbox": [
+        61,
+        61,
+        2439,
+        3277
+      ]
+    },
+    {
+      "block": "002_text",
+      "block_label": "text",
+      "hint_label": "schematic/circuit",
+      "hint_confidence": 0.90169,
+      "block_overlap": 0.46658,
+      "hint_overlap": 0.7849,
+      "bbox": [
+        178,
+        32,
+        1526,
+        3275
+      ],
+      "hint_bbox": [
+        0,
+        0,
+        890,
+        3338
+      ]
+    },
+    {
+      "block": "002_text",
+      "block_label": "text",
+      "hint_label": "schematic/circuit",
+      "hint_confidence": 0.91442,
+      "block_overlap": 0.02112,
+      "hint_overlap": 1.0,
+      "bbox": [
+        178,
+        32,
+        1526,
+        3275
+      ],
+      "hint_bbox": [
+        475,
+        59,
+        593,
+        178
+      ]
+    },
+    {
+      "block": "002_text",
+      "block_label": "text",
+      "hint_label": "schematic/circuit",
+      "hint_confidence": 0.80325,
+      "block_overlap": 0.01058,
+      "hint_overlap": 1.0,
+      "bbox": [
+        178,
+        32,
+        1526,
+        3275
+      ],
+      "hint_bbox": [
+        297,
+        1365,
+        297,
+        178
+      ]
+    },
+    {
+      "block": "004_text",
+      "block_label": "text",
+      "hint_label": "schematic/circuit",
+      "hint_confidence": 0.58497,
+      "block_overlap": 0.05536,
+      "hint_overlap": 1.0,
+      "bbox": [
+        1719,
+        1858,
+        734,
+        1391
+      ],
+      "hint_bbox": [
+        1899,
+        2374,
+        475,
+        119
+      ]
+    },
+    {
+      "block": "004_text",
+      "block_label": "text",
+      "hint_label": "schematic/circuit",
+      "hint_confidence": 0.75797,
+      "block_overlap": 0.08264,
+      "hint_overlap": 1.0,
+      "bbox": [
+        1719,
+        1858,
+        734,
+        1391
+      ],
+      "hint_bbox": [
+        2018,
+        2730,
+        356,
+        237
+      ]
+    }
+  ],
+  "frequency_cluster_warnings": [
+    {
+      "block": "001_image",
+      "block_label": "image",
+      "hint_label": "schematic/circuit",
+      "hint_confidence": 0.91578,
+      "block_overlap": 1.0,
+      "hint_overlap": 0.17418,
+      "bbox": [
+        20,
+        32,
+        158,
+        3275
+      ],
+      "hint_bbox": [
+        0,
+        0,
+        890,
+        3338
+      ]
+    },
+    {
+      "block": "002_text",
+      "block_label": "text",
+      "hint_label": "schematic/circuit",
+      "hint_confidence": 0.91578,
+      "block_overlap": 0.46658,
+      "hint_overlap": 0.7849,
+      "bbox": [
+        178,
+        32,
+        1526,
+        3275
+      ],
+      "hint_bbox": [
+        0,
+        0,
+        890,
+        3338
+      ]
+    },
+    {
+      "block": "002_text",
+      "block_label": "text",
+      "hint_label": "schematic/circuit",
+      "hint_confidence": 0.91412,
+      "block_overlap": 0.02112,
+      "hint_overlap": 1.0,
+      "bbox": [
+        178,
+        32,
+        1526,
+        3275
+      ],
+      "hint_bbox": [
+        475,
+        59,
+        593,
+        178
+      ]
+    },
+    {
+      "block": "002_text",
+      "block_label": "text",
+      "hint_label": "schematic/circuit",
+      "hint_confidence": 0.80325,
+      "block_overlap": 0.01058,
+      "hint_overlap": 1.0,
+      "bbox": [
+        178,
+        32,
+        1526,
+        3275
+      ],
+      "hint_bbox": [
+        297,
+        1365,
+        297,
+        178
+      ]
+    },
+    {
+      "block": "004_text",
+      "block_label": "text",
+      "hint_label": "schematic/circuit",
+      "hint_confidence": 0.58497,
+      "block_overlap": 0.05536,
+      "hint_overlap": 1.0,
+      "bbox": [
+        1719,
+        1858,
+        734,
+        1391
+      ],
+      "hint_bbox": [
+        1899,
+        2374,
+        475,
+        119
+      ]
+    },
+    {
+      "block": "004_text",
+      "block_label": "text",
+      "hint_label": "schematic/circuit",
+      "hint_confidence": 0.77729,
+      "block_overlap": 0.11026,
+      "hint_overlap": 1.0,
+      "bbox": [
+        1719,
+        1858,
+        734,
+        1391
+      ],
+      "hint_bbox": [
+        1899,
+        2730,
+        475,
+        237
+      ]
+    },
+    {
+      "block": "004_text",
+      "block_label": "text",
+      "hint_label": "schematic/circuit",
+      "hint_confidence": 0.83704,
+      "block_overlap": 0.05536,
+      "hint_overlap": 1.0,
+      "bbox": [
+        1719,
+        1858,
+        734,
+        1391
+      ],
+      "hint_bbox": [
+        1899,
+        3026,
+        475,
+        119
+      ]
+    }
+  ],
+  "preview": "preview.png",
+  "blocks": [
+    {
+      "ident": "001_image",
+      "label": "image",
+      "orientation": "unknown",
+      "confidence": 0.7809,
+      "bbox": [
+        20,
+        32,
+        158,
+        3275
+      ],
+      "outline": [
+        [
+          [
+            20,
+            32
+          ],
+          [
+            178,
+            32
+          ],
+          [
+            178,
+            3307
+          ],
+          [
+            20,
+            3307
+          ]
+        ]
+      ],
+      "features": {
+        "width_ratio": 0.06306,
+        "height_ratio": 0.98111,
+        "area_ratio": 0.06187,
+        "wide_aspect": 0.00963,
+        "tall_aspect": 1.0,
+        "ink_density": 0.65028,
+        "edge_density": 0.25784,
+        "gray_std": 0.48384,
+        "gray_levels": 0.9375,
+        "component_density": 0.41969,
+        "hline_density": 1.0,
+        "vline_density": 1.0,
+        "line_art_score": 1.0,
+        "line_balance": 0.75173,
+        "saturation_mean": 0.3399,
+        "saturation_p80": 0.52157,
+        "textline_density": 0.01019,
+        "horizontal_text_score": 0.01019,
+        "vertical_text_score": 0.21176,
+        "diagonal_text_score": 0.16514,
+        "max_text_score": 0.21176
+      },
+      "crop_path": "blocks/image/001_image.png",
+      "figure_ref": null,
+      "caption_candidates": null
+    },
+    {
+      "ident": "002_text",
+      "label": "text",
+      "orientation": "horizontal",
+      "confidence": 0.9024,
+      "bbox": [
+        178,
+        32,
+        1526,
+        3275
+      ],
+      "outline": null,
+      "features": {
+        "width_ratio": 0.61053,
+        "height_ratio": 0.98111,
+        "area_ratio": 0.599,
+        "wide_aspect": 0.0932,
+        "tall_aspect": 0.42916,
+        "ink_density": 0.23149,
+        "edge_density": 0.63736,
+        "gray_std": 0.73824,
+        "gray_levels": 0.96875,
+        "component_density": 1.0,
+        "hline_density": 0.03261,
+        "vline_density": 0.0,
+        "line_art_score": 0.08762,
+        "line_balance": 0.0,
+        "saturation_mean": 0.01007,
+        "saturation_p80": 0.0,
+        "textline_density": 0.72367,
+        "horizontal_text_score": 0.72367,
+        "vertical_text_score": 0.06561,
+        "diagonal_text_score": 0.12787,
+        "max_text_score": 0.72367
+      },
+      "crop_path": "blocks/text/002_text.png",
+      "figure_ref": null,
+      "caption_candidates": null
+    },
+    {
+      "ident": "003_text",
+      "label": "text",
+      "orientation": "horizontal",
+      "confidence": 0.9034,
+      "bbox": [
+        1699,
+        74,
+        768,
+        1764
+      ],
+      "outline": null,
+      "features": {
+        "width_ratio": 0.30712,
+        "height_ratio": 0.52833,
+        "area_ratio": 0.16226,
+        "wide_aspect": 0.08707,
+        "tall_aspect": 0.45942,
+        "ink_density": 0.2484,
+        "edge_density": 0.73066,
+        "gray_std": 0.77253,
+        "gray_levels": 0.96875,
+        "component_density": 1.0,
+        "hline_density": 0.0,
+        "vline_density": 0.0,
+        "line_art_score": 0.07103,
+        "line_balance": 0.0,
+        "saturation_mean": 0.00022,
+        "saturation_p80": 0.0,
+        "textline_density": 0.87066,
+        "horizontal_text_score": 0.87066,
+        "vertical_text_score": 0.04348,
+        "diagonal_text_score": 0.14922,
+        "max_text_score": 0.87066
+      },
+      "crop_path": "blocks/text/003_text.png",
+      "figure_ref": null,
+      "caption_candidates": null
+    },
+    {
+      "ident": "004_text",
+      "label": "text",
+      "orientation": "diagonal",
+      "confidence": 0.5963,
+      "bbox": [
+        1719,
+        1858,
+        734,
+        1391
+      ],
+      "outline": null,
+      "features": {
+        "width_ratio": 0.29377,
+        "height_ratio": 0.41667,
+        "area_ratio": 0.1224,
+        "wide_aspect": 0.1056,
+        "tall_aspect": 0.37879,
+        "ink_density": 0.08062,
+        "edge_density": 0.22123,
+        "gray_std": 0.43136,
+        "gray_levels": 0.9375,
+        "component_density": 0.3064,
+        "hline_density": 0.14445,
+        "vline_density": 0.00406,
+        "line_art_score": 0.30311,
+        "line_balance": 0.02811,
+        "saturation_mean": 0.01762,
+        "saturation_p80": 0.01961,
+        "textline_density": 0.312,
+        "horizontal_text_score": 0.312,
+        "vertical_text_score": 0.18182,
+        "diagonal_text_score": 0.68005,
+        "max_text_score": 0.68005
+      },
+      "crop_path": "blocks/text/004_text.png",
+      "figure_ref": null,
+      "caption_candidates": null
+    }
+  ]
+}

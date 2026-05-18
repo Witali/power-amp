@@ -1,0 +1,801 @@
+{
+  "source": ".tmp\\radio_ru_2000_power_pages\\b.2000-11.044.jpg",
+  "page": "b.2000-11.044",
+  "width": 2500,
+  "height": 3338,
+  "analysis_scale": 0.5392450569203115,
+  "classes": [
+    "text",
+    "image",
+    "schematic/circuit",
+    "diagram",
+    "table",
+    "other"
+  ],
+  "metadata": {
+    "threshold": 181,
+    "bright_foreground": false,
+    "analysis_width": 1348,
+    "analysis_height": 1800,
+    "accelerator": "cpu",
+    "frequency_hint_count": 14,
+    "frequency_cluster_hint_count": 6,
+    "frequency_visual_hint_count": 0,
+    "frequency_text_hint_count": 0,
+    "frequency_mode": "validate"
+  },
+  "accelerator": "cpu",
+  "frequency_hints_enabled": true,
+  "frequency_mode": "validate",
+  "frequency_hints": [
+    {
+      "label": "text",
+      "confidence": 0.79773,
+      "bbox": [
+        61,
+        0,
+        2439,
+        3338
+      ],
+      "area_ratio": 0.97552
+    },
+    {
+      "label": "schematic/circuit",
+      "confidence": 0.92,
+      "bbox": [
+        2314,
+        0,
+        185,
+        2314
+      ],
+      "area_ratio": 0.05143
+    },
+    {
+      "label": "schematic/circuit",
+      "confidence": 0.92,
+      "bbox": [
+        59,
+        1306,
+        297,
+        237
+      ],
+      "area_ratio": 0.00844
+    },
+    {
+      "label": "schematic/circuit",
+      "confidence": 0.9194,
+      "bbox": [
+        415,
+        1306,
+        771,
+        119
+      ],
+      "area_ratio": 0.01097
+    },
+    {
+      "label": "schematic/circuit",
+      "confidence": 0.57166,
+      "bbox": [
+        653,
+        2136,
+        712,
+        178
+      ],
+      "area_ratio": 0.01519
+    },
+    {
+      "label": "schematic/circuit",
+      "confidence": 0.79128,
+      "bbox": [
+        1840,
+        2136,
+        356,
+        297
+      ],
+      "area_ratio": 0.01266
+    },
+    {
+      "label": "schematic/circuit",
+      "confidence": 0.64099,
+      "bbox": [
+        1128,
+        2374,
+        415,
+        178
+      ],
+      "area_ratio": 0.00886
+    },
+    {
+      "label": "schematic/circuit",
+      "confidence": 0.7074,
+      "bbox": [
+        1187,
+        2492,
+        1313,
+        846
+      ],
+      "area_ratio": 0.13306
+    },
+    {
+      "label": "schematic/circuit",
+      "confidence": 0.7196,
+      "bbox": [
+        475,
+        2552,
+        297,
+        297
+      ],
+      "area_ratio": 0.01055
+    },
+    {
+      "label": "schematic/circuit",
+      "confidence": 0.75842,
+      "bbox": [
+        890,
+        2552,
+        297,
+        178
+      ],
+      "area_ratio": 0.00633
+    },
+    {
+      "label": "schematic/circuit",
+      "confidence": 0.81049,
+      "bbox": [
+        1246,
+        2611,
+        415,
+        178
+      ],
+      "area_ratio": 0.00886
+    },
+    {
+      "label": "text",
+      "confidence": 0.78172,
+      "bbox": [
+        655,
+        2672,
+        356,
+        119
+      ],
+      "area_ratio": 0.00506
+    },
+    {
+      "label": "schematic/circuit",
+      "confidence": 0.66531,
+      "bbox": [
+        475,
+        2789,
+        949,
+        356
+      ],
+      "area_ratio": 0.04051
+    },
+    {
+      "label": "schematic/circuit",
+      "confidence": 0.81202,
+      "bbox": [
+        2077,
+        2789,
+        237,
+        297
+      ],
+      "area_ratio": 0.00844
+    }
+  ],
+  "frequency_cluster_hints": [
+    {
+      "label": "schematic/circuit",
+      "family": "line_art",
+      "confidence": 0.92,
+      "bbox": [
+        59,
+        1306,
+        297,
+        237
+      ],
+      "area_ratio": 0.00844,
+      "tile_count": 9,
+      "mean_feature_distance": 0.11652
+    },
+    {
+      "label": "schematic/circuit",
+      "family": "line_art",
+      "confidence": 0.9194,
+      "bbox": [
+        415,
+        1306,
+        771,
+        119
+      ],
+      "area_ratio": 0.01097,
+      "tile_count": 18,
+      "mean_feature_distance": 0.10381
+    },
+    {
+      "label": "schematic/circuit",
+      "family": "line_art",
+      "confidence": 0.7053,
+      "bbox": [
+        475,
+        2077,
+        2025,
+        1261
+      ],
+      "area_ratio": 0.30603,
+      "tile_count": 228,
+      "mean_feature_distance": 0.20855
+    },
+    {
+      "label": "schematic/circuit",
+      "family": "line_art",
+      "confidence": 0.80832,
+      "bbox": [
+        1840,
+        2136,
+        356,
+        534
+      ],
+      "area_ratio": 0.02279,
+      "tile_count": 29,
+      "mean_feature_distance": 0.14684
+    },
+    {
+      "label": "text",
+      "family": "text",
+      "confidence": 0.78157,
+      "bbox": [
+        653,
+        2670,
+        356,
+        119
+      ],
+      "area_ratio": 0.00506,
+      "tile_count": 11,
+      "mean_feature_distance": 0.14119
+    },
+    {
+      "label": "text",
+      "family": "text",
+      "confidence": 0.74209,
+      "bbox": [
+        2440,
+        2908,
+        59,
+        356
+      ],
+      "area_ratio": 0.00253,
+      "tile_count": 6,
+      "mean_feature_distance": 0.07695
+    }
+  ],
+  "frequency_warnings": [
+    {
+      "block": "006_text",
+      "block_label": "text",
+      "hint_label": "schematic/circuit",
+      "hint_confidence": 0.92,
+      "block_overlap": 0.07388,
+      "hint_overlap": 0.9798,
+      "bbox": [
+        65,
+        1270,
+        1543,
+        605
+      ],
+      "hint_bbox": [
+        59,
+        1306,
+        297,
+        237
+      ]
+    },
+    {
+      "block": "006_text",
+      "block_label": "text",
+      "hint_label": "schematic/circuit",
+      "hint_confidence": 0.9194,
+      "block_overlap": 0.09828,
+      "hint_overlap": 1.0,
+      "bbox": [
+        65,
+        1270,
+        1543,
+        605
+      ],
+      "hint_bbox": [
+        415,
+        1306,
+        771,
+        119
+      ]
+    },
+    {
+      "block": "009_schematic_circuit",
+      "block_label": "schematic/circuit",
+      "hint_label": "text",
+      "hint_confidence": 0.79773,
+      "block_overlap": 1.0,
+      "hint_overlap": 0.26595,
+      "bbox": [
+        493,
+        2090,
+        1838,
+        1178
+      ],
+      "hint_bbox": [
+        61,
+        0,
+        2439,
+        3338
+      ]
+    },
+    {
+      "block": "009_schematic_circuit",
+      "block_label": "schematic/circuit",
+      "hint_label": "text",
+      "hint_confidence": 0.78172,
+      "block_overlap": 0.01957,
+      "hint_overlap": 1.0,
+      "bbox": [
+        493,
+        2090,
+        1838,
+        1178
+      ],
+      "hint_bbox": [
+        655,
+        2672,
+        356,
+        119
+      ]
+    }
+  ],
+  "frequency_cluster_warnings": [
+    {
+      "block": "006_text",
+      "block_label": "text",
+      "hint_label": "schematic/circuit",
+      "hint_confidence": 0.92,
+      "block_overlap": 0.07388,
+      "hint_overlap": 0.9798,
+      "bbox": [
+        65,
+        1270,
+        1543,
+        605
+      ],
+      "hint_bbox": [
+        59,
+        1306,
+        297,
+        237
+      ]
+    },
+    {
+      "block": "006_text",
+      "block_label": "text",
+      "hint_label": "schematic/circuit",
+      "hint_confidence": 0.9194,
+      "block_overlap": 0.09828,
+      "hint_overlap": 1.0,
+      "bbox": [
+        65,
+        1270,
+        1543,
+        605
+      ],
+      "hint_bbox": [
+        415,
+        1306,
+        771,
+        119
+      ]
+    },
+    {
+      "block": "009_schematic_circuit",
+      "block_label": "schematic/circuit",
+      "hint_label": "text",
+      "hint_confidence": 0.78157,
+      "block_overlap": 0.01957,
+      "hint_overlap": 1.0,
+      "bbox": [
+        493,
+        2090,
+        1838,
+        1178
+      ],
+      "hint_bbox": [
+        653,
+        2670,
+        356,
+        119
+      ]
+    }
+  ],
+  "preview": "preview.png",
+  "blocks": [
+    {
+      "ident": "001_text",
+      "label": "text",
+      "orientation": "horizontal",
+      "confidence": 0.9008,
+      "bbox": [
+        76,
+        83,
+        753,
+        1018
+      ],
+      "outline": null,
+      "features": {
+        "width_ratio": 0.30119,
+        "height_ratio": 0.305,
+        "area_ratio": 0.09186,
+        "wide_aspect": 0.14791,
+        "tall_aspect": 0.27044,
+        "ink_density": 0.25056,
+        "edge_density": 0.76618,
+        "gray_std": 0.7516,
+        "gray_levels": 0.96875,
+        "component_density": 1.0,
+        "hline_density": 0.0,
+        "vline_density": 0.0,
+        "line_art_score": 0.0933,
+        "line_balance": 0.0,
+        "saturation_mean": 0.00152,
+        "saturation_p80": 0.0,
+        "textline_density": 0.85246,
+        "horizontal_text_score": 0.85246,
+        "vertical_text_score": 0.04433,
+        "diagonal_text_score": 0.15929,
+        "max_text_score": 0.85246
+      },
+      "crop_path": "blocks/text/001_text.png",
+      "figure_ref": null,
+      "caption_candidates": null
+    },
+    {
+      "ident": "002_text",
+      "label": "text",
+      "orientation": "horizontal",
+      "confidence": 0.9011,
+      "bbox": [
+        829,
+        83,
+        760,
+        1018
+      ],
+      "outline": null,
+      "features": {
+        "width_ratio": 0.30415,
+        "height_ratio": 0.305,
+        "area_ratio": 0.09277,
+        "wide_aspect": 0.14936,
+        "tall_aspect": 0.2678,
+        "ink_density": 0.26006,
+        "edge_density": 0.78928,
+        "gray_std": 0.77195,
+        "gray_levels": 0.96875,
+        "component_density": 1.0,
+        "hline_density": 0.0,
+        "vline_density": 0.0,
+        "line_art_score": 0.08437,
+        "line_balance": 0.0,
+        "saturation_mean": 0.00164,
+        "saturation_p80": 0.0,
+        "textline_density": 0.81967,
+        "horizontal_text_score": 0.81967,
+        "vertical_text_score": 0.0439,
+        "diagonal_text_score": 0.15929,
+        "max_text_score": 0.81967
+      },
+      "crop_path": "blocks/text/002_text.png",
+      "figure_ref": null,
+      "caption_candidates": null
+    },
+    {
+      "ident": "003_text",
+      "label": "text",
+      "orientation": "horizontal",
+      "confidence": 0.9008,
+      "bbox": [
+        1612,
+        83,
+        740,
+        1016
+      ],
+      "outline": null,
+      "features": {
+        "width_ratio": 0.29599,
+        "height_ratio": 0.30444,
+        "area_ratio": 0.09011,
+        "wide_aspect": 0.14562,
+        "tall_aspect": 0.27469,
+        "ink_density": 0.26775,
+        "edge_density": 0.8106,
+        "gray_std": 0.77496,
+        "gray_levels": 0.96875,
+        "component_density": 1.0,
+        "hline_density": 0.0,
+        "vline_density": 0.0,
+        "line_art_score": 0.11218,
+        "line_balance": 0.0,
+        "saturation_mean": 0.00364,
+        "saturation_p80": 0.00784,
+        "textline_density": 0.88686,
+        "horizontal_text_score": 0.88686,
+        "vertical_text_score": 0.04511,
+        "diagonal_text_score": 0.21365,
+        "max_text_score": 0.88686
+      },
+      "crop_path": "blocks/text/003_text.png",
+      "figure_ref": null,
+      "caption_candidates": null
+    },
+    {
+      "ident": "004_text",
+      "label": "text",
+      "orientation": "horizontal",
+      "confidence": 0.6687,
+      "bbox": [
+        195,
+        1148,
+        1302,
+        117
+      ],
+      "outline": null,
+      "features": {
+        "width_ratio": 0.52077,
+        "height_ratio": 0.035,
+        "area_ratio": 0.01823,
+        "wide_aspect": 1.0,
+        "tall_aspect": 0.01795,
+        "ink_density": 0.21049,
+        "edge_density": 0.47022,
+        "gray_std": 0.83405,
+        "gray_levels": 0.96875,
+        "component_density": 0.58789,
+        "hline_density": 0.77513,
+        "vline_density": 0.70574,
+        "line_art_score": 1.0,
+        "line_balance": 0.91048,
+        "saturation_mean": 0.01003,
+        "saturation_p80": 0.01176,
+        "textline_density": 0.85714,
+        "horizontal_text_score": 0.85714,
+        "vertical_text_score": 0.02564,
+        "diagonal_text_score": 1.0,
+        "max_text_score": 1.0
+      },
+      "crop_path": "blocks/text/004_text.png",
+      "figure_ref": null,
+      "caption_candidates": null
+    },
+    {
+      "ident": "005_text",
+      "label": "text",
+      "orientation": "horizontal",
+      "confidence": 0.898,
+      "bbox": [
+        1612,
+        1170,
+        740,
+        898
+      ],
+      "outline": null,
+      "features": {
+        "width_ratio": 0.29599,
+        "height_ratio": 0.26889,
+        "area_ratio": 0.07959,
+        "wide_aspect": 0.16488,
+        "tall_aspect": 0.24261,
+        "ink_density": 0.26782,
+        "edge_density": 0.80128,
+        "gray_std": 0.77631,
+        "gray_levels": 0.96875,
+        "component_density": 1.0,
+        "hline_density": 0.0,
+        "vline_density": 0.0,
+        "line_art_score": 0.18514,
+        "line_balance": 0.0,
+        "saturation_mean": 0.00232,
+        "saturation_p80": 0.0,
+        "textline_density": 0.81818,
+        "horizontal_text_score": 0.81818,
+        "vertical_text_score": 0.04511,
+        "diagonal_text_score": 0.1165,
+        "max_text_score": 0.81818
+      },
+      "crop_path": "blocks/text/005_text.png",
+      "figure_ref": null,
+      "caption_candidates": null
+    },
+    {
+      "ident": "006_text",
+      "label": "text",
+      "orientation": "horizontal",
+      "confidence": 0.761,
+      "bbox": [
+        65,
+        1270,
+        1543,
+        605
+      ],
+      "outline": null,
+      "features": {
+        "width_ratio": 0.61721,
+        "height_ratio": 0.18111,
+        "area_ratio": 0.11178,
+        "wide_aspect": 0.51043,
+        "tall_aspect": 0.07837,
+        "ink_density": 0.21205,
+        "edge_density": 0.4002,
+        "gray_std": 0.84662,
+        "gray_levels": 0.96875,
+        "component_density": 1.0,
+        "hline_density": 0.0,
+        "vline_density": 0.0,
+        "line_art_score": 0.82539,
+        "line_balance": 0.0,
+        "saturation_mean": 0.00188,
+        "saturation_p80": 0.0,
+        "textline_density": 0.49693,
+        "horizontal_text_score": 0.49693,
+        "vertical_text_score": 0.04327,
+        "diagonal_text_score": 0.28367,
+        "max_text_score": 0.49693
+      },
+      "crop_path": "blocks/text/006_text.png",
+      "figure_ref": null,
+      "caption_candidates": null
+    },
+    {
+      "ident": "007_text",
+      "label": "text",
+      "orientation": "horizontal",
+      "confidence": 0.954,
+      "bbox": [
+        836,
+        1884,
+        770,
+        195
+      ],
+      "outline": null,
+      "features": {
+        "width_ratio": 0.30786,
+        "height_ratio": 0.05833,
+        "area_ratio": 0.01796,
+        "wide_aspect": 0.79048,
+        "tall_aspect": 0.0506,
+        "ink_density": 0.22534,
+        "edge_density": 0.67598,
+        "gray_std": 0.73606,
+        "gray_levels": 0.9375,
+        "component_density": 1.0,
+        "hline_density": 0.0,
+        "vline_density": 0.01466,
+        "line_art_score": 0.94086,
+        "line_balance": 0.0,
+        "saturation_mean": 0.0,
+        "saturation_p80": 0.0,
+        "textline_density": 0.68571,
+        "horizontal_text_score": 0.68571,
+        "vertical_text_score": 0.08675,
+        "diagonal_text_score": 0.30201,
+        "max_text_score": 0.68571
+      },
+      "crop_path": "blocks/text/007_text.png",
+      "figure_ref": null,
+      "caption_candidates": null
+    },
+    {
+      "ident": "008_text",
+      "label": "text",
+      "orientation": "horizontal",
+      "confidence": 0.9563,
+      "bbox": [
+        76,
+        1890,
+        1513,
+        191
+      ],
+      "outline": null,
+      "features": {
+        "width_ratio": 0.60534,
+        "height_ratio": 0.05722,
+        "area_ratio": 0.03464,
+        "wide_aspect": 1.0,
+        "tall_aspect": 0.02525,
+        "ink_density": 0.23099,
+        "edge_density": 0.6986,
+        "gray_std": 0.73448,
+        "gray_levels": 0.9375,
+        "component_density": 1.0,
+        "hline_density": 0.0,
+        "vline_density": 0.0076,
+        "line_art_score": 0.90748,
+        "line_balance": 0.0,
+        "saturation_mean": 0.0,
+        "saturation_p80": 0.0,
+        "textline_density": 0.87379,
+        "horizontal_text_score": 0.87379,
+        "vertical_text_score": 0.15441,
+        "diagonal_text_score": 0.47149,
+        "max_text_score": 0.87379
+      },
+      "crop_path": "blocks/text/008_text.png",
+      "figure_ref": null,
+      "caption_candidates": null
+    },
+    {
+      "ident": "009_schematic_circuit",
+      "label": "schematic/circuit",
+      "orientation": "unknown",
+      "confidence": 0.9435,
+      "bbox": [
+        493,
+        2090,
+        1838,
+        1178
+      ],
+      "outline": [
+        [
+          [
+            493,
+            2090
+          ],
+          [
+            2331,
+            2090
+          ],
+          [
+            2331,
+            3268
+          ],
+          [
+            493,
+            3268
+          ]
+        ]
+      ],
+      "features": {
+        "width_ratio": 0.73516,
+        "height_ratio": 0.35278,
+        "area_ratio": 0.25935,
+        "wide_aspect": 0.31213,
+        "tall_aspect": 0.12815,
+        "ink_density": 0.16786,
+        "edge_density": 0.45148,
+        "gray_std": 0.67329,
+        "gray_levels": 0.96875,
+        "component_density": 0.87401,
+        "hline_density": 0.12264,
+        "vline_density": 0.09235,
+        "line_art_score": 0.45777,
+        "line_balance": 0.753,
+        "saturation_mean": 0.01277,
+        "saturation_p80": 0.0,
+        "textline_density": 0.17008,
+        "horizontal_text_score": 0.17008,
+        "vertical_text_score": 0.03633,
+        "diagonal_text_score": 0.24115,
+        "max_text_score": 0.24115
+      },
+      "crop_path": "blocks/schematic_circuit/009_schematic_circuit.png",
+      "figure_ref": null,
+      "caption_candidates": [
+        {
+          "block": "internal_caption_probe",
+          "bbox": [
+            521,
+            3159,
+            588,
+            88
+          ],
+          "position": "inside-bottom-left-probe",
+          "score": 0.01
+        }
+      ]
+    }
+  ]
+}
