@@ -22,6 +22,17 @@ FEATURE_KEYS = [
     "ink_density",
     "gray_std",
     "saturation_p80",
+    "saturation_high_fraction",
+    "color_pixel_fraction",
+    "luma_dark_fraction",
+    "luma_light_fraction",
+    "luma_mid_fraction",
+    "luma_dark_light_ratio",
+    "luma_light_dark_ratio",
+    "luma_bimodal_score",
+    "luma_hist_entropy",
+    "saturation_hist_entropy",
+    "hue_hist_entropy",
     "row_period_score",
     "column_period_score",
     "row_entropy",
@@ -47,8 +58,8 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--out-md", default="study/layout_frequency_calibration.md", help="Markdown report path.")
     parser.add_argument("--out-json", default="study/layout_frequency_calibration.json", help="Machine-readable report path.")
     parser.add_argument("--max-analysis-side", type=int, default=1800)
-    parser.add_argument("--tile-size", type=int, default=192)
-    parser.add_argument("--stride", type=int, default=96)
+    parser.add_argument("--tile-size", type=int, default=layout_frequency.DEFAULT_TILE_SIZE)
+    parser.add_argument("--stride", type=int, default=layout_frequency.DEFAULT_STRIDE)
     parser.add_argument("--min-overlap", type=float, default=0.58)
     return parser.parse_args(argv)
 
@@ -117,7 +128,9 @@ def collect_samples(args: argparse.Namespace) -> tuple[list[dict[str, object]], 
     samples: list[dict[str, object]] = []
     pages: dict[str, int] = {}
 
-    for layout_path in sorted(layouts_dir.glob("*/layout.json")):
+    layout_paths = sorted(layouts_dir.glob("*/layout.json"))
+    for page_index, layout_path in enumerate(layout_paths, start=1):
+        print(f"Calibrating {layout_path.parent.name} ({page_index}/{len(layout_paths)})", flush=True)
         layout = json.loads(layout_path.read_text(encoding="utf-8"))
         source_image = source_image_for_layout(layout_path, images_dir)
         original = layout_frequency.read_image(source_image)
@@ -199,6 +212,11 @@ def summarize(samples: list[dict[str, object]], pages: dict[str, int]) -> dict[s
         "confusion": confusion_dict,
         "labels": label_stats,
         "constants": {
+            "DEFAULT_TILE_SIZE": layout_frequency.DEFAULT_TILE_SIZE,
+            "DEFAULT_STRIDE": layout_frequency.DEFAULT_STRIDE,
+            "LUMA_HIST_BINS": layout_frequency.LUMA_HIST_BINS,
+            "SATURATION_HIST_BINS": layout_frequency.SATURATION_HIST_BINS,
+            "HUE_HIST_BINS": layout_frequency.HUE_HIST_BINS,
             "TEXT_ROW_PERIOD_BAND": layout_frequency.TEXT_ROW_PERIOD_BAND,
             "TEXT_COLUMN_PERIOD_BAND": layout_frequency.TEXT_COLUMN_PERIOD_BAND,
             "BACKGROUND_MAX_INK": layout_frequency.BACKGROUND_MAX_INK,
@@ -210,6 +228,13 @@ def summarize(samples: list[dict[str, object]], pages: dict[str, int]) -> dict[s
             "LINE_ART_MIN_LINE_DENSITY": layout_frequency.LINE_ART_MIN_LINE_DENSITY,
             "LINE_ART_MIN_BALANCE": layout_frequency.LINE_ART_MIN_BALANCE,
             "IMAGE_STRONG_SATURATION": layout_frequency.IMAGE_STRONG_SATURATION,
+            "TEXT_MIN_LUMA_BIMODAL": layout_frequency.TEXT_MIN_LUMA_BIMODAL,
+            "TEXT_MAX_LUMA_MID_FRACTION": layout_frequency.TEXT_MAX_LUMA_MID_FRACTION,
+            "IMAGE_MIN_LUMA_ENTROPY": layout_frequency.IMAGE_MIN_LUMA_ENTROPY,
+            "IMAGE_MIN_LUMA_MID_FRACTION": layout_frequency.IMAGE_MIN_LUMA_MID_FRACTION,
+            "SCHEMATIC_MAX_DARK_LIGHT_RATIO": layout_frequency.SCHEMATIC_MAX_DARK_LIGHT_RATIO,
+            "TEXT_MIN_DARK_LIGHT_RATIO": layout_frequency.TEXT_MIN_DARK_LIGHT_RATIO,
+            "TEXT_MAX_DARK_LIGHT_RATIO": layout_frequency.TEXT_MAX_DARK_LIGHT_RATIO,
         },
     }
 
@@ -264,11 +289,11 @@ def main(argv: list[str] | None = None) -> int:
 
     out_json = Path(args.out_json)
     out_json.parent.mkdir(parents=True, exist_ok=True)
-    out_json.write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
+    out_json.write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8", newline="\n")
 
     out_md = Path(args.out_md)
     out_md.parent.mkdir(parents=True, exist_ok=True)
-    out_md.write_text(format_markdown(summary), encoding="utf-8")
+    out_md.write_text(format_markdown(summary), encoding="utf-8", newline="\n")
 
     print(f"Calibrated {summary['tile_count']} tile(s) from {len(summary['pages'])} page(s).")
     print(f"Accuracy: {summary['overall_accuracy']}")

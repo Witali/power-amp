@@ -22,8 +22,13 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--out-dir", default=".tmp/page_frequency", help="Output root for frequency JSON and preview.")
     parser.add_argument("--layout", help="Optional OpenCV layout.json to validate against frequency hints.")
     parser.add_argument("--max-analysis-side", type=int, default=1800, help="Largest side used during frequency analysis.")
-    parser.add_argument("--tile-size", type=int, default=192, help="Square tile size for local 1D frequency analysis.")
-    parser.add_argument("--stride", type=int, default=96, help="Tile stride in pixels.")
+    parser.add_argument(
+        "--tile-size",
+        type=int,
+        default=layout_frequency.DEFAULT_TILE_SIZE,
+        help="Square tile size for local 1D frequency analysis.",
+    )
+    parser.add_argument("--stride", type=int, default=layout_frequency.DEFAULT_STRIDE, help="Tile stride in pixels.")
     parser.add_argument("--preview-width", type=int, default=1400, help="Preview overlay width in pixels.")
     parser.add_argument("--min-hint-confidence", type=float, default=0.42, help="Lowest tile confidence used when merging hints.")
     return parser.parse_args(argv)
@@ -48,11 +53,13 @@ def build_result(args: argparse.Namespace) -> dict[str, object]:
         "frequency": {
             key: value
             for key, value in frequency.items()
-            if key not in {"tiles", "hints"}
+            if key not in {"tiles", "hints", "cluster_hints"}
         },
         "tiles": frequency["tiles"],
         "hints": frequency["hints"],
+        "cluster_hints": frequency.get("cluster_hints", []),
         "hints_original": layout_frequency.hints_in_original_coordinates(frequency["hints"], scale),
+        "cluster_hints_original": layout_frequency.hints_in_original_coordinates(frequency.get("cluster_hints", []), scale),
     }
 
     if args.layout:
@@ -61,6 +68,7 @@ def build_result(args: argparse.Namespace) -> dict[str, object]:
         blocks = list(layout.get("blocks", []))
         result["layout"] = str(layout_path)
         result["layout_warnings"] = layout_frequency.validate_layout_blocks(blocks, result["hints_original"])
+        result["layout_cluster_warnings"] = layout_frequency.validate_layout_blocks(blocks, result["cluster_hints_original"])
 
     return result
 
@@ -80,10 +88,15 @@ def main(argv: list[str]) -> int:
 
     counts = layout_frequency.label_counts(result["hints"])
     counts_text = ", ".join(f"{key}={value}" for key, value in counts.items()) or "none"
+    cluster_counts = layout_frequency.label_counts(result["cluster_hints"])
+    cluster_counts_text = ", ".join(f"{key}={value}" for key, value in cluster_counts.items()) or "none"
     warnings = len(result.get("layout_warnings", []))
+    cluster_warnings = len(result.get("layout_cluster_warnings", []))
     print(f"Frequency hints: {len(result['hints'])} ({counts_text})")
+    print(f"Cluster hints: {len(result['cluster_hints'])} ({cluster_counts_text})")
     if args.layout:
         print(f"Layout warnings: {warnings}")
+        print(f"Layout cluster warnings: {cluster_warnings}")
     print(json_path)
     print(preview_path)
     return 0

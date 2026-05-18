@@ -755,7 +755,12 @@ def frequency_hint_boxes(
         return []
     boxes: list[Box] = []
     page_area = max(1, width * height)
-    for hint in frequency_result.get("hints", []):
+    raw_hints = frequency_result.get("hints", [])
+    raw_cluster_hints = frequency_result.get("cluster_hints", [])
+    all_hints = (raw_hints if isinstance(raw_hints, list) else []) + (
+        raw_cluster_hints if isinstance(raw_cluster_hints, list) else []
+    )
+    for hint in all_hints:
         if not isinstance(hint, dict):
             continue
         label = str(hint.get("label", ""))
@@ -801,10 +806,14 @@ def add_frequency_text_hints(
     return deduplicate_candidate_boxes(result)
 
 
-def scale_frequency_hints_to_original(frequency_result: dict[str, object] | None, scale: float) -> list[dict[str, object]]:
+def scale_frequency_hints_to_original(
+    frequency_result: dict[str, object] | None,
+    scale: float,
+    key: str = "hints",
+) -> list[dict[str, object]]:
     if not frequency_result or layout_frequency is None:
         return []
-    hints = frequency_result.get("hints", [])
+    hints = frequency_result.get(key, [])
     if not isinstance(hints, list):
         return []
     return layout_frequency.hints_in_original_coordinates(hints, scale)
@@ -906,6 +915,7 @@ def detect_candidate_boxes(
         "analysis_height": height,
         "accelerator": accelerator,
         "frequency_hint_count": len(frequency_result.get("hints", [])) if frequency_result else 0,
+        "frequency_cluster_hint_count": len(frequency_result.get("cluster_hints", [])) if frequency_result else 0,
         "frequency_visual_hint_count": len(frequency_visual_boxes),
         "frequency_text_hint_count": len(frequency_text_boxes),
     }
@@ -1977,9 +1987,12 @@ def detect_page_layout(
     metadata["frequency_mode"] = frequency_hints
     if frequency_result:
         metadata["frequency_hint_count"] = len(frequency_result.get("hints", []))
+        metadata["frequency_cluster_hint_count"] = len(frequency_result.get("cluster_hints", []))
     blocks = classify_blocks(analysis_image, boxes, scale=scale, save_crops=save_crops, page_dir=page_dir, accelerator=accelerator)
     original_frequency_hints = scale_frequency_hints_to_original(frequency_result, scale)
+    original_frequency_cluster_hints = scale_frequency_hints_to_original(frequency_result, scale, "cluster_hints")
     frequency_warnings = frequency_validation_warnings(blocks, original_frequency_hints)
+    frequency_cluster_warnings = frequency_validation_warnings(blocks, original_frequency_cluster_hints)
     preview_path = draw_preview(original, blocks, preview_width=preview_width, page_dir=page_dir)
 
     result = {
@@ -1994,7 +2007,9 @@ def detect_page_layout(
         "frequency_hints_enabled": frequency_hints != "off",
         "frequency_mode": frequency_hints,
         "frequency_hints": original_frequency_hints,
+        "frequency_cluster_hints": original_frequency_cluster_hints,
         "frequency_warnings": frequency_warnings,
+        "frequency_cluster_warnings": frequency_cluster_warnings,
         "preview": preview_path.relative_to(page_dir).as_posix(),
         "blocks": [asdict(block) for block in blocks],
     }

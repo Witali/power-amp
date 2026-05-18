@@ -586,7 +586,9 @@ class DetectPageLayoutTests(unittest.TestCase):
             self.assertTrue(all("caption_candidates" in block for block in saved["blocks"]))
             self.assertTrue(saved["frequency_hints_enabled"])
             self.assertIn("frequency_hints", saved)
+            self.assertIn("frequency_cluster_hints", saved)
             self.assertIn("frequency_warnings", saved)
+            self.assertIn("frequency_cluster_warnings", saved)
 
     def test_split_box_by_vertical_gap_separates_margin_strip(self) -> None:
         np = detect_page_layout.np
