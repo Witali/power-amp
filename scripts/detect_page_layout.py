@@ -16,7 +16,7 @@ import shutil
 import sys
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Iterable
+from typing import Callable, Iterable
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -41,6 +41,14 @@ except ImportError:
         import layout_frequency  # type: ignore
     except ImportError:
         layout_frequency = None  # type: ignore
+
+try:
+    from scripts import layout_component_signatures  # type: ignore
+except ImportError:
+    try:
+        import layout_component_signatures  # type: ignore
+    except ImportError:
+        layout_component_signatures = None  # type: ignore
 
 
 CLASS_NAMES = ["text", "image", "schematic/circuit", "diagram", "table", "other"]
@@ -1052,8 +1060,18 @@ def feature_dict(image, mask, edges, box: Box) -> dict[str, float]:
     v_density = float((v_lines > 0).sum()) / area
     local_line_density = float(((local_h_lines > 0) | (local_v_lines > 0)).sum()) / area
     line_balance = min(h_density, v_density) / max(h_density, v_density, 1e-6)
+    if layout_component_signatures is not None:
+        component_signatures = layout_component_signatures.component_signature_features(roi_mask, roi_edges)
+    else:
+        component_signatures = {
+            "component_signature_score": 0.0,
+            "resistor_symbol_density": 0.0,
+            "capacitor_symbol_density": 0.0,
+            "diode_symbol_density": 0.0,
+            "transistor_symbol_density": 0.0,
+        }
 
-    return {
+    features = {
         "width_ratio": box.w / max(1, page_w),
         "height_ratio": box.h / max(1, page_h),
         "area_ratio": area / max(1, page_w * page_h),
@@ -1076,6 +1094,8 @@ def feature_dict(image, mask, edges, box: Box) -> dict[str, float]:
         "diagonal_text_score": orientation_scores["diagonal_text_score"],
         "max_text_score": orientation_scores["max_text_score"],
     }
+    features.update(component_signatures)
+    return features
 
 
 FEATURE_ORDER = [
@@ -1156,10 +1176,17 @@ def rule_scores(features: dict[str, float]) -> np.ndarray:
     vertical_text = features["vertical_text_score"]
     diagonal_text = features["diagonal_text_score"]
     area = features["area_ratio"]
+    component_signature = features.get("component_signature_score", 0.0)
+    line_art = features.get("line_art_score", 0.0)
+    component_rule_signal = (
+        component_signature
+        if max_text < 0.62 and line_art > 0.16 and balance > 0.10
+        else 0.0
+    )
 
     scores[0] = 1.8 * max_text + 1.1 * components + 0.4 * ink + 0.3 * max(vertical_text, diagonal_text) - 0.45 * balance
     scores[1] = 1.6 * std + 1.3 * levels + 0.9 * edge + 0.5 * ink - 0.75 * max_text
-    scores[2] = 1.1 * hline + 1.1 * vline + 0.8 * balance + 0.5 * edge - 0.5 * std
+    scores[2] = 1.1 * hline + 1.1 * vline + 0.8 * balance + 0.5 * edge + 1.6 * component_rule_signal - 0.5 * std
     scores[3] = 0.8 * edge + 0.6 * hline + 0.25 * max_text + 0.5 * levels
     scores[4] = 1.4 * hline + 1.4 * vline + 1.2 * balance + 0.25 * max_text - 0.4 * std
     scores[5] = 0.5 + (0.08 > area) * 0.2 - 0.4 * ink - 0.2 * edge
@@ -1177,6 +1204,7 @@ def classify_features(ann, features: dict[str, float]) -> tuple[str, float]:
     max_text = features["max_text_score"]
     line_art = features.get("line_art_score", 0.0)
     saturation_p80 = features.get("saturation_p80", 0.0)
+    component_signature = features.get("component_signature_score", 0.0)
 
     if features["area_ratio"] < 0.002 and features["textline_density"] < 0.25:
         scores *= 0.65
@@ -1235,6 +1263,30 @@ def classify_features(ann, features: dict[str, float]) -> tuple[str, float]:
         scores[CLASS_NAMES.index("image")] *= 0.45
         scores[CLASS_NAMES.index("diagram")] *= 0.62
         scores[CLASS_NAMES.index("table")] *= 0.72
+    if (
+        component_signature > 0.18
+        and line_art > 0.12
+        and max_text < 0.62
+        and features["textline_density"] < 0.62
+        and features["hline_density"] > 0.04
+        and features["vline_density"] > 0.04
+        and features["line_balance"] > 0.10
+        and saturation_p80 < 0.12
+        and features["edge_density"] > 0.12
+        and features["ink_density"] < 0.34
+    ):
+        scores[CLASS_NAMES.index("schematic/circuit")] += 1.35 + component_signature
+        scores[CLASS_NAMES.index("diagram")] *= 0.55
+        scores[CLASS_NAMES.index("table")] *= 0.62
+    if (
+        component_signature > 0.34
+        and saturation_p80 < 0.08
+        and features["ink_density"] < 0.26
+        and max_text < 0.65
+        and features["line_balance"] > 0.12
+    ):
+        scores[CLASS_NAMES.index("schematic/circuit")] += 1.15
+        scores[CLASS_NAMES.index("diagram")] *= 0.45
     if (
         saturation_p80 > 0.16
         and features["gray_std"] > 0.45
@@ -1332,6 +1384,13 @@ def box_from_list(values: list[int]) -> Box:
 
 def rectangle_polygon(box: Box) -> list[list[list[int]]]:
     return [[[box.x, box.y], [box.x2, box.y], [box.x2, box.y2], [box.x, box.y2]]]
+
+
+def point_inside_block(block: Block, point: tuple[float, float]) -> bool:
+    if block.outline:
+        return point_inside_outline(point, block.outline)
+    box = box_from_list(block.bbox)
+    return box.x <= point[0] <= box.x2 and box.y <= point[1] <= box.y2
 
 
 def intersection_box(first: Box, second: Box) -> Box | None:
@@ -2025,6 +2084,262 @@ def demote_textual_diagram_wrappers(classified: list[tuple[Block, Box]]) -> list
     return result
 
 
+OverlapOwnerFn = Callable[[Block, Block, Box], str]
+
+
+def block_outline_to_mask(block: Block) -> tuple[Box, object]:
+    box = box_from_list(block.bbox)
+    mask = np.zeros((box.h, box.w), dtype=np.uint8)
+    if block.outline:
+        polygons = []
+        for polygon in block.outline:
+            points = np.array(
+                [
+                    [
+                        max(0, min(box.w - 1, int(round(point[0] - box.x)))),
+                        max(0, min(box.h - 1, int(round(point[1] - box.y)))),
+                    ]
+                    for point in polygon
+                ],
+                dtype=np.int32,
+            )
+            if points.shape[0] >= 3:
+                polygons.append(points)
+        if polygons:
+            cv2.fillPoly(mask, polygons, 255)
+    else:
+        mask[:, :] = 255
+    return box, mask
+
+
+def rect_slice_inside_box(rect: Box, box: Box) -> tuple[slice, slice] | None:
+    x1 = max(0, rect.x - box.x)
+    y1 = max(0, rect.y - box.y)
+    x2 = min(box.w, rect.x2 - box.x)
+    y2 = min(box.h, rect.y2 - box.y)
+    if x2 <= x1 or y2 <= y1:
+        return None
+    return slice(y1, y2), slice(x1, x2)
+
+
+def mask_overlap_area(first_mask, first_box: Box, second_mask, second_box: Box, overlap: Box) -> int:
+    first_slice = rect_slice_inside_box(overlap, first_box)
+    second_slice = rect_slice_inside_box(overlap, second_box)
+    if first_slice is None or second_slice is None:
+        return 0
+    first_region = first_mask[first_slice]
+    second_region = second_mask[second_slice]
+    if first_region.shape != second_region.shape or first_region.size == 0:
+        return 0
+    return int(np.logical_and(first_region > 0, second_region > 0).sum())
+
+
+def set_overlap_in_block_mask(block_mask, block_box: Box, overlap: Box, value: int) -> bool:
+    block_slice = rect_slice_inside_box(overlap, block_box)
+    if block_slice is None:
+        return False
+    region = block_mask[block_slice]
+    before = int((region > 0).sum())
+    region[:, :] = value
+    after = int((region > 0).sum())
+    return before != after
+
+
+def mask_to_block_outline(block: Block, box: Box, mask) -> list[list[list[int]]]:
+    if mask.size == 0:
+        return rectangle_polygon(box)
+    if bool(np.all(mask > 0)):
+        return rectangle_polygon(box)
+
+    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    min_area = max(16.0, box.area * 0.002)
+    selected = sorted((contour for contour in contours if cv2.contourArea(contour) >= min_area), key=cv2.contourArea, reverse=True)
+    polygons: list[list[list[int]]] = []
+    for contour in selected[:8]:
+        approx = cv2.approxPolyDP(contour, 4.0, True)
+        points: list[list[int]] = []
+        for point in approx.reshape(-1, 2):
+            rel_x = int(point[0])
+            rel_y = int(point[1])
+            abs_x = box.x2 if rel_x >= box.w - 1 else box.x + rel_x
+            abs_y = box.y2 if rel_y >= box.h - 1 else box.y + rel_y
+            points.append([abs_x, abs_y])
+        points = orthogonalize_polygon(points)
+        if len(points) >= 3:
+            polygons.append(points)
+    return polygons or rectangle_polygon(box)
+
+
+def scaled_overlap_for_analysis(overlap: Box, scale: float, width: int, height: int) -> Box | None:
+    x1 = int(round(overlap.x * scale))
+    y1 = int(round(overlap.y * scale))
+    x2 = int(round(overlap.x2 * scale))
+    y2 = int(round(overlap.y2 * scale))
+    if x2 <= x1:
+        x2 = x1 + 1
+    if y2 <= y1:
+        y2 = y1 + 1
+    if x1 >= width or y1 >= height or x2 <= 0 or y2 <= 0:
+        return None
+    return Box(x1, y1, x2 - x1, y2 - y1).clamp(width, height)
+
+
+def labels_are_visual_family(first: str, second: str) -> bool:
+    return first in FIGURE_LABELS and second in FIGURE_LABELS
+
+
+def overlap_owner_score(block: Block, block_box: Box, overlap: Box, overlap_label: str, overlap_features: dict[str, float]) -> float:
+    line_art = float(overlap_features.get("line_art_score", 0.0))
+    text_score = float(overlap_features.get("max_text_score", 0.0))
+    textline = float(overlap_features.get("textline_density", 0.0))
+    hline = float(overlap_features.get("hline_density", 0.0))
+    vline = float(overlap_features.get("vline_density", 0.0))
+    saturation = float(overlap_features.get("saturation_p80", 0.0))
+    gray_std = float(overlap_features.get("gray_std", 0.0))
+    component_signature = float(overlap_features.get("component_signature_score", 0.0))
+    overlap_fraction = overlap.area / max(1, block_box.area)
+
+    score = block.confidence * 0.35 + min(0.80, overlap_fraction * 2.0)
+    if block.label == overlap_label:
+        score += 3.0
+    elif labels_are_visual_family(block.label, overlap_label):
+        score += 1.0
+
+    if block.label == "text":
+        score += text_score * 2.2 + textline * 1.4
+        if overlap_label == "text":
+            score += 1.2
+        if line_art > 0.45 and (hline > 0.04 or vline > 0.04):
+            score -= 0.9
+    elif block.label == "schematic/circuit":
+        score += line_art * 2.1 + (hline + vline) * 1.5 + component_signature * 2.4
+        if saturation < 0.08:
+            score += 0.45
+        if overlap_label == "schematic/circuit":
+            score += 1.5
+        if text_score > 0.75 and hline < 0.03 and vline < 0.03:
+            score -= 1.2
+    elif block.label == "diagram":
+        score += line_art * 1.4 + hline * 1.8 + vline * 0.7
+        if overlap_label == "diagram":
+            score += 1.4
+    elif block.label == "image":
+        score += saturation * 2.0 + gray_std * 0.8
+        if overlap_label == "image":
+            score += 1.6
+    elif block.label == "table":
+        score += (hline + vline) * 1.4
+        if overlap_label == "table":
+            score += 1.4
+    return score
+
+
+def decide_overlap_owner(
+    first_block: Block,
+    first_box: Box,
+    second_block: Block,
+    second_box: Box,
+    overlap: Box,
+    image,
+    mask,
+    edges,
+    ann,
+    scale: float,
+) -> str:
+    height, width = image.shape[:2]
+    analysis_overlap = scaled_overlap_for_analysis(overlap, scale, width, height)
+    if analysis_overlap is None:
+        return first_block.ident if first_block.confidence >= second_block.confidence else second_block.ident
+
+    overlap_features = feature_dict(image, mask, edges, analysis_overlap)
+    overlap_label, _ = classify_features(ann, overlap_features)
+    first_score = overlap_owner_score(first_block, first_box, overlap, overlap_label, overlap_features)
+    second_score = overlap_owner_score(second_block, second_box, overlap, overlap_label, overlap_features)
+    if abs(first_score - second_score) <= 0.12:
+        if first_block.label == overlap_label and second_block.label != overlap_label:
+            return first_block.ident
+        if second_block.label == overlap_label and first_block.label != overlap_label:
+            return second_block.ident
+        return first_block.ident if first_block.confidence >= second_block.confidence else second_block.ident
+    return first_block.ident if first_score > second_score else second_block.ident
+
+
+def resolve_block_overlaps(
+    blocks: list[Block],
+    image=None,
+    mask=None,
+    edges=None,
+    ann=None,
+    scale: float = 1.0,
+    owner_fn: OverlapOwnerFn | None = None,
+) -> list[Block]:
+    if len(blocks) < 2:
+        return blocks
+    if owner_fn is None and (image is None or mask is None or edges is None or ann is None):
+        return blocks
+
+    boxes = {block.ident: box_from_list(block.bbox) for block in blocks}
+    masks: dict[str, object] = {}
+    changed: set[str] = set()
+    pairs: list[tuple[int, int, Box]] = []
+    for first_index, first_block in enumerate(blocks):
+        first_box = boxes[first_block.ident]
+        for second_index in range(first_index + 1, len(blocks)):
+            second_block = blocks[second_index]
+            second_box = boxes[second_block.ident]
+            overlap = intersection_box(first_box, second_box)
+            if overlap is None:
+                continue
+            min_area = min(first_box.area, second_box.area)
+            if overlap.area < max(25, int(round(min_area * 0.006))):
+                continue
+            pairs.append((first_index, second_index, overlap))
+
+    for first_index, second_index, overlap in sorted(pairs, key=lambda item: item[2].area, reverse=True):
+        first_block = blocks[first_index]
+        second_block = blocks[second_index]
+        first_box = boxes[first_block.ident]
+        second_box = boxes[second_block.ident]
+        if first_block.ident not in masks:
+            _, masks[first_block.ident] = block_outline_to_mask(first_block)
+        if second_block.ident not in masks:
+            _, masks[second_block.ident] = block_outline_to_mask(second_block)
+
+        active_area = mask_overlap_area(masks[first_block.ident], first_box, masks[second_block.ident], second_box, overlap)
+        if active_area < max(16, int(round(overlap.area * 0.05))):
+            continue
+
+        if owner_fn is not None:
+            owner_ident = owner_fn(first_block, second_block, overlap)
+        else:
+            owner_ident = decide_overlap_owner(first_block, first_box, second_block, second_box, overlap, image, mask, edges, ann, scale)
+        if owner_ident not in {first_block.ident, second_block.ident}:
+            continue
+
+        loser_block = second_block if owner_ident == first_block.ident else first_block
+        loser_box = boxes[loser_block.ident]
+        winner_block = first_block if owner_ident == first_block.ident else second_block
+        winner_box = boxes[winner_block.ident]
+        if set_overlap_in_block_mask(masks[loser_block.ident], loser_box, overlap, 0):
+            changed.add(loser_block.ident)
+        if set_overlap_in_block_mask(masks[winner_block.ident], winner_box, overlap, 255):
+            changed.add(winner_block.ident)
+
+    for block in blocks:
+        if block.ident not in changed:
+            continue
+        box = boxes[block.ident]
+        block_mask = masks[block.ident]
+        full_rectangle = bool(np.all(block_mask > 0))
+        if full_rectangle and block.label not in FIGURE_LABELS:
+            block.outline = None
+        else:
+            block.outline = mask_to_block_outline(block, box, block_mask)
+        block.features["overlap_resolution"] = 1.0
+
+    return blocks
+
+
 def small_artifact_inside_or_touching_schematic(block: Block, schematic: Block) -> bool:
     if block.ident == schematic.ident or block.label in {"text", "schematic/circuit"}:
         return False
@@ -2228,6 +2543,7 @@ def classify_blocks(
     assign_visual_outlines(all_blocks)
     blocks = suppress_text_inside_schematics(all_blocks)
     blocks = suppress_small_artifacts_near_schematics(blocks)
+    blocks = resolve_block_overlaps(blocks, image, mask, edges, ann, scale)
     attach_caption_candidates(blocks, [block for block in all_blocks if block.label == "text"])
     kept_idents = {block.ident for block in blocks}
     if save_crops:
@@ -2361,7 +2677,7 @@ def detect_page_layout(
         "preview": preview_path.relative_to(page_dir).as_posix(),
         "blocks": [asdict(block) for block in blocks],
     }
-    (page_dir / "layout.json").write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
+    (page_dir / "layout.json").write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8", newline="\n")
     return result
 
 

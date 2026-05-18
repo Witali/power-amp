@@ -241,6 +241,11 @@
         "vertical_text_score": 0.11364,
         "diagonal_text_score": 0.12694,
         "max_text_score": 0.33962,
+        "component_signature_score": 0.82,
+        "resistor_symbol_density": 1.0,
+        "capacitor_symbol_density": 1.0,
+        "diode_symbol_density": 0.0,
+        "transistor_symbol_density": 1.0,
         "merged_block_count": 5.0,
         "stacked_diagram_merge": 1.0,
         "textual_diagram_wrapper_demote": 1.0
@@ -282,7 +287,12 @@
         "horizontal_text_score": 0.85878,
         "vertical_text_score": 0.04478,
         "diagonal_text_score": 0.21119,
-        "max_text_score": 0.85878
+        "max_text_score": 0.85878,
+        "component_signature_score": 1.0,
+        "resistor_symbol_density": 1.0,
+        "capacitor_symbol_density": 1.0,
+        "diode_symbol_density": 1.0,
+        "transistor_symbol_density": 1.0
       },
       "crop_path": "blocks/text/003_text.png",
       "figure_ref": null,
@@ -321,7 +331,12 @@
         "horizontal_text_score": 0.90452,
         "vertical_text_score": 0.02281,
         "diagonal_text_score": 0.34982,
-        "max_text_score": 0.90452
+        "max_text_score": 0.90452,
+        "component_signature_score": 1.0,
+        "resistor_symbol_density": 1.0,
+        "capacitor_symbol_density": 1.0,
+        "diode_symbol_density": 1.0,
+        "transistor_symbol_density": 1.0
       },
       "crop_path": "blocks/text/008_text.png",
       "figure_ref": null,
@@ -360,7 +375,12 @@
         "horizontal_text_score": 0.94299,
         "vertical_text_score": 0.04489,
         "diagonal_text_score": 0.10876,
-        "max_text_score": 0.94299
+        "max_text_score": 0.94299,
+        "component_signature_score": 1.0,
+        "resistor_symbol_density": 1.0,
+        "capacitor_symbol_density": 1.0,
+        "diode_symbol_density": 1.0,
+        "transistor_symbol_density": 1.0
       },
       "crop_path": "blocks/text/009_text.png",
       "figure_ref": null,
@@ -399,7 +419,12 @@
         "horizontal_text_score": 0.70866,
         "vertical_text_score": 0.50382,
         "diagonal_text_score": 0.59081,
-        "max_text_score": 0.70866
+        "max_text_score": 0.70866,
+        "component_signature_score": 1.0,
+        "resistor_symbol_density": 1.0,
+        "capacitor_symbol_density": 1.0,
+        "diode_symbol_density": 1.0,
+        "transistor_symbol_density": 1.0
       },
       "crop_path": "blocks/text/010_text.png",
       "figure_ref": null,
@@ -438,7 +463,12 @@
         "horizontal_text_score": 0.91996,
         "vertical_text_score": 0.04369,
         "diagonal_text_score": 0.14674,
-        "max_text_score": 0.91996
+        "max_text_score": 0.91996,
+        "component_signature_score": 1.0,
+        "resistor_symbol_density": 1.0,
+        "capacitor_symbol_density": 1.0,
+        "diode_symbol_density": 1.0,
+        "transistor_symbol_density": 1.0
       },
       "crop_path": "blocks/text/011_text.png",
       "figure_ref": null,
@@ -477,7 +507,12 @@
         "horizontal_text_score": 0.50704,
         "vertical_text_score": 0.9,
         "diagonal_text_score": 1.0,
-        "max_text_score": 1.0
+        "max_text_score": 1.0,
+        "component_signature_score": 0.0,
+        "resistor_symbol_density": 0.0,
+        "capacitor_symbol_density": 0.0,
+        "diode_symbol_density": 0.0,
+        "transistor_symbol_density": 0.0
       },
       "crop_path": "blocks/text/012_text.png",
       "figure_ref": null,
@@ -516,7 +551,12 @@
         "horizontal_text_score": 0.75,
         "vertical_text_score": 0.35821,
         "diagonal_text_score": 0.48869,
-        "max_text_score": 0.75
+        "max_text_score": 0.75,
+        "component_signature_score": 0.82,
+        "resistor_symbol_density": 1.0,
+        "capacitor_symbol_density": 1.0,
+        "diode_symbol_density": 0.0,
+        "transistor_symbol_density": 1.0
       },
       "crop_path": "blocks/text/013_text.png",
       "figure_ref": null,
@@ -574,7 +614,12 @@
         "horizontal_text_score": 1.0,
         "vertical_text_score": 0.71642,
         "diagonal_text_score": 1.0,
-        "max_text_score": 1.0
+        "max_text_score": 1.0,
+        "component_signature_score": 0.82,
+        "resistor_symbol_density": 1.0,
+        "capacitor_symbol_density": 1.0,
+        "diode_symbol_density": 0.0,
+        "transistor_symbol_density": 1.0
       },
       "crop_path": "blocks/schematic_circuit/014_schematic_circuit.png",
       "figure_ref": null,
@@ -625,7 +670,12 @@
         "horizontal_text_score": 0.93426,
         "vertical_text_score": 0.04478,
         "diagonal_text_score": 0.18443,
-        "max_text_score": 0.93426
+        "max_text_score": 0.93426,
+        "component_signature_score": 1.0,
+        "resistor_symbol_density": 1.0,
+        "capacitor_symbol_density": 1.0,
+        "diode_symbol_density": 1.0,
+        "transistor_symbol_density": 1.0
       },
       "crop_path": "blocks/text/015_text.png",
       "figure_ref": null,
@@ -664,7 +714,12 @@
         "horizontal_text_score": 0.64286,
         "vertical_text_score": 0.22388,
         "diagonal_text_score": 0.72,
-        "max_text_score": 0.72
+        "max_text_score": 0.72,
+        "component_signature_score": 0.82,
+        "resistor_symbol_density": 1.0,
+        "capacitor_symbol_density": 1.0,
+        "diode_symbol_density": 0.0,
+        "transistor_symbol_density": 1.0
       },
       "crop_path": "blocks/text/016_text.png",
       "figure_ref": null,
@@ -681,7 +736,26 @@
         745,
         122
       ],
-      "outline": null,
+      "outline": [
+        [
+          [
+            161,
+            2965
+          ],
+          [
+            161,
+            3085
+          ],
+          [
+            906,
+            3085
+          ],
+          [
+            906,
+            2965
+          ]
+        ]
+      ],
       "features": {
         "width_ratio": 0.29822,
         "height_ratio": 0.03667,
@@ -703,7 +777,13 @@
         "horizontal_text_score": 0.81818,
         "vertical_text_score": 0.80597,
         "diagonal_text_score": 1.0,
-        "max_text_score": 1.0
+        "max_text_score": 1.0,
+        "component_signature_score": 0.82,
+        "resistor_symbol_density": 1.0,
+        "capacitor_symbol_density": 1.0,
+        "diode_symbol_density": 0.0,
+        "transistor_symbol_density": 1.0,
+        "overlap_resolution": 1.0
       },
       "crop_path": "blocks/text/017_text.png",
       "figure_ref": null,
@@ -742,7 +822,12 @@
         "horizontal_text_score": 0.77419,
         "vertical_text_score": 0.71642,
         "diagonal_text_score": 0.66857,
-        "max_text_score": 0.77419
+        "max_text_score": 0.77419,
+        "component_signature_score": 1.0,
+        "resistor_symbol_density": 1.0,
+        "capacitor_symbol_density": 1.0,
+        "diode_symbol_density": 1.0,
+        "transistor_symbol_density": 1.0
       },
       "crop_path": "blocks/text/018_text.png",
       "figure_ref": null,

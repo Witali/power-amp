@@ -18,6 +18,7 @@ if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
 import detect_page_layout  # noqa: E402
+import layout_analysis_thresholds as thresholds  # noqa: E402
 import layout_frequency  # noqa: E402
 
 
@@ -63,24 +64,42 @@ def histogram_only_label(features: dict[str, float]) -> str:
     saturation_high = float(features.get("saturation_high_fraction", 0.0))
     color_fraction = float(features.get("color_pixel_fraction", 0.0))
 
-    if ink < 0.018 or (luma_light > 0.96 and luma_dark < 0.010 and luma_mid < 0.08):
+    if ink < thresholds.HISTOGRAM_BACKGROUND_MAX_INK or (
+        luma_light > thresholds.HISTOGRAM_BACKGROUND_MIN_LIGHT
+        and luma_dark < thresholds.HISTOGRAM_BACKGROUND_MAX_DARK
+        and luma_mid < thresholds.HISTOGRAM_BACKGROUND_MAX_MID
+    ):
         return "background"
     if (
-        ink > 0.08
+        ink > thresholds.HISTOGRAM_IMAGE_MIN_INK
         and (
-            saturation_high > 0.20
-            or (color_fraction > 0.55 and luma_mid > 0.20)
-            or (luma_mid > 0.48 and luma_entropy > 0.45)
+            saturation_high > thresholds.HISTOGRAM_IMAGE_MIN_HIGH_SATURATION
+            or (
+                color_fraction > thresholds.HISTOGRAM_IMAGE_MIN_COLOR_FRACTION
+                and luma_mid > thresholds.HISTOGRAM_IMAGE_MIN_COLOR_MID
+            )
+            or (
+                luma_mid > thresholds.HISTOGRAM_IMAGE_MIN_MID
+                and luma_entropy > thresholds.HISTOGRAM_IMAGE_MIN_ENTROPY
+            )
         )
     ):
         return "image"
-    if ink > 0.020 and dark_light <= layout_frequency.SCHEMATIC_MAX_DARK_LIGHT_RATIO and luma_light > 0.58 and luma_mid < 0.36:
+    if (
+        ink > thresholds.HISTOGRAM_SCHEMATIC_MIN_INK
+        and dark_light <= thresholds.HISTOGRAM_SCHEMATIC_MAX_DARK_LIGHT_RATIO
+        and luma_light > thresholds.HISTOGRAM_SCHEMATIC_MIN_LIGHT
+        and luma_mid < thresholds.HISTOGRAM_SCHEMATIC_MAX_MID
+    ):
         return "schematic/circuit"
     if (
-        ink > 0.035
-        and layout_frequency.TEXT_MIN_DARK_LIGHT_RATIO <= dark_light <= layout_frequency.TEXT_MAX_DARK_LIGHT_RATIO
-        and luma_mid < layout_frequency.TEXT_MAX_LUMA_MID_FRACTION
-        and (luma_bimodal > 0.035 or luma_entropy > 0.32)
+        ink > thresholds.HISTOGRAM_TEXT_MIN_INK
+        and thresholds.HISTOGRAM_TEXT_MIN_DARK_LIGHT_RATIO <= dark_light <= thresholds.HISTOGRAM_TEXT_MAX_DARK_LIGHT_RATIO
+        and luma_mid < thresholds.HISTOGRAM_TEXT_MAX_MID
+        and (
+            luma_bimodal > thresholds.HISTOGRAM_TEXT_MIN_BIMODAL
+            or luma_entropy > thresholds.HISTOGRAM_TEXT_MIN_ENTROPY
+        )
     ):
         return "text"
     return "other"
@@ -93,13 +112,27 @@ def balance_only_label(features: dict[str, float]) -> str:
     luma_mid = float(features.get("luma_mid_fraction", 0.0))
     luma_light = float(features.get("luma_light_fraction", 0.0))
 
-    if ink < 0.018 or (luma_light > 0.96 and dark_light < 0.012):
+    if ink < thresholds.BALANCE_BACKGROUND_MAX_INK or (
+        luma_light > thresholds.BALANCE_BACKGROUND_MIN_LIGHT
+        and dark_light < thresholds.BALANCE_BACKGROUND_MAX_DARK_LIGHT_RATIO
+    ):
         return "background"
-    if ink > 0.020 and dark_light <= 0.055 and luma_light > 0.62:
+    if (
+        ink > thresholds.BALANCE_SCHEMATIC_MIN_INK
+        and dark_light <= thresholds.BALANCE_SCHEMATIC_MAX_DARK_LIGHT_RATIO
+        and luma_light > thresholds.BALANCE_SCHEMATIC_MIN_LIGHT
+    ):
         return "schematic/circuit"
-    if ink > 0.035 and 0.055 < dark_light <= 0.24 and luma_mid < 0.45:
+    if (
+        ink > thresholds.BALANCE_TEXT_MIN_INK
+        and thresholds.BALANCE_TEXT_MIN_DARK_LIGHT_RATIO < dark_light <= thresholds.BALANCE_TEXT_MAX_DARK_LIGHT_RATIO
+        and luma_mid < thresholds.BALANCE_TEXT_MAX_MID
+    ):
         return "text"
-    if ink > 0.08 and (dark_light > 0.34 or luma_mid > 0.48):
+    if ink > thresholds.BALANCE_IMAGE_MIN_INK and (
+        dark_light > thresholds.BALANCE_IMAGE_MIN_DARK_LIGHT_RATIO
+        or luma_mid > thresholds.BALANCE_IMAGE_MIN_MID
+    ):
         return "image"
     return "other"
 
@@ -137,7 +170,7 @@ def draw_tile_layer(
         cv2.rectangle(overlay, (x1, y1), (x2, y2), color, -1)
         classified_tiles.append({"label": label, "bbox": original_bbox})
 
-    preview = cv2.addWeighted(overlay, 0.26, preview, 0.74, 0)
+    preview = cv2.addWeighted(overlay, thresholds.TILE_OVERLAY_ALPHA, preview, thresholds.TILE_BASE_ALPHA, 0)
     for tile in classified_tiles:
         x, y, w, h = [int(value) for value in tile["bbox"]]
         x1 = int(round(x * preview_scale))

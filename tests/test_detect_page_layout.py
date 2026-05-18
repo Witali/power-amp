@@ -258,6 +258,42 @@ class DetectPageLayoutTests(unittest.TestCase):
         self.assertEqual(label, "schematic/circuit")
         self.assertGreater(confidence, 0.35)
 
+    def test_component_signature_boosts_schematic_over_diagram(self) -> None:
+        ann = detect_page_layout.train_bootstrap_ann()
+        features = {
+            "width_ratio": 0.36,
+            "height_ratio": 0.18,
+            "area_ratio": 0.06,
+            "wide_aspect": 0.40,
+            "tall_aspect": 0.10,
+            "ink_density": 0.12,
+            "edge_density": 0.34,
+            "gray_std": 0.34,
+            "gray_levels": 0.55,
+            "component_density": 0.42,
+            "hline_density": 0.20,
+            "vline_density": 0.18,
+            "line_balance": 0.55,
+            "textline_density": 0.42,
+            "horizontal_text_score": 0.42,
+            "vertical_text_score": 0.24,
+            "diagonal_text_score": 0.18,
+            "max_text_score": 0.42,
+            "line_art_score": 0.32,
+            "saturation_mean": 0.0,
+            "saturation_p80": 0.0,
+            "component_signature_score": 0.42,
+            "resistor_symbol_density": 0.45,
+            "capacitor_symbol_density": 0.35,
+            "diode_symbol_density": 0.18,
+            "transistor_symbol_density": 0.10,
+        }
+
+        label, confidence = detect_page_layout.classify_features(ann, features)
+
+        self.assertEqual(label, "schematic/circuit")
+        self.assertGreater(confidence, 0.35)
+
     def test_feature_classifier_prefers_color_photo_over_schematic(self) -> None:
         ann = detect_page_layout.train_bootstrap_ann()
         features = {
@@ -465,6 +501,106 @@ class DetectPageLayoutTests(unittest.TestCase):
         outline = detect_page_layout.visual_outline_from_text_cutouts(figure, [page_column])
 
         self.assertEqual(outline, [[[10, 100], [310, 100], [310, 240], [10, 240]]])
+
+    def test_resolve_block_overlaps_cuts_overlap_from_visual_loser(self) -> None:
+        schematic = detect_page_layout.Block(
+            ident="001_schematic",
+            label="schematic/circuit",
+            orientation="unknown",
+            confidence=0.90,
+            bbox=[10, 10, 120, 90],
+            outline=[[[10, 10], [130, 10], [130, 100], [10, 100]]],
+            features={},
+        )
+        text = detect_page_layout.Block(
+            ident="002_text",
+            label="text",
+            orientation="horizontal",
+            confidence=0.91,
+            bbox=[90, 35, 90, 42],
+            outline=None,
+            features={},
+        )
+
+        resolved = detect_page_layout.resolve_block_overlaps(
+            [schematic, text],
+            owner_fn=lambda first, second, overlap: text.ident,
+        )
+
+        self.assertFalse(detect_page_layout.point_inside_block(resolved[0], (100, 50)))
+        self.assertTrue(detect_page_layout.point_inside_block(resolved[1], (100, 50)))
+        self.assertEqual(resolved[0].features["overlap_resolution"], 1.0)
+
+    def test_resolve_block_overlaps_cuts_overlap_from_text_loser(self) -> None:
+        schematic = detect_page_layout.Block(
+            ident="001_schematic",
+            label="schematic/circuit",
+            orientation="unknown",
+            confidence=0.90,
+            bbox=[10, 10, 120, 90],
+            outline=[[[10, 10], [130, 10], [130, 100], [10, 100]]],
+            features={},
+        )
+        text = detect_page_layout.Block(
+            ident="002_text",
+            label="text",
+            orientation="horizontal",
+            confidence=0.91,
+            bbox=[90, 35, 90, 42],
+            outline=None,
+            features={},
+        )
+
+        resolved = detect_page_layout.resolve_block_overlaps(
+            [schematic, text],
+            owner_fn=lambda first, second, overlap: schematic.ident,
+        )
+
+        self.assertTrue(detect_page_layout.point_inside_block(resolved[0], (100, 50)))
+        self.assertFalse(detect_page_layout.point_inside_block(resolved[1], (100, 50)))
+        self.assertIsNotNone(resolved[1].outline)
+        self.assertEqual(resolved[1].features["overlap_resolution"], 1.0)
+
+    def test_overlap_owner_score_prefers_text_for_textual_overlap(self) -> None:
+        text = detect_page_layout.Block(
+            ident="001_text",
+            label="text",
+            orientation="horizontal",
+            confidence=0.90,
+            bbox=[90, 35, 90, 42],
+            outline=None,
+            features={},
+        )
+        schematic = detect_page_layout.Block(
+            ident="002_schematic",
+            label="schematic/circuit",
+            orientation="unknown",
+            confidence=0.90,
+            bbox=[10, 10, 120, 90],
+            outline=None,
+            features={},
+        )
+        overlap = detect_page_layout.Box(90, 35, 40, 42)
+        features = {
+            "max_text_score": 0.91,
+            "textline_density": 0.88,
+            "line_art_score": 0.10,
+            "hline_density": 0.0,
+            "vline_density": 0.0,
+            "saturation_p80": 0.0,
+            "gray_std": 0.6,
+        }
+
+        text_score = detect_page_layout.overlap_owner_score(text, detect_page_layout.box_from_list(text.bbox), overlap, "text", features)
+        schematic_score = detect_page_layout.overlap_owner_score(
+            schematic,
+            detect_page_layout.box_from_list(schematic.bbox),
+            overlap,
+            "text",
+            features,
+        )
+
+        self.assertGreater(text_score, schematic_score)
 
     def test_block_preview_label_includes_block_number(self) -> None:
         block = detect_page_layout.Block(
