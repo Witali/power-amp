@@ -5,6 +5,7 @@ param(
     [switch]$SkipSpellcheck,
     [switch]$InstallHunspell,
     [switch]$SkipLayoutCv,
+    [switch]$SkipGo,
     [switch]$SkipNode,
     [string]$SevenZipPath
 )
@@ -33,6 +34,12 @@ $NgspiceVersion = "46"
 $NgspiceArchive = "ngspice-46_64.7z"
 $NgspiceUrl = "https://downloads.sourceforge.net/project/ngspice/ng-spice-rework/$NgspiceVersion/$NgspiceArchive"
 $NgspiceExe = Join-Path $Tools "ngspice\Spice64\bin\ngspice_con.exe"
+
+$GoVersion = "1.26.3"
+$GoArchive = "go$GoVersion.windows-amd64.zip"
+$GoUrl = "https://go.dev/dl/$GoArchive"
+$GoExtracted = Join-Path $Tools "go"
+$GoExe = Join-Path $GoExtracted "bin\go.exe"
 
 $TesseractVersion = "5.5.0.20241111"
 $TesseractPackage = "tesseract.$TesseractVersion.nupkg"
@@ -250,6 +257,27 @@ function Install-Tesseract {
     }
 
     & $TesseractExe --tessdata-dir $TessData --list-langs
+}
+
+function Install-Go {
+    Write-Step "Checking Go"
+    if ((Test-Path -LiteralPath $GoExe) -and !$Force) {
+        & $GoExe version
+        return
+    }
+
+    $archive = Join-Path $Downloads $GoArchive
+    Invoke-Download -Uri $GoUrl -OutFile $archive
+
+    if ($Force -and (Test-Path -LiteralPath $GoExtracted)) {
+        Remove-Item -LiteralPath $GoExtracted -Recurse -Force
+    }
+    Expand-ZipPackage -Archive $archive -Destination $Tools
+
+    if (!(Test-Path -LiteralPath $GoExe)) {
+        throw "go.exe was not found after extracting $archive"
+    }
+    & $GoExe version
 }
 
 function Find-LocalHunspell {
@@ -488,6 +516,9 @@ function Show-Summary {
     if (Test-LocalPythonPackage -PackageName "cv2") {
         Write-Host "Layout CV: $PythonPackages"
     }
+    if (Test-Path -LiteralPath $GoExe) {
+        Write-Host "Go:        $GoExe"
+    }
     Write-Host ""
     Write-Host "Local tools are under local_tools/ and are ignored by Git."
 }
@@ -509,6 +540,9 @@ if (!$SkipSpellcheck) {
 }
 if (!$SkipLayoutCv) {
     Install-PythonLayoutDependencies
+}
+if (!$SkipGo) {
+    Install-Go
 }
 if (!$SkipNode) {
     Install-NodeDependencies

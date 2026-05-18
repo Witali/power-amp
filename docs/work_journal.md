@@ -156,10 +156,20 @@
 - Пороги вспомогательных histogram/balance-слоев вынесены из `compare_layout_analysis_layers.py` в отдельный модуль `layout_analysis_thresholds.py`.
 - Для лучшего различения схем и диаграмм добавлен модуль `layout_component_signatures.py`: он ищет признаки типовых радиодеталей, включая прямоугольники резисторов, пары пластин конденсаторов, треугольные диодные контуры и круглые транзисторные/ламповые УГО.
 - Начат экспериментальный перенос алгоритмов анализа страниц в Go: `native/go-layout` содержит standalone CLI для thresholding, connected components, базовых признаков, component signatures и JSON/crop-вывода без замены текущих Python/Node.js скриптов.
+- Сохранен набор из 20 наиболее полезных страниц для регрессионных проверок OpenCV-разметки: исходники, `layout.json`, `preview.png` и манифест лежат в `study/opencv_layout_regression_pages`.
+
+### 2026-05-19 - portable Go и проверка Go-прототипа
+
+- Установлен portable Go `1.26.3` в `local_tools/go`; дистрибутив и кэши остаются вне git благодаря `.gitignore`.
+- `scripts/setup_local_tools.ps1` теперь умеет устанавливать и проверять Go, с флагом `-SkipGo` для пропуска.
+- Добавлен `scripts/test_go_layout.ps1`: он выставляет `GOCACHE`/`GOMODCACHE` внутри `.tmp`, запускает `go test ./...` и при необходимости smoke-run `layoutscan` на тестовой странице.
+- В `package.json` добавлены обертки `npm run go:test` и `npm run go:smoke`.
+- Go-метка схем приведена к текущему соглашению проекта: `schematic` вместо `schematic/circuit`; добавлены unit-тесты для классификации схемных признаков и имени метки.
 
 ## Что проверять после изменений
 
 - `python -m unittest discover -s tests`
+- `scripts/test_go_layout.ps1 -SkipScan` или `npm run go:test`
 - `git diff --check`
 - PowerShell parser для измененных `.ps1`-скриптов, если менялся PowerShell-код.
 - Визуальный просмотр PNG-превью для страниц из `study/layout_detection_marked_pages/`.

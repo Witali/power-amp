@@ -6,7 +6,16 @@ import (
 	"sort"
 )
 
-var classNames = []string{"text", "image", "schematic/circuit", "diagram", "table", "other"}
+const (
+	LabelText      = "text"
+	LabelImage     = "image"
+	LabelSchematic = "schematic"
+	LabelDiagram   = "diagram"
+	LabelTable     = "table"
+	LabelOther     = "other"
+)
+
+var classNames = []string{LabelText, LabelImage, LabelSchematic, LabelDiagram, LabelTable, LabelOther}
 
 func ScanFile(path string, opts Options) (Result, error) {
 	if opts.MaxAnalysisSide == 0 {

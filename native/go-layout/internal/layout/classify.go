@@ -19,28 +19,28 @@ func Classify(f map[string]float64) (string, float64) {
 	entropy := f["luma_hist_entropy"]
 
 	scores := map[string]float64{
-		"text":              1.5*ink + 0.6*entropy + 0.2 - 0.8*balance,
-		"image":             1.4*std + 0.8*mid + 0.5*entropy,
-		"schematic/circuit": 1.2*hline + 1.2*vline + 0.9*balance + 1.8*signature + 0.35*edge - 0.4*std,
-		"diagram":           0.8*edge + 0.8*hline + 0.3*entropy - 0.5*signature,
-		"table":             1.3*hline + 1.3*vline + 1.0*balance,
-		"other":             0.2,
+		LabelText:      1.5*ink + 0.6*entropy + 0.2 - 0.8*balance,
+		LabelImage:     1.4*std + 0.8*mid + 0.5*entropy,
+		LabelSchematic: 1.2*hline + 1.2*vline + 0.9*balance + 1.8*signature + 0.35*edge - 0.4*std,
+		LabelDiagram:   0.8*edge + 0.8*hline + 0.3*entropy - 0.5*signature,
+		LabelTable:     1.3*hline + 1.3*vline + 1.0*balance,
+		LabelOther:     0.2,
 	}
 	if ink < 0.015 {
-		scores["other"] += 0.8
+		scores[LabelOther] += 0.8
 	}
 	if signature > 0.18 && ink < 0.34 && darkLight < 0.35 {
-		scores["schematic/circuit"] += 1.2 + signature
-		scores["diagram"] *= 0.6
+		scores[LabelSchematic] += 1.2 + signature
+		scores[LabelDiagram] *= 0.6
 	}
 	if hline > 0.45 && vline > 0.35 && signature < 0.10 {
-		scores["table"] += 0.9
+		scores[LabelTable] += 0.9
 	}
 	if mid > 0.48 && std > 0.45 {
-		scores["image"] += 0.8
+		scores[LabelImage] += 0.8
 	}
 
-	bestLabel := "other"
+	bestLabel := LabelOther
 	best := -math.MaxFloat64
 	var sum float64
 	for _, label := range classNames {

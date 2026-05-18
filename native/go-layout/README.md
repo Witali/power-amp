@@ -12,7 +12,7 @@ The first implementation intentionally uses only the Go standard library:
 - Coarse block merging.
 - Feature extraction for ink density, edge density, run-line density,
   luma histograms, and schematic component signatures.
-- Rule-based labels: `text`, `image`, `schematic/circuit`, `diagram`, `table`,
+- Rule-based labels: `text`, `image`, `schematic`, `diagram`, `table`,
   and `other`.
 - JSON output plus optional PNG crops.
 
