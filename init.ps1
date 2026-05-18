@@ -5,6 +5,7 @@ param(
     [switch]$SkipSpellcheck,
     [switch]$InstallHunspell,
     [switch]$SkipLayoutCv,
+    [switch]$SkipGo,
     [switch]$SkipNode,
     [string]$SevenZipPath
 )
@@ -12,4 +13,4 @@ param(
 $ErrorActionPreference = "Stop"
 $Script = Join-Path $PSScriptRoot "scripts\setup_local_tools.ps1"
 
-& $Script -Force:$Force -SkipNgspice:$SkipNgspice -SkipOcr:$SkipOcr -SkipSpellcheck:$SkipSpellcheck -InstallHunspell:$InstallHunspell -SkipLayoutCv:$SkipLayoutCv -SkipNode:$SkipNode -SevenZipPath $SevenZipPath
+& $Script -Force:$Force -SkipNgspice:$SkipNgspice -SkipOcr:$SkipOcr -SkipSpellcheck:$SkipSpellcheck -InstallHunspell:$InstallHunspell -SkipLayoutCv:$SkipLayoutCv -SkipGo:$SkipGo -SkipNode:$SkipNode -SevenZipPath $SevenZipPath

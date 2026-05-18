@@ -795,6 +795,25 @@ class DetectPageLayoutTests(unittest.TestCase):
         self.assertLess(pieces[0].w, box.w)
         self.assertLess(pieces[1].w, box.w)
 
+    def test_vertical_whitespace_corridor_finds_column_gutter(self) -> None:
+        np = detect_page_layout.np
+
+        mask = np.zeros((220, 340), dtype=np.uint8)
+        for row in range(20, 195, 17):
+            mask[row : row + 8, 20:140] = 255
+            mask[row : row + 8, 180:320] = 255
+        mask[55, 158] = 255
+        mask[141, 164] = 255
+        box = detect_page_layout.Box(20, 20, 300, 180)
+
+        corridors = detect_page_layout.vertical_whitespace_corridor_runs(mask, box, min_gap=12)
+        pieces = detect_page_layout.split_box_by_vertical_gaps(mask, box, 340, 220)
+
+        self.assertTrue(any(118 <= start <= 124 and 155 <= end <= 162 for start, end, _ in corridors))
+        self.assertEqual(len(pieces), 2)
+        self.assertLessEqual(pieces[0].x2, 180)
+        self.assertGreaterEqual(pieces[1].x, 150)
+
     def test_split_box_by_side_color_strip_separates_colored_margin(self) -> None:
         np = detect_page_layout.np
 

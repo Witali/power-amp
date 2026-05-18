@@ -6,3 +6,4 @@
 - For ordinary non-destructive local commands inside this project, proceed without asking first. Still honor required sandbox or system approval prompts.
 - Do not revert user changes unless the user explicitly asks for that.
 - Automate repeated project actions in scripts instead of relying on chat context. Prefer `scripts/project_tasks.py` and the npm wrappers `npm run symbols`, `npm run check`, and `npm run build`.
+- When adding or downloading local tools for project work, update `docs/downloaded_tools.md` with the tool name, version, source URL, local path, purpose, and Git policy.

@@ -21,10 +21,17 @@ portable and fast enough to compare against the Python detector.
 
 ## Build
 
-Install Go, then from this directory run:
+The project-level build script uses portable Go from `local_tools/go`, writes
+Go caches under `.tmp`, and builds command-line tools into `local_tools/bin`:
 
 ```text
-go build ./cmd/layoutscan
+pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/build_go_tools.ps1
+```
+
+To build and run the smoke page check:
+
+```text
+pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/build_go_tools.ps1 -Smoke -Crops
 ```
 
 ## Example

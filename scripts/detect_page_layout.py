@@ -359,6 +359,39 @@ def projection_runs(values, threshold: float, min_run: int) -> list[tuple[int, i
     return runs
 
 
+def low_projection_runs(values, threshold: float, min_run: int) -> list[tuple[int, int, float]]:
+    runs: list[tuple[int, int, float]] = []
+    start = -1
+    for index, value in enumerate(values):
+        low = value <= threshold
+        if low and start < 0:
+            start = index
+        elif not low and start >= 0:
+            end = index - 1
+            if end - start + 1 >= min_run:
+                runs.append((start, end, float(values[start : end + 1].mean())))
+            start = -1
+    if start >= 0:
+        end = len(values) - 1
+        if end - start + 1 >= min_run:
+            runs.append((start, end, float(values[start : end + 1].mean())))
+    return runs
+
+
+def vertical_whitespace_corridor_runs(mask, box: Box, min_gap: int) -> list[tuple[int, int, float]]:
+    roi = mask[box.y : box.y2, box.x : box.x2]
+    if roi.size == 0:
+        return []
+
+    column_projection = (roi > 0).sum(axis=0).astype(np.float32)
+    smooth_radius = max(1, box.w // 180)
+    smoothed = smooth_projection(column_projection, smooth_radius)
+    raw_limit = max(1.0, box.h * 0.006)
+    smooth_limit = max(1.5, box.h * 0.010)
+    corridor_values = np.where((column_projection <= raw_limit) & (smoothed <= smooth_limit), 0.0, smoothed)
+    return low_projection_runs(corridor_values, threshold=0.0, min_run=min_gap)
+
+
 def split_box_by_vertical_gaps(mask, box: Box, page_width: int, page_height: int) -> list[Box]:
     if box.h < page_height * 0.18 or box.w < page_width * 0.20:
         return [box]
@@ -373,21 +406,8 @@ def split_box_by_vertical_gaps(mask, box: Box, page_width: int, page_height: int
     min_gap = max(5, int(box.w * 0.015))
     min_piece = max(22, int(page_width * 0.035))
 
-    runs: list[tuple[int, int, float]] = []
-    start = -1
-    for index, value in enumerate(smoothed):
-        low = value <= low_limit
-        if low and start < 0:
-            start = index
-        elif not low and start >= 0:
-            end = index - 1
-            if end - start + 1 >= min_gap:
-                runs.append((start, end, float(smoothed[start : end + 1].mean())))
-            start = -1
-    if start >= 0:
-        end = len(smoothed) - 1
-        if end - start + 1 >= min_gap:
-            runs.append((start, end, float(smoothed[start : end + 1].mean())))
+    runs = low_projection_runs(smoothed, low_limit, min_gap)
+    runs.extend(vertical_whitespace_corridor_runs(mask, box, min_gap))
 
     candidates = []
     for start, end, mean_density in runs:
@@ -395,11 +415,12 @@ def split_box_by_vertical_gaps(mask, box: Box, page_width: int, page_height: int
         if center < min_piece or box.w - center < min_piece:
             continue
         width = end - start + 1
-        candidates.append((width, -mean_density, center))
+        center_balance = 1.0 - abs((center / float(box.w)) - 0.5)
+        candidates.append((width, center_balance, -mean_density, center))
     if not candidates:
         return [box]
 
-    _, _, center = max(candidates)
+    _, _, _, center = max(candidates)
     left = Box(box.x, box.y, center, box.h)
     right = Box(box.x + center, box.y, box.w - center, box.h)
     return [piece for piece in (left, right) if piece.area > 0]
@@ -521,6 +542,13 @@ def feature_visual_candidate_for_text_recovery(features: dict[str, float]) -> bo
     line_art = features.get("line_art_score", 0.0)
     line_balance = features["line_balance"]
     min_line_density = min(features["hline_density"], features["vline_density"])
+    component_signature = features.get("component_signature_score", 0.0)
+    saturation = features.get("saturation_p80", 0.0)
+    saturated_horizontal_note = (
+        saturation > 0.18
+        and features["height_ratio"] < 0.075
+        and features["wide_aspect"] > 0.45
+    )
     line_drawing = (
         area > 0.012
         and line_art > 0.18
@@ -528,13 +556,85 @@ def feature_visual_candidate_for_text_recovery(features: dict[str, float]) -> bo
         and min_line_density > 0.045
         and max_text < 0.62
     )
+    component_visual = (
+        area > 0.004
+        and line_art > 0.26
+        and component_signature > 0.52
+        and features["edge_density"] > 0.16
+        and features["ink_density"] < 0.20
+        and min_line_density > 0.020
+        and saturation < 0.12
+    )
+    grayscale_photo = (
+        area > 0.004
+        and features["gray_std"] > 0.55
+        and features["gray_levels"] > 0.68
+        and features["ink_density"] > 0.18
+        and max_text < 0.78
+        and line_art > 0.24
+        and not saturated_horizontal_note
+    )
     photo_like = (
         area > 0.006
-        and features.get("saturation_p80", 0.0) > 0.16
+        and saturation > 0.16
         and features["gray_std"] > 0.45
         and max_text < 0.45
+        and not saturated_horizontal_note
     )
-    return line_drawing or photo_like
+    return line_drawing or component_visual or grayscale_photo or photo_like
+
+
+def nested_visual_boxes_from_large_regions(
+    image,
+    foreground,
+    gray,
+    boxes: list[Box],
+    width: int,
+    height: int,
+) -> list[Box]:
+    page_area = max(1, width * height)
+    large_boxes = [box for box in boxes if box.area / page_area > 0.08 and box.w > width * 0.18 and box.h > height * 0.22]
+    if not large_boxes:
+        return []
+
+    line_length = max(18, min(width, height) // 70)
+    close_size = max(10, min(width, height) // 150)
+    h_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (line_length, 1))
+    v_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1, line_length))
+    h_lines = cv2.morphologyEx(foreground, cv2.MORPH_OPEN, h_kernel)
+    v_lines = cv2.morphologyEx(foreground, cv2.MORPH_OPEN, v_kernel)
+    line_mask = cv2.bitwise_or(h_lines, v_lines)
+    close_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (close_size, close_size))
+    line_mask = cv2.dilate(line_mask, close_kernel, iterations=1)
+    edges = canny_edges(gray)
+
+    contours, _ = cv2.findContours(line_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    candidates: list[Box] = []
+    for contour in contours:
+        x, y, w, h = cv2.boundingRect(contour)
+        candidate = Box(x, y, w, h).inflate(max(3, min(width, height) // 320), width, height)
+        area_ratio = candidate.area / page_area
+        if area_ratio < 0.004 or area_ratio > 0.16:
+            continue
+        if candidate.w < width * 0.045 or candidate.h < height * 0.035:
+            continue
+        if candidate.x < width * 0.08 and candidate.h > height * 0.45:
+            continue
+        title_like = candidate.h < height * 0.070 and candidate.w > width * 0.20
+        if title_like:
+            continue
+        if not any(overlap_area(candidate, large) / max(1, candidate.area) > 0.78 for large in large_boxes):
+            continue
+
+        features = feature_dict(image, foreground, edges, candidate)
+        saturation = features.get("saturation_p80", 0.0)
+        if saturation > 0.18 and (candidate.h < height * 0.075 or candidate.w / max(1, candidate.h) > 2.8):
+            continue
+        if not feature_visual_candidate_for_text_recovery(features):
+            continue
+        candidates.append(candidate)
+
+    return deduplicate_candidate_boxes(candidates)
 
 
 def visual_boxes_for_text_recovery(image, gray, existing_boxes: list[Box], width: int, height: int) -> list[Box]:
@@ -909,6 +1009,7 @@ def detect_candidate_boxes(
     boxes = split_boxes_by_internal_gaps(mask, boxes, width, height)
     boxes = split_boxes_by_side_color_strips(image, boxes, width, height)
     line_art_boxes = line_art_boxes_from_large_regions(image, mask, gray, boxes + oversized_boxes, width, height)
+    nested_visual_boxes = nested_visual_boxes_from_large_regions(image, mask, gray, boxes + oversized_boxes, width, height)
     frequency_visual_boxes = frequency_hint_boxes(
         frequency_result,
         {"schematic/circuit", "table", "diagram"},
@@ -917,7 +1018,7 @@ def detect_candidate_boxes(
         min_confidence=0.70,
         min_area_ratio=0.020,
     )
-    line_art_boxes = deduplicate_candidate_boxes(line_art_boxes + frequency_visual_boxes)
+    line_art_boxes = deduplicate_candidate_boxes(line_art_boxes + nested_visual_boxes + frequency_visual_boxes)
     large_mixed_boxes = [
         box
         for box in boxes
@@ -1287,6 +1388,33 @@ def classify_features(ann, features: dict[str, float]) -> tuple[str, float]:
     ):
         scores[CLASS_NAMES.index("schematic/circuit")] += 1.15
         scores[CLASS_NAMES.index("diagram")] *= 0.45
+    if (
+        0.004 < features["area_ratio"] < 0.055
+        and component_signature > 0.52
+        and line_art > 0.26
+        and min(features["hline_density"], features["vline_density"]) > 0.020
+        and features["line_balance"] > 0.18
+        and features["edge_density"] > 0.16
+        and features["ink_density"] < 0.20
+        and saturation_p80 < 0.12
+    ):
+        scores[CLASS_NAMES.index("schematic/circuit")] += 2.00 + component_signature
+        scores[CLASS_NAMES.index("text")] *= 0.42
+        scores[CLASS_NAMES.index("image")] *= 0.55
+        scores[CLASS_NAMES.index("table")] *= 0.55
+    if (
+        0.003 < features["area_ratio"] < 0.022
+        and features["gray_std"] > 0.55
+        and features["gray_levels"] > 0.68
+        and features["ink_density"] > 0.18
+        and max_text < 0.78
+        and line_art > 0.24
+        and features["height_ratio"] < 0.16
+    ):
+        scores[CLASS_NAMES.index("image")] += 1.55
+        scores[CLASS_NAMES.index("schematic/circuit")] *= 0.38
+        scores[CLASS_NAMES.index("diagram")] *= 0.55
+        scores[CLASS_NAMES.index("text")] *= 0.60
     if (
         saturation_p80 > 0.16
         and features["gray_std"] > 0.45
@@ -1939,11 +2067,16 @@ def merge_line_art_attachments_into_schematics(
 
 def stacked_diagram_seed(block: Block, box: Box, width: int, height: int) -> bool:
     features = block.features
-    if box.w < width * 0.25 or box.h > height * 0.075:
+    if box.w < width * 0.20 or box.h > height * 0.12:
         return False
-    if box.w / max(1, box.h) < 3.2:
+    if box.w / max(1, box.h) < 1.55:
         return False
     if float(features.get("saturation_p80", 1.0)) > 0.08:
+        return False
+    if "hline_density" in features and "vline_density" in features and min(
+        float(features.get("hline_density", 0.0)),
+        float(features.get("vline_density", 0.0)),
+    ) < 0.04:
         return False
     return (
         block.label in {"diagram", "table", "schematic/circuit", "image"}
@@ -2529,10 +2662,10 @@ def classify_blocks(
             )
         )
 
-    classified = merge_connected_schematic_blocks(
+    classified = merge_stacked_diagram_blocks(
         classified, image, mask, edges, ann, scale=scale, width=analysis_w, height=analysis_h
     )
-    classified = merge_stacked_diagram_blocks(
+    classified = merge_connected_schematic_blocks(
         classified, image, mask, edges, ann, scale=scale, width=analysis_w, height=analysis_h
     )
     classified = demote_textual_diagram_wrappers(classified)

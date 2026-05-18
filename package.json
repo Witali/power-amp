@@ -6,8 +6,9 @@
   "scripts": {
     "build": "python scripts/project_tasks.py all",
     "check": "python scripts/project_tasks.py check",
-    "go:test": "pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/test_go_layout.ps1 -SkipScan",
-    "go:smoke": "pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/test_go_layout.ps1 -Crops",
+    "go:build": "pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/build_go_tools.ps1",
+    "go:test": "pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/build_go_tools.ps1 -SkipBuild",
+    "go:smoke": "pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/build_go_tools.ps1 -Smoke -Crops",
     "layout:calibrate": "python scripts/project_tasks.py layout-calibrate",
     "layout:frequency": "python scripts/analyze_page_frequency.py",
     "lint:svg": "python scripts/lint_svg.py",

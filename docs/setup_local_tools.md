@@ -8,6 +8,8 @@ Use the project init script after cloning the repository on a Windows machine.
 
 It installs tools locally under `local_tools/` and project caches under `node_cache/`.
 Both are ignored by Git, so the repository stays small.
+The detailed inventory of downloaded tools, source URLs, local paths, and Git
+policy is maintained in `docs/downloaded_tools.md`.
 
 ## What It Installs
 
@@ -16,6 +18,7 @@ Both are ignored by Git, so the repository stays small.
 - Tesseract language data: `rus`, `eng`, and `osd`.
 - Optional Hunspell spell checker plus `ru_RU` and `en_US` dictionaries for OCR text checks.
 - Python packages for page-layout detection before OCR: `opencv-python-headless`, `numpy`, and `pillow`, installed into `local_tools/python_packages`.
+- Go 1.26.3 portable for native layout-analysis tools.
 - Node.js 20.11.1 portable, only if no system `node.exe` is found.
 - 7-Zip portable, only if no system `7z.exe` is found.
 - Node dependencies from `package.json`, currently `@resvg/resvg-js` for SVG to PNG rendering.
@@ -47,6 +50,7 @@ scripts/setup_local_tools.ps1
 .\init.ps1 -SkipSpellcheck
 .\init.ps1 -InstallHunspell
 .\init.ps1 -SkipLayoutCv
+.\init.ps1 -SkipGo
 .\init.ps1 -SkipNode
 ```
 
