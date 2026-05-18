@@ -69,6 +69,23 @@ def spellcheck_text(paths: list[Path], backend: str, out: Path | None, fail_on_i
     run(command)
 
 
+def calibrate_layout_frequency(images_dir: Path, layouts_dir: Path, out_md: Path, out_json: Path) -> None:
+    run(
+        [
+            sys.executable,
+            "scripts/calibrate_layout_frequency.py",
+            "--images-dir",
+            rel(images_dir),
+            "--layouts-dir",
+            rel(layouts_dir),
+            "--out-md",
+            rel(out_md),
+            "--out-json",
+            rel(out_json),
+        ]
+    )
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Reproducible project task runner.")
     subparsers = parser.add_subparsers(dest="task", required=True)
@@ -102,6 +119,12 @@ def parse_args() -> argparse.Namespace:
     spellcheck.add_argument("--out", type=Path, help="Optional TSV report path.")
     spellcheck.add_argument("--fail-on-issues", action="store_true", help="Exit non-zero if issues are found.")
 
+    layout_calibrate = subparsers.add_parser("layout-calibrate", help="Measure frequency features on reviewed layout blocks.")
+    layout_calibrate.add_argument("--images-dir", type=Path, default=Path(".tmp/layout_candidate_pages"))
+    layout_calibrate.add_argument("--layouts-dir", type=Path, default=Path(".tmp/layout_frequency_calibration_layouts"))
+    layout_calibrate.add_argument("--out-md", type=Path, default=Path("study/layout_frequency_calibration.md"))
+    layout_calibrate.add_argument("--out-json", type=Path, default=Path("study/layout_frequency_calibration.json"))
+
     return parser.parse_args()
 
 
@@ -125,6 +148,8 @@ def main() -> int:
             run_result(args.variant, args.scale, args.no_png, args.no_html)
         elif args.task == "spellcheck":
             spellcheck_text(args.paths, args.backend, args.out, args.fail_on_issues)
+        elif args.task == "layout-calibrate":
+            calibrate_layout_frequency(args.images_dir, args.layouts_dir, args.out_md, args.out_json)
         else:
             raise AssertionError(args.task)
     except subprocess.CalledProcessError as exc:

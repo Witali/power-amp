@@ -9,6 +9,7 @@ npm run symbols
 npm test
 npm run check
 npm run layout:frequency -- --image .tmp\layout_candidate_pages\b.2000-09.011.jpg
+npm run layout:calibrate -- --images-dir .tmp\layout_candidate_pages --layouts-dir .tmp\layout_frequency_calibration_layouts
 npm run spellcheck
 npm run build
 ```
@@ -17,6 +18,7 @@ npm run build
 - `npm test`: runs the Python unit tests for project scripts.
 - `npm run check`: runs tests, the SVG linter, and `git diff --check`.
 - `npm run layout:frequency -- --image ...`: generates FFT/autocorrelation-style page layout hints, JSON, and PNG preview.
+- `npm run layout:calibrate -- --images-dir ... --layouts-dir ...`: measures frequency features on reviewed page blocks and refreshes `study/layout_frequency_calibration.md`.
 - `npm run spellcheck`: checks OCR text under `.tmp` with Hunspell when available, otherwise with OCR-focused heuristics.
 - `npm run build`: runs the symbols workflow and then project checks.
 
@@ -32,6 +34,7 @@ python scripts\project_tasks.py result results\003_radiostorage_shema_1804_6\var
 python scripts\project_tasks.py spellcheck .tmp --out .tmp\spellcheck_report.tsv
 python scripts\lint_svg.py --fail-on-warning
 python scripts\analyze_page_frequency.py --image .tmp\layout_candidate_pages\b.2000-09.011.jpg --layout .tmp\layout_frequency_integrated_check\b.2000-09.011\layout.json
+python scripts\project_tasks.py layout-calibrate --images-dir .tmp\layout_candidate_pages --layouts-dir .tmp\layout_frequency_calibration_layouts
 python scripts\benchmark_layout_detector.py .tmp\layout_candidate_pages\b.2000-02.036.jpg .tmp\layout_candidate_pages\b.2000-10.014.jpg
 ```
 
@@ -58,6 +61,7 @@ npm run symbols
 npm test
 npm run check
 npm run layout:frequency -- --image .tmp\layout_candidate_pages\b.2000-09.011.jpg
+npm run layout:calibrate -- --images-dir .tmp\layout_candidate_pages --layouts-dir .tmp\layout_frequency_calibration_layouts
 npm run spellcheck
 npm run build
 ```
@@ -66,6 +70,7 @@ npm run build
 - `npm test`: запускает Python unit-тесты для проектных скриптов.
 - `npm run check`: запускает тесты, SVG-линтер и `git diff --check`.
 - `npm run layout:frequency -- --image ...`: создает частотные подсказки макета страницы, JSON и PNG-превью.
+- `npm run layout:calibrate -- --images-dir ... --layouts-dir ...`: измеряет частотные признаки на проверенных блоках страниц и обновляет `study/layout_frequency_calibration.md`.
 - `npm run spellcheck`: проверяет OCR-текст в `.tmp`, используя Hunspell при наличии или OCR-эвристики без внешних зависимостей.
 - `npm run build`: выполняет workflow символов и затем проверки проекта.
 
@@ -81,6 +86,7 @@ python scripts\project_tasks.py result results\003_radiostorage_shema_1804_6\var
 python scripts\project_tasks.py spellcheck .tmp --out .tmp\spellcheck_report.tsv
 python scripts\lint_svg.py --fail-on-warning
 python scripts\analyze_page_frequency.py --image .tmp\layout_candidate_pages\b.2000-09.011.jpg --layout .tmp\layout_frequency_integrated_check\b.2000-09.011\layout.json
+python scripts\project_tasks.py layout-calibrate --images-dir .tmp\layout_candidate_pages --layouts-dir .tmp\layout_frequency_calibration_layouts
 python scripts\benchmark_layout_detector.py .tmp\layout_candidate_pages\b.2000-02.036.jpg .tmp\layout_candidate_pages\b.2000-10.014.jpg
 ```
 

@@ -36,6 +36,32 @@ LABEL_COLORS = {
     "background": (190, 190, 190),
 }
 HINT_LABELS = {"text", "image", "schematic/circuit", "diagram", "table", "other"}
+TEXT_ROW_PERIOD_BAND = (8.0, 44.0)
+TEXT_COLUMN_PERIOD_BAND = (4.0, 28.0)
+
+# Calibrated on the locally reviewed archive.radio.ru page set under
+# study/layout_detection_marked_pages. The measured p05..p95 text row period
+# range was about 19..38 px at the 1800 px analysis scale; the band above keeps
+# roughly 15-20% headroom and the rules below prevent line art from becoming
+# text purely because circuit labels are also periodic.
+BACKGROUND_MAX_INK = 0.010
+BACKGROUND_MAX_GRAY_STD = 0.080
+STRONG_TEXT_ROW_PERIOD = 0.68
+STRONG_TEXT_ROW_ENTROPY_MAX = 0.66
+TEXT_ROW_PERIOD = 0.38
+TEXT_ROW_ENTROPY_MAX = 0.70
+TEXT_MAX_LINE_BALANCE = 0.35
+TEXT_MAX_LINE_DENSITY = 0.22
+TEXT_MAX_SATURATION = 0.34
+LINE_ART_MAX_INK = 0.26
+LINE_ART_MIN_ENTROPY = 0.56
+LINE_ART_MIN_LINE_DENSITY = 0.045
+LINE_ART_MIN_BALANCE = 0.12
+LINE_ART_MAX_SATURATION = 0.16
+IMAGE_STRONG_SATURATION = 0.24
+IMAGE_MEDIUM_SATURATION = 0.15
+IMAGE_MIN_GRAY_STD = 0.52
+IMAGE_MIN_ENTROPY = 0.34
 
 
 def require_dependencies() -> None:
@@ -129,6 +155,32 @@ def spectral_entropy(profile) -> float:
     return entropy / math.log2(max(2, probability.size))
 
 
+def dominant_period(profile, min_period: float = 3.0, max_period: float = 80.0) -> float:
+    signal = profile.astype(np.float32)
+    if signal.size < 8:
+        return 0.0
+    signal = signal - float(signal.mean())
+    if float(signal.std()) < 1e-6:
+        return 0.0
+    spectrum = np.fft.rfft(signal * np.hanning(signal.size).astype(np.float32))
+    power = (spectrum.real * spectrum.real) + (spectrum.imag * spectrum.imag)
+    if power.size <= 1:
+        return 0.0
+    power[0] = 0.0
+    total = float(power.sum())
+    if total <= 1e-9:
+        return 0.0
+    indices = np.arange(power.size, dtype=np.float32)
+    periods = np.full(power.size, np.inf, dtype=np.float32)
+    periods[1:] = signal.size / indices[1:]
+    band = (periods >= min_period) & (periods <= max_period)
+    if not bool(band.any()) or float(power[band].sum()) <= 1e-9:
+        return 0.0
+    band_indices = np.where(band)[0]
+    best_index = band_indices[int(power[band].argmax())]
+    return float(periods[best_index])
+
+
 def foreground_mask(gray):
     blurred = cv2.GaussianBlur(gray, (3, 3), 0)
     threshold, _ = cv2.threshold(blurred, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
@@ -171,12 +223,12 @@ def tile_features(image, gray, mask, x: int, y: int, tile_size: int) -> dict[str
     saturation = hsv[:, :, 1].astype(np.float32) / 255.0
 
     row_text_period = max(
-        band_energy_ratio(row_profile, 7.0, 34.0),
-        band_energy_ratio(gray_row_profile, 7.0, 34.0),
+        band_energy_ratio(row_profile, *TEXT_ROW_PERIOD_BAND),
+        band_energy_ratio(gray_row_profile, *TEXT_ROW_PERIOD_BAND),
     )
     column_text_period = max(
-        band_energy_ratio(column_profile, 4.0, 24.0),
-        band_energy_ratio(gray_column_profile, 4.0, 24.0),
+        band_energy_ratio(column_profile, *TEXT_COLUMN_PERIOD_BAND),
+        band_energy_ratio(gray_column_profile, *TEXT_COLUMN_PERIOD_BAND),
     )
 
     return {
@@ -191,6 +243,10 @@ def tile_features(image, gray, mask, x: int, y: int, tile_size: int) -> dict[str
         "hline_density": min(h_density * 8.0, 1.0),
         "vline_density": min(v_density * 8.0, 1.0),
         "line_balance": line_balance,
+        "row_dominant_period": dominant_period(row_profile),
+        "column_dominant_period": dominant_period(column_profile),
+        "gray_row_dominant_period": dominant_period(gray_row_profile),
+        "gray_column_dominant_period": dominant_period(gray_column_profile),
     }
 
 
@@ -207,25 +263,82 @@ def classify_frequency_features(features: dict[str, float]) -> tuple[str, float]
     saturation = features["saturation_p80"]
     gray_std = features["gray_std"]
 
-    if ink < 0.010 and gray_std < 0.08:
-        return "background", min(0.98, 0.72 + (0.010 - ink) * 12.0)
+    row_entropy = features["row_entropy"]
+    column_entropy = features["column_entropy"]
+    min_line = min(hline, vline)
+    max_line = max(hline, vline)
+
+    if ink < BACKGROUND_MAX_INK and gray_std < BACKGROUND_MAX_GRAY_STD:
+        return "background", min(0.98, 0.72 + (BACKGROUND_MAX_INK - ink) * 12.0)
+
+    strong_text = (
+        row_period > STRONG_TEXT_ROW_PERIOD
+        and row_entropy < STRONG_TEXT_ROW_ENTROPY_MAX
+        and (balance < TEXT_MAX_LINE_BALANCE or max_line < TEXT_MAX_LINE_DENSITY or min_line < LINE_ART_MIN_LINE_DENSITY)
+    )
+    display_text = (
+        row_period > 0.78
+        and ink > 0.08
+        and saturation < TEXT_MAX_SATURATION
+        and max_line < 0.42
+        and balance < 0.55
+    )
+    compact_text = row_period > 0.50 and row_entropy < 0.58 and max_line < 0.20
+    if strong_text or display_text or compact_text:
+        confidence = 0.44 + row_period * 0.36 + max(0.0, TEXT_ROW_ENTROPY_MAX - row_entropy) * 0.20
+        confidence -= min(0.16, balance * 0.10 + max_line * 0.06)
+        return "text", min(0.92, max(0.42, confidence))
+
+    strong_image = saturation > IMAGE_STRONG_SATURATION and gray_std > IMAGE_MIN_GRAY_STD and entropy > IMAGE_MIN_ENTROPY
+    medium_image = (
+        saturation > IMAGE_MEDIUM_SATURATION
+        and gray_std > 0.64
+        and ink > 0.16
+        and max_line < 0.65
+        and not (min_line > LINE_ART_MIN_LINE_DENSITY and balance > 0.20 and entropy > LINE_ART_MIN_ENTROPY)
+    )
+    if strong_image and not (row_period > 0.65 and row_entropy < TEXT_ROW_ENTROPY_MAX):
+        return "image", min(0.92, 0.40 + saturation * 0.50 + entropy * 0.22 + gray_std * 0.14)
+    if medium_image:
+        return "image", min(0.88, 0.36 + saturation * 0.42 + gray_std * 0.20 + entropy * 0.16)
+
+    line_art = (
+        ink < LINE_ART_MAX_INK
+        and entropy > LINE_ART_MIN_ENTROPY
+        and (
+            (min_line > LINE_ART_MIN_LINE_DENSITY and balance > LINE_ART_MIN_BALANCE)
+            or (hline > 0.14 and vline > 0.035)
+            or (vline > 0.14 and hline > 0.035)
+        )
+    )
+    loose_line_art = (
+        ink < 0.22
+        and entropy > 0.62
+        and max(row_period, column_period) > 0.42
+        and min_line > 0.025
+        and saturation < LINE_ART_MAX_SATURATION
+    )
+    if line_art or loose_line_art:
+        label = "table" if min_line > 0.20 and balance > 0.50 and min(row_period, column_period) > 0.12 else "schematic/circuit"
+        confidence = 0.40 + (hline + vline) * 0.44 + balance * 0.12 + entropy * 0.12
+        confidence -= min(0.14, saturation * 0.20)
+        return label, min(0.92, max(0.42, confidence))
+
+    if row_period > TEXT_ROW_PERIOD and row_entropy < TEXT_ROW_ENTROPY_MAX and (
+        balance < 0.24 or max_line < 0.16 or min_line < 0.035
+    ):
+        return "text", min(0.88, 0.40 + row_period * 0.38 + max(0.0, TEXT_ROW_ENTROPY_MAX - row_entropy) * 0.14)
+    if row_period > 0.55 and ink > 0.09 and saturation < 0.22 and row_entropy < 0.76 and max_line < 0.28:
+        return "text", min(0.86, 0.39 + row_period * 0.34 + ink * 0.16)
 
     scores = {
-        "text": 1.8 * row_period + 0.6 * column_period + 0.7 * ink - 0.7 * balance - 0.35 * saturation,
-        "schematic/circuit": 1.3 * hline + 1.3 * vline + 1.1 * balance + 0.45 * entropy - 0.55 * saturation,
-        "table": 1.2 * min(hline, vline) + 1.1 * balance + 0.45 * min(row_period, column_period),
-        "image": 1.0 * entropy + 0.9 * gray_std + 0.9 * saturation + 0.4 * ink - 0.35 * row_period,
+        "text": 2.7 * row_period + 0.35 * column_period + 0.55 * ink - 1.0 * balance - 0.75 * entropy - 0.35 * saturation,
+        "schematic/circuit": 1.6 * hline + 1.6 * vline + 1.15 * balance + 1.0 * entropy + 0.35 * max(row_period, column_period) - 0.60 * saturation - 0.35 * ink,
+        "table": 1.25 * min_line + 1.0 * balance + 0.25 * min(row_period, column_period),
+        "image": 1.15 * gray_std + 1.25 * saturation + 0.55 * entropy + 0.35 * ink - 0.55 * row_period - 0.20 * balance,
         "other": 0.20 + 0.25 * ink + 0.15 * entropy,
     }
 
-    if row_period > 0.20 and hline < 0.35 and vline < 0.35:
-        scores["text"] += 0.70
-    if hline > 0.18 and vline > 0.12 and balance > 0.25:
-        scores["schematic/circuit"] += 0.75
-    if min(hline, vline) > 0.20 and balance > 0.50 and min(row_period, column_period) > 0.12:
-        scores["table"] += 0.65
-    if saturation > 0.16 and gray_std > 0.30 and entropy > 0.45:
-        scores["image"] += 0.85
     if ink > 0.45 and saturation < 0.08 and row_period > 0.12:
         scores["text"] += 0.35
         scores["image"] *= 0.55
@@ -234,13 +347,13 @@ def classify_frequency_features(features: dict[str, float]) -> tuple[str, float]
     total = sum(scores.values())
     label = max(scores, key=scores.get)
     confidence = scores[label] / max(total, 1e-6)
-    if label == "text" and row_period > 0.22:
-        confidence = max(confidence, min(0.92, 0.42 + row_period * 0.45 - max(hline, vline) * 0.08))
-    if label == "schematic/circuit" and hline > 0.10 and vline > 0.08 and balance > 0.20:
+    if label == "text" and row_period > TEXT_ROW_PERIOD:
+        confidence = max(confidence, min(0.90, 0.40 + row_period * 0.40 - max_line * 0.08))
+    if label == "schematic/circuit" and hline > 0.08 and vline > 0.06 and balance > 0.16:
         confidence = max(confidence, min(0.92, 0.44 + (hline + vline) * 0.42 + balance * 0.10))
-    if label == "table" and min(hline, vline) > 0.15 and balance > 0.45:
-        confidence = max(confidence, min(0.90, 0.42 + min(hline, vline) * 0.55 + balance * 0.10))
-    if label == "image" and (saturation > 0.16 or (entropy > 0.45 and gray_std > 0.45)):
+    if label == "table" and min_line > 0.15 and balance > 0.45:
+        confidence = max(confidence, min(0.90, 0.42 + min_line * 0.55 + balance * 0.10))
+    if label == "image" and (saturation > IMAGE_MEDIUM_SATURATION or (entropy > 0.45 and gray_std > 0.45)):
         confidence = max(confidence, min(0.92, 0.40 + saturation * 0.45 + entropy * 0.22 + gray_std * 0.15))
     if confidence < 0.32 and label != "other":
         return "other", confidence

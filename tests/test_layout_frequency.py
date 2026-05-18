@@ -17,6 +17,58 @@ class LayoutFrequencyTests(unittest.TestCase):
 
         self.assertGreater(ratio, 0.15)
 
+    def test_dominant_period_reports_main_profile_period(self) -> None:
+        np = layout_frequency.np
+
+        x = np.arange(192, dtype=np.float32)
+        values = np.sin(2.0 * np.pi * x / 24.0).astype(np.float32)
+
+        period = layout_frequency.dominant_period(values, 8.0, 44.0)
+
+        self.assertAlmostEqual(period, 24.0, delta=1.0)
+
+    def test_calibrated_classifier_separates_reviewed_feature_profiles(self) -> None:
+        text_features = {
+            "ink_density": 0.22,
+            "gray_std": 0.72,
+            "saturation_p80": 0.0,
+            "row_period_score": 0.83,
+            "column_period_score": 0.67,
+            "row_entropy": 0.42,
+            "column_entropy": 0.73,
+            "hline_density": 0.0,
+            "vline_density": 0.0,
+            "line_balance": 0.0,
+        }
+        schematic_features = {
+            "ink_density": 0.13,
+            "gray_std": 0.60,
+            "saturation_p80": 0.0,
+            "row_period_score": 0.56,
+            "column_period_score": 0.70,
+            "row_entropy": 0.74,
+            "column_entropy": 0.76,
+            "hline_density": 0.11,
+            "vline_density": 0.12,
+            "line_balance": 0.40,
+        }
+        image_features = {
+            "ink_density": 0.52,
+            "gray_std": 0.75,
+            "saturation_p80": 0.38,
+            "row_period_score": 0.23,
+            "column_period_score": 0.22,
+            "row_entropy": 0.43,
+            "column_entropy": 0.46,
+            "hline_density": 1.0,
+            "vline_density": 1.0,
+            "line_balance": 0.78,
+        }
+
+        self.assertEqual(layout_frequency.classify_frequency_features(text_features)[0], "text")
+        self.assertEqual(layout_frequency.classify_frequency_features(schematic_features)[0], "schematic/circuit")
+        self.assertEqual(layout_frequency.classify_frequency_features(image_features)[0], "image")
+
     def test_frequency_analysis_finds_text_and_schematic_hints(self) -> None:
         cv2 = layout_frequency.cv2
         np = layout_frequency.np
