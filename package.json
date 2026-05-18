@@ -6,6 +6,7 @@
   "scripts": {
     "build": "python scripts/project_tasks.py all",
     "check": "python scripts/project_tasks.py check",
+    "layout:frequency": "python scripts/analyze_page_frequency.py",
     "lint:svg": "python scripts/lint_svg.py",
     "render:svg": "python scripts/project_tasks.py render",
     "spellcheck": "python scripts/project_tasks.py spellcheck",

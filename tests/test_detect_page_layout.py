@@ -584,6 +584,9 @@ class DetectPageLayoutTests(unittest.TestCase):
             self.assertTrue(labels & {"text", "image", "schematic/circuit", "diagram", "table"})
             self.assertTrue(all("orientation" in block for block in saved["blocks"]))
             self.assertTrue(all("caption_candidates" in block for block in saved["blocks"]))
+            self.assertTrue(saved["frequency_hints_enabled"])
+            self.assertIn("frequency_hints", saved)
+            self.assertIn("frequency_warnings", saved)
 
     def test_split_box_by_vertical_gap_separates_margin_strip(self) -> None:
         np = detect_page_layout.np
@@ -651,13 +654,14 @@ class DetectPageLayoutTests(unittest.TestCase):
 
         stamp = detect_page_layout.Box(220, 550, 120, 45)
         cv2.ellipse(page, (280, 572), (58, 20), 0, 0, 360, (50, 95, 50), -1)
+        already_found_text_column = detect_page_layout.Box(20, 30, 155, 480)
 
         gray = cv2.cvtColor(page, cv2.COLOR_BGR2GRAY)
         boxes = detect_page_layout.text_boxes_from_oversized_regions(
             page,
             gray,
             [detect_page_layout.Box(10, 10, 500, 590)],
-            [schematic, stamp],
+            [already_found_text_column, schematic, stamp],
             520,
             620,
         )
@@ -696,6 +700,85 @@ class DetectPageLayoutTests(unittest.TestCase):
         self.assertTrue(boxes)
         best = max(boxes, key=lambda box: detect_page_layout.overlap_area(box, schematic))
         self.assertGreaterEqual(detect_page_layout.overlap_area(best, schematic) / schematic.area, 0.65)
+
+    def test_merges_adjacent_schematics_when_lines_bridge_the_gap(self) -> None:
+        cv2 = detect_page_layout.cv2
+        np = detect_page_layout.np
+
+        page = np.full((320, 520, 3), 255, dtype=np.uint8)
+        upper = detect_page_layout.Box(70, 40, 360, 110)
+        lower = detect_page_layout.Box(55, 158, 390, 120)
+        cv2.rectangle(page, (upper.x, upper.y), (upper.x2, upper.y2), (0, 0, 0), 2)
+        cv2.rectangle(page, (lower.x, lower.y), (lower.x2, lower.y2), (0, 0, 0), 2)
+        cv2.line(page, (180, upper.y2 - 16), (180, lower.y + 16), (0, 0, 0), 2)
+        cv2.line(page, (300, upper.y2 - 10), (300, lower.y + 10), (0, 0, 0), 2)
+
+        gray = cv2.cvtColor(page, cv2.COLOR_BGR2GRAY)
+        mask, _, _ = detect_page_layout.foreground_mask(gray)
+        edges = detect_page_layout.canny_edges(gray)
+        ann = detect_page_layout.train_bootstrap_ann()
+        first = detect_page_layout.Block(
+            ident="003_schematic_circuit",
+            label="schematic/circuit",
+            orientation="unknown",
+            confidence=0.90,
+            bbox=upper.to_list(),
+            outline=None,
+            features={},
+        )
+        second = detect_page_layout.Block(
+            ident="005_schematic_circuit",
+            label="schematic/circuit",
+            orientation="unknown",
+            confidence=0.92,
+            bbox=lower.to_list(),
+            outline=None,
+            features={},
+        )
+
+        merged = detect_page_layout.merge_connected_schematic_blocks(
+            [(first, upper), (second, lower)], page, mask, edges, ann, scale=1.0, width=520, height=320
+        )
+
+        self.assertEqual(len(merged), 1)
+        block, box = merged[0]
+        self.assertEqual(block.ident, "003_schematic_circuit")
+        self.assertEqual(block.label, "schematic/circuit")
+        self.assertEqual(box.to_list(), detect_page_layout.union_box(upper, lower).to_list())
+        self.assertEqual(block.features["line_bridge_merge"], 1.0)
+
+    def test_suppresses_small_artifact_strip_touching_schematic(self) -> None:
+        schematic = detect_page_layout.Block(
+            ident="003_schematic_circuit",
+            label="schematic/circuit",
+            orientation="unknown",
+            confidence=0.93,
+            bbox=[50, 50, 420, 300],
+            outline=None,
+            features={},
+        )
+        strip = detect_page_layout.Block(
+            ident="009_image",
+            label="image",
+            orientation="unknown",
+            confidence=0.51,
+            bbox=[55, 354, 400, 24],
+            outline=None,
+            features={},
+        )
+        photo = detect_page_layout.Block(
+            ident="010_image",
+            label="image",
+            orientation="unknown",
+            confidence=0.80,
+            bbox=[520, 50, 120, 100],
+            outline=None,
+            features={},
+        )
+
+        filtered = detect_page_layout.suppress_small_artifacts_near_schematics([schematic, strip, photo])
+
+        self.assertEqual([block.ident for block in filtered], ["003_schematic_circuit", "010_image"])
 
     def test_close_or_overlapping_keeps_large_layout_blocks_separate(self) -> None:
         upper_text = detect_page_layout.Box(50, 301, 850, 154)

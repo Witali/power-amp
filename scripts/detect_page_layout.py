@@ -34,6 +34,14 @@ except ImportError:
     np = None  # type: ignore
     OPENCV_AVAILABLE = False
 
+try:
+    from scripts import layout_frequency  # type: ignore
+except ImportError:
+    try:
+        import layout_frequency  # type: ignore
+    except ImportError:
+        layout_frequency = None  # type: ignore
+
 
 CLASS_NAMES = ["text", "image", "schematic/circuit", "diagram", "table", "other"]
 FIGURE_LABELS = {"image", "schematic/circuit", "diagram"}
@@ -49,6 +57,7 @@ CAPTION_HIGHLIGHT_COLOR = (0, 255, 255)
 CAPTION_HIGHLIGHT_OPACITY = 0.30
 CAPTION_HIGHLIGHT_PADDING = 4
 ACCELERATOR_CHOICES = ("cpu", "opencl")
+FREQUENCY_HINT_CHOICES = ("off", "validate", "hints")
 
 
 @dataclass(frozen=True)
@@ -470,6 +479,44 @@ def likely_visual_candidate_box(box: Box, page_width: int, page_height: int) -> 
     return area_ratio > 0.015 and not title_like and (box.h > page_height * 0.08 or area_ratio > 0.08)
 
 
+def feature_visual_candidate_for_text_recovery(features: dict[str, float]) -> bool:
+    area = features["area_ratio"]
+    max_text = features["max_text_score"]
+    line_art = features.get("line_art_score", 0.0)
+    line_balance = features["line_balance"]
+    min_line_density = min(features["hline_density"], features["vline_density"])
+    line_drawing = (
+        area > 0.012
+        and line_art > 0.18
+        and line_balance > 0.20
+        and min_line_density > 0.045
+        and max_text < 0.62
+    )
+    photo_like = (
+        area > 0.006
+        and features.get("saturation_p80", 0.0) > 0.16
+        and features["gray_std"] > 0.45
+        and max_text < 0.45
+    )
+    return line_drawing or photo_like
+
+
+def visual_boxes_for_text_recovery(image, gray, existing_boxes: list[Box], width: int, height: int) -> list[Box]:
+    if not existing_boxes:
+        return []
+
+    mask, _, _ = foreground_mask(gray)
+    edges = canny_edges(gray)
+    visual_boxes: list[Box] = []
+    for box in existing_boxes:
+        if not likely_visual_candidate_box(box, width, height):
+            continue
+        features = feature_dict(image, mask, edges, box)
+        if feature_visual_candidate_for_text_recovery(features):
+            visual_boxes.append(box)
+    return deduplicate_candidate_boxes(visual_boxes)
+
+
 def inflate_candidate_box(box: Box, pixels: int, width: int, height: int) -> Box:
     return box.inflate(pixels, width, height)
 
@@ -635,9 +682,8 @@ def text_boxes_from_oversized_regions(
     for oversized in oversized_boxes:
         visual_boxes = [
             box
-            for box in existing_boxes
-            if likely_visual_candidate_box(box, width, height)
-            and not (
+            for box in visual_boxes_for_text_recovery(image, gray, existing_boxes, width, height)
+            if not (
                 box.area >= oversized.area * 0.65
                 and overlap_area(box, oversized) / max(1, oversized.area) > 0.75
             )
@@ -697,11 +743,85 @@ def deduplicate_candidate_boxes(boxes: list[Box]) -> list[Box]:
     return sorted(kept, key=lambda item: (item.y, item.x))
 
 
+def frequency_hint_boxes(
+    frequency_result: dict[str, object] | None,
+    labels: set[str],
+    width: int,
+    height: int,
+    min_confidence: float,
+    min_area_ratio: float,
+) -> list[Box]:
+    if not frequency_result:
+        return []
+    boxes: list[Box] = []
+    page_area = max(1, width * height)
+    for hint in frequency_result.get("hints", []):
+        if not isinstance(hint, dict):
+            continue
+        label = str(hint.get("label", ""))
+        if label not in labels:
+            continue
+        confidence = float(hint.get("confidence", 0.0))
+        if confidence < min_confidence:
+            continue
+        bbox = hint.get("bbox")
+        if not isinstance(bbox, list) or len(bbox) != 4:
+            continue
+        box = Box(*(int(value) for value in bbox)).clamp(width, height)
+        if box.area / page_area < min_area_ratio or box.w < 24 or box.h < 24:
+            continue
+        if label != "text":
+            if box.w < width * 0.16 or box.h < height * 0.10:
+                continue
+            if box.w > width * 0.88 or box.h > height * 0.78:
+                continue
+            if box.w < width * 0.20 and box.h > height * 0.42:
+                continue
+        boxes.append(box)
+    return deduplicate_candidate_boxes(boxes)
+
+
+def add_frequency_text_hints(
+    boxes: list[Box],
+    text_hints: list[Box],
+    width: int,
+    height: int,
+    min_area_ratio: float,
+) -> list[Box]:
+    if not text_hints:
+        return boxes
+    page_area = max(1, width * height)
+    result = boxes[:]
+    for hint in text_hints:
+        if hint.area / page_area < max(0.0025, min_area_ratio * 4.0):
+            continue
+        if any(overlap_area(hint, box) / max(1, hint.area) > 0.58 for box in result):
+            continue
+        result.append(hint)
+    return deduplicate_candidate_boxes(result)
+
+
+def scale_frequency_hints_to_original(frequency_result: dict[str, object] | None, scale: float) -> list[dict[str, object]]:
+    if not frequency_result or layout_frequency is None:
+        return []
+    hints = frequency_result.get("hints", [])
+    if not isinstance(hints, list):
+        return []
+    return layout_frequency.hints_in_original_coordinates(hints, scale)
+
+
+def frequency_validation_warnings(blocks: list[Block], original_frequency_hints: list[dict[str, object]]) -> list[dict[str, object]]:
+    if layout_frequency is None or not original_frequency_hints:
+        return []
+    return layout_frequency.validate_layout_blocks([asdict(block) for block in blocks], original_frequency_hints)
+
+
 def detect_candidate_boxes(
     image,
     min_area_ratio: float = 0.00035,
     max_area_ratio: float = 0.85,
     accelerator: str = "cpu",
+    frequency_result: dict[str, object] | None = None,
 ) -> tuple[list[Box], dict[str, object]]:
     accelerator = normalize_accelerator(accelerator)
     gray = grayscale_image(image, accelerator)
@@ -743,7 +863,16 @@ def detect_candidate_boxes(
         boxes = raw_boxes
     boxes = split_boxes_by_internal_gaps(mask, boxes, width, height)
     boxes = split_boxes_by_side_color_strips(image, boxes, width, height)
-    line_art_boxes = line_art_boxes_from_large_regions(image, mask, gray, boxes, width, height)
+    line_art_boxes = line_art_boxes_from_large_regions(image, mask, gray, boxes + oversized_boxes, width, height)
+    frequency_visual_boxes = frequency_hint_boxes(
+        frequency_result,
+        {"schematic/circuit", "table", "diagram"},
+        width,
+        height,
+        min_confidence=0.70,
+        min_area_ratio=0.020,
+    )
+    line_art_boxes = deduplicate_candidate_boxes(line_art_boxes + frequency_visual_boxes)
     large_mixed_boxes = [
         box
         for box in boxes
@@ -758,9 +887,16 @@ def detect_candidate_boxes(
             boxes = [box for box in boxes if box not in large_mixed_boxes] + recovered_text_boxes
     boxes = split_boxes_around_visual_candidates(boxes, line_art_boxes, width, height)
     if oversized_boxes:
-        boxes = deduplicate_candidate_boxes(
-            boxes + text_boxes_from_oversized_regions(image, gray, oversized_boxes, boxes, width, height)
-        )
+        recovered_from_oversized = text_boxes_from_oversized_regions(image, gray, oversized_boxes, boxes, width, height)
+        if recovered_from_oversized:
+            boxes = deduplicate_candidate_boxes(boxes + recovered_from_oversized)
+            second_pass_recovered = text_boxes_from_oversized_regions(image, gray, oversized_boxes, boxes, width, height)
+            if second_pass_recovered:
+                boxes = deduplicate_candidate_boxes(boxes + second_pass_recovered)
+            visual_after_oversized = visual_boxes_for_text_recovery(image, gray, boxes + line_art_boxes, width, height)
+            boxes = split_boxes_around_visual_candidates(boxes, visual_after_oversized, width, height)
+    frequency_text_boxes: list[Box] = []
+    boxes = add_frequency_text_hints(boxes, frequency_text_boxes, width, height, min_area_ratio)
     if not boxes:
         boxes = raw_boxes
     metadata = {
@@ -769,6 +905,9 @@ def detect_candidate_boxes(
         "analysis_width": width,
         "analysis_height": height,
         "accelerator": accelerator,
+        "frequency_hint_count": len(frequency_result.get("hints", [])) if frequency_result else 0,
+        "frequency_visual_hint_count": len(frequency_visual_boxes),
+        "frequency_text_hint_count": len(frequency_text_boxes),
     }
     return boxes, metadata
 
@@ -1430,6 +1569,171 @@ def suppress_nested_text_blocks(blocks: list[Block]) -> list[Block]:
     return [block for block in blocks if block.ident not in nested_idents]
 
 
+def box_horizontal_overlap_width(first: Box, second: Box) -> int:
+    return max(0, min(first.x2, second.x2) - max(first.x, second.x))
+
+
+def box_vertical_overlap_height(first: Box, second: Box) -> int:
+    return max(0, min(first.y2, second.y2) - max(first.y, second.y))
+
+
+def line_bridge_between_schematic_boxes(line_mask, first: Box, second: Box, width: int, height: int) -> bool:
+    margin = max(8, min(width, height) // 140)
+    pad = max(3, min(width, height) // 360)
+
+    vertical_gap = max(0, max(first.y, second.y) - min(first.y2, second.y2))
+    horizontal_overlap = box_horizontal_overlap_width(first, second)
+    if vertical_gap <= margin and horizontal_overlap >= min(first.w, second.w) * 0.22:
+        upper, lower = (first, second) if first.y <= second.y else (second, first)
+        x1 = max(0, max(upper.x, lower.x) - pad)
+        x2 = min(width, min(upper.x2, lower.x2) + pad)
+        top_band = line_mask[max(0, upper.y2 - pad) : min(height, upper.y2 + pad + 1), x1:x2]
+        bottom_band = line_mask[max(0, lower.y - pad) : min(height, lower.y + pad + 1), x1:x2]
+        if top_band.size > 0 and bottom_band.size > 0:
+            top_columns = (top_band > 0).sum(axis=0) >= max(1, int(round(top_band.shape[0] * 0.08)))
+            bottom_columns = (bottom_band > 0).sum(axis=0) >= max(1, int(round(bottom_band.shape[0] * 0.08)))
+            shared_columns = int(np.logical_and(top_columns, bottom_columns).sum())
+            if shared_columns >= max(2, int(round((x2 - x1) * 0.003))):
+                return True
+
+        seam = line_mask[max(0, upper.y2) : min(height, lower.y), x1:x2]
+        if vertical_gap <= max(3, margin // 2) and seam.size > 0:
+            if int((seam > 0).sum()) >= max(4, int(round(seam.size * 0.001))):
+                return True
+
+    horizontal_gap = max(0, max(first.x, second.x) - min(first.x2, second.x2))
+    vertical_overlap = box_vertical_overlap_height(first, second)
+    if horizontal_gap <= margin and vertical_overlap >= min(first.h, second.h) * 0.22:
+        left, right = (first, second) if first.x <= second.x else (second, first)
+        y1 = max(0, max(left.y, right.y) - pad)
+        y2 = min(height, min(left.y2, right.y2) + pad)
+        left_band = line_mask[y1:y2, max(0, left.x2 - pad) : min(width, left.x2 + pad + 1)]
+        right_band = line_mask[y1:y2, max(0, right.x - pad) : min(width, right.x + pad + 1)]
+        if left_band.size > 0 and right_band.size > 0:
+            left_rows = (left_band > 0).sum(axis=1) >= max(1, int(round(left_band.shape[1] * 0.08)))
+            right_rows = (right_band > 0).sum(axis=1) >= max(1, int(round(right_band.shape[1] * 0.08)))
+            shared_rows = int(np.logical_and(left_rows, right_rows).sum())
+            if shared_rows >= max(2, int(round((y2 - y1) * 0.003))):
+                return True
+
+        seam = line_mask[y1:y2, max(0, left.x2) : min(width, right.x)]
+        if horizontal_gap <= max(3, margin // 2) and seam.size > 0:
+            if int((seam > 0).sum()) >= max(4, int(round(seam.size * 0.001))):
+                return True
+
+    return False
+
+
+def merge_connected_schematic_blocks(
+    classified: list[tuple[Block, Box]],
+    image,
+    mask,
+    edges,
+    ann,
+    scale: float,
+    width: int,
+    height: int,
+) -> list[tuple[Block, Box]]:
+    if len(classified) < 2:
+        return classified
+
+    line_mask = cv2.bitwise_or(mask, edges)
+    items = classified[:]
+    changed = True
+    while changed:
+        changed = False
+        for first_index in range(len(items)):
+            first_block, first_box = items[first_index]
+            if first_block.label != "schematic/circuit":
+                continue
+            for second_index in range(first_index + 1, len(items)):
+                second_block, second_box = items[second_index]
+                if second_block.label != "schematic/circuit":
+                    continue
+                if not line_bridge_between_schematic_boxes(line_mask, first_box, second_box, width, height):
+                    continue
+
+                merged_box = union_box(first_box, second_box).clamp(width, height)
+                original_box = Box(
+                    int(round(merged_box.x / scale)),
+                    int(round(merged_box.y / scale)),
+                    int(round(merged_box.w / scale)),
+                    int(round(merged_box.h / scale)),
+                )
+                features = feature_dict(image, mask, edges, merged_box)
+                _, merged_confidence = classify_features(ann, features)
+                merged_count = (
+                    float(first_block.features.get("merged_block_count", 1.0))
+                    + float(second_block.features.get("merged_block_count", 1.0))
+                )
+                rounded_features = {key: round(float(value), 5) for key, value in features.items()}
+                rounded_features["merged_block_count"] = round(merged_count, 5)
+                rounded_features["line_bridge_merge"] = 1.0
+                merged_block = Block(
+                    ident=first_block.ident,
+                    label="schematic/circuit",
+                    orientation="unknown",
+                    confidence=round(max(first_block.confidence, second_block.confidence, merged_confidence), 4),
+                    bbox=original_box.to_list(),
+                    outline=None,
+                    features=rounded_features,
+                )
+                items[first_index] = (merged_block, merged_box)
+                del items[second_index]
+                changed = True
+                break
+            if changed:
+                break
+
+    return sorted(items, key=lambda item: (item[1].y, item[1].x))
+
+
+def small_artifact_inside_or_touching_schematic(block: Block, schematic: Block) -> bool:
+    if block.ident == schematic.ident or block.label in {"text", "schematic/circuit"}:
+        return False
+
+    block_box = box_from_list(block.bbox)
+    schematic_box = box_from_list(schematic.bbox)
+    if block_box.area <= 0 or schematic_box.area <= block_box.area:
+        return False
+
+    small = block_box.area <= schematic_box.area * 0.080
+    thin = (
+        block_box.h <= max(80, int(round(schematic_box.h * 0.050)))
+        or block_box.w <= max(80, int(round(schematic_box.w * 0.050)))
+    )
+    if not small or not thin:
+        return False
+
+    overlap_fraction = intersection_area(block_box, schematic_box) / max(1, block_box.area)
+    if overlap_fraction >= 0.55:
+        return True
+
+    margin = max(14, int(round(min(schematic_box.w, schematic_box.h) * 0.018)))
+    horizontal_touch = (
+        0 <= block_box.y - schematic_box.y2 <= margin or 0 <= schematic_box.y - block_box.y2 <= margin
+    ) and box_horizontal_overlap_width(block_box, schematic_box) >= min(block_box.w, schematic_box.w) * 0.45
+    vertical_touch = (
+        0 <= block_box.x - schematic_box.x2 <= margin or 0 <= schematic_box.x - block_box.x2 <= margin
+    ) and box_vertical_overlap_height(block_box, schematic_box) >= min(block_box.h, schematic_box.h) * 0.45
+    return horizontal_touch or vertical_touch
+
+
+def suppress_small_artifacts_near_schematics(blocks: list[Block]) -> list[Block]:
+    schematic_blocks = [block for block in blocks if block.label == "schematic/circuit"]
+    if not schematic_blocks:
+        return blocks
+
+    suppressed = {
+        block.ident
+        for block in blocks
+        if any(small_artifact_inside_or_touching_schematic(block, schematic) for schematic in schematic_blocks)
+    }
+    if not suppressed:
+        return blocks
+    return [block for block in blocks if block.ident not in suppressed]
+
+
 def caption_candidate_for_figure(figure_block: Block, text_block: Block) -> dict[str, object] | None:
     figure_box = box_from_list(figure_block.bbox)
     text_box = box_from_list(text_block.bbox)
@@ -1573,9 +1877,13 @@ def classify_blocks(
             )
         )
 
+    classified = merge_connected_schematic_blocks(
+        classified, image, mask, edges, ann, scale=scale, width=analysis_w, height=analysis_h
+    )
     all_blocks = suppress_nested_text_blocks([block for block, _ in classified])
     assign_visual_outlines(all_blocks)
     blocks = suppress_text_inside_schematics(all_blocks)
+    blocks = suppress_small_artifacts_near_schematics(blocks)
     attach_caption_candidates(blocks, [block for block in all_blocks if block.label == "text"])
     kept_idents = {block.ident for block in blocks}
     if save_crops:
@@ -1647,6 +1955,7 @@ def detect_page_layout(
     min_area_ratio: float = 0.00035,
     save_crops: bool = True,
     accelerator: str = "cpu",
+    frequency_hints: str = "validate",
 ) -> dict[str, object]:
     accelerator = configure_accelerator(accelerator)
     original = read_image(image_path)
@@ -1655,8 +1964,22 @@ def detect_page_layout(
     page_dir = out_dir / page_name
     page_dir.mkdir(parents=True, exist_ok=True)
 
-    boxes, metadata = detect_candidate_boxes(analysis_image, min_area_ratio=min_area_ratio, accelerator=accelerator)
+    frequency_result = None
+    if frequency_hints != "off" and layout_frequency is not None:
+        frequency_result = layout_frequency.analyze_image(analysis_image)
+
+    boxes, metadata = detect_candidate_boxes(
+        analysis_image,
+        min_area_ratio=min_area_ratio,
+        accelerator=accelerator,
+        frequency_result=frequency_result if frequency_hints == "hints" else None,
+    )
+    metadata["frequency_mode"] = frequency_hints
+    if frequency_result:
+        metadata["frequency_hint_count"] = len(frequency_result.get("hints", []))
     blocks = classify_blocks(analysis_image, boxes, scale=scale, save_crops=save_crops, page_dir=page_dir, accelerator=accelerator)
+    original_frequency_hints = scale_frequency_hints_to_original(frequency_result, scale)
+    frequency_warnings = frequency_validation_warnings(blocks, original_frequency_hints)
     preview_path = draw_preview(original, blocks, preview_width=preview_width, page_dir=page_dir)
 
     result = {
@@ -1668,6 +1991,10 @@ def detect_page_layout(
         "classes": CLASS_NAMES,
         "metadata": metadata,
         "accelerator": accelerator,
+        "frequency_hints_enabled": frequency_hints != "off",
+        "frequency_mode": frequency_hints,
+        "frequency_hints": original_frequency_hints,
+        "frequency_warnings": frequency_warnings,
         "preview": preview_path.relative_to(page_dir).as_posix(),
         "blocks": [asdict(block) for block in blocks],
     }
@@ -1688,6 +2015,12 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         default="cpu",
         help="OpenCV acceleration backend. OpenCL falls back to CPU when unavailable.",
     )
+    parser.add_argument(
+        "--frequency-hints",
+        choices=FREQUENCY_HINT_CHOICES,
+        default="validate",
+        help="Use 1D frequency analysis: off, validate-only, or hints as extra OpenCV candidate boxes.",
+    )
     parser.add_argument("--no-crops", action="store_true", help="Do not write block crop images.")
     return parser.parse_args(argv)
 
@@ -1703,6 +2036,7 @@ def main(argv: list[str]) -> int:
         min_area_ratio=args.min_area_ratio,
         save_crops=not args.no_crops,
         accelerator=args.accelerator,
+        frequency_hints=args.frequency_hints,
     )
     counts: dict[str, int] = {}
     for block in result["blocks"]:

@@ -16,7 +16,14 @@ if str(PROJECT_ROOT) not in sys.path:
 from scripts import detect_page_layout
 
 
-def run_once(image_path: Path, out_dir: Path, accelerator: str, max_analysis_side: int, preview_width: int) -> float:
+def run_once(
+    image_path: Path,
+    out_dir: Path,
+    accelerator: str,
+    max_analysis_side: int,
+    preview_width: int,
+    frequency_hints: str,
+) -> float:
     started = time.perf_counter()
     detect_page_layout.detect_page_layout(
         image_path=image_path,
@@ -25,6 +32,7 @@ def run_once(image_path: Path, out_dir: Path, accelerator: str, max_analysis_sid
         preview_width=preview_width,
         save_crops=False,
         accelerator=accelerator,
+        frequency_hints=frequency_hints,
     )
     return time.perf_counter() - started
 
@@ -37,6 +45,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--warmup", type=int, default=1, help="Warm-up iterations per image and accelerator.")
     parser.add_argument("--max-analysis-side", type=int, default=1800, help="Detector analysis size.")
     parser.add_argument("--preview-width", type=int, default=900, help="Preview width generated during the benchmark.")
+    parser.add_argument(
+        "--frequency-hints",
+        choices=detect_page_layout.FREQUENCY_HINT_CHOICES,
+        default="off",
+        help="Frequency-analysis mode used during the benchmark. Defaults to off for CPU/OpenCL comparison.",
+    )
     return parser.parse_args()
 
 
@@ -49,9 +63,9 @@ def main() -> int:
         for image_path in args.images:
             page_out = args.out_dir / accelerator
             for _ in range(max(0, args.warmup)):
-                run_once(image_path, page_out, accelerator, args.max_analysis_side, args.preview_width)
+                run_once(image_path, page_out, accelerator, args.max_analysis_side, args.preview_width, args.frequency_hints)
             for _ in range(max(1, args.iterations)):
-                elapsed = run_once(image_path, page_out, accelerator, args.max_analysis_side, args.preview_width)
+                elapsed = run_once(image_path, page_out, accelerator, args.max_analysis_side, args.preview_width, args.frequency_hints)
                 results[accelerator].append(elapsed)
                 print(f"{accelerator}\t{image_path.name}\t{elapsed:.4f}s")
 

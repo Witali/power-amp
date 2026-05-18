@@ -8,6 +8,7 @@ This project should keep repeatable work in scripts instead of relying on the cu
 npm run symbols
 npm test
 npm run check
+npm run layout:frequency -- --image .tmp\layout_candidate_pages\b.2000-09.011.jpg
 npm run spellcheck
 npm run build
 ```
@@ -15,6 +16,7 @@ npm run build
 - `npm run symbols`: regenerates `part_symbols`, renders PNG previews, and runs the SVG linter with warnings treated as failures.
 - `npm test`: runs the Python unit tests for project scripts.
 - `npm run check`: runs tests, the SVG linter, and `git diff --check`.
+- `npm run layout:frequency -- --image ...`: generates FFT/autocorrelation-style page layout hints, JSON, and PNG preview.
 - `npm run spellcheck`: checks OCR text under `.tmp` with Hunspell when available, otherwise with OCR-focused heuristics.
 - `npm run build`: runs the symbols workflow and then project checks.
 
@@ -29,10 +31,12 @@ python scripts\project_tasks.py render part_symbols results\003_radiostorage_she
 python scripts\project_tasks.py result results\003_radiostorage_shema_1804_6\variants\bootstrap.py
 python scripts\project_tasks.py spellcheck .tmp --out .tmp\spellcheck_report.tsv
 python scripts\lint_svg.py --fail-on-warning
+python scripts\analyze_page_frequency.py --image .tmp\layout_candidate_pages\b.2000-09.011.jpg --layout .tmp\layout_frequency_integrated_check\b.2000-09.011\layout.json
 python scripts\benchmark_layout_detector.py .tmp\layout_candidate_pages\b.2000-02.036.jpg .tmp\layout_candidate_pages\b.2000-10.014.jpg
 ```
 
 The layout detector supports `--accelerator cpu` and `--accelerator opencl`. CPU remains the default because the local benchmark on 2026-05-18 was faster overall than OpenCL on the cached magazine pages.
+The layout detector also supports `--frequency-hints off|validate|hints`. The default `validate` mode keeps OpenCV geometry unchanged and records frequency-based hints and mismatch warnings in `layout.json`; `hints` is an experimental mode that adds conservative line-art hints as extra candidate boxes.
 
 ## Rules For Future Work
 
@@ -53,6 +57,7 @@ The layout detector supports `--accelerator cpu` and `--accelerator opencl`. CPU
 npm run symbols
 npm test
 npm run check
+npm run layout:frequency -- --image .tmp\layout_candidate_pages\b.2000-09.011.jpg
 npm run spellcheck
 npm run build
 ```
@@ -60,6 +65,7 @@ npm run build
 - `npm run symbols`: пересоздает `part_symbols`, рендерит PNG-превью и запускает SVG-линтер с ошибкой на предупреждениях.
 - `npm test`: запускает Python unit-тесты для проектных скриптов.
 - `npm run check`: запускает тесты, SVG-линтер и `git diff --check`.
+- `npm run layout:frequency -- --image ...`: создает частотные подсказки макета страницы, JSON и PNG-превью.
 - `npm run spellcheck`: проверяет OCR-текст в `.tmp`, используя Hunspell при наличии или OCR-эвристики без внешних зависимостей.
 - `npm run build`: выполняет workflow символов и затем проверки проекта.
 
@@ -74,10 +80,12 @@ python scripts\project_tasks.py render part_symbols results\003_radiostorage_she
 python scripts\project_tasks.py result results\003_radiostorage_shema_1804_6\variants\bootstrap.py
 python scripts\project_tasks.py spellcheck .tmp --out .tmp\spellcheck_report.tsv
 python scripts\lint_svg.py --fail-on-warning
+python scripts\analyze_page_frequency.py --image .tmp\layout_candidate_pages\b.2000-09.011.jpg --layout .tmp\layout_frequency_integrated_check\b.2000-09.011\layout.json
 python scripts\benchmark_layout_detector.py .tmp\layout_candidate_pages\b.2000-02.036.jpg .tmp\layout_candidate_pages\b.2000-10.014.jpg
 ```
 
 Детектор макета поддерживает `--accelerator cpu` и `--accelerator opencl`. CPU остается режимом по умолчанию, потому что локальный benchmark от 2026-05-18 на сохраненных страницах журнала оказался быстрее OpenCL.
+Детектор макета также поддерживает `--frequency-hints off|validate|hints`. По умолчанию используется `validate`: геометрия OpenCV не меняется, а частотные подсказки и предупреждения о несовпадениях записываются в `layout.json`; режим `hints` экспериментально добавляет осторожные line-art подсказки как дополнительные блоки-кандидаты.
 
 ## Правила На Будущее
 
