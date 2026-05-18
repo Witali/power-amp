@@ -8,6 +8,13 @@ from scripts import detect_page_layout
 
 @unittest.skipUnless(detect_page_layout.OPENCV_AVAILABLE, "OpenCV dependencies are not installed")
 class DetectPageLayoutTests(unittest.TestCase):
+    def test_normalize_accelerator_accepts_cpu(self) -> None:
+        self.assertEqual(detect_page_layout.normalize_accelerator("cpu"), "cpu")
+
+    def test_normalize_accelerator_rejects_unknown_backend(self) -> None:
+        with self.assertRaises(ValueError):
+            detect_page_layout.normalize_accelerator("quantum")
+
     def test_feature_classifier_recognizes_large_title_text(self) -> None:
         ann = detect_page_layout.train_bootstrap_ann()
         features = {
@@ -34,6 +41,68 @@ class DetectPageLayoutTests(unittest.TestCase):
         label, confidence = detect_page_layout.classify_features(ann, features)
 
         self.assertEqual(label, "text")
+        self.assertGreater(confidence, 0.25)
+
+    def test_feature_classifier_keeps_bold_display_title_as_text(self) -> None:
+        ann = detect_page_layout.train_bootstrap_ann()
+        features = {
+            "width_ratio": 0.6290,
+            "height_ratio": 0.0656,
+            "area_ratio": 0.0350,
+            "wide_aspect": 1.00,
+            "tall_aspect": 0.0324,
+            "ink_density": 0.3709,
+            "edge_density": 0.3831,
+            "gray_std": 0.9372,
+            "gray_levels": 0.9375,
+            "component_density": 0.4191,
+            "hline_density": 0.0,
+            "vline_density": 1.0,
+            "line_balance": 0.0,
+            "textline_density": 0.3051,
+            "horizontal_text_score": 0.3051,
+            "vertical_text_score": 0.1484,
+            "diagonal_text_score": 0.0602,
+            "max_text_score": 0.3051,
+            "line_art_score": 1.0,
+            "saturation_mean": 0.20,
+            "saturation_p80": 0.2627,
+        }
+
+        label, confidence = detect_page_layout.classify_features(ann, features)
+
+        self.assertEqual(label, "text")
+        self.assertGreater(confidence, 0.25)
+
+    def test_feature_classifier_recognizes_colored_line_art_as_schematic(self) -> None:
+        ann = detect_page_layout.train_bootstrap_ann()
+        features = {
+            "width_ratio": 0.6290,
+            "height_ratio": 0.2761,
+            "area_ratio": 0.1737,
+            "wide_aspect": 0.3453,
+            "tall_aspect": 0.1159,
+            "ink_density": 0.0872,
+            "edge_density": 0.2715,
+            "gray_std": 0.4792,
+            "gray_levels": 0.9062,
+            "component_density": 0.1759,
+            "hline_density": 0.1333,
+            "vline_density": 0.1151,
+            "line_balance": 0.8635,
+            "textline_density": 0.2897,
+            "horizontal_text_score": 0.2897,
+            "vertical_text_score": 0.6084,
+            "diagonal_text_score": 0.2515,
+            "max_text_score": 0.6084,
+            "line_art_score": 0.3459,
+            "saturation_mean": 0.3063,
+            "saturation_p80": 0.3176,
+        }
+
+        label, confidence = detect_page_layout.classify_features(ann, features)
+
+        self.assertEqual(label, "schematic/circuit")
         self.assertGreater(confidence, 0.25)
 
     def test_feature_classifier_recognizes_vertical_text(self) -> None:
@@ -543,6 +612,96 @@ class DetectPageLayoutTests(unittest.TestCase):
         self.assertEqual(len(pieces), 2)
         self.assertLess(pieces[0].w, box.w)
         self.assertLess(pieces[1].w, box.w)
+
+    def test_projection_runs_finds_active_segments(self) -> None:
+        np = detect_page_layout.np
+
+        values = np.array([0, 0, 5, 7, 8, 0, 1, 9, 10, 9, 0], dtype=np.float32)
+
+        self.assertEqual(detect_page_layout.projection_runs(values, threshold=4, min_run=2), [(2, 4), (7, 9)])
+
+    def test_split_text_box_around_visuals_removes_embedded_image(self) -> None:
+        text_box = detect_page_layout.Box(10, 20, 220, 300)
+        image_box = detect_page_layout.Box(50, 230, 130, 70)
+
+        pieces = detect_page_layout.split_text_box_around_visuals(text_box, [image_box], 260, 360)
+
+        self.assertGreaterEqual(len(pieces), 1)
+        self.assertTrue(all(detect_page_layout.overlap_area(piece, image_box) == 0 for piece in pieces))
+        self.assertTrue(any(piece.y2 < image_box.y for piece in pieces))
+
+    def test_text_boxes_from_oversized_regions_recovers_column_text(self) -> None:
+        cv2 = detect_page_layout.cv2
+        np = detect_page_layout.np
+
+        page = np.full((620, 520, 3), 245, dtype=np.uint8)
+        for row in range(35, 500, 16):
+            cv2.rectangle(page, (25, row), (165, row + 10), (0, 0, 0), -1)
+        for row in range(40, 210, 16):
+            cv2.rectangle(page, (205, row), (330, row + 10), (0, 0, 0), -1)
+            cv2.rectangle(page, (360, row), (485, row + 10), (0, 0, 0), -1)
+
+        schematic = detect_page_layout.Box(200, 245, 285, 120)
+        cv2.rectangle(page, (schematic.x, schematic.y), (schematic.x2, schematic.y2), (0, 0, 0), 2)
+        cv2.line(page, (220, 300), (465, 300), (0, 0, 0), 2)
+        cv2.line(page, (330, 260), (330, 345), (0, 0, 0), 2)
+        for row in range(390, 540, 16):
+            cv2.rectangle(page, (205, row), (330, row + 10), (0, 0, 0), -1)
+            cv2.rectangle(page, (360, row), (485, row + 10), (0, 0, 0), -1)
+
+        stamp = detect_page_layout.Box(220, 550, 120, 45)
+        cv2.ellipse(page, (280, 572), (58, 20), 0, 0, 360, (50, 95, 50), -1)
+
+        gray = cv2.cvtColor(page, cv2.COLOR_BGR2GRAY)
+        boxes = detect_page_layout.text_boxes_from_oversized_regions(
+            page,
+            gray,
+            [detect_page_layout.Box(10, 10, 500, 590)],
+            [schematic, stamp],
+            520,
+            620,
+        )
+
+        self.assertTrue(any(box.x < 80 and box.h > 250 for box in boxes))
+        self.assertTrue(any(190 <= box.x <= 230 and box.y < schematic.y for box in boxes))
+        self.assertTrue(any(box.x > 330 and box.y < schematic.y for box in boxes))
+        self.assertTrue(all(detect_page_layout.overlap_area(box, schematic) == 0 for box in boxes))
+
+    def test_line_art_boxes_from_large_regions_finds_embedded_schematic(self) -> None:
+        cv2 = detect_page_layout.cv2
+        np = detect_page_layout.np
+
+        page = np.full((620, 520, 3), 245, dtype=np.uint8)
+        for row in range(35, 250, 16):
+            cv2.rectangle(page, (25, row), (165, row + 10), (0, 0, 0), -1)
+            cv2.rectangle(page, (205, row), (345, row + 10), (0, 0, 0), -1)
+        schematic = detect_page_layout.Box(65, 300, 390, 180)
+        cv2.rectangle(page, (schematic.x, schematic.y), (schematic.x2, schematic.y2), (0, 0, 0), 2)
+        cv2.line(page, (90, 390), (430, 390), (0, 0, 0), 2)
+        cv2.line(page, (180, 320), (180, 460), (0, 0, 0), 2)
+        cv2.line(page, (320, 320), (320, 460), (0, 0, 0), 2)
+        cv2.circle(page, (250, 390), 42, (0, 0, 0), 2)
+
+        gray = cv2.cvtColor(page, cv2.COLOR_BGR2GRAY)
+        foreground, _, _ = detect_page_layout.foreground_mask(gray)
+        boxes = detect_page_layout.line_art_boxes_from_large_regions(
+            page,
+            foreground,
+            gray,
+            [detect_page_layout.Box(10, 10, 500, 590)],
+            520,
+            620,
+        )
+
+        self.assertTrue(boxes)
+        best = max(boxes, key=lambda box: detect_page_layout.overlap_area(box, schematic))
+        self.assertGreaterEqual(detect_page_layout.overlap_area(best, schematic) / schematic.area, 0.65)
+
+    def test_close_or_overlapping_keeps_large_layout_blocks_separate(self) -> None:
+        upper_text = detect_page_layout.Box(50, 301, 850, 154)
+        lower_column = detect_page_layout.Box(473, 454, 426, 327)
+
+        self.assertFalse(detect_page_layout.close_or_overlapping(upper_text, lower_column, margin=8))
 
     def test_infer_orientation_keeps_wide_display_text_horizontal(self) -> None:
         features = {

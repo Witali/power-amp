@@ -48,6 +48,7 @@ CLASS_COLORS = {
 CAPTION_HIGHLIGHT_COLOR = (0, 255, 255)
 CAPTION_HIGHLIGHT_OPACITY = 0.30
 CAPTION_HIGHLIGHT_PADDING = 4
+ACCELERATOR_CHOICES = ("cpu", "opencl")
 
 
 @dataclass(frozen=True)
@@ -125,16 +126,51 @@ def write_image(path: Path, image) -> None:
     encoded.tofile(str(path))
 
 
-def resize_for_analysis(image, max_side: int):
+def opencl_is_available() -> bool:
+    return bool(hasattr(cv2, "ocl") and cv2.ocl.haveOpenCL())
+
+
+def normalize_accelerator(accelerator: str | None) -> str:
+    requested = (accelerator or "cpu").lower()
+    if requested not in ACCELERATOR_CHOICES:
+        raise ValueError(f"Unsupported accelerator: {accelerator}")
+    if requested == "opencl" and not opencl_is_available():
+        return "cpu"
+    return requested
+
+
+def configure_accelerator(accelerator: str | None) -> str:
+    selected = normalize_accelerator(accelerator)
+    if hasattr(cv2, "ocl"):
+        cv2.ocl.setUseOpenCL(selected == "opencl")
+    return selected
+
+
+def resize_for_analysis(image, max_side: int, accelerator: str = "cpu"):
     height, width = image.shape[:2]
     scale = min(1.0, max_side / float(max(width, height)))
     if scale >= 0.999:
         return image.copy(), 1.0
-    resized = cv2.resize(image, (int(round(width * scale)), int(round(height * scale))), interpolation=cv2.INTER_AREA)
+    target = (int(round(width * scale)), int(round(height * scale)))
+    if accelerator == "opencl":
+        resized = cv2.resize(cv2.UMat(image), target, interpolation=cv2.INTER_AREA).get()
+    else:
+        resized = cv2.resize(image, target, interpolation=cv2.INTER_AREA)
     return resized, scale
 
 
-def foreground_mask(gray):
+def foreground_mask(gray, accelerator: str = "cpu"):
+    if accelerator == "opencl":
+        gray_u = cv2.UMat(gray)
+        blurred_u = cv2.GaussianBlur(gray_u, (3, 3), 0)
+        threshold, _ = cv2.threshold(blurred_u, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+        _, light_u = cv2.threshold(gray_u, threshold, 255, cv2.THRESH_BINARY)
+        light_count = int(cv2.countNonZero(light_u))
+        dark_count = int(gray.size - light_count)
+        bright_foreground = light_count < dark_count
+        mask_u = light_u if bright_foreground else cv2.bitwise_not(light_u)
+        return mask_u.get(), int(threshold), bright_foreground
+
     blurred = cv2.GaussianBlur(gray, (3, 3), 0)
     threshold, binary = cv2.threshold(blurred, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
     dark = gray <= threshold
@@ -146,17 +182,37 @@ def foreground_mask(gray):
     return (mask.astype(np.uint8) * 255), int(threshold), bright_foreground
 
 
-def make_block_mask(gray, mask):
+def make_block_mask(gray, mask, accelerator: str = "cpu"):
     height, width = gray.shape[:2]
     line_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (max(9, width // 90), max(2, height // 550)))
     block_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (max(15, width // 65), max(7, height // 180)))
+    edge_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (max(6, width // 180), max(6, height // 220)))
+    if accelerator == "opencl":
+        gray_u = cv2.UMat(gray)
+        mask_u = cv2.UMat(mask)
+        textish_u = cv2.morphologyEx(mask_u, cv2.MORPH_CLOSE, line_kernel, iterations=1)
+        textish_u = cv2.dilate(textish_u, block_kernel, iterations=1)
+        edges_u = cv2.Canny(gray_u, 60, 160)
+        edge_blocks_u = cv2.dilate(edges_u, edge_kernel, iterations=1)
+        return cv2.bitwise_or(textish_u, edge_blocks_u).get()
+
     textish = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, line_kernel, iterations=1)
     textish = cv2.dilate(textish, block_kernel, iterations=1)
-
     edges = cv2.Canny(gray, 60, 160)
-    edge_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (max(6, width // 180), max(6, height // 220)))
     edge_blocks = cv2.dilate(edges, edge_kernel, iterations=1)
     return cv2.bitwise_or(textish, edge_blocks)
+
+
+def grayscale_image(image, accelerator: str = "cpu"):
+    if accelerator == "opencl":
+        return cv2.cvtColor(cv2.UMat(image), cv2.COLOR_BGR2GRAY).get()
+    return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+
+def canny_edges(gray, accelerator: str = "cpu"):
+    if accelerator == "opencl":
+        return cv2.Canny(cv2.UMat(gray), 60, 160).get()
+    return cv2.Canny(gray, 60, 160)
 
 
 def overlap_area(a: Box, b: Box) -> int:
@@ -183,6 +239,17 @@ def close_or_overlapping(a: Box, b: Box, margin: int) -> bool:
     overlap = overlap_area(a, b)
     if overlap / smaller > 0.15:
         return True
+    overlap_w = max(0, min(a.x2, b.x2) - max(a.x, b.x))
+    overlap_h = max(0, min(a.y2, b.y2) - max(a.y, b.y))
+    large_block_area = max(6_000, (margin * 20) ** 2)
+    large_layout_blocks = (
+        min(a.area, b.area) >= large_block_area
+        and min(a.w, b.w) >= margin * 8
+        and min(a.h, b.h) >= margin * 8
+    )
+    thin_touch = overlap > 0 and min(overlap_w, overlap_h) <= margin * 2 and overlap / smaller < 0.04
+    if large_layout_blocks and (overlap == 0 or thin_touch):
+        return False
     horizontal_gap = max(0, max(a.x, b.x) - min(a.x2, b.x2))
     vertical_overlap = min(a.y2, b.y2) - max(a.y, b.y)
     if horizontal_gap <= margin and vertical_overlap > min(a.h, b.h) * 0.25:
@@ -229,6 +296,22 @@ def smooth_projection(values, radius: int):
     radius = max(1, radius)
     kernel = np.ones(radius * 2 + 1, dtype=np.float32) / float(radius * 2 + 1)
     return np.convolve(values.astype(np.float32), kernel, mode="same")
+
+
+def projection_runs(values, threshold: float, min_run: int) -> list[tuple[int, int]]:
+    runs: list[tuple[int, int]] = []
+    start = -1
+    for index, value in enumerate(values):
+        active = value > threshold
+        if active and start < 0:
+            start = index
+        elif not active and start >= 0:
+            if index - start >= min_run:
+                runs.append((start, index - 1))
+            start = -1
+    if start >= 0 and len(values) - start >= min_run:
+        runs.append((start, len(values) - 1))
+    return runs
 
 
 def split_box_by_vertical_gaps(mask, box: Box, page_width: int, page_height: int) -> list[Box]:
@@ -338,10 +421,294 @@ def split_boxes_by_side_color_strips(image, boxes: list[Box], width: int, height
     return sorted(split, key=lambda item: (item.y, item.x))
 
 
-def detect_candidate_boxes(image, min_area_ratio: float = 0.00035, max_area_ratio: float = 0.85) -> tuple[list[Box], dict[str, object]]:
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    mask, threshold, bright_foreground = foreground_mask(gray)
-    block_mask = make_block_mask(gray, mask)
+def dark_ink_mask(gray):
+    threshold = int(np.clip(np.percentile(gray, 8), 55, 115))
+    return ((gray < threshold).astype(np.uint8) * 255), threshold
+
+
+def remove_side_color_strips_from_mask(image, work_mask, box: Box) -> None:
+    roi = image[box.y : box.y2, box.x : box.x2]
+    if roi.size == 0:
+        return
+
+    hsv = cv2.cvtColor(roi, cv2.COLOR_BGR2HSV)
+    saturation = hsv[:, :, 1].mean(axis=0)
+    value = hsv[:, :, 2].mean(axis=0)
+    smoothed_saturation = smooth_projection(saturation, max(2, box.w // 120))
+    smoothed_value = smooth_projection(value, max(2, box.w // 120))
+
+    median_saturation = float(np.median(smoothed_saturation))
+    median_value = float(np.median(smoothed_value))
+    side_candidate = (smoothed_saturation > max(30.0, median_saturation + 18.0)) | (
+        smoothed_value < min(220.0, median_value - 18.0)
+    )
+
+    min_strip = max(18, int(round(box.w * 0.025)))
+    max_strip = max(min_strip + 1, int(round(box.w * 0.38)))
+
+    right_start = None
+    index = box.w - 1
+    while index >= 0 and side_candidate[index]:
+        right_start = index
+        index -= 1
+    if right_start is not None and min_strip <= box.w - right_start <= max_strip:
+        work_mask[box.y : box.y2, box.x + right_start : box.x2] = 0
+
+    left_end = None
+    index = 0
+    while index < box.w and side_candidate[index]:
+        left_end = index + 1
+        index += 1
+    if left_end is not None and min_strip <= left_end <= max_strip:
+        work_mask[box.y : box.y2, box.x : box.x + left_end] = 0
+
+
+def likely_visual_candidate_box(box: Box, page_width: int, page_height: int) -> bool:
+    page_area = max(1, page_width * page_height)
+    area_ratio = box.area / page_area
+    title_like = box.h < page_height * 0.07 and box.w > page_width * 0.20
+    return area_ratio > 0.015 and not title_like and (box.h > page_height * 0.08 or area_ratio > 0.08)
+
+
+def inflate_candidate_box(box: Box, pixels: int, width: int, height: int) -> Box:
+    return box.inflate(pixels, width, height)
+
+
+def split_text_candidate_box(mask, box: Box, page_width: int, page_height: int) -> list[Box]:
+    pieces = [box]
+    if box.w > page_width * 0.35 and box.h > page_height * 0.12:
+        pieces = split_box_by_vertical_gaps(mask, box, page_width, page_height)
+    return pieces
+
+
+def split_text_box_around_visuals(box: Box, visual_boxes: list[Box], width: int, height: int) -> list[Box]:
+    fragments = [box]
+    pad = max(5, min(width, height) // 260)
+    for visual in visual_boxes:
+        next_fragments: list[Box] = []
+        for fragment in fragments:
+            overlap = intersection_box(fragment, visual.inflate(pad, width, height))
+            if overlap is None or overlap.area / max(1, fragment.area) < 0.025:
+                next_fragments.append(fragment)
+                continue
+            horizontal_cover = overlap.w / max(1, fragment.w)
+            vertical_cover = overlap.h / max(1, fragment.h)
+            if horizontal_cover >= 0.45:
+                top = Box(fragment.x, fragment.y, fragment.w, max(0, overlap.y - fragment.y))
+                bottom = Box(fragment.x, overlap.y2, fragment.w, max(0, fragment.y2 - overlap.y2))
+                next_fragments.extend(part for part in (top, bottom) if part.w >= 30 and part.h >= 14)
+            elif vertical_cover >= 0.45:
+                left = Box(fragment.x, fragment.y, max(0, overlap.x - fragment.x), fragment.h)
+                right = Box(overlap.x2, fragment.y, max(0, fragment.x2 - overlap.x2), fragment.h)
+                next_fragments.extend(part for part in (left, right) if part.w >= 30 and part.h >= 14)
+            else:
+                next_fragments.append(fragment)
+        fragments = next_fragments
+    return fragments
+
+
+def expand_line_art_box_with_ink(dark_mask, parent: Box, candidate: Box, width: int, height: int) -> Box:
+    band_pad = max(8, int(round(candidate.h * 0.035)))
+    y1 = max(parent.y, candidate.y - band_pad)
+    y2 = min(parent.y2, candidate.y2 + band_pad)
+    if y2 <= y1:
+        return candidate
+
+    horizontal_roi = dark_mask[y1:y2, parent.x : parent.x2]
+    column_projection = (horizontal_roi > 0).sum(axis=0)
+    smoothed_columns = smooth_projection(column_projection, max(3, parent.w // 160))
+    x_runs = projection_runs(smoothed_columns, max(2.0, (y2 - y1) * 0.008), max(20, parent.w // 45))
+    candidate_center_x = candidate.x + candidate.w / 2.0 - parent.x
+    expanded_x1 = candidate.x
+    expanded_x2 = candidate.x2
+    for run_x1, run_x2 in x_runs:
+        if run_x1 <= candidate_center_x <= run_x2 or (
+            min(parent.x + run_x2, candidate.x2) - max(parent.x + run_x1, candidate.x) > candidate.w * 0.35
+        ):
+            expanded_x1 = parent.x + run_x1
+            expanded_x2 = parent.x + run_x2 + 1
+            break
+
+    vertical_roi = dark_mask[parent.y : parent.y2, expanded_x1:expanded_x2]
+    row_projection = (vertical_roi > 0).sum(axis=1)
+    smoothed_rows = smooth_projection(row_projection, max(3, parent.h // 180))
+    y_runs = projection_runs(smoothed_rows, max(2.0, (expanded_x2 - expanded_x1) * 0.008), max(20, parent.h // 85))
+    candidate_center_y = candidate.y + candidate.h / 2.0 - parent.y
+    expanded_y1 = candidate.y
+    expanded_y2 = candidate.y2
+    for run_y1, run_y2 in y_runs:
+        if run_y1 <= candidate_center_y <= run_y2 or (
+            min(parent.y + run_y2, candidate.y2) - max(parent.y + run_y1, candidate.y) > candidate.h * 0.35
+        ):
+            expanded_y1 = parent.y + run_y1
+            expanded_y2 = parent.y + run_y2 + 1
+            break
+
+    return Box(expanded_x1, expanded_y1, expanded_x2 - expanded_x1, expanded_y2 - expanded_y1).inflate(
+        max(3, min(width, height) // 300), width, height
+    )
+
+
+def line_art_boxes_from_large_regions(
+    image,
+    foreground,
+    gray,
+    boxes: list[Box],
+    width: int,
+    height: int,
+) -> list[Box]:
+    page_area = max(1, width * height)
+    parent_boxes = [
+        box
+        for box in boxes
+        if box.area / page_area > 0.22 and box.w > width * 0.34 and box.h > height * 0.45
+    ]
+    if not parent_boxes:
+        return []
+
+    line_length = max(35, min(width, height) // 45)
+    close_size = max(12, min(width, height) // 110)
+    h_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (line_length, 1))
+    v_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1, line_length))
+    h_lines = cv2.morphologyEx(foreground, cv2.MORPH_OPEN, h_kernel)
+    v_lines = cv2.morphologyEx(foreground, cv2.MORPH_OPEN, v_kernel)
+    line_mask = cv2.bitwise_or(h_lines, v_lines)
+    close_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (close_size, close_size))
+    line_mask = cv2.dilate(line_mask, close_kernel, iterations=1)
+
+    dark_mask, _ = dark_ink_mask(gray)
+    contours, _ = cv2.findContours(line_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    candidates: list[Box] = []
+    for contour in contours:
+        x, y, w, h = cv2.boundingRect(contour)
+        candidate = Box(x, y, w, h).inflate(max(3, min(width, height) // 320), width, height)
+        if candidate.area / page_area < 0.035 or candidate.w < width * 0.22 or candidate.h < height * 0.10:
+            continue
+        for parent in parent_boxes:
+            if overlap_area(candidate, parent) / max(1, candidate.area) < 0.80:
+                continue
+            if candidate.area > parent.area * 0.78:
+                continue
+            expanded = expand_line_art_box_with_ink(dark_mask, parent, candidate, width, height)
+            if expanded.area / page_area >= 0.035:
+                candidates.append(expanded)
+
+    return deduplicate_candidate_boxes(candidates)
+
+
+def split_boxes_around_visual_candidates(boxes: list[Box], visual_boxes: list[Box], width: int, height: int) -> list[Box]:
+    if not visual_boxes:
+        return boxes
+
+    page_area = max(1, width * height)
+    result: list[Box] = []
+    for box in boxes:
+        cutters = [
+            visual
+            for visual in visual_boxes
+            if box.area > visual.area * 1.35
+            and box.area / page_area > 0.08
+            and overlap_area(box, visual) / max(1, visual.area) > 0.82
+        ]
+        if cutters:
+            result.extend(split_text_box_around_visuals(box, cutters, width, height))
+        else:
+            result.append(box)
+    result.extend(visual_boxes)
+    return deduplicate_candidate_boxes(result)
+
+
+def text_boxes_from_oversized_regions(
+    image,
+    gray,
+    oversized_boxes: list[Box],
+    existing_boxes: list[Box],
+    width: int,
+    height: int,
+) -> list[Box]:
+    if not oversized_boxes:
+        return []
+
+    ink_mask, _ = dark_ink_mask(gray)
+    page_area = max(1, width * height)
+    result: list[Box] = []
+    for oversized in oversized_boxes:
+        visual_boxes = [
+            box
+            for box in existing_boxes
+            if likely_visual_candidate_box(box, width, height)
+            and not (
+                box.area >= oversized.area * 0.65
+                and overlap_area(box, oversized) / max(1, oversized.area) > 0.75
+            )
+        ]
+        work_mask = np.zeros_like(ink_mask)
+        work_mask[oversized.y : oversized.y2, oversized.x : oversized.x2] = ink_mask[
+            oversized.y : oversized.y2, oversized.x : oversized.x2
+        ]
+        for existing in visual_boxes:
+            cleared = inflate_candidate_box(existing, max(6, min(width, height) // 220), width, height)
+            work_mask[cleared.y : cleared.y2, cleared.x : cleared.x2] = 0
+        remove_side_color_strips_from_mask(image, work_mask, oversized)
+
+        line_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (max(7, width // 180), 1))
+        line_mask = cv2.morphologyEx(work_mask, cv2.MORPH_CLOSE, line_kernel, iterations=1)
+        block_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (max(4, width // 260), max(2, height // 700)))
+        line_mask = cv2.dilate(line_mask, block_kernel, iterations=1)
+
+        column_projection = (line_mask > 0).sum(axis=0)
+        smoothed_columns = smooth_projection(column_projection, max(3, width // 180))
+        x_runs = projection_runs(smoothed_columns, max(5.0, height * 0.012), max(45, width // 30))
+
+        for x1, x2 in x_runs:
+            column_width = x2 - x1 + 1
+            if column_width < max(45, width // 35):
+                continue
+            column_mask = line_mask[:, x1 : x2 + 1]
+            row_projection = (column_mask > 0).sum(axis=1)
+            smoothed_rows = smooth_projection(row_projection, max(2, height // 300))
+            y_runs = projection_runs(smoothed_rows, max(3.0, column_width * 0.018), max(14, height // 140))
+            for y1, y2 in y_runs:
+                candidate = Box(x1, y1, column_width, y2 - y1 + 1).inflate(2, width, height)
+                if candidate.area / page_area < 0.00035 or candidate.w < 30 or candidate.h < 14:
+                    continue
+                for piece in split_text_candidate_box(line_mask, candidate, width, height):
+                    for fragment in split_text_box_around_visuals(piece, visual_boxes, width, height):
+                        if fragment.area / page_area >= 0.00035 and fragment.w >= 30 and fragment.h >= 14:
+                            result.append(fragment)
+
+    return result
+
+
+def deduplicate_candidate_boxes(boxes: list[Box]) -> list[Box]:
+    kept: list[Box] = []
+    for box in boxes:
+        duplicate = False
+        for existing in kept:
+            overlap = overlap_area(box, existing)
+            if overlap / max(1, box.area) > 0.88:
+                duplicate = True
+                break
+            if overlap / max(1, box.area) > 0.62 and overlap / max(1, existing.area) > 0.62:
+                duplicate = True
+                break
+        if not duplicate:
+            kept.append(box)
+    return sorted(kept, key=lambda item: (item.y, item.x))
+
+
+def detect_candidate_boxes(
+    image,
+    min_area_ratio: float = 0.00035,
+    max_area_ratio: float = 0.85,
+    accelerator: str = "cpu",
+) -> tuple[list[Box], dict[str, object]]:
+    accelerator = normalize_accelerator(accelerator)
+    gray = grayscale_image(image, accelerator)
+    mask, threshold, bright_foreground = foreground_mask(gray, accelerator)
+    # Keep the block mask on CPU: OpenCL morphology can change contour topology
+    # enough to alter page segmentation, even when it is slightly faster.
+    block_mask = make_block_mask(gray, mask, "cpu")
     height, width = gray.shape[:2]
     page_area = width * height
     border_x = max(4, width // 80)
@@ -354,11 +721,16 @@ def detect_candidate_boxes(image, min_area_ratio: float = 0.00035, max_area_rati
     contours, _ = cv2.findContours(block_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     raw_boxes: list[Box] = []
     boxes: list[Box] = []
+    oversized_boxes: list[Box] = []
     for contour in contours:
         x, y, w, h = cv2.boundingRect(contour)
         box = Box(x, y, w, h).inflate(max(3, min(width, height) // 250), width, height)
         area_ratio = box.area / page_area
-        if area_ratio < min_area_ratio or area_ratio > max_area_ratio:
+        if area_ratio > max_area_ratio:
+            if area_ratio <= 0.98:
+                oversized_boxes.append(box)
+            continue
+        if area_ratio < min_area_ratio:
             continue
         if box.w < 8 or box.h < 8:
             continue
@@ -371,6 +743,24 @@ def detect_candidate_boxes(image, min_area_ratio: float = 0.00035, max_area_rati
         boxes = raw_boxes
     boxes = split_boxes_by_internal_gaps(mask, boxes, width, height)
     boxes = split_boxes_by_side_color_strips(image, boxes, width, height)
+    line_art_boxes = line_art_boxes_from_large_regions(image, mask, gray, boxes, width, height)
+    large_mixed_boxes = [
+        box
+        for box in boxes
+        if box.area / page_area > 0.22
+        and any(overlap_area(box, visual) / max(1, visual.area) > 0.82 for visual in line_art_boxes)
+    ]
+    if large_mixed_boxes:
+        recovered_text_boxes = text_boxes_from_oversized_regions(
+            image, gray, large_mixed_boxes, boxes + line_art_boxes, width, height
+        )
+        if recovered_text_boxes:
+            boxes = [box for box in boxes if box not in large_mixed_boxes] + recovered_text_boxes
+    boxes = split_boxes_around_visual_candidates(boxes, line_art_boxes, width, height)
+    if oversized_boxes:
+        boxes = deduplicate_candidate_boxes(
+            boxes + text_boxes_from_oversized_regions(image, gray, oversized_boxes, boxes, width, height)
+        )
     if not boxes:
         boxes = raw_boxes
     metadata = {
@@ -378,6 +768,7 @@ def detect_candidate_boxes(image, min_area_ratio: float = 0.00035, max_area_rati
         "bright_foreground": bright_foreground,
         "analysis_width": width,
         "analysis_height": height,
+        "accelerator": accelerator,
     }
     return boxes, metadata
 
@@ -662,6 +1053,19 @@ def classify_features(ann, features: dict[str, float]) -> tuple[str, float]:
         scores[CLASS_NAMES.index("image")] += 1.00
         scores[CLASS_NAMES.index("schematic/circuit")] *= 0.35
         scores[CLASS_NAMES.index("table")] *= 0.60
+    if (
+        features["area_ratio"] > 0.035
+        and line_art > 0.22
+        and features["ink_density"] < 0.18
+        and features["edge_density"] > 0.18
+        and features["line_balance"] > 0.45
+        and min(features["hline_density"], features["vline_density"]) > 0.07
+        and max_text < 0.70
+    ):
+        scores[CLASS_NAMES.index("schematic/circuit")] += 1.45
+        scores[CLASS_NAMES.index("image")] *= 0.35
+        scores[CLASS_NAMES.index("diagram")] *= 0.55
+        scores[CLASS_NAMES.index("text")] *= 0.70
     if features["hline_density"] > 0.30 and features["vline_density"] > 0.24 and features["line_balance"] > 0.55:
         scores[CLASS_NAMES.index("table")] += 0.15
         scores[CLASS_NAMES.index("schematic/circuit")] += 0.10
@@ -703,6 +1107,19 @@ def classify_features(ann, features: dict[str, float]) -> tuple[str, float]:
         scores[CLASS_NAMES.index("diagram")] *= 0.45
         scores[CLASS_NAMES.index("table")] *= 0.45
         scores[CLASS_NAMES.index("schematic/circuit")] *= 0.45
+    if (
+        features["height_ratio"] < 0.090
+        and features["wide_aspect"] > 0.80
+        and features["area_ratio"] < 0.075
+        and features["max_text_score"] > 0.18
+        and features["ink_density"] > 0.12
+        and features["line_balance"] < 0.12
+    ):
+        scores[CLASS_NAMES.index("text")] += 1.25
+        scores[CLASS_NAMES.index("image")] *= 0.25
+        scores[CLASS_NAMES.index("diagram")] *= 0.50
+        scores[CLASS_NAMES.index("table")] *= 0.55
+        scores[CLASS_NAMES.index("schematic/circuit")] *= 0.40
     if features["max_text_score"] > 0.48 and features["line_balance"] < 0.20:
         scores[CLASS_NAMES.index("text")] += 0.70
         scores[CLASS_NAMES.index("diagram")] *= 0.55
@@ -1111,11 +1528,19 @@ def attach_caption_candidates(blocks: list[Block], candidate_text_blocks: list[B
                 figure_block.caption_candidates = [fallback]
 
 
-def classify_blocks(image, boxes: list[Box], scale: float, save_crops: bool, page_dir: Path) -> list[Block]:
+def classify_blocks(
+    image,
+    boxes: list[Box],
+    scale: float,
+    save_crops: bool,
+    page_dir: Path,
+    accelerator: str = "cpu",
+) -> list[Block]:
     analysis_h, analysis_w = image.shape[:2]
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    mask, _, _ = foreground_mask(gray)
-    edges = cv2.Canny(gray, 60, 160)
+    accelerator = normalize_accelerator(accelerator)
+    gray = grayscale_image(image, accelerator)
+    mask, _, _ = foreground_mask(gray, accelerator)
+    edges = canny_edges(gray, accelerator)
     ann = train_bootstrap_ann()
 
     classified: list[tuple[Block, Box]] = []
@@ -1221,15 +1646,17 @@ def detect_page_layout(
     preview_width: int = 1400,
     min_area_ratio: float = 0.00035,
     save_crops: bool = True,
+    accelerator: str = "cpu",
 ) -> dict[str, object]:
+    accelerator = configure_accelerator(accelerator)
     original = read_image(image_path)
-    analysis_image, scale = resize_for_analysis(original, max_analysis_side)
+    analysis_image, scale = resize_for_analysis(original, max_analysis_side, accelerator)
     page_name = image_path.stem
     page_dir = out_dir / page_name
     page_dir.mkdir(parents=True, exist_ok=True)
 
-    boxes, metadata = detect_candidate_boxes(analysis_image, min_area_ratio=min_area_ratio)
-    blocks = classify_blocks(analysis_image, boxes, scale=scale, save_crops=save_crops, page_dir=page_dir)
+    boxes, metadata = detect_candidate_boxes(analysis_image, min_area_ratio=min_area_ratio, accelerator=accelerator)
+    blocks = classify_blocks(analysis_image, boxes, scale=scale, save_crops=save_crops, page_dir=page_dir, accelerator=accelerator)
     preview_path = draw_preview(original, blocks, preview_width=preview_width, page_dir=page_dir)
 
     result = {
@@ -1240,6 +1667,7 @@ def detect_page_layout(
         "analysis_scale": scale,
         "classes": CLASS_NAMES,
         "metadata": metadata,
+        "accelerator": accelerator,
         "preview": preview_path.relative_to(page_dir).as_posix(),
         "blocks": [asdict(block) for block in blocks],
     }
@@ -1254,6 +1682,12 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--max-analysis-side", type=int, default=1800, help="Largest side used during detection.")
     parser.add_argument("--preview-width", type=int, default=1400, help="Preview overlay width in pixels.")
     parser.add_argument("--min-area-ratio", type=float, default=0.00035, help="Smallest candidate block area relative to page.")
+    parser.add_argument(
+        "--accelerator",
+        choices=ACCELERATOR_CHOICES,
+        default="cpu",
+        help="OpenCV acceleration backend. OpenCL falls back to CPU when unavailable.",
+    )
     parser.add_argument("--no-crops", action="store_true", help="Do not write block crop images.")
     return parser.parse_args(argv)
 
@@ -1268,6 +1702,7 @@ def main(argv: list[str]) -> int:
         preview_width=args.preview_width,
         min_area_ratio=args.min_area_ratio,
         save_crops=not args.no_crops,
+        accelerator=args.accelerator,
     )
     counts: dict[str, int] = {}
     for block in result["blocks"]:

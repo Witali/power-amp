@@ -29,7 +29,10 @@ python scripts\project_tasks.py render part_symbols results\003_radiostorage_she
 python scripts\project_tasks.py result results\003_radiostorage_shema_1804_6\variants\bootstrap.py
 python scripts\project_tasks.py spellcheck .tmp --out .tmp\spellcheck_report.tsv
 python scripts\lint_svg.py --fail-on-warning
+python scripts\benchmark_layout_detector.py .tmp\layout_candidate_pages\b.2000-02.036.jpg .tmp\layout_candidate_pages\b.2000-10.014.jpg
 ```
+
+The layout detector supports `--accelerator cpu` and `--accelerator opencl`. CPU remains the default because the local benchmark on 2026-05-18 was faster overall than OpenCL on the cached magazine pages.
 
 ## Rules For Future Work
 
@@ -71,7 +74,10 @@ python scripts\project_tasks.py render part_symbols results\003_radiostorage_she
 python scripts\project_tasks.py result results\003_radiostorage_shema_1804_6\variants\bootstrap.py
 python scripts\project_tasks.py spellcheck .tmp --out .tmp\spellcheck_report.tsv
 python scripts\lint_svg.py --fail-on-warning
+python scripts\benchmark_layout_detector.py .tmp\layout_candidate_pages\b.2000-02.036.jpg .tmp\layout_candidate_pages\b.2000-10.014.jpg
 ```
+
+Детектор макета поддерживает `--accelerator cpu` и `--accelerator opencl`. CPU остается режимом по умолчанию, потому что локальный benchmark от 2026-05-18 на сохраненных страницах журнала оказался быстрее OpenCL.
 
 ## Правила На Будущее
 
