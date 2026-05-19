@@ -6,6 +6,7 @@
   "analysis_scale": 0.5454545454545454,
   "classes": [
     "text",
+    "heading",
     "image",
     "schematic/circuit",
     "diagram",
@@ -297,8 +298,28 @@
   ],
   "frequency_warnings": [
     {
-      "block": "002_text",
-      "block_label": "text",
+      "block": "002_heading",
+      "block_label": "heading",
+      "hint_label": "text",
+      "hint_confidence": 0.79862,
+      "block_overlap": 0.9213,
+      "hint_overlap": 0.03859,
+      "bbox": [
+        92,
+        218,
+        1335,
+        216
+      ],
+      "hint_bbox": [
+        59,
+        235,
+        2347,
+        2933
+      ]
+    },
+    {
+      "block": "002_heading",
+      "block_label": "heading",
       "hint_label": "schematic/circuit",
       "hint_confidence": 0.92,
       "block_overlap": 0.35827,
@@ -399,8 +420,8 @@
   ],
   "frequency_cluster_warnings": [
     {
-      "block": "002_text",
-      "block_label": "text",
+      "block": "002_heading",
+      "block_label": "heading",
       "hint_label": "schematic/circuit",
       "hint_confidence": 0.92,
       "block_overlap": 0.14343,
@@ -419,8 +440,8 @@
       ]
     },
     {
-      "block": "002_text",
-      "block_label": "text",
+      "block": "002_heading",
+      "block_label": "heading",
       "hint_label": "schematic/circuit",
       "hint_confidence": 0.92,
       "block_overlap": 0.35827,
@@ -435,6 +456,46 @@
         763,
         235,
         587,
+        176
+      ]
+    },
+    {
+      "block": "002_heading",
+      "block_label": "heading",
+      "hint_label": "text",
+      "hint_confidence": 0.79744,
+      "block_overlap": 0.14343,
+      "hint_overlap": 1.0,
+      "bbox": [
+        92,
+        218,
+        1335,
+        216
+      ],
+      "hint_bbox": [
+        880,
+        235,
+        235,
+        176
+      ]
+    },
+    {
+      "block": "002_heading",
+      "block_label": "heading",
+      "hint_label": "text",
+      "hint_confidence": 0.81022,
+      "block_overlap": 0.10742,
+      "hint_overlap": 1.0,
+      "bbox": [
+        92,
+        218,
+        1335,
+        216
+      ],
+      "hint_bbox": [
+        1232,
+        235,
+        176,
         176
       ]
     },
@@ -482,10 +543,10 @@
   "preview": "preview.png",
   "blocks": [
     {
-      "ident": "001_text",
-      "label": "text",
+      "ident": "001_heading",
+      "label": "heading",
       "orientation": "horizontal",
-      "confidence": 0.884,
+      "confidence": 0.5692,
       "bbox": [
         22,
         97,
@@ -530,10 +591,10 @@
       "caption_candidates": null
     },
     {
-      "ident": "002_text",
-      "label": "text",
+      "ident": "002_heading",
+      "label": "heading",
       "orientation": "horizontal",
-      "confidence": 0.6945,
+      "confidence": 0.664,
       "bbox": [
         92,
         218,
@@ -581,7 +642,7 @@
       "ident": "003_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.8996,
+      "confidence": 0.8741,
       "bbox": [
         1648,
         222,
@@ -629,7 +690,7 @@
       "ident": "004_image",
       "label": "image",
       "orientation": "unknown",
-      "confidence": 0.955,
+      "confidence": 0.8958,
       "bbox": [
         92,
         453,
@@ -698,7 +759,7 @@
       "ident": "006_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.9204,
+      "confidence": 0.8749,
       "bbox": [
         90,
         832,
@@ -746,7 +807,7 @@
       "ident": "007_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.8917,
+      "confidence": 0.8701,
       "bbox": [
         867,
         832,
@@ -814,7 +875,7 @@
       "ident": "008_schematic_circuit",
       "label": "schematic/circuit",
       "orientation": "unknown",
-      "confidence": 0.7562,
+      "confidence": 0.7392,
       "bbox": [
         856,
         1450,
@@ -902,7 +963,7 @@
       "ident": "009_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.8928,
+      "confidence": 0.8714,
       "bbox": [
         865,
         2339,
@@ -978,7 +1039,7 @@
       "ident": "010_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.8921,
+      "confidence": 0.8708,
       "bbox": [
         1650,
         2358,
@@ -1026,7 +1087,7 @@
       "ident": "011_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.6801,
+      "confidence": 0.6575,
       "bbox": [
         106,
         3221,
@@ -1074,7 +1135,7 @@
       "ident": "012_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.9528,
+      "confidence": 0.9129,
       "bbox": [
         2055,
         3225,

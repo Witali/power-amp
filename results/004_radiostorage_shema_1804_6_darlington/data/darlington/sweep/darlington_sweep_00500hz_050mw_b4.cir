@@ -1,0 +1,39 @@
+* RadioStorage shema-1804-6 single-supply BJT audio amplifier, upper Darlington variant
+.options abstol=1n reltol=0.003 itl1=500 itl4=500
+.temp 27
+
+VCC vcc 0 12
+VIN vin 0 DC 0 SIN(0 0.09375 500)
+C3 vin b_in 10u
+R3 b_in 0 10000
+R2 out b_in 47000
+Q1 drive b_in e_vt1 KT3102A
+R4 e_vt1 0 100
+R1A vcc boot 560
+R1B boot b_top 1800
+C4 boot out 470u
+D1 b_top d_mid1 KD521A
+D2 d_mid1 d_mid2 KD521A
+D3 d_mid2 drive KD521A
+Q2A vcc b_top b_upper KT3102A
+Q2B vcc b_upper out KT817A
+Q3 0 drive out KT816A
+C2 out load 4700u
+RLOAD load 0 8
+C1 vcc 0 1000u
+
+.model KD521A D(Is=2.5n Rs=1.8 N=1.85 Cjo=2p M=0.33 Bv=75 Ibv=5u Tt=4n)
+.model KT3102A NPN(Is=2e-14 Bf=100 Br=6 Vaf=100 Var=20 Ikf=0.12 Ikr=0.02
++ Rc=1 Re=0.35 Rb=60 Cje=9p Cjc=4p Tf=0.4n Tr=35n)
+.model KT817A NPN(Is=9e-14 Bf=50 Br=5 Vaf=70 Var=15 Ikf=3.0 Ikr=0.4
++ Rc=0.12 Re=0.06 Rb=2.5 Cje=140p Cjc=80p Tf=0.45u Tr=6u)
+.model KT816A PNP(Is=1.1e-13 Bf=50 Br=5 Vaf=60 Var=15 Ikf=2.5 Ikr=0.35
++ Rc=0.14 Re=0.07 Rb=2.8 Cje=160p Cjc=90p Tf=0.55u Tr=7u)
+
+.control
+set noaskquit
+tran 7.8125e-06 0.048 0.024 7.8125e-06
+wrdata darlington_sweep_00500hz_050mw_b4.csv time v(load) v(vin)
+quit
+.endc
+.end

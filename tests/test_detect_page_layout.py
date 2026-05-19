@@ -15,7 +15,7 @@ class DetectPageLayoutTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             detect_page_layout.normalize_accelerator("quantum")
 
-    def test_feature_classifier_recognizes_large_title_text(self) -> None:
+    def test_feature_classifier_recognizes_large_title_as_heading(self) -> None:
         ann = detect_page_layout.train_bootstrap_ann()
         features = {
             "width_ratio": 0.50,
@@ -40,10 +40,10 @@ class DetectPageLayoutTests(unittest.TestCase):
 
         label, confidence = detect_page_layout.classify_features(ann, features)
 
-        self.assertEqual(label, "text")
+        self.assertEqual(label, "heading")
         self.assertGreater(confidence, 0.25)
 
-    def test_feature_classifier_keeps_bold_display_title_as_text(self) -> None:
+    def test_feature_classifier_keeps_bold_display_title_as_heading(self) -> None:
         ann = detect_page_layout.train_bootstrap_ann()
         features = {
             "width_ratio": 0.6290,
@@ -71,7 +71,47 @@ class DetectPageLayoutTests(unittest.TestCase):
 
         label, confidence = detect_page_layout.classify_features(ann, features)
 
-        self.assertEqual(label, "text")
+        self.assertEqual(label, "heading")
+        self.assertGreater(confidence, 0.25)
+
+    def test_feature_classifier_recognizes_saturated_article_title_as_heading(self) -> None:
+        ann = detect_page_layout.train_bootstrap_ann()
+        features = {
+            "width_ratio": 0.47654,
+            "height_ratio": 0.12611,
+            "area_ratio": 0.06010,
+            "wide_aspect": 0.57269,
+            "tall_aspect": 0.06985,
+            "ink_density": 0.21544,
+            "edge_density": 0.26142,
+            "gray_std": 0.69475,
+            "gray_levels": 0.81250,
+            "component_density": 0.36598,
+            "hline_density": 0.0,
+            "vline_density": 0.02342,
+            "line_balance": 0.0,
+            "textline_density": 0.31718,
+            "horizontal_text_score": 0.31718,
+            "vertical_text_score": 0.05538,
+            "diagonal_text_score": 0.11613,
+            "max_text_score": 0.31718,
+            "line_art_score": 1.0,
+            "saturation_mean": 0.20863,
+            "saturation_p80": 0.47451,
+            "component_signature_score": 0.79371,
+            "resistor_symbol_density": 1.0,
+            "capacitor_symbol_density": 1.0,
+            "diode_symbol_density": 0.0,
+            "transistor_symbol_density": 0.85395,
+            "pcb_trace_density": 1.0,
+            "pcb_pad_density": 1.0,
+            "pcb_board_outline_score": 1.0,
+            "pcb_signature_score": 1.0,
+        }
+
+        label, confidence = detect_page_layout.classify_features(ann, features)
+
+        self.assertEqual(label, "heading")
         self.assertGreater(confidence, 0.25)
 
     def test_feature_classifier_recognizes_colored_line_art_as_schematic(self) -> None:
@@ -330,7 +370,7 @@ class DetectPageLayoutTests(unittest.TestCase):
         self.assertEqual(label, "pcb")
         self.assertGreater(confidence, 0.35)
 
-    def test_pcb_signature_does_not_capture_bold_heading(self) -> None:
+    def test_pcb_signature_classifies_bold_heading_as_heading(self) -> None:
         ann = detect_page_layout.train_bootstrap_ann()
         features = {
             "width_ratio": 0.48,
@@ -363,7 +403,71 @@ class DetectPageLayoutTests(unittest.TestCase):
 
         label, _ = detect_page_layout.classify_features(ann, features)
 
-        self.assertNotEqual(label, "pcb")
+        self.assertEqual(label, "heading")
+
+    def test_splits_multiline_text_block_at_column_gutter(self) -> None:
+        cv2 = detect_page_layout.cv2
+        np = detect_page_layout.np
+
+        mask = np.zeros((260, 700), dtype=np.uint8)
+        for row in range(5):
+            y = 28 + row * 34
+            cv2.rectangle(mask, (40, y), (275, y + 12), 255, -1)
+            cv2.rectangle(mask, (430, y), (650, y + 12), 255, -1)
+        box = detect_page_layout.Box(20, 12, 660, 190)
+
+        pieces = detect_page_layout.split_multiline_text_box_recursive(mask, box, page_width=1000, page_height=1000)
+
+        self.assertEqual(len(pieces), 2)
+        self.assertLessEqual(pieces[0].x2, pieces[1].x)
+        self.assertGreaterEqual(pieces[0].w, 250)
+        self.assertGreaterEqual(pieces[1].w, 250)
+
+    def test_does_not_split_single_line_heading_at_word_gap(self) -> None:
+        cv2 = detect_page_layout.cv2
+        np = detect_page_layout.np
+
+        mask = np.zeros((180, 700), dtype=np.uint8)
+        cv2.rectangle(mask, (35, 70), (280, 94), 255, -1)
+        cv2.rectangle(mask, (420, 70), (650, 94), 255, -1)
+        box = detect_page_layout.Box(20, 40, 660, 90)
+
+        pieces = detect_page_layout.split_multiline_text_box_recursive(mask, box, page_width=1000, page_height=1000)
+
+        self.assertEqual(pieces, [box])
+
+    def test_suppresses_small_text_artifact_touching_pcb(self) -> None:
+        pcb = detect_page_layout.Block(
+            ident="004_pcb",
+            label="pcb",
+            orientation="unknown",
+            confidence=0.83,
+            bbox=[250, 90, 1080, 1740],
+            outline=None,
+            features={},
+        )
+        artifact = detect_page_layout.Block(
+            ident="005_text",
+            label="text",
+            orientation="horizontal",
+            confidence=0.77,
+            bbox=[1340, 860, 220, 35],
+            outline=None,
+            features={},
+        )
+        prose = detect_page_layout.Block(
+            ident="006_text",
+            label="text",
+            orientation="horizontal",
+            confidence=0.93,
+            bbox=[1595, 860, 740, 700],
+            outline=None,
+            features={},
+        )
+
+        filtered = detect_page_layout.suppress_small_text_artifacts_near_visuals([pcb, artifact, prose])
+
+        self.assertEqual([block.ident for block in filtered], ["004_pcb", "006_text"])
 
     def test_feature_classifier_prefers_color_photo_over_schematic(self) -> None:
         ann = detect_page_layout.train_bootstrap_ann()
@@ -1665,7 +1769,7 @@ class DetectPageLayoutTests(unittest.TestCase):
         self.assertEqual(box.to_list(), [40, 80, 360, 206])
         self.assertEqual(block.features["stacked_diagram_merge"], 1.0)
 
-    def test_demotes_stacked_bold_heading_wrapper_to_text(self) -> None:
+    def test_demotes_stacked_bold_heading_wrapper_to_heading(self) -> None:
         block = detect_page_layout.Block(
             ident="001_diagram",
             label="diagram",
@@ -1686,9 +1790,9 @@ class DetectPageLayoutTests(unittest.TestCase):
 
         demoted = detect_page_layout.demote_textual_diagram_wrappers([(block, box)])
 
-        self.assertEqual(demoted[0][0].label, "text")
+        self.assertEqual(demoted[0][0].label, "heading")
         self.assertEqual(demoted[0][0].orientation, "horizontal")
-        self.assertEqual(demoted[0][0].ident, "001_text")
+        self.assertEqual(demoted[0][0].ident, "001_heading")
         self.assertEqual(demoted[0][0].features["textual_diagram_wrapper_demote"], 1.0)
 
     def test_keeps_stacked_waveform_wrapper_as_diagram(self) -> None:

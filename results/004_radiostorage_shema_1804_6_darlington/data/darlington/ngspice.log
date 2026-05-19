@@ -1,0 +1,58 @@
+
+Note: No compatibility mode selected!
+
+
+Circuit: * radiostorage shema-1804-6 single-supply bjt audio amplifier, upper darlington variant
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+No. of Data Rows : 1
+v(b_in) = 8.914079e-01
+v(e_vt1) = 2.305428e-01
+v(drive) = 5.489941e+00
+v(d_mid1) = 6.794061e+00
+v(d_mid2) = 6.142001e+00
+v(b_top) = 7.446122e+00
+v(b_upper) = 6.835267e+00
+v(boot) = 1.091942e+01
+v(out) = 6.159859e+00
+v(load) = 0.000000e+00
+i(vcc) = -2.09219e-02
+@q1[ic] = 2.282474e-03
+@q2a[ic] = 3.607944e-04
+@q2b[ic] = 1.863151e-02
+@q3[ic] = -1.85273e-02
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+No. of Data Rows : 369
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vcc                                         12
+vin                                          0
+b_in                                  0.891408
+out                                    6.15986
+drive                                  5.48994
+e_vt1                                 0.230543
+boot                                   10.9194
+b_top                                  7.44612
+d_mid1                                 6.79406
+d_mid2                                   6.142
+b_upper                                6.83527
+load                                         0
+vin#branch                                   0
+vcc#branch                          -0.0209219
+
+
+No. of Data Rows : 4001
+ngspice-46 done

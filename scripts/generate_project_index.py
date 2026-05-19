@@ -64,7 +64,7 @@ def result_cards() -> str:
         netlist_count = len(list((folder / "netlists").glob("*"))) if (folder / "netlists").exists() else 0
         data_count = len(list((folder / "data").rglob("*.*"))) if (folder / "data").exists() else 0
         preview_html = (
-            f'<a class="thumb-link" href="{html.escape(rel(preview))}"><img src="{html.escape(rel(preview))}" alt="{html.escape(title)} schematic"></a>'
+            f'<a class="thumb-link" href="{html.escape(rel(primary_link))}"><img src="{html.escape(rel(preview))}" alt="{html.escape(title)} schematic"></a>'
             if preview
             else '<div class="thumb-placeholder">No schematic preview</div>'
         )
@@ -86,10 +86,85 @@ def result_cards() -> str:
     return "\n".join(cards)
 
 
+def write_symbols_index() -> Path:
+    symbols_dir = PROJECT_ROOT / "part_symbols"
+    symbols_preview = symbols_dir / "part_symbols.png"
+    symbols_index = symbols_dir / "index.html"
+    symbols_index.write_text(
+        f"""<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Part Symbols Library</title>
+  <style>
+    body {{
+      margin: 0;
+      font: 15px/1.5 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #18202a;
+      background: #fff;
+    }}
+    main {{
+      width: min(1180px, calc(100% - 32px));
+      margin: 28px auto 48px;
+    }}
+    h1 {{ margin: 0 0 10px; font-size: 30px; }}
+    p {{ margin: 0 0 12px; max-width: 860px; }}
+    a {{ color: #1769aa; }}
+    .links {{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 16px 0 22px;
+    }}
+    .links a {{
+      display: inline-flex;
+      min-height: 34px;
+      align-items: center;
+      padding: 6px 10px;
+      border: 1px solid #d7dde5;
+      border-radius: 6px;
+      text-decoration: none;
+      color: #18202a;
+    }}
+    img {{
+      display: block;
+      max-width: 100%;
+      height: auto;
+      border: 1px solid #d7dde5;
+      border-radius: 8px;
+      background: #fff;
+    }}
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Part Symbols Library</h1>
+    <p>Локальная библиотека условных графических обозначений для GOST/ESKD, IEC, ANSI и общих элементов. Каждый символ хранится отдельным SVG-файлом и проверяется SVG-линтером.</p>
+    <div class="links">
+      <a href="../index.html#symbols">Project index</a>
+      <a href="README.md">README</a>
+      <a href="symbol_sources.md">Symbol sources</a>
+      <a href="gost/part_symbols_gost.svg">GOST sheet</a>
+      <a href="iec/part_symbols_iec.svg">IEC sheet</a>
+      <a href="ansi/part_symbols_ansi.svg">ANSI sheet</a>
+    </div>
+    <a href="{html.escape(symbols_preview.name)}"><img src="{html.escape(symbols_preview.name)}" alt="Part symbols overview"></a>
+  </main>
+</body>
+</html>
+""",
+        encoding="utf-8",
+        newline="\n",
+    )
+    return symbols_index
+
+
 def write_index() -> Path:
     opencv_preview = PROJECT_ROOT / "study" / "opencv_layout_reports" / "latest" / "detected" / "b.2000-02.037" / "preview.png"
     opencv_report = PROJECT_ROOT / "study" / "opencv_layout_reports" / "latest" / "index.html"
     symbols_preview = PROJECT_ROOT / "part_symbols" / "part_symbols.png"
+    symbols_index = write_symbols_index()
     symbols_readme = PROJECT_ROOT / "part_symbols" / "README.md"
 
     index = PROJECT_ROOT / "index.html"
@@ -265,6 +340,7 @@ def write_index() -> Path:
     <section id="results">
       <h2>Индивидуальные схемы и результаты</h2>
       <p class="subtle">Каждая папка в <code>results/</code> хранит схему, графики, данные моделирования, netlist и описание для одного эксперимента или схемы.</p>
+      <p class="subtle">Данные схемы были распознаны и заново отрисованы с помощью ИИ. Сгенерированы их SPICE-модели и просимулированы с помощью ngspice.</p>
       <div class="grid">
 {result_cards()}
       </div>
@@ -288,7 +364,7 @@ def write_index() -> Path:
             <span class="tag">20 regression pages</span>
           </div>
         </div>
-        <a class="thumb-link" href="{html.escape(rel(opencv_preview))}">
+        <a class="thumb-link" href="{html.escape(rel(opencv_report))}">
           <img src="{html.escape(rel(opencv_preview))}" alt="OpenCV page layout preview">
         </a>
       </div>
@@ -312,7 +388,7 @@ def write_index() -> Path:
             <li>Drawing priorities: preserve symbol proportions, avoid overlaps, then reduce wire length.</li>
           </ul>
         </div>
-        <a class="thumb-link" href="{html.escape(rel(symbols_preview))}">
+        <a class="thumb-link" href="{html.escape(rel(symbols_index))}">
           <img src="{html.escape(rel(symbols_preview))}" alt="Part symbols overview">
         </a>
       </div>

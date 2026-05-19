@@ -50,31 +50,53 @@ except ImportError:
     except ImportError:
         layout_component_signatures = None  # type: ignore
 
+try:
+    from scripts import layout_config  # type: ignore
+except ImportError:
+    import layout_config  # type: ignore
 
-CLASS_NAMES = ["text", "image", "schematic/circuit", "diagram", "pcb", "table", "other"]
-FIGURE_LABELS = {"image", "schematic/circuit", "diagram", "pcb"}
-CLASS_COLORS = {
-    "text": (52, 168, 83),
-    "image": (66, 133, 244),
-    "schematic/circuit": (234, 67, 53),
-    "diagram": (251, 188, 5),
-    "pcb": (0, 170, 180),
-    "table": (171, 71, 188),
-    "other": (128, 128, 128),
-}
-CAPTION_HIGHLIGHT_COLOR = (0, 255, 255)
-CAPTION_HIGHLIGHT_OPACITY = 0.30
-CAPTION_HIGHLIGHT_PADDING = 4
-ACCELERATOR_CHOICES = ("cpu", "opencl")
-FREQUENCY_HINT_CHOICES = ("off", "validate", "hints")
-PCB_MIN_TRACE_DENSITY = 0.30
-PCB_MIN_SIGNATURE_SCORE = 0.40
-PCB_MIN_LINE_BALANCE = 0.16
-PCB_MIN_AXIS_LINE_DENSITY = 0.045
-PCB_MIN_AREA_RATIO = 0.030
-PCB_MIN_HEIGHT_RATIO = 0.110
-PCB_MAX_TEXT_SCORE = 0.58
-PCB_MAX_INK_DENSITY = 0.34
+
+CLASS_NAMES = layout_config.LAYOUT_CLASS_NAMES
+TEXTUAL_LABELS = layout_config.TEXTUAL_LABELS
+FIGURE_LABELS = layout_config.FIGURE_LABELS
+CLASS_COLORS = layout_config.CLASS_COLORS_BGR
+CAPTION_HIGHLIGHT_COLOR = layout_config.CAPTION_HIGHLIGHT_COLOR_BGR
+CAPTION_HIGHLIGHT_OPACITY = layout_config.CAPTION_HIGHLIGHT_OPACITY
+CAPTION_HIGHLIGHT_PADDING = layout_config.CAPTION_HIGHLIGHT_PADDING_PX
+ACCELERATOR_CHOICES = layout_config.ACCELERATOR_CHOICES
+FREQUENCY_HINT_CHOICES = layout_config.FREQUENCY_HINT_CHOICES
+PCB_MIN_TRACE_DENSITY = layout_config.PCB_MIN_TRACE_DENSITY
+PCB_MIN_SIGNATURE_SCORE = layout_config.PCB_MIN_SIGNATURE_SCORE
+PCB_MIN_LINE_BALANCE = layout_config.PCB_MIN_LINE_BALANCE
+PCB_MIN_AXIS_LINE_DENSITY = layout_config.PCB_MIN_AXIS_LINE_DENSITY
+PCB_MIN_AREA_RATIO = layout_config.PCB_MIN_AREA_RATIO
+PCB_MIN_HEIGHT_RATIO = layout_config.PCB_MIN_HEIGHT_RATIO
+PCB_MAX_TEXT_SCORE = layout_config.PCB_MAX_TEXT_SCORE
+PCB_MAX_INK_DENSITY = layout_config.PCB_MAX_INK_DENSITY
+TEXT_COLUMN_SPLIT_MIN_WIDTH_RATIO = layout_config.TEXT_COLUMN_SPLIT_MIN_WIDTH_RATIO
+TEXT_COLUMN_SPLIT_MIN_HEIGHT_RATIO = layout_config.TEXT_COLUMN_SPLIT_MIN_HEIGHT_RATIO
+TEXT_COLUMN_SPLIT_MIN_ROW_RUNS = layout_config.TEXT_COLUMN_SPLIT_MIN_ROW_RUNS
+TEXT_COLUMN_SPLIT_MIN_GAP_RATIO = layout_config.TEXT_COLUMN_SPLIT_MIN_GAP_RATIO
+TEXT_COLUMN_SPLIT_MIN_GAP_PX = layout_config.TEXT_COLUMN_SPLIT_MIN_GAP_PX
+TEXT_COLUMN_SPLIT_MIN_PIECE_WIDTH_RATIO = layout_config.TEXT_COLUMN_SPLIT_MIN_PIECE_WIDTH_RATIO
+TEXT_COLUMN_SPLIT_MAX_PIECES = layout_config.TEXT_COLUMN_SPLIT_MAX_PIECES
+TEXT_ARTIFACT_VISUAL_LABELS = layout_config.TEXT_ARTIFACT_VISUAL_LABELS
+TEXT_ARTIFACT_MAX_AREA_RATIO = layout_config.TEXT_ARTIFACT_MAX_AREA_RATIO
+TEXT_ARTIFACT_MAX_HEIGHT_PX = layout_config.TEXT_ARTIFACT_MAX_HEIGHT_PX
+TEXT_ARTIFACT_MAX_HEIGHT_RATIO = layout_config.TEXT_ARTIFACT_MAX_HEIGHT_RATIO
+TEXT_ARTIFACT_MAX_WIDTH_RATIO = layout_config.TEXT_ARTIFACT_MAX_WIDTH_RATIO
+TEXT_ARTIFACT_TOUCH_MARGIN_RATIO = layout_config.TEXT_ARTIFACT_TOUCH_MARGIN_RATIO
+TEXT_ARTIFACT_MIN_OVERLAP_RATIO = layout_config.TEXT_ARTIFACT_MIN_OVERLAP_RATIO
+HEADING_MIN_WIDTH_RATIO = layout_config.HEADING_MIN_WIDTH_RATIO
+HEADING_MAX_HEIGHT_RATIO = layout_config.HEADING_MAX_HEIGHT_RATIO
+HEADING_MAX_AREA_RATIO = layout_config.HEADING_MAX_AREA_RATIO
+HEADING_MIN_WIDE_ASPECT = layout_config.HEADING_MIN_WIDE_ASPECT
+HEADING_MIN_TEXT_SCORE = layout_config.HEADING_MIN_TEXT_SCORE
+HEADING_MAX_TEXT_SCORE = layout_config.HEADING_MAX_TEXT_SCORE
+HEADING_MIN_INK_DENSITY = layout_config.HEADING_MIN_INK_DENSITY
+HEADING_MIN_GRAY_STD = layout_config.HEADING_MIN_GRAY_STD
+HEADING_MAX_LINE_BALANCE = layout_config.HEADING_MAX_LINE_BALANCE
+HEADING_MIN_COMPONENT_DENSITY = layout_config.HEADING_MIN_COMPONENT_DENSITY
 
 
 @dataclass(frozen=True)
@@ -433,6 +455,60 @@ def split_box_by_vertical_gaps(mask, box: Box, page_width: int, page_height: int
     left = Box(box.x, box.y, center, box.h)
     right = Box(box.x + center, box.y, box.w - center, box.h)
     return [piece for piece in (left, right) if piece.area > 0]
+
+
+def text_row_run_count(mask, box: Box) -> int:
+    roi = mask[box.y : box.y2, box.x : box.x2]
+    if roi.size == 0:
+        return 0
+    row_projection = (roi > 0).sum(axis=1).astype(np.float32)
+    smoothed = smooth_projection(row_projection, max(1, box.h // 80))
+    threshold = max(2.0, box.w * 0.010)
+    min_run = max(3, box.h // 80)
+    return len(projection_runs(smoothed, threshold, min_run))
+
+
+def split_multiline_text_box_by_column_gaps(mask, box: Box, page_width: int, page_height: int) -> list[Box]:
+    if box.w < page_width * TEXT_COLUMN_SPLIT_MIN_WIDTH_RATIO:
+        return [box]
+    if box.h < page_height * TEXT_COLUMN_SPLIT_MIN_HEIGHT_RATIO:
+        return [box]
+    if text_row_run_count(mask, box) < TEXT_COLUMN_SPLIT_MIN_ROW_RUNS:
+        return [box]
+
+    min_gap = max(TEXT_COLUMN_SPLIT_MIN_GAP_PX, int(round(box.w * TEXT_COLUMN_SPLIT_MIN_GAP_RATIO)))
+    min_piece = max(40, int(round(page_width * TEXT_COLUMN_SPLIT_MIN_PIECE_WIDTH_RATIO)))
+    candidates = []
+    for start, end, mean_density in vertical_whitespace_corridor_runs(mask, box, min_gap):
+        center = (start + end) // 2
+        if center < min_piece or box.w - center < min_piece:
+            continue
+        width = end - start + 1
+        center_balance = 1.0 - abs((center / float(box.w)) - 0.5)
+        candidates.append((width, center_balance, -mean_density, center))
+    if not candidates:
+        return [box]
+
+    _, _, _, center = max(candidates)
+    left = Box(box.x, box.y, center, box.h)
+    right = Box(box.x + center, box.y, box.w - center, box.h)
+    return [piece for piece in (left, right) if piece.area > 0]
+
+
+def split_multiline_text_box_recursive(mask, box: Box, page_width: int, page_height: int) -> list[Box]:
+    pieces = [box]
+    for _ in range(TEXT_COLUMN_SPLIT_MAX_PIECES - 1):
+        changed = False
+        next_pieces: list[Box] = []
+        for piece in pieces:
+            split = split_multiline_text_box_by_column_gaps(mask, piece, page_width, page_height)
+            if len(split) > 1:
+                changed = True
+            next_pieces.extend(split)
+        pieces = next_pieces
+        if not changed or len(pieces) >= TEXT_COLUMN_SPLIT_MAX_PIECES:
+            break
+    return sorted(pieces[:TEXT_COLUMN_SPLIT_MAX_PIECES], key=lambda item: (item.y, item.x))
 
 
 def split_boxes_by_internal_gaps(mask, boxes: list[Box], width: int, height: int) -> list[Box]:
@@ -1247,6 +1323,7 @@ def jittered_samples(prototype: list[float], count: int, rng):
 def train_bootstrap_ann():
     prototypes = {
         "text": [0.42, 0.26, 0.10, 0.55, 0.10, 0.10, 0.10, 0.14, 0.18, 0.78, 0.10, 0.02, 0.12, 0.82, 0.82, 0.18, 0.20, 0.82],
+        "heading": [0.48, 0.09, 0.045, 0.74, 0.04, 0.24, 0.30, 0.70, 0.78, 0.42, 0.02, 0.03, 0.03, 0.36, 0.36, 0.10, 0.14, 0.36],
         "image": [0.28, 0.25, 0.08, 0.25, 0.22, 0.43, 0.58, 0.78, 0.95, 0.18, 0.04, 0.04, 0.25, 0.18, 0.18, 0.16, 0.16, 0.18],
         "schematic/circuit": [0.36, 0.30, 0.09, 0.42, 0.18, 0.07, 0.18, 0.20, 0.34, 0.45, 0.42, 0.34, 0.78, 0.38, 0.38, 0.28, 0.32, 0.38],
         "diagram": [0.32, 0.24, 0.08, 0.36, 0.20, 0.13, 0.28, 0.36, 0.55, 0.52, 0.20, 0.14, 0.45, 0.45, 0.45, 0.28, 0.35, 0.45],
@@ -1274,6 +1351,21 @@ def train_bootstrap_ann():
     ann.setTermCriteria((cv2.TERM_CRITERIA_MAX_ITER | cv2.TERM_CRITERIA_EPS, 700, 1e-5))
     ann.train(train_data, cv2.ml.ROW_SAMPLE, responses)
     return ann
+
+
+def heading_candidate_features(features: dict[str, float]) -> bool:
+    return (
+        features["width_ratio"] >= HEADING_MIN_WIDTH_RATIO
+        and features["height_ratio"] <= HEADING_MAX_HEIGHT_RATIO
+        and features["area_ratio"] <= HEADING_MAX_AREA_RATIO
+        and features["wide_aspect"] >= HEADING_MIN_WIDE_ASPECT
+        and features["max_text_score"] >= HEADING_MIN_TEXT_SCORE
+        and features["max_text_score"] <= HEADING_MAX_TEXT_SCORE
+        and features["ink_density"] >= HEADING_MIN_INK_DENSITY
+        and features["gray_std"] >= HEADING_MIN_GRAY_STD
+        and features["line_balance"] <= HEADING_MAX_LINE_BALANCE
+        and features["component_density"] >= HEADING_MIN_COMPONENT_DENSITY
+    )
 
 
 def rule_scores(features: dict[str, float]) -> np.ndarray:
@@ -1304,6 +1396,7 @@ def rule_scores(features: dict[str, float]) -> np.ndarray:
     )
 
     text_index = CLASS_NAMES.index("text")
+    heading_index = CLASS_NAMES.index("heading")
     image_index = CLASS_NAMES.index("image")
     schematic_index = CLASS_NAMES.index("schematic/circuit")
     diagram_index = CLASS_NAMES.index("diagram")
@@ -1312,6 +1405,16 @@ def rule_scores(features: dict[str, float]) -> np.ndarray:
     other_index = CLASS_NAMES.index("other")
 
     scores[text_index] = 1.8 * max_text + 1.1 * components + 0.4 * ink + 0.3 * max(vertical_text, diagonal_text) - 0.45 * balance
+    scores[heading_index] = (
+        1.7 * max_text
+        + 0.7 * components
+        + 0.55 * ink
+        + 0.55 * std
+        + 0.35 * features.get("saturation_p80", 0.0)
+        + 0.40 * features["wide_aspect"]
+        - 0.85 * balance
+        - 0.40 * max(hline, vline)
+    )
     scores[image_index] = 1.6 * std + 1.3 * levels + 0.9 * edge + 0.5 * ink - 0.75 * max_text
     scores[schematic_index] = 1.1 * hline + 1.1 * vline + 0.8 * balance + 0.5 * edge + 1.6 * component_rule_signal - 0.5 * std
     scores[diagram_index] = 0.8 * edge + 0.6 * hline + 0.25 * max_text + 0.5 * levels
@@ -1340,6 +1443,7 @@ def classify_features(ann, features: dict[str, float]) -> tuple[str, float]:
     pcb_axis_line_density = min(features["hline_density"], features["vline_density"])
     pcb_has_track_grid = features["line_balance"] >= PCB_MIN_LINE_BALANCE and pcb_axis_line_density >= PCB_MIN_AXIS_LINE_DENSITY
     pcb_size_ok = features["area_ratio"] >= PCB_MIN_AREA_RATIO and features["height_ratio"] >= PCB_MIN_HEIGHT_RATIO
+    heading_candidate = heading_candidate_features(features)
     pcb_candidate = (
         pcb_trace >= PCB_MIN_TRACE_DENSITY
         and pcb_signature >= PCB_MIN_SIGNATURE_SCORE
@@ -1562,6 +1666,14 @@ def classify_features(ann, features: dict[str, float]) -> tuple[str, float]:
         scores[CLASS_NAMES.index("diagram")] *= 0.55
     if not pcb_candidate or features["width_ratio"] < 0.12:
         scores[CLASS_NAMES.index("pcb")] *= 0.12
+    if heading_candidate:
+        scores[CLASS_NAMES.index("heading")] += 3.20
+        scores[CLASS_NAMES.index("text")] += 0.35
+        scores[CLASS_NAMES.index("image")] *= 0.10
+        scores[CLASS_NAMES.index("schematic/circuit")] *= 0.25
+        scores[CLASS_NAMES.index("diagram")] *= 0.38
+        scores[CLASS_NAMES.index("table")] *= 0.48
+        scores[CLASS_NAMES.index("pcb")] *= 0.06
     scores = scores / max(float(scores.sum()), 1e-6)
 
     index = int(scores.argmax())
@@ -1807,7 +1919,7 @@ def visual_outline_from_text_cutouts(visual_block: Block, text_blocks: list[Bloc
 
 
 def assign_visual_outlines(blocks: list[Block]) -> None:
-    text_blocks = [block for block in blocks if block.label == "text"]
+    text_blocks = [block for block in blocks if block.label in TEXTUAL_LABELS]
     for block in blocks:
         if block.label in FIGURE_LABELS:
             block.outline = visual_outline_from_text_cutouts(block, text_blocks)
@@ -1816,7 +1928,7 @@ def assign_visual_outlines(blocks: list[Block]) -> None:
 def block_preview_label(block: Block) -> str:
     block_number = block.ident.split("_", 1)[0] if block.ident else "?"
     label = "schematic" if block.label == "schematic/circuit" else block.label
-    if block.label == "text" and block.orientation != "unknown":
+    if block.label in TEXTUAL_LABELS and block.orientation != "unknown":
         label = f"{label} {block.orientation}"
     return f"#{block_number} {label} {block.confidence:.2f}"
 
@@ -1950,8 +2062,51 @@ def suppress_text_inside_schematics(blocks: list[Block]) -> list[Block]:
     return filtered
 
 
+def small_text_artifact_near_visual(block: Block, visual: Block) -> bool:
+    if block.ident == visual.ident or block.label != "text" or visual.label not in TEXT_ARTIFACT_VISUAL_LABELS:
+        return False
+
+    block_box = box_from_list(block.bbox)
+    visual_box = box_from_list(visual.bbox)
+    if block_box.area <= 0 or visual_box.area <= block_box.area:
+        return False
+
+    small = block_box.area <= visual_box.area * TEXT_ARTIFACT_MAX_AREA_RATIO
+    thin = block_box.h <= max(TEXT_ARTIFACT_MAX_HEIGHT_PX, int(round(visual_box.h * TEXT_ARTIFACT_MAX_HEIGHT_RATIO)))
+    narrow = block_box.w <= max(80, int(round(visual_box.w * TEXT_ARTIFACT_MAX_WIDTH_RATIO)))
+    if not (small and thin and narrow):
+        return False
+
+    margin = max(12, int(round(min(visual_box.w, visual_box.h) * TEXT_ARTIFACT_TOUCH_MARGIN_RATIO)))
+    vertical_overlap = box_vertical_overlap_height(block_box, visual_box)
+    horizontal_overlap = box_horizontal_overlap_width(block_box, visual_box)
+    touches_left_or_right = (
+        0 <= block_box.x - visual_box.x2 <= margin or 0 <= visual_box.x - block_box.x2 <= margin
+    ) and vertical_overlap >= block_box.h * TEXT_ARTIFACT_MIN_OVERLAP_RATIO
+    touches_top_or_bottom = (
+        0 <= block_box.y - visual_box.y2 <= margin or 0 <= visual_box.y - block_box.y2 <= margin
+    ) and horizontal_overlap >= block_box.w * TEXT_ARTIFACT_MIN_OVERLAP_RATIO
+    mostly_inside = intersection_area(block_box, visual_box) / max(1, block_box.area) >= 0.45
+    return touches_left_or_right or touches_top_or_bottom or mostly_inside
+
+
+def suppress_small_text_artifacts_near_visuals(blocks: list[Block]) -> list[Block]:
+    visual_blocks = [block for block in blocks if block.label in TEXT_ARTIFACT_VISUAL_LABELS]
+    if not visual_blocks:
+        return blocks
+
+    suppressed = {
+        block.ident
+        for block in blocks
+        if any(small_text_artifact_near_visual(block, visual) for visual in visual_blocks)
+    }
+    if not suppressed:
+        return blocks
+    return [block for block in blocks if block.ident not in suppressed]
+
+
 def text_block_inside_text_block(inner_block: Block, outer_block: Block) -> bool:
-    if inner_block.ident == outer_block.ident or inner_block.label != "text" or outer_block.label != "text":
+    if inner_block.ident == outer_block.ident or inner_block.label not in TEXTUAL_LABELS or outer_block.label not in TEXTUAL_LABELS:
         return False
 
     inner_box = box_from_list(inner_block.bbox)
@@ -1970,7 +2125,7 @@ def text_block_inside_text_block(inner_block: Block, outer_block: Block) -> bool
 
 
 def suppress_nested_text_blocks(blocks: list[Block]) -> list[Block]:
-    text_blocks = [block for block in blocks if block.label == "text"]
+    text_blocks = [block for block in blocks if block.label in TEXTUAL_LABELS]
     if len(text_blocks) < 2:
         return blocks
 
@@ -2084,6 +2239,59 @@ def merged_classified_item(
         features=rounded_features,
     )
     return block, merged_box
+
+
+def split_text_columns_in_classified_blocks(
+    classified: list[tuple[Block, Box]],
+    image,
+    mask,
+    edges,
+    ann,
+    scale: float,
+    width: int,
+    height: int,
+) -> list[tuple[Block, Box]]:
+    result: list[tuple[Block, Box]] = []
+    for block, box in classified:
+        if block.label != "text":
+            result.append((block, box))
+            continue
+
+        pieces = split_multiline_text_box_recursive(mask, box, width, height)
+        if len(pieces) <= 1:
+            result.append((block, box))
+            continue
+
+        block_number = block.ident.split("_", 1)[0]
+        for index, piece in enumerate(pieces):
+            features = feature_dict(image, mask, edges, piece)
+            label, confidence = classify_features(ann, features)
+            if label != "text":
+                label = "text"
+                confidence = max(confidence, block.confidence)
+            orientation = infer_orientation(features)
+            original_box = Box(
+                int(round(piece.x / scale)),
+                int(round(piece.y / scale)),
+                int(round(piece.w / scale)),
+                int(round(piece.h / scale)),
+            )
+            suffix = chr(ord("a") + index) if index < 26 else str(index + 1)
+            result.append(
+                (
+                    Block(
+                        ident=f"{block_number}{suffix}_{safe_label(label)}",
+                        label=label,
+                        orientation=orientation,
+                        confidence=round(confidence, 4),
+                        bbox=original_box.to_list(),
+                        outline=None,
+                        features={key: round(float(value), 5) for key, value in features.items()},
+                    ),
+                    piece,
+                )
+            )
+    return sorted(result, key=lambda item: (item[1].y, item[1].x))
 
 
 def merge_connected_schematic_blocks(
@@ -2592,8 +2800,8 @@ def demote_textual_diagram_wrappers(classified: list[tuple[Block, Box]]) -> list
             demoted_features = dict(features)
             demoted_features["textual_diagram_wrapper_demote"] = 1.0
             block = Block(
-                ident=block.ident.replace("_diagram", "_text"),
-                label="text",
+                ident=block.ident.replace("_diagram", "_heading"),
+                label="heading",
                 orientation="horizontal",
                 confidence=block.confidence,
                 bbox=block.bbox,
@@ -2728,12 +2936,14 @@ def overlap_owner_score(block: Block, block_box: Box, overlap: Box, overlap_labe
     elif labels_are_visual_family(block.label, overlap_label):
         score += 1.0
 
-    if block.label == "text":
+    if block.label in TEXTUAL_LABELS:
         score += text_score * 2.2 + textline * 1.4
-        if overlap_label == "text":
+        if overlap_label in TEXTUAL_LABELS:
             score += 1.2
         if line_art > 0.45 and (hline > 0.04 or vline > 0.04):
             score -= 0.9
+        if block.label == "heading":
+            score += 0.4
     elif block.label == "schematic/circuit":
         score += line_art * 2.1 + (hline + vline) * 1.5 + component_signature * 2.4
         if saturation < 0.08:
@@ -3027,7 +3237,7 @@ def classify_blocks(
     for index, box in enumerate(boxes, start=1):
         features = feature_dict(image, mask, edges, box)
         label, confidence = classify_features(ann, features)
-        orientation = infer_orientation(features) if label == "text" else "unknown"
+        orientation = infer_orientation(features) if label in TEXTUAL_LABELS else "unknown"
         counters[label] = counters.get(label, 0) + 1
         ident = f"{index:03d}_{safe_label(label)}"
 
@@ -3052,6 +3262,9 @@ def classify_blocks(
             )
         )
 
+    classified = split_text_columns_in_classified_blocks(
+        classified, image, mask, edges, ann, scale=scale, width=analysis_w, height=analysis_h
+    )
     classified = merge_stacked_diagram_blocks(
         classified, image, mask, edges, ann, scale=scale, width=analysis_w, height=analysis_h
     )
@@ -3068,6 +3281,7 @@ def classify_blocks(
     all_blocks = suppress_nested_text_blocks([block for block, _ in classified])
     assign_visual_outlines(all_blocks)
     blocks = suppress_text_inside_schematics(all_blocks)
+    blocks = suppress_small_text_artifacts_near_visuals(blocks)
     blocks = suppress_small_artifacts_near_schematics(blocks)
     blocks = resolve_block_overlaps(blocks, image, mask, edges, ann, scale)
     attach_caption_candidates(blocks, [block for block in all_blocks if block.label == "text"])

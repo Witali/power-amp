@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Part Symbols Library</title>
+  <style>
+    body {
+      margin: 0;
+      font: 15px/1.5 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #18202a;
+      background: #fff;
+    }
+    main {
+      width: min(1180px, calc(100% - 32px));
+      margin: 28px auto 48px;
+    }
+    h1 { margin: 0 0 10px; font-size: 30px; }
+    p { margin: 0 0 12px; max-width: 860px; }
+    a { color: #1769aa; }
+    .links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 16px 0 22px;
+    }
+    .links a {
+      display: inline-flex;
+      min-height: 34px;
+      align-items: center;
+      padding: 6px 10px;
+      border: 1px solid #d7dde5;
+      border-radius: 6px;
+      text-decoration: none;
+      color: #18202a;
+    }
+    img {
+      display: block;
+      max-width: 100%;
+      height: auto;
+      border: 1px solid #d7dde5;
+      border-radius: 8px;
+      background: #fff;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Part Symbols Library</h1>
+    <p>Локальная библиотека условных графических обозначений для GOST/ESKD, IEC, ANSI и общих элементов. Каждый символ хранится отдельным SVG-файлом и проверяется SVG-линтером.</p>
+    <div class="links">
+      <a href="../index.html#symbols">Project index</a>
+      <a href="README.md">README</a>
+      <a href="symbol_sources.md">Symbol sources</a>
+      <a href="gost/part_symbols_gost.svg">GOST sheet</a>
+      <a href="iec/part_symbols_iec.svg">IEC sheet</a>
+      <a href="ansi/part_symbols_ansi.svg">ANSI sheet</a>
+    </div>
+    <a href="part_symbols.png"><img src="part_symbols.png" alt="Part symbols overview"></a>
+  </main>
+</body>
+</html>

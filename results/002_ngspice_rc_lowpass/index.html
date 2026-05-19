@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>002 ngspice rc lowpass</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #172033;
+      --muted: #647083;
+      --line: #d8dee8;
+      --panel: #f6f8fb;
+      --accent: #1665d8;
+      --image-max-width: 920px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--ink);
+      background: #ffffff;
+      line-height: 1.5;
+    }
+    header {
+      padding: 32px 28px 18px;
+      border-bottom: 1px solid var(--line);
+      background: var(--panel);
+    }
+    main {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 24px 28px 42px;
+    }
+    h1, h2, h3 {
+      margin: 0 0 12px;
+      line-height: 1.18;
+    }
+    h1 { font-size: 30px; }
+    h2 {
+      margin-top: 28px;
+      padding-top: 8px;
+      font-size: 22px;
+    }
+    h3 { font-size: 18px; }
+    p, ul { margin: 0 0 12px; }
+    code {
+      padding: 1px 5px;
+      border-radius: 4px;
+      background: #edf1f7;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 0.95em;
+    }
+    pre {
+      overflow: auto;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #101827;
+      color: #f7fafc;
+    }
+    pre code {
+      padding: 0;
+      background: transparent;
+      color: inherit;
+    }
+    a { color: var(--accent); }
+    .muted { color: var(--muted); }
+    .description {
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+    }
+    .description img {
+      display: block;
+      width: auto;
+      max-width: min(100%, var(--image-max-width));
+      height: auto;
+      margin: 12px auto 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+    }
+    .image-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 16px;
+      justify-items: center;
+    }
+    .image-card {
+      margin: 0;
+      width: 100%;
+      max-width: var(--image-max-width);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      overflow: hidden;
+    }
+    .image-card img {
+      display: block;
+      width: 100%;
+      height: auto;
+      background: #fff;
+    }
+    .image-card figcaption {
+      padding: 10px 12px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>002 ngspice rc lowpass</h1>
+    <p class="muted">Generated 2026-05-19 17:45:14 from local result files.</p>
+  </header>
+  <main>
+    <section><h2>Source Image</h2><p class="muted">No source images found.</p></section>
+    <section>
+      <h2>Description</h2>
+      <article class="description">
+        <h1>002 ngspice RC Low-Pass</h1>
+<p>This result verifies that the project can use a real open-source SPICE backend.</p>
+<p>Simulator:</p>
+<ul>
+<li>ngspice-46 console binary, installed locally under <code>local_tools/ngspice</code>.</li>
+<li>Runner: <code>tools/run_ngspice.ps1</code>.</li>
+</ul>
+<p>Circuit:</p>
+<ul>
+<li><code>Vin</code>: DC 0, AC 1, transient sine 1 V peak at 1 kHz</li>
+<li><code>R1</code>: 1 kOhm</li>
+<li><code>C1</code>: 100 nF</li>
+<li><code>Rload</code>: 100 kOhm</li>
+<li>Ideal cutoff without load interaction: 1591.5 Hz</li>
+</ul>
+<p>Files:</p>
+<ul>
+<li><code>schematic/rc_lowpass.svg</code></li>
+<li><code>schematic/rc_lowpass.png</code></li>
+<li><code>plots/ac_gain_phase.svg</code></li>
+<li><code>plots/ac_gain_phase.png</code></li>
+<li><code>plots/transient.svg</code></li>
+<li><code>plots/transient.png</code></li>
+<li><code>data/ngspice.log</code></li>
+<li><code>data/ac_response.csv</code></li>
+<li><code>data/transient.csv</code></li>
+</ul>
+<p>Run again:</p>
+<pre><code class="language-powershell">.\tools\run_ngspice.ps1 -Netlist .\spice_examples\001_rc_lowpass\rc_lowpass.cir -OutputDir .\results\002_ngspice_rc_lowpass\data
+python .\spice_examples\001_rc_lowpass\generate_assets.py
+.\tools\render_svg_png.ps1 -InputSvg .\results\002_ngspice_rc_lowpass\schematic\rc_lowpass.svg -OutputPng .\results\002_ngspice_rc_lowpass\schematic\rc_lowpass.png -Scale 2
+.\tools\render_svg_png.ps1 -InputSvg .\results\002_ngspice_rc_lowpass\plots\ac_gain_phase.svg -OutputPng .\results\002_ngspice_rc_lowpass\plots\ac_gain_phase.png -Scale 2
+.\tools\render_svg_png.ps1 -InputSvg .\results\002_ngspice_rc_lowpass\plots\transient.svg -OutputPng .\results\002_ngspice_rc_lowpass\plots\transient.png -Scale 2</code></pre>
+      </article>
+    </section>
+    <section><h2>Reconstructed Schematic</h2><div class="image-grid"><figure class="image-card">
+  <a href="schematic/rc_lowpass.png"><img src="schematic/rc_lowpass.png" alt="rc lowpass" loading="lazy"></a>
+  <figcaption>rc lowpass</figcaption>
+</figure></div></section>
+    <section><h2>Plots</h2><div class="image-grid"><figure class="image-card">
+  <a href="plots/ac_gain_phase.png"><img src="plots/ac_gain_phase.png" alt="ac gain phase" loading="lazy"></a>
+  <figcaption>ac gain phase</figcaption>
+</figure>
+<figure class="image-card">
+  <a href="plots/transient.png"><img src="plots/transient.png" alt="transient" loading="lazy"></a>
+  <figcaption>transient</figcaption>
+</figure></div></section>
+  </main>
+</body>
+</html>

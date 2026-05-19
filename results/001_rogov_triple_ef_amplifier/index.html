@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>001 rogov triple ef amplifier</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #172033;
+      --muted: #647083;
+      --line: #d8dee8;
+      --panel: #f6f8fb;
+      --accent: #1665d8;
+      --image-max-width: 920px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--ink);
+      background: #ffffff;
+      line-height: 1.5;
+    }
+    header {
+      padding: 32px 28px 18px;
+      border-bottom: 1px solid var(--line);
+      background: var(--panel);
+    }
+    main {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 24px 28px 42px;
+    }
+    h1, h2, h3 {
+      margin: 0 0 12px;
+      line-height: 1.18;
+    }
+    h1 { font-size: 30px; }
+    h2 {
+      margin-top: 28px;
+      padding-top: 8px;
+      font-size: 22px;
+    }
+    h3 { font-size: 18px; }
+    p, ul { margin: 0 0 12px; }
+    code {
+      padding: 1px 5px;
+      border-radius: 4px;
+      background: #edf1f7;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 0.95em;
+    }
+    pre {
+      overflow: auto;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #101827;
+      color: #f7fafc;
+    }
+    pre code {
+      padding: 0;
+      background: transparent;
+      color: inherit;
+    }
+    a { color: var(--accent); }
+    .muted { color: var(--muted); }
+    .description {
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+    }
+    .description img {
+      display: block;
+      width: auto;
+      max-width: min(100%, var(--image-max-width));
+      height: auto;
+      margin: 12px auto 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+    }
+    .image-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 16px;
+      justify-items: center;
+    }
+    .image-card {
+      margin: 0;
+      width: 100%;
+      max-width: var(--image-max-width);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      overflow: hidden;
+    }
+    .image-card img {
+      display: block;
+      width: 100%;
+      height: auto;
+      background: #fff;
+    }
+    .image-card figcaption {
+      padding: 10px 12px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>001 rogov triple ef amplifier</h1>
+    <p class="muted">Generated 2026-05-19 17:45:14 from local result files.</p>
+  </header>
+  <main>
+    <section><h2>Source Image</h2><p class="muted">No source images found.</p></section>
+    <section>
+      <h2>Description</h2>
+      <article class="description">
+        <h1>001 Rogov Triple EF Amplifier</h1>
+<p>Selected amplifier variant from the Radio.ru-inspired five-topology study.</p>
+<h2>What This Is</h2>
+<p>Topology: no-overall-feedback BJT amplifier using a Rogov-style triple emitter-follower output stage.</p>
+<p>Context:</p>
+<ul>
+<li>Supply rails: <code>+/-15 V</code></li>
+<li>Load: <code>8 ohm</code></li>
+<li>Nominal voltage gain: <code>10 V/V</code>, about <code>20 dB</code></li>
+<li>Output stage: three-stage complementary emitter follower</li>
+<li>Source basis: Rogov 2018 two-vs-three emitter-follower discussion plus Grechishkin 2013 BJT signal-path pattern</li>
+</ul>
+<h2>Sources</h2>
+<ul>
+<li>I. Rogov, &quot;Выходной каскад УМЗЧ - две или три ступени повторителя?&quot;, <code>Радио</code>, 2018 №12, p.27. Official Radio annual table of contents: <a href="https://ftp.radio.ru/pub/2018/12/2018.pdf">ftp.radio.ru/pub/2018/12/2018.pdf</a>.</li>
+<li>Local collected notes: <a href="../../study/amp_no_feedback_study/radio_ru_bjt_amplifier_knowledge.md">study/amp_no_feedback_study/radio_ru_bjt_amplifier_knowledge.md</a>.</li>
+</ul>
+<h2>Main Files</h2>
+<p>Schematic:</p>
+<ul>
+<li><code>schematic/rogov_triple_ef_amplifier.svg</code></li>
+<li><code>schematic/rogov_triple_ef_amplifier.png</code> (<code>3600x2160</code>)</li>
+</ul>
+<p>The current schematic redraw uses transistor symbols, rectangular resistor UGO style, explicit junction dots, and mostly orthogonal wiring for readability.</p>
+<p>Plots:</p>
+<ul>
+<li><code>plots/gain_vs_frequency.svg</code></li>
+<li><code>plots/gain_vs_frequency.png</code> (<code>1840x1000</code>)</li>
+<li><code>plots/thd_vs_frequency_5w.svg</code></li>
+<li><code>plots/thd_vs_frequency_5w.png</code> (<code>1840x1000</code>)</li>
+<li><code>plots/thd_vs_output_power_1khz.svg</code></li>
+<li><code>plots/thd_vs_output_power_1khz.png</code> (<code>1840x1000</code>)</li>
+</ul>
+<p>Data and reproduction:</p>
+<ul>
+<li><code>data/selected_amp_curve_data.csv</code></li>
+<li><code>data/spice_component_results.csv</code></li>
+<li><code>netlists/variant_02_rogov_triple_ef.cir</code></li>
+<li><code>source/*.py</code></li>
+</ul>
+<h2>Key Simulation Points</h2>
+<ul>
+<li><code>1 kHz, 1 W</code>: THD about <code>0.0014%</code></li>
+<li><code>1 kHz, 5 W</code>: THD about <code>0.0035%</code></li>
+<li>Clean power before <code>1%</code> THD in the local component screen: about <code>9 W / 8 ohm</code></li>
+<li>Estimated output resistance: about <code>0.165 ohm</code></li>
+<li>Estimated damping factor: about <code>48.5</code></li>
+</ul>
+<h2>Caveat</h2>
+<p>These files are generated from the local simplified SPICE-style component model and topology study. They are useful for comparison and documentation, but not a final hardware signoff. Before building hardware, rerun with real transistor models in ngspice/LTspice, add protection/SOA checks, and verify thermal stability and capacitive-load behavior.</p>
+      </article>
+    </section>
+    <section><h2>Reconstructed Schematic</h2><div class="image-grid"><figure class="image-card">
+  <a href="schematic/rogov_triple_ef_amplifier.png"><img src="schematic/rogov_triple_ef_amplifier.png" alt="rogov triple ef amplifier" loading="lazy"></a>
+  <figcaption>rogov triple ef amplifier</figcaption>
+</figure></div></section>
+    <section><h2>Plots</h2><div class="image-grid"><figure class="image-card">
+  <a href="plots/gain_vs_frequency.png"><img src="plots/gain_vs_frequency.png" alt="gain vs frequency" loading="lazy"></a>
+  <figcaption>gain vs frequency</figcaption>
+</figure>
+<figure class="image-card">
+  <a href="plots/thd_vs_frequency_5w.png"><img src="plots/thd_vs_frequency_5w.png" alt="thd vs frequency 5w" loading="lazy"></a>
+  <figcaption>thd vs frequency 5w</figcaption>
+</figure>
+<figure class="image-card">
+  <a href="plots/thd_vs_output_power_1khz.png"><img src="plots/thd_vs_output_power_1khz.png" alt="thd vs output power 1khz" loading="lazy"></a>
+  <figcaption>thd vs output power 1khz</figcaption>
+</figure></div></section>
+  </main>
+</body>
+</html>

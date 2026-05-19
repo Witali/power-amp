@@ -169,36 +169,37 @@
     <section id="results">
       <h2>Индивидуальные схемы и результаты</h2>
       <p class="subtle">Каждая папка в <code>results/</code> хранит схему, графики, данные моделирования, netlist и описание для одного эксперимента или схемы.</p>
+      <p class="subtle">Данные схемы были распознаны и заново отрисованы с помощью ИИ. Сгенерированы их SPICE-модели и просимулированы с помощью ngspice.</p>
       <div class="grid">
 
         <article class="card result-card">
-          <a class="thumb-link" href="results/001_rogov_triple_ef_amplifier/schematic/rogov_triple_ef_amplifier.png"><img src="results/001_rogov_triple_ef_amplifier/schematic/rogov_triple_ef_amplifier.png" alt="001 Rogov Triple EF Amplifier schematic"></a>
+          <a class="thumb-link" href="results/001_rogov_triple_ef_amplifier/index.html"><img src="results/001_rogov_triple_ef_amplifier/schematic/rogov_triple_ef_amplifier.png" alt="001 Rogov Triple EF Amplifier schematic"></a>
           <div class="card-body">
             <h3>001 Rogov Triple EF Amplifier</h3>
             <p>Selected amplifier variant from the Radio.ru-inspired five-topology study.</p>
             <p class="meta">plots: 3 · netlists: 1 · data files: 2</p>
             <div class="links">
-              <a href="results/001_rogov_triple_ef_amplifier/README.md">Open result</a>
+              <a href="results/001_rogov_triple_ef_amplifier/index.html">Open result</a>
               <a href="results/001_rogov_triple_ef_amplifier/README.md">README</a>
             </div>
           </div>
         </article>
 
         <article class="card result-card">
-          <a class="thumb-link" href="results/002_ngspice_rc_lowpass/schematic/rc_lowpass.png"><img src="results/002_ngspice_rc_lowpass/schematic/rc_lowpass.png" alt="002 ngspice RC Low-Pass schematic"></a>
+          <a class="thumb-link" href="results/002_ngspice_rc_lowpass/index.html"><img src="results/002_ngspice_rc_lowpass/schematic/rc_lowpass.png" alt="002 ngspice RC Low-Pass schematic"></a>
           <div class="card-body">
             <h3>002 ngspice RC Low-Pass</h3>
             <p>This result verifies that the project can use a real open-source SPICE backend.</p>
             <p class="meta">plots: 2 · netlists: 0 · data files: 3</p>
             <div class="links">
-              <a href="results/002_ngspice_rc_lowpass/README.md">Open result</a>
+              <a href="results/002_ngspice_rc_lowpass/index.html">Open result</a>
               <a href="results/002_ngspice_rc_lowpass/README.md">README</a>
             </div>
           </div>
         </article>
 
         <article class="card result-card">
-          <a class="thumb-link" href="results/003_radiostorage_shema_1804_6/schematic/reconstructed_amplifier_bootstrap.png"><img src="results/003_radiostorage_shema_1804_6/schematic/reconstructed_amplifier_bootstrap.png" alt="003 RadioStorage shema-1804-6 Bootstrap Reconstruction schematic"></a>
+          <a class="thumb-link" href="results/003_radiostorage_shema_1804_6/index.html"><img src="results/003_radiostorage_shema_1804_6/schematic/reconstructed_amplifier_bootstrap.png" alt="003 RadioStorage shema-1804-6 Bootstrap Reconstruction schematic"></a>
           <div class="card-body">
             <h3>003 RadioStorage shema-1804-6 Bootstrap Reconstruction</h3>
             <p>This folder contains a local reconstruction of the amplifier schematic from:</p>
@@ -206,6 +207,19 @@
             <div class="links">
               <a href="results/003_radiostorage_shema_1804_6/index.html">Open result</a>
               <a href="results/003_radiostorage_shema_1804_6/README.md">README</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="card result-card">
+          <a class="thumb-link" href="results/004_radiostorage_shema_1804_6_darlington/index.html"><img src="results/004_radiostorage_shema_1804_6_darlington/schematic/reconstructed_amplifier_darlington.png" alt="004 RadioStorage shema-1804-6 Upper Darlington Variant schematic"></a>
+          <div class="card-body">
+            <h3>004 RadioStorage shema-1804-6 Upper Darlington Variant</h3>
+            <p>This folder is derived from `003_radiostorage_shema_1804_6`. The circuit keeps the bootstrap voltage-addition network and adds an extra NPN transistor in the upper output arm, so `VT2A` and `VT2B` work as a Darlington emitter follower.</p>
+            <p class="meta">plots: 7 · netlists: 1 · data files: 1221</p>
+            <div class="links">
+              <a href="results/004_radiostorage_shema_1804_6_darlington/index.html">Open result</a>
+              <a href="results/004_radiostorage_shema_1804_6_darlington/README.md">README</a>
             </div>
           </div>
         </article>
@@ -230,7 +244,7 @@
             <span class="tag">20 regression pages</span>
           </div>
         </div>
-        <a class="thumb-link" href="study/opencv_layout_reports/latest/detected/b.2000-02.037/preview.png">
+        <a class="thumb-link" href="study/opencv_layout_reports/latest/index.html">
           <img src="study/opencv_layout_reports/latest/detected/b.2000-02.037/preview.png" alt="OpenCV page layout preview">
         </a>
       </div>
@@ -254,7 +268,7 @@
             <li>Drawing priorities: preserve symbol proportions, avoid overlaps, then reduce wire length.</li>
           </ul>
         </div>
-        <a class="thumb-link" href="part_symbols/part_symbols.png">
+        <a class="thumb-link" href="part_symbols/index.html">
           <img src="part_symbols/part_symbols.png" alt="Part symbols overview">
         </a>
       </div>

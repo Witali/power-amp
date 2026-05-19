@@ -5,11 +5,11 @@
     "source": "../../opencv_layout_regression_pages/sources/b.1997-04.018.jpg",
     "layout": "detected/b.1997-04.018/layout.json",
     "preview": "detected/b.1997-04.018/preview.png",
-    "block_count": 11,
+    "block_count": 12,
     "counts": {
       "schematic": 2,
-      "text": 8,
-      "image": 1
+      "text": 9,
+      "heading": 1
     },
     "warning_count": 12
   },
@@ -21,11 +21,12 @@
     "preview": "detected/b.1997-12.015/preview.png",
     "block_count": 11,
     "counts": {
-      "text": 9,
+      "heading": 2,
+      "text": 7,
       "image": 1,
       "schematic": 1
     },
-    "warning_count": 9
+    "warning_count": 12
   },
   {
     "id": "b.1997-12.016",
@@ -48,10 +49,11 @@
     "preview": "detected/b.1998-12.018/preview.png",
     "block_count": 17,
     "counts": {
-      "text": 16,
+      "heading": 2,
+      "text": 14,
       "schematic": 1
     },
-    "warning_count": 15
+    "warning_count": 17
   },
   {
     "id": "b.1999-10.014",
@@ -72,13 +74,14 @@
     "source": "../../opencv_layout_regression_pages/sources/b.1999-10.017.jpg",
     "layout": "detected/b.1999-10.017/layout.json",
     "preview": "detected/b.1999-10.017/preview.png",
-    "block_count": 13,
+    "block_count": 14,
     "counts": {
       "image": 1,
-      "text": 10,
+      "heading": 2,
+      "text": 9,
       "schematic": 2
     },
-    "warning_count": 7
+    "warning_count": 9
   },
   {
     "id": "b.1999-10.018",
@@ -88,12 +91,12 @@
     "preview": "detected/b.1999-10.018/preview.png",
     "block_count": 14,
     "counts": {
-      "image": 1,
-      "text": 11,
-      "schematic": 1,
-      "table": 1
+      "image": 2,
+      "heading": 2,
+      "text": 9,
+      "schematic": 1
     },
-    "warning_count": 6
+    "warning_count": 10
   },
   {
     "id": "b.2000-02.036",
@@ -117,10 +120,11 @@
     "preview": "detected/b.2000-02.037/preview.png",
     "block_count": 18,
     "counts": {
-      "text": 16,
+      "heading": 5,
+      "text": 11,
       "schematic": 2
     },
-    "warning_count": 11
+    "warning_count": 16
   },
   {
     "id": "b.2000-09.011",
@@ -131,10 +135,11 @@
     "block_count": 9,
     "counts": {
       "image": 1,
-      "text": 7,
+      "text": 6,
+      "heading": 1,
       "schematic": 1
     },
-    "warning_count": 7
+    "warning_count": 8
   },
   {
     "id": "b.2000-09.012",
@@ -145,10 +150,11 @@
     "block_count": 13,
     "counts": {
       "image": 1,
-      "text": 11,
+      "text": 9,
+      "heading": 2,
       "schematic": 1
     },
-    "warning_count": 9
+    "warning_count": 14
   },
   {
     "id": "b.2000-10.014",
@@ -172,11 +178,12 @@
     "preview": "detected/b.2000-10.015/preview.png",
     "block_count": 18,
     "counts": {
-      "text": 15,
+      "text": 11,
+      "heading": 4,
       "image": 2,
       "schematic": 1
     },
-    "warning_count": 14
+    "warning_count": 18
   },
   {
     "id": "b.2000-11.011",
@@ -184,11 +191,12 @@
     "source": "../../opencv_layout_regression_pages/sources/b.2000-11.011.jpg",
     "layout": "detected/b.2000-11.011/layout.json",
     "preview": "detected/b.2000-11.011/preview.png",
-    "block_count": 12,
+    "block_count": 11,
     "counts": {
-      "image": 3,
-      "text": 8,
-      "diagram": 1
+      "heading": 2,
+      "text": 7,
+      "image": 1,
+      "schematic": 1
     },
     "warning_count": 13
   },
@@ -226,15 +234,15 @@
     "source": "../../opencv_layout_regression_pages/sources/b.2000-01.042.jpg",
     "layout": "detected/b.2000-01.042/layout.json",
     "preview": "detected/b.2000-01.042/preview.png",
-    "block_count": 17,
+    "block_count": 15,
     "counts": {
-      "image": 2,
-      "text": 11,
+      "image": 3,
+      "text": 8,
       "pcb": 1,
       "schematic": 2,
-      "table": 1
+      "heading": 1
     },
-    "warning_count": 14
+    "warning_count": 17
   },
   {
     "id": "b.2000-01.043",

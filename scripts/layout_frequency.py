@@ -25,96 +25,55 @@ except ImportError:
     np = None  # type: ignore
     OPENCV_AVAILABLE = False
 
+try:
+    from scripts import layout_config  # type: ignore
+except ImportError:
+    import layout_config  # type: ignore
 
-LABEL_COLORS = {
-    "text": (52, 168, 83),
-    "image": (66, 133, 244),
-    "schematic/circuit": (234, 67, 53),
-    "diagram": (251, 188, 5),
-    "pcb": (0, 170, 180),
-    "table": (171, 71, 188),
-    "other": (128, 128, 128),
-    "background": (190, 190, 190),
-}
-HINT_LABELS = {"text", "image", "schematic/circuit", "diagram", "pcb", "table", "other"}
-DEFAULT_TILE_SIZE = 32
-DEFAULT_STRIDE = 32
-TEXT_ROW_PERIOD_BAND = (8.0, 44.0)
-TEXT_COLUMN_PERIOD_BAND = (4.0, 28.0)
+
+LABEL_COLORS = layout_config.LABEL_COLORS_BGR
+HINT_LABELS = set(layout_config.LAYOUT_CLASS_NAMES)
+DEFAULT_TILE_SIZE = layout_config.DEFAULT_TILE_SIZE
+DEFAULT_STRIDE = layout_config.DEFAULT_STRIDE
+TEXT_ROW_PERIOD_BAND = layout_config.TEXT_ROW_PERIOD_BAND
+TEXT_COLUMN_PERIOD_BAND = layout_config.TEXT_COLUMN_PERIOD_BAND
 
 # Calibrated on the locally reviewed archive.radio.ru page set under
 # study/layout_detection_marked_pages. The measured p05..p95 text row period
 # range was about 19..38 px at the 1800 px analysis scale; the band above keeps
 # roughly 15-20% headroom and the rules below prevent line art from becoming
 # text purely because circuit labels are also periodic.
-BACKGROUND_MAX_INK = 0.010
-BACKGROUND_MAX_GRAY_STD = 0.080
-STRONG_TEXT_ROW_PERIOD = 0.68
-STRONG_TEXT_ROW_ENTROPY_MAX = 0.66
-TEXT_ROW_PERIOD = 0.38
-TEXT_ROW_ENTROPY_MAX = 0.70
-TEXT_MAX_LINE_BALANCE = 0.35
-TEXT_MAX_LINE_DENSITY = 0.22
-TEXT_MAX_SATURATION = 0.34
-LINE_ART_MAX_INK = 0.26
-LINE_ART_MIN_ENTROPY = 0.56
-LINE_ART_MIN_LINE_DENSITY = 0.045
-LINE_ART_MIN_BALANCE = 0.12
-LINE_ART_MAX_SATURATION = 0.16
-IMAGE_STRONG_SATURATION = 0.24
-IMAGE_MEDIUM_SATURATION = 0.15
-IMAGE_MIN_GRAY_STD = 0.52
-IMAGE_MIN_ENTROPY = 0.34
-LUMA_HIST_BINS = 16
-SATURATION_HIST_BINS = 8
-HUE_HIST_BINS = 12
-TEXT_MIN_LUMA_BIMODAL = 0.38
-TEXT_MAX_LUMA_MID_FRACTION = 0.42
-IMAGE_MIN_LUMA_ENTROPY = 0.52
-IMAGE_MIN_LUMA_MID_FRACTION = 0.32
-SCHEMATIC_MAX_DARK_LIGHT_RATIO = 0.24
-TEXT_MIN_DARK_LIGHT_RATIO = 0.03
-TEXT_MAX_DARK_LIGHT_RATIO = 0.34
-CLUSTER_FEATURE_KEYS = (
-    "ink_density",
-    "gray_std",
-    "saturation_p80",
-    "saturation_high_fraction",
-    "color_pixel_fraction",
-    "luma_dark_light_ratio",
-    "luma_mid_fraction",
-    "luma_hist_entropy",
-    "row_period_score",
-    "column_period_score",
-    "row_entropy",
-    "column_entropy",
-    "hline_density",
-    "vline_density",
-    "line_balance",
-)
-CLUSTER_FEATURE_WEIGHTS = {
-    "ink_density": 1.10,
-    "gray_std": 0.80,
-    "saturation_p80": 0.80,
-    "saturation_high_fraction": 0.70,
-    "color_pixel_fraction": 0.70,
-    "luma_dark_light_ratio": 1.15,
-    "luma_mid_fraction": 0.95,
-    "luma_hist_entropy": 0.85,
-    "row_period_score": 1.10,
-    "column_period_score": 0.70,
-    "row_entropy": 0.90,
-    "column_entropy": 0.75,
-    "hline_density": 1.10,
-    "vline_density": 1.10,
-    "line_balance": 0.90,
-}
-CLUSTER_DISTANCE_THRESHOLDS = {
-    "text": 0.46,
-    "line_art": 0.58,
-    "image": 0.66,
-    "other": 0.42,
-}
+BACKGROUND_MAX_INK = layout_config.BACKGROUND_MAX_INK
+BACKGROUND_MAX_GRAY_STD = layout_config.BACKGROUND_MAX_GRAY_STD
+STRONG_TEXT_ROW_PERIOD = layout_config.STRONG_TEXT_ROW_PERIOD
+STRONG_TEXT_ROW_ENTROPY_MAX = layout_config.STRONG_TEXT_ROW_ENTROPY_MAX
+TEXT_ROW_PERIOD = layout_config.TEXT_ROW_PERIOD
+TEXT_ROW_ENTROPY_MAX = layout_config.TEXT_ROW_ENTROPY_MAX
+TEXT_MAX_LINE_BALANCE = layout_config.TEXT_MAX_LINE_BALANCE
+TEXT_MAX_LINE_DENSITY = layout_config.TEXT_MAX_LINE_DENSITY
+TEXT_MAX_SATURATION = layout_config.TEXT_MAX_SATURATION
+LINE_ART_MAX_INK = layout_config.LINE_ART_MAX_INK
+LINE_ART_MIN_ENTROPY = layout_config.LINE_ART_MIN_ENTROPY
+LINE_ART_MIN_LINE_DENSITY = layout_config.LINE_ART_MIN_LINE_DENSITY
+LINE_ART_MIN_BALANCE = layout_config.LINE_ART_MIN_BALANCE
+LINE_ART_MAX_SATURATION = layout_config.LINE_ART_MAX_SATURATION
+IMAGE_STRONG_SATURATION = layout_config.IMAGE_STRONG_SATURATION
+IMAGE_MEDIUM_SATURATION = layout_config.IMAGE_MEDIUM_SATURATION
+IMAGE_MIN_GRAY_STD = layout_config.IMAGE_MIN_GRAY_STD
+IMAGE_MIN_ENTROPY = layout_config.IMAGE_MIN_ENTROPY
+LUMA_HIST_BINS = layout_config.LUMA_HIST_BINS
+SATURATION_HIST_BINS = layout_config.SATURATION_HIST_BINS
+HUE_HIST_BINS = layout_config.HUE_HIST_BINS
+TEXT_MIN_LUMA_BIMODAL = layout_config.TEXT_MIN_LUMA_BIMODAL
+TEXT_MAX_LUMA_MID_FRACTION = layout_config.TEXT_MAX_LUMA_MID_FRACTION
+IMAGE_MIN_LUMA_ENTROPY = layout_config.IMAGE_MIN_LUMA_ENTROPY
+IMAGE_MIN_LUMA_MID_FRACTION = layout_config.IMAGE_MIN_LUMA_MID_FRACTION
+SCHEMATIC_MAX_DARK_LIGHT_RATIO = layout_config.SCHEMATIC_MAX_DARK_LIGHT_RATIO
+TEXT_MIN_DARK_LIGHT_RATIO = layout_config.TEXT_MIN_DARK_LIGHT_RATIO
+TEXT_MAX_DARK_LIGHT_RATIO = layout_config.TEXT_MAX_DARK_LIGHT_RATIO
+CLUSTER_FEATURE_KEYS = layout_config.CLUSTER_FEATURE_KEYS
+CLUSTER_FEATURE_WEIGHTS = layout_config.CLUSTER_FEATURE_WEIGHTS
+CLUSTER_DISTANCE_THRESHOLDS = layout_config.CLUSTER_DISTANCE_THRESHOLDS
 
 
 def require_dependencies() -> None:

@@ -6,6 +6,7 @@
   "analysis_scale": 0.5034965034965035,
   "classes": [
     "text",
+    "heading",
     "image",
     "schematic/circuit",
     "diagram",
@@ -305,8 +306,48 @@
   ],
   "frequency_warnings": [
     {
-      "block": "006_text",
-      "block_label": "text",
+      "block": "001_heading",
+      "block_label": "heading",
+      "hint_label": "text",
+      "hint_confidence": 0.79451,
+      "block_overlap": 1.0,
+      "hint_overlap": 0.00477,
+      "bbox": [
+        1956,
+        73,
+        463,
+        83
+      ],
+      "hint_bbox": [
+        64,
+        64,
+        2437,
+        3305
+      ]
+    },
+    {
+      "block": "006_heading",
+      "block_label": "heading",
+      "hint_label": "text",
+      "hint_confidence": 0.79451,
+      "block_overlap": 1.0,
+      "hint_overlap": 0.01839,
+      "bbox": [
+        105,
+        2008,
+        1527,
+        97
+      ],
+      "hint_bbox": [
+        64,
+        64,
+        2437,
+        3305
+      ]
+    },
+    {
+      "block": "006_heading",
+      "block_label": "heading",
       "hint_label": "schematic/circuit",
       "hint_confidence": 0.92,
       "block_overlap": 0.30486,
@@ -467,8 +508,8 @@
       ]
     },
     {
-      "block": "006_text",
-      "block_label": "text",
+      "block": "006_heading",
+      "block_label": "heading",
       "hint_label": "schematic/circuit",
       "hint_confidence": 0.92,
       "block_overlap": 0.30486,
@@ -610,10 +651,10 @@
   "preview": "preview.png",
   "blocks": [
     {
-      "ident": "001_text",
-      "label": "text",
+      "ident": "001_heading",
+      "label": "heading",
       "orientation": "horizontal",
-      "confidence": 0.8858,
+      "confidence": 0.5675,
       "bbox": [
         1956,
         73,
@@ -661,7 +702,7 @@
       "ident": "002_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.9111,
+      "confidence": 0.8741,
       "bbox": [
         83,
         224,
@@ -709,7 +750,7 @@
       "ident": "003_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.9137,
+      "confidence": 0.8745,
       "bbox": [
         862,
         224,
@@ -757,7 +798,7 @@
       "ident": "004_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.9117,
+      "confidence": 0.8742,
       "bbox": [
         1648,
         226,
@@ -805,7 +846,7 @@
       "ident": "005_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.8895,
+      "confidence": 0.871,
       "bbox": [
         1670,
         2002,
@@ -850,10 +891,10 @@
       "caption_candidates": null
     },
     {
-      "ident": "006_text",
-      "label": "text",
+      "ident": "006_heading",
+      "label": "heading",
       "orientation": "horizontal",
-      "confidence": 0.8496,
+      "confidence": 0.5677,
       "bbox": [
         105,
         2008,
@@ -901,7 +942,7 @@
       "ident": "007_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.9178,
+      "confidence": 0.8579,
       "bbox": [
         105,
         2113,
@@ -949,7 +990,7 @@
       "ident": "008_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.8896,
+      "confidence": 0.8689,
       "bbox": [
         105,
         2238,
@@ -997,7 +1038,7 @@
       "ident": "009_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.8921,
+      "confidence": 0.8707,
       "bbox": [
         866,
         2238,
@@ -1045,7 +1086,7 @@
       "ident": "010_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.7629,
+      "confidence": 0.6998,
       "bbox": [
         1670,
         2735,
@@ -1093,7 +1134,7 @@
       "ident": "011_schematic_circuit",
       "label": "schematic/circuit",
       "orientation": "unknown",
-      "confidence": 0.6246,
+      "confidence": 0.6117,
       "bbox": [
         99,
         2796,
@@ -1172,7 +1213,7 @@
       "ident": "012_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.7643,
+      "confidence": 0.6801,
       "bbox": [
         1670,
         2856,
@@ -1220,7 +1261,7 @@
       "ident": "013_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.8904,
+      "confidence": 0.8574,
       "bbox": [
         1670,
         2933,
@@ -1288,7 +1329,7 @@
       "ident": "014_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.9641,
+      "confidence": 0.9267,
       "bbox": [
         1670,
         3162,
@@ -1336,7 +1377,7 @@
       "ident": "015_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.9636,
+      "confidence": 0.9262,
       "bbox": [
         1670,
         3277,
@@ -1404,7 +1445,7 @@
       "ident": "016_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.962,
+      "confidence": 0.922,
       "bbox": [
         95,
         3466,
@@ -1452,7 +1493,7 @@
       "ident": "017_text",
       "label": "text",
       "orientation": "vertical",
-      "confidence": 0.7307,
+      "confidence": 0.7016,
       "bbox": [
         2310,
         3468,

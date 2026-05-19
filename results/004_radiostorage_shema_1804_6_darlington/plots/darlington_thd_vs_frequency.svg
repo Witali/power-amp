@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="520" viewBox="0 0 920 520">
+<defs>
+<style>
+.wire{stroke:#111;stroke-width:2.6;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.thin{stroke:#a7b0bd;stroke-width:1.2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.axis{stroke:#111;stroke-width:1.4;fill:none}
+.blue{stroke:#1665d8;stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.green{stroke:#13795b;stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.orange{stroke:#b54708;stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.node{fill:#111;stroke:none}
+</style>
+</defs>
+<rect width="100%" height="100%" fill="#fff"/>
+<text x="76" y="36" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" text-anchor="start" fill="#111">Darlington THD vs frequency at fixed output power</text>
+<rect x="76" y="60" width="812" height="396" fill="#fff" stroke="#111" stroke-width="1.4"/>
+<line x1="76" y1="60" x2="76" y2="456" class="thin"/>
+<text x="76" y="479" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="middle" fill="#111">20</text>
+<line x1="183.709" y1="60" x2="183.709" y2="456" class="thin"/>
+<text x="183.709" y="479" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="middle" fill="#111">50</text>
+<line x1="265.188" y1="60" x2="265.188" y2="456" class="thin"/>
+<text x="265.188" y="479" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="middle" fill="#111">100</text>
+<line x1="535.855" y1="60" x2="535.855" y2="456" class="thin"/>
+<text x="535.855" y="479" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="middle" fill="#111">1k</text>
+<line x1="806.521" y1="60" x2="806.521" y2="456" class="thin"/>
+<text x="806.521" y="479" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="middle" fill="#111">10k</text>
+<line x1="888" y1="60" x2="888" y2="456" class="thin"/>
+<text x="888" y="479" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="middle" fill="#111">20k</text>
+<line x1="76" y1="456" x2="888" y2="456" class="thin"/>
+<text x="66" y="460" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="end" fill="#111">0</text>
+<line x1="76" y1="357" x2="888" y2="357" class="thin"/>
+<text x="66" y="361" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="end" fill="#111">25</text>
+<line x1="76" y1="258" x2="888" y2="258" class="thin"/>
+<text x="66" y="262" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="end" fill="#111">50</text>
+<line x1="76" y1="159" x2="888" y2="159" class="thin"/>
+<text x="66" y="163" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="end" fill="#111">75</text>
+<line x1="76" y1="60" x2="888" y2="60" class="thin"/>
+<text x="66" y="64" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="end" fill="#111">100</text>
+<polyline points="76.00,279.78 183.71,274.40 265.19,279.41 346.67,278.24 454.38,273.43 535.85,258.72 617.33,233.44 725.04,279.71 806.52,290.09 888.00,264.28" fill="none" stroke="#13795b" stroke-width="3" stroke-linejoin="round"/>
+<polyline points="76.00,218.60 183.71,217.39 265.19,215.38 346.67,222.98 454.38,213.21 535.85,191.00 617.33,185.78 725.04,218.07 806.52,239.99 888.00,239.25" fill="none" stroke="#1665d8" stroke-width="3" stroke-linejoin="round"/>
+<polyline points="76.00,186.99 183.71,181.88 265.19,185.55 346.67,192.08 454.38,178.86 535.85,163.56 617.33,164.53 725.04,194.24 806.52,224.24 888.00,375.83" fill="none" stroke="#b54708" stroke-width="3" stroke-linejoin="round"/>
+<rect x="670" y="62" width="190" height="96" rx="4" ry="4" fill="#fff" fill-opacity="0.82" stroke="#111" stroke-width="1"/>
+<line x1="682" y1="78" x2="718" y2="78" stroke="#13795b" stroke-width="3"/>
+<text x="728" y="83" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="start" fill="#111">20 mW</text>
+<line x1="682" y1="104" x2="718" y2="104" stroke="#1665d8" stroke-width="3"/>
+<text x="728" y="109" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="start" fill="#111">50 mW</text>
+<line x1="682" y1="130" x2="718" y2="130" stroke="#b54708" stroke-width="3"/>
+<text x="728" y="135" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="start" fill="#111">100 mW</text>
+<text x="460" y="502" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" text-anchor="middle" fill="#111">Frequency, Hz</text>
+<text x="22" y="260" font-family="Arial, Helvetica, sans-serif" font-size="14" text-anchor="middle" fill="#111" transform="rotate(-90 22 260)">THD, %</text>
+</svg>

@@ -6,6 +6,7 @@
   "analysis_scale": 0.5392450569203115,
   "classes": [
     "text",
+    "heading",
     "image",
     "schematic/circuit",
     "diagram",
@@ -103,14 +104,49 @@
       "ident": "001_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.9227,
+      "confidence": 0.8656,
       "bbox": [
         1556,
         32,
         745,
         3275
       ],
-      "outline": null,
+      "outline": [
+        [
+          [
+            1556,
+            32
+          ],
+          [
+            1556,
+            1067
+          ],
+          [
+            1563,
+            1067
+          ],
+          [
+            1563,
+            2992
+          ],
+          [
+            1556,
+            2992
+          ],
+          [
+            1556,
+            3307
+          ],
+          [
+            2301,
+            3307
+          ],
+          [
+            2301,
+            32
+          ]
+        ]
+      ],
       "features": {
         "width_ratio": 0.29822,
         "height_ratio": 0.98111,
@@ -141,7 +177,8 @@
         "pcb_trace_density": 0.05184,
         "pcb_pad_density": 1.0,
         "pcb_board_outline_score": 0.0,
-        "pcb_signature_score": 0.29733
+        "pcb_signature_score": 0.29733,
+        "overlap_resolution": 1.0
       },
       "crop_path": null,
       "figure_ref": null,
@@ -151,7 +188,7 @@
       "ident": "002_image",
       "label": "image",
       "orientation": "unknown",
-      "confidence": 0.8321,
+      "confidence": 0.8208,
       "bbox": [
         2301,
         32,
@@ -218,7 +255,7 @@
       "ident": "003_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.9137,
+      "confidence": 0.8464,
       "bbox": [
         30,
         37,
@@ -266,7 +303,7 @@
       "ident": "004_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.9171,
+      "confidence": 0.8727,
       "bbox": [
         20,
         1068,
@@ -314,7 +351,7 @@
       "ident": "005_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.9169,
+      "confidence": 0.8705,
       "bbox": [
         792,
         1068,
@@ -332,11 +369,11 @@
             2993
           ],
           [
-            1555,
+            1563,
             2993
           ],
           [
-            1555,
+            1563,
             1068
           ]
         ]
@@ -382,7 +419,7 @@
       "ident": "006_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.8917,
+      "confidence": 0.8627,
       "bbox": [
         794,
         2986,

@@ -6,6 +6,7 @@
   "analysis_scale": 0.5392450569203115,
   "classes": [
     "text",
+    "heading",
     "image",
     "schematic/circuit",
     "diagram",
@@ -501,7 +502,7 @@
       "ident": "001_image",
       "label": "image",
       "orientation": "unknown",
-      "confidence": 0.8433,
+      "confidence": 0.7919,
       "bbox": [
         2350,
         0,
@@ -568,7 +569,7 @@
       "ident": "002_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.9014,
+      "confidence": 0.8702,
       "bbox": [
         844,
         82,
@@ -616,7 +617,7 @@
       "ident": "003_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.9035,
+      "confidence": 0.8716,
       "bbox": [
         76,
         83,
@@ -664,7 +665,7 @@
       "ident": "004_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.8973,
+      "confidence": 0.873,
       "bbox": [
         1612,
         83,
@@ -712,7 +713,7 @@
       "ident": "005_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.6757,
+      "confidence": 0.6575,
       "bbox": [
         195,
         1148,
@@ -760,7 +761,7 @@
       "ident": "006_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.6727,
+      "confidence": 0.6485,
       "bbox": [
         844,
         1150,
@@ -828,7 +829,7 @@
       "ident": "007_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.6744,
+      "confidence": 0.6498,
       "bbox": [
         76,
         1152,
@@ -896,7 +897,7 @@
       "ident": "008_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.8994,
+      "confidence": 0.8677,
       "bbox": [
         1612,
         1170,
@@ -944,7 +945,7 @@
       "ident": "009_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.7496,
+      "confidence": 0.6598,
       "bbox": [
         65,
         1270,
@@ -992,7 +993,7 @@
       "ident": "010_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.9243,
+      "confidence": 0.8513,
       "bbox": [
         836,
         1884,
@@ -1040,7 +1041,7 @@
       "ident": "011_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.9524,
+      "confidence": 0.9017,
       "bbox": [
         76,
         1890,
@@ -1088,7 +1089,7 @@
       "ident": "012_schematic_circuit",
       "label": "schematic/circuit",
       "orientation": "unknown",
-      "confidence": 0.9749,
+      "confidence": 0.9626,
       "bbox": [
         493,
         2090,

@@ -18,7 +18,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from scripts import detect_page_layout  # noqa: E402
+from scripts import detect_page_layout, layout_config  # noqa: E402
 
 
 DEFAULT_MANIFEST = PROJECT_ROOT / "study" / "opencv_layout_regression_pages" / "manifest.json"
@@ -62,7 +62,7 @@ def count_blocks(blocks: list[dict[str, Any]]) -> Counter[str]:
 def counts_text(counts: Counter[str]) -> str:
     if not counts:
         return "no blocks"
-    order = ["text", "schematic", "pcb", "diagram", "image", "table", "other"]
+    order = layout_config.LAYOUT_REPORT_LABEL_ORDER
     parts = [f"{label}: {counts[label]}" for label in order if counts.get(label)]
     parts.extend(f"{label}: {value}" for label, value in sorted(counts.items()) if label not in order)
     return ", ".join(parts)
@@ -83,8 +83,8 @@ def run_detector(manifest: dict[str, Any], out_dir: Path, max_pages: int) -> lis
         shutil.rmtree(layout_dir)
     layout_dir.mkdir(parents=True, exist_ok=True)
 
-    preview_width = int(manifest.get("preview_width", 1100))
-    frequency_hints = str(manifest.get("frequency_hints", "validate"))
+    preview_width = int(manifest.get("preview_width", layout_config.LAYOUT_REPORT_DEFAULT_PREVIEW_WIDTH))
+    frequency_hints = str(manifest.get("frequency_hints", layout_config.LAYOUT_REPORT_DEFAULT_FREQUENCY_HINT_MODE))
     pages = list(manifest["pages"])
     if max_pages > 0:
         pages = pages[:max_pages]
@@ -137,7 +137,7 @@ def report_notes(entries: list[dict[str, Any]]) -> list[str]:
     no_visuals = [
         entry["id"]
         for entry in entries
-        if not any(int(entry["counts"].get(label, 0)) for label in ("schematic", "pcb", "diagram", "image", "table"))
+        if not any(int(entry["counts"].get(label, 0)) for label in layout_config.LAYOUT_REPORT_VISUAL_LABELS)
     ]
     notes.append(f"Processed {len(entries)} page(s).")
     if high_other:

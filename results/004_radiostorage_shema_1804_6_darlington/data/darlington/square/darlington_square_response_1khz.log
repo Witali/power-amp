@@ -1,0 +1,34 @@
+Note: vin: dc value used for op instead of transient time=0 value.
+
+Note: No compatibility mode selected!
+
+
+Circuit: * radiostorage shema-1804-6 single-supply bjt audio amplifier, upper darlington variant
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vcc                                         12
+vin                                       -0.5
+b_in                                  0.891408
+out                                    6.15986
+drive                                  5.48994
+e_vt1                                 0.230543
+boot                                   10.9194
+b_top                                  7.44612
+d_mid1                                 6.79406
+d_mid2                                   6.142
+b_upper                                6.83527
+load                                         0
+vin#branch                                   0
+vcc#branch                          -0.0209219
+
+
+No. of Data Rows : 2141
+ngspice-46 done

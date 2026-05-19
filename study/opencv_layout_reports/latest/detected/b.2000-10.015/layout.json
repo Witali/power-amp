@@ -6,6 +6,7 @@
   "analysis_scale": 0.5392450569203115,
   "classes": [
     "text",
+    "heading",
     "image",
     "schematic/circuit",
     "diagram",
@@ -252,8 +253,28 @@
   ],
   "frequency_warnings": [
     {
-      "block": "009_text",
-      "block_label": "text",
+      "block": "009_heading",
+      "block_label": "heading",
+      "hint_label": "text",
+      "hint_confidence": 0.80084,
+      "block_overlap": 1.0,
+      "hint_overlap": 0.00813,
+      "bbox": [
+        612,
+        1552,
+        649,
+        102
+      ],
+      "hint_bbox": [
+        61,
+        0,
+        2439,
+        3338
+      ]
+    },
+    {
+      "block": "009_heading",
+      "block_label": "heading",
       "hint_label": "schematic/circuit",
       "hint_confidence": 0.92,
       "block_overlap": 0.8228,
@@ -312,8 +333,28 @@
       ]
     },
     {
-      "block": "011_text",
-      "block_label": "text",
+      "block": "011_heading",
+      "block_label": "heading",
+      "hint_label": "text",
+      "hint_confidence": 0.80084,
+      "block_overlap": 1.0,
+      "hint_overlap": 0.01652,
+      "bbox": [
+        187,
+        1558,
+        1511,
+        89
+      ],
+      "hint_bbox": [
+        61,
+        0,
+        2439,
+        3338
+      ]
+    },
+    {
+      "block": "011_heading",
+      "block_label": "heading",
       "hint_label": "schematic/circuit",
       "hint_confidence": 0.92,
       "block_overlap": 0.35341,
@@ -329,6 +370,46 @@
         1543,
         534,
         119
+      ]
+    },
+    {
+      "block": "012_heading",
+      "block_label": "heading",
+      "hint_label": "text",
+      "hint_confidence": 0.80084,
+      "block_overlap": 1.0,
+      "hint_overlap": 0.01652,
+      "bbox": [
+        187,
+        1662,
+        1511,
+        89
+      ],
+      "hint_bbox": [
+        61,
+        0,
+        2439,
+        3338
+      ]
+    },
+    {
+      "block": "013_heading",
+      "block_label": "heading",
+      "hint_label": "text",
+      "hint_confidence": 0.80084,
+      "block_overlap": 1.0,
+      "hint_overlap": 0.01169,
+      "bbox": [
+        187,
+        1765,
+        1511,
+        63
+      ],
+      "hint_bbox": [
+        61,
+        0,
+        2439,
+        3338
       ]
     },
     {
@@ -414,8 +495,8 @@
   ],
   "frequency_cluster_warnings": [
     {
-      "block": "009_text",
-      "block_label": "text",
+      "block": "009_heading",
+      "block_label": "heading",
       "hint_label": "schematic/circuit",
       "hint_confidence": 0.92,
       "block_overlap": 0.8228,
@@ -454,8 +535,8 @@
       ]
     },
     {
-      "block": "011_text",
-      "block_label": "text",
+      "block": "011_heading",
+      "block_label": "heading",
       "hint_label": "schematic/circuit",
       "hint_confidence": 0.92,
       "block_overlap": 0.35341,
@@ -540,7 +621,7 @@
       "ident": "001_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.9108,
+      "confidence": 0.8705,
       "bbox": [
         940,
         78,
@@ -588,7 +669,7 @@
       "ident": "002_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.8945,
+      "confidence": 0.8689,
       "bbox": [
         1706,
         82,
@@ -656,7 +737,7 @@
       "ident": "003_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.9082,
+      "confidence": 0.8738,
       "bbox": [
         187,
         83,
@@ -704,7 +785,7 @@
       "ident": "004_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.9619,
+      "confidence": 0.9205,
       "bbox": [
         1966,
         883,
@@ -752,7 +833,7 @@
       "ident": "005_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.7548,
+      "confidence": 0.6774,
       "bbox": [
         1717,
         890,
@@ -838,7 +919,7 @@
       "ident": "006_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.8896,
+      "confidence": 0.8649,
       "bbox": [
         1710,
         964,
@@ -886,7 +967,7 @@
       "ident": "007_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.8808,
+      "confidence": 0.842,
       "bbox": [
         187,
         1482,
@@ -934,7 +1015,7 @@
       "ident": "008_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.8807,
+      "confidence": 0.846,
       "bbox": [
         1717,
         1482,
@@ -979,10 +1060,10 @@
       "caption_candidates": null
     },
     {
-      "ident": "009_text",
-      "label": "text",
+      "ident": "009_heading",
+      "label": "heading",
       "orientation": "horizontal",
-      "confidence": 0.9143,
+      "confidence": 0.5089,
       "bbox": [
         612,
         1552,
@@ -1030,7 +1111,7 @@
       "ident": "010_image",
       "label": "image",
       "orientation": "unknown",
-      "confidence": 0.6875,
+      "confidence": 0.6849,
       "bbox": [
         1708,
         1552,
@@ -1094,10 +1175,10 @@
       "caption_candidates": null
     },
     {
-      "ident": "011_text",
-      "label": "text",
+      "ident": "011_heading",
+      "label": "heading",
       "orientation": "horizontal",
-      "confidence": 0.9141,
+      "confidence": 0.5083,
       "bbox": [
         187,
         1558,
@@ -1180,10 +1261,10 @@
       "caption_candidates": null
     },
     {
-      "ident": "012_text",
-      "label": "text",
+      "ident": "012_heading",
+      "label": "heading",
       "orientation": "horizontal",
-      "confidence": 0.911,
+      "confidence": 0.5652,
       "bbox": [
         187,
         1662,
@@ -1228,10 +1309,10 @@
       "caption_candidates": null
     },
     {
-      "ident": "013_text",
-      "label": "text",
+      "ident": "013_heading",
+      "label": "heading",
       "orientation": "horizontal",
-      "confidence": 0.9515,
+      "confidence": 0.5096,
       "bbox": [
         187,
         1765,
@@ -1279,7 +1360,7 @@
       "ident": "014_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.787,
+      "confidence": 0.7686,
       "bbox": [
         1719,
         1832,
@@ -1327,7 +1408,7 @@
       "ident": "015_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.9135,
+      "confidence": 0.8744,
       "bbox": [
         946,
         1847,
@@ -1375,7 +1456,7 @@
       "ident": "016_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.8916,
+      "confidence": 0.8707,
       "bbox": [
         187,
         1858,
@@ -1423,7 +1504,7 @@
       "ident": "017_schematic_circuit",
       "label": "schematic/circuit",
       "orientation": "unknown",
-      "confidence": 0.8234,
+      "confidence": 0.8159,
       "bbox": [
         217,
         2691,
@@ -1502,7 +1583,7 @@
       "ident": "018_image",
       "label": "image",
       "orientation": "unknown",
-      "confidence": 0.3731,
+      "confidence": 0.3422,
       "bbox": [
         1712,
         2763,
