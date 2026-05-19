@@ -31,11 +31,12 @@ LABEL_COLORS = {
     "image": (66, 133, 244),
     "schematic/circuit": (234, 67, 53),
     "diagram": (251, 188, 5),
+    "pcb": (0, 170, 180),
     "table": (171, 71, 188),
     "other": (128, 128, 128),
     "background": (190, 190, 190),
 }
-HINT_LABELS = {"text", "image", "schematic/circuit", "diagram", "table", "other"}
+HINT_LABELS = {"text", "image", "schematic/circuit", "diagram", "pcb", "table", "other"}
 DEFAULT_TILE_SIZE = 32
 DEFAULT_STRIDE = 32
 TEXT_ROW_PERIOD_BAND = (8.0, 44.0)
@@ -857,7 +858,7 @@ def overlap_area(first: list[int], second: list[int]) -> int:
 
 
 def normalize_label(label: str) -> str:
-    if label in {"schematic", "schematic/circuit", "diagram", "table"}:
+    if label in {"schematic", "schematic/circuit", "diagram", "pcb", "table"}:
         return "line_art"
     if label == "image":
         return "image"

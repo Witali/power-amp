@@ -294,6 +294,77 @@ class DetectPageLayoutTests(unittest.TestCase):
         self.assertEqual(label, "schematic/circuit")
         self.assertGreater(confidence, 0.35)
 
+    def test_pcb_signature_boosts_pcb_over_schematic(self) -> None:
+        ann = detect_page_layout.train_bootstrap_ann()
+        features = {
+            "width_ratio": 0.43,
+            "height_ratio": 0.52,
+            "area_ratio": 0.18,
+            "wide_aspect": 0.36,
+            "tall_aspect": 0.24,
+            "ink_density": 0.15,
+            "edge_density": 0.31,
+            "gray_std": 0.70,
+            "gray_levels": 0.94,
+            "component_density": 0.45,
+            "hline_density": 0.12,
+            "vline_density": 0.17,
+            "line_balance": 0.72,
+            "textline_density": 0.12,
+            "horizontal_text_score": 0.12,
+            "vertical_text_score": 0.10,
+            "diagonal_text_score": 0.14,
+            "max_text_score": 0.16,
+            "line_art_score": 0.46,
+            "saturation_mean": 0.0,
+            "saturation_p80": 0.0,
+            "component_signature_score": 0.98,
+            "pcb_trace_density": 0.82,
+            "pcb_pad_density": 0.65,
+            "pcb_board_outline_score": 0.30,
+            "pcb_signature_score": 0.86,
+        }
+
+        label, confidence = detect_page_layout.classify_features(ann, features)
+
+        self.assertEqual(label, "pcb")
+        self.assertGreater(confidence, 0.35)
+
+    def test_pcb_signature_does_not_capture_bold_heading(self) -> None:
+        ann = detect_page_layout.train_bootstrap_ann()
+        features = {
+            "width_ratio": 0.48,
+            "height_ratio": 0.10,
+            "area_ratio": 0.047,
+            "wide_aspect": 0.74,
+            "tall_aspect": 0.05,
+            "ink_density": 0.26,
+            "edge_density": 0.29,
+            "gray_std": 0.74,
+            "gray_levels": 0.78,
+            "component_density": 0.33,
+            "hline_density": 0.00,
+            "vline_density": 0.66,
+            "line_balance": 0.00,
+            "textline_density": 0.31,
+            "horizontal_text_score": 0.31,
+            "vertical_text_score": 0.22,
+            "diagonal_text_score": 0.12,
+            "max_text_score": 0.31,
+            "line_art_score": 1.00,
+            "saturation_mean": 0.0,
+            "saturation_p80": 0.0,
+            "component_signature_score": 0.34,
+            "pcb_trace_density": 1.00,
+            "pcb_pad_density": 0.00,
+            "pcb_board_outline_score": 1.00,
+            "pcb_signature_score": 0.90,
+        }
+
+        label, _ = detect_page_layout.classify_features(ann, features)
+
+        self.assertNotEqual(label, "pcb")
+
     def test_feature_classifier_prefers_color_photo_over_schematic(self) -> None:
         ann = detect_page_layout.train_bootstrap_ann()
         features = {
@@ -628,6 +699,56 @@ class DetectPageLayoutTests(unittest.TestCase):
 
         self.assertEqual(detect_page_layout.block_preview_label(block), "#007 schematic 0.89")
 
+    def test_preview_label_anchor_uses_visible_outline_top_edge(self) -> None:
+        block = detect_page_layout.Block(
+            ident="005_schematic_circuit",
+            label="schematic/circuit",
+            orientation="unknown",
+            confidence=0.98,
+            bbox=[65, 846, 2264, 2418],
+            outline=[[[836, 846], [836, 1589], [65, 1589], [65, 3263], [2328, 3263], [2328, 846]]],
+            features={},
+        )
+
+        self.assertEqual(detect_page_layout.preview_label_anchor(block, 29, 379, 0.45), (376, 381))
+
+    def test_preview_label_anchor_keeps_rectangle_default(self) -> None:
+        block = detect_page_layout.Block(
+            ident="002_text",
+            label="text",
+            orientation="horizontal",
+            confidence=0.90,
+            bbox=[65, 300, 300, 120],
+            outline=None,
+            features={},
+        )
+
+        self.assertEqual(detect_page_layout.preview_label_anchor(block, 29, 135, 0.45), (29, 135))
+
+    def test_bridges_stacked_text_cutout_gap_at_visual_edge(self) -> None:
+        visual = detect_page_layout.Box(152, 108, 2275, 1537)
+        upper_text_cutout = detect_page_layout.Box(1659, 1128, 768, 137)
+        lower_text_cutout = detect_page_layout.Box(1655, 1329, 772, 316)
+
+        cutouts = detect_page_layout.bridge_aligned_text_cutout_gaps(
+            [upper_text_cutout, lower_text_cutout],
+            visual,
+        )
+
+        self.assertIn(detect_page_layout.Box(1655, 1265, 772, 64), cutouts)
+
+    def test_does_not_bridge_distant_text_cutouts(self) -> None:
+        visual = detect_page_layout.Box(152, 108, 2275, 1537)
+        upper_text_cutout = detect_page_layout.Box(1659, 1128, 768, 137)
+        lower_text_cutout = detect_page_layout.Box(1655, 1510, 772, 120)
+
+        cutouts = detect_page_layout.bridge_aligned_text_cutout_gaps(
+            [upper_text_cutout, lower_text_cutout],
+            visual,
+        )
+
+        self.assertEqual(cutouts, [upper_text_cutout, lower_text_cutout])
+
     def test_caption_highlight_boxes_deduplicates_candidates(self) -> None:
         first = detect_page_layout.Block(
             ident="001_schematic",
@@ -959,6 +1080,50 @@ class DetectPageLayoutTests(unittest.TestCase):
         self.assertEqual(box.to_list(), detect_page_layout.union_box(upper, lower).to_list())
         self.assertEqual(block.features["line_bridge_merge"], 1.0)
 
+    def test_merges_overlapping_schematic_fragments(self) -> None:
+        cv2 = detect_page_layout.cv2
+        np = detect_page_layout.np
+
+        page = np.full((340, 520, 3), 255, dtype=np.uint8)
+        left_fragment = detect_page_layout.Box(70, 70, 330, 120)
+        right_fragment = detect_page_layout.Box(250, 88, 210, 130)
+        cv2.rectangle(page, (left_fragment.x, left_fragment.y), (left_fragment.x2, left_fragment.y2), (0, 0, 0), 2)
+        cv2.rectangle(page, (right_fragment.x, right_fragment.y), (right_fragment.x2, right_fragment.y2), (0, 0, 0), 2)
+
+        gray = cv2.cvtColor(page, cv2.COLOR_BGR2GRAY)
+        mask, _, _ = detect_page_layout.foreground_mask(gray)
+        edges = detect_page_layout.canny_edges(gray)
+        ann = detect_page_layout.train_bootstrap_ann()
+        first = detect_page_layout.Block(
+            ident="012_schematic_circuit",
+            label="schematic/circuit",
+            orientation="unknown",
+            confidence=0.90,
+            bbox=left_fragment.to_list(),
+            outline=None,
+            features={},
+        )
+        second = detect_page_layout.Block(
+            ident="015_schematic_circuit",
+            label="schematic/circuit",
+            orientation="unknown",
+            confidence=0.71,
+            bbox=right_fragment.to_list(),
+            outline=None,
+            features={},
+        )
+
+        merged = detect_page_layout.merge_connected_schematic_blocks(
+            [(first, left_fragment), (second, right_fragment)], page, mask, edges, ann, scale=1.0, width=520, height=340
+        )
+
+        self.assertEqual(len(merged), 1)
+        block, box = merged[0]
+        self.assertEqual(block.ident, "012_schematic_circuit")
+        self.assertEqual(block.label, "schematic/circuit")
+        self.assertEqual(box.to_list(), detect_page_layout.union_box(left_fragment, right_fragment).to_list())
+        self.assertEqual(block.features["line_bridge_merge"], 1.0)
+
     def test_merges_low_confidence_line_art_strip_into_schematic(self) -> None:
         cv2 = detect_page_layout.cv2
         np = detect_page_layout.np
@@ -1015,6 +1180,416 @@ class DetectPageLayoutTests(unittest.TestCase):
         self.assertEqual(block.label, "schematic/circuit")
         self.assertEqual(box.to_list(), detect_page_layout.union_box(strip, schematic).to_list())
         self.assertEqual(block.features["line_art_attachment_merge"], 1.0)
+
+    def test_merges_technical_text_strip_into_compact_schematic(self) -> None:
+        cv2 = detect_page_layout.cv2
+        np = detect_page_layout.np
+
+        page = np.full((900, 620, 3), 255, dtype=np.uint8)
+        strip = detect_page_layout.Box(70, 92, 300, 34)
+        schematic = detect_page_layout.Box(70, 126, 300, 92)
+        cv2.line(page, (strip.x + 20, strip.y + 18), (strip.x2 - 20, strip.y + 18), (0, 0, 0), 2)
+        cv2.putText(page, "C1 0.01 uF", (strip.x + 150, strip.y + 24), cv2.FONT_HERSHEY_SIMPLEX, 0.65, (0, 0, 0), 2)
+        cv2.rectangle(page, (schematic.x + 120, schematic.y + 10), (schematic.x + 130, schematic.y + 80), (0, 0, 0), 2)
+        cv2.line(page, (schematic.x + 40, schematic.y + 42), (schematic.x2 - 40, schematic.y + 42), (0, 0, 0), 2)
+
+        gray = cv2.cvtColor(page, cv2.COLOR_BGR2GRAY)
+        mask, _, _ = detect_page_layout.foreground_mask(gray)
+        edges = detect_page_layout.canny_edges(gray)
+        ann = detect_page_layout.train_bootstrap_ann()
+        strip_block = detect_page_layout.Block(
+            ident="014_text",
+            label="text",
+            orientation="horizontal",
+            confidence=0.78,
+            bbox=strip.to_list(),
+            outline=None,
+            features={
+                "line_art_score": 0.31,
+                "edge_density": 0.20,
+                "ink_density": 0.28,
+                "saturation_p80": 0.0,
+                "component_signature_score": 0.82,
+            },
+        )
+        schematic_block = detect_page_layout.Block(
+            ident="015_schematic_circuit",
+            label="schematic/circuit",
+            orientation="unknown",
+            confidence=0.71,
+            bbox=schematic.to_list(),
+            outline=None,
+            features={},
+        )
+
+        merged = detect_page_layout.merge_line_art_attachments_into_schematics(
+            [(strip_block, strip), (schematic_block, schematic)],
+            page,
+            mask,
+            edges,
+            ann,
+            scale=1.0,
+            width=620,
+            height=900,
+        )
+
+        self.assertEqual(len(merged), 1)
+        block, box = merged[0]
+        self.assertEqual(block.ident, "015_schematic_circuit")
+        self.assertEqual(block.label, "schematic/circuit")
+        self.assertEqual(box.to_list(), detect_page_layout.union_box(strip, schematic).to_list())
+        self.assertEqual(block.features["line_art_attachment_merge"], 1.0)
+
+    def test_does_not_merge_technical_text_strip_by_side_touch(self) -> None:
+        cv2 = detect_page_layout.cv2
+        np = detect_page_layout.np
+
+        page = np.full((900, 620, 3), 255, dtype=np.uint8)
+        side_strip = detect_page_layout.Box(10, 100, 48, 360)
+        text_strip = detect_page_layout.Box(55, 260, 420, 40)
+        cv2.rectangle(page, (side_strip.x, side_strip.y), (side_strip.x2, side_strip.y2), (0, 0, 0), 2)
+        cv2.line(page, (text_strip.x, text_strip.y + 20), (text_strip.x2, text_strip.y + 20), (0, 0, 0), 2)
+
+        gray = cv2.cvtColor(page, cv2.COLOR_BGR2GRAY)
+        mask, _, _ = detect_page_layout.foreground_mask(gray)
+        edges = detect_page_layout.canny_edges(gray)
+        ann = detect_page_layout.train_bootstrap_ann()
+        side_block = detect_page_layout.Block(
+            ident="017_schematic_circuit",
+            label="schematic/circuit",
+            orientation="unknown",
+            confidence=0.95,
+            bbox=side_strip.to_list(),
+            outline=None,
+            features={},
+        )
+        text_block = detect_page_layout.Block(
+            ident="018_text",
+            label="text",
+            orientation="horizontal",
+            confidence=0.75,
+            bbox=text_strip.to_list(),
+            outline=None,
+            features={
+                "line_art_score": 0.31,
+                "edge_density": 0.20,
+                "ink_density": 0.28,
+                "saturation_p80": 0.0,
+                "component_signature_score": 0.82,
+            },
+        )
+
+        merged = detect_page_layout.merge_line_art_attachments_into_schematics(
+            [(side_block, side_strip), (text_block, text_strip)],
+            page,
+            mask,
+            edges,
+            ann,
+            scale=1.0,
+            width=620,
+            height=900,
+        )
+
+        self.assertEqual(len(merged), 2)
+        self.assertEqual([block.ident for block, _ in merged], ["017_schematic_circuit", "018_text"])
+
+    def test_does_not_merge_technical_text_strip_into_large_schematic(self) -> None:
+        cv2 = detect_page_layout.cv2
+        np = detect_page_layout.np
+
+        page = np.full((900, 620, 3), 255, dtype=np.uint8)
+        schematic = detect_page_layout.Box(20, 40, 560, 360)
+        text_strip = detect_page_layout.Box(30, 405, 520, 40)
+        cv2.rectangle(page, (schematic.x, schematic.y), (schematic.x2, schematic.y2), (0, 0, 0), 2)
+        cv2.line(page, (text_strip.x, text_strip.y + 20), (text_strip.x2, text_strip.y + 20), (0, 0, 0), 2)
+
+        gray = cv2.cvtColor(page, cv2.COLOR_BGR2GRAY)
+        mask, _, _ = detect_page_layout.foreground_mask(gray)
+        edges = detect_page_layout.canny_edges(gray)
+        ann = detect_page_layout.train_bootstrap_ann()
+        schematic_block = detect_page_layout.Block(
+            ident="001_schematic_circuit",
+            label="schematic/circuit",
+            orientation="unknown",
+            confidence=0.95,
+            bbox=schematic.to_list(),
+            outline=None,
+            features={},
+        )
+        text_block = detect_page_layout.Block(
+            ident="020_text",
+            label="text",
+            orientation="horizontal",
+            confidence=0.78,
+            bbox=text_strip.to_list(),
+            outline=None,
+            features={
+                "line_art_score": 0.31,
+                "edge_density": 0.20,
+                "ink_density": 0.28,
+                "saturation_p80": 0.0,
+                "component_signature_score": 0.82,
+            },
+        )
+
+        merged = detect_page_layout.merge_line_art_attachments_into_schematics(
+            [(schematic_block, schematic), (text_block, text_strip)],
+            page,
+            mask,
+            edges,
+            ann,
+            scale=1.0,
+            width=620,
+            height=900,
+        )
+
+        self.assertEqual(len(merged), 2)
+        self.assertEqual([block.ident for block, _ in merged], ["001_schematic_circuit", "020_text"])
+
+    def test_merges_tall_frame_strip_into_schematic(self) -> None:
+        cv2 = detect_page_layout.cv2
+        np = detect_page_layout.np
+
+        page = np.full((900, 620, 3), 255, dtype=np.uint8)
+        schematic = detect_page_layout.Box(60, 250, 430, 260)
+        frame_strip = detect_page_layout.Box(490, 250, 40, 260)
+        cv2.rectangle(page, (schematic.x, schematic.y), (schematic.x2, schematic.y2), (0, 0, 0), 2)
+        cv2.line(page, (frame_strip.x + 20, frame_strip.y), (frame_strip.x + 20, frame_strip.y2), (0, 0, 0), 2)
+        cv2.line(page, (frame_strip.x, frame_strip.y), (frame_strip.x2, frame_strip.y), (0, 0, 0), 2)
+        cv2.line(page, (frame_strip.x, frame_strip.y2), (frame_strip.x2, frame_strip.y2), (0, 0, 0), 2)
+
+        gray = cv2.cvtColor(page, cv2.COLOR_BGR2GRAY)
+        mask, _, _ = detect_page_layout.foreground_mask(gray)
+        edges = detect_page_layout.canny_edges(gray)
+        ann = detect_page_layout.train_bootstrap_ann()
+        schematic_block = detect_page_layout.Block(
+            ident="005_schematic_circuit",
+            label="schematic/circuit",
+            orientation="unknown",
+            confidence=0.78,
+            bbox=schematic.to_list(),
+            outline=None,
+            features={},
+        )
+        strip_block = detect_page_layout.Block(
+            ident="006_diagram",
+            label="diagram",
+            orientation="unknown",
+            confidence=0.29,
+            bbox=frame_strip.to_list(),
+            outline=None,
+            features={
+                "line_art_score": 0.24,
+                "edge_density": 0.12,
+                "ink_density": 0.04,
+                "saturation_p80": 0.0,
+            },
+        )
+
+        merged = detect_page_layout.merge_line_art_attachments_into_schematics(
+            [(schematic_block, schematic), (strip_block, frame_strip)],
+            page,
+            mask,
+            edges,
+            ann,
+            scale=1.0,
+            width=620,
+            height=900,
+        )
+
+        self.assertEqual(len(merged), 1)
+        block, box = merged[0]
+        self.assertEqual(block.ident, "005_schematic_circuit")
+        self.assertEqual(block.label, "schematic/circuit")
+        self.assertEqual(box.to_list(), [60, 250, 470, 260])
+        self.assertEqual(block.features["line_art_attachment_merge"], 1.0)
+
+    def test_merges_labeled_line_art_fragments_into_image(self) -> None:
+        cv2 = detect_page_layout.cv2
+        np = detect_page_layout.np
+
+        page = np.full((900, 620, 3), 255, dtype=np.uint8)
+        drawing = detect_page_layout.Box(80, 70, 360, 260)
+        side_piece = detect_page_layout.Box(440, 70, 90, 260)
+        caption_band = detect_page_layout.Box(90, 260, 420, 82)
+        cv2.line(page, (drawing.x + 20, drawing.y + 220), (drawing.x + 280, drawing.y + 20), (0, 0, 0), 2)
+        cv2.line(page, (drawing.x + 80, drawing.y + 10), (drawing.x + 300, drawing.y + 180), (0, 0, 0), 2)
+        cv2.line(page, (side_piece.x + 6, side_piece.y + 130), (side_piece.x2 - 8, side_piece.y + 130), (0, 0, 0), 2)
+        cv2.putText(page, "Fig. 2", (caption_band.x + 4, caption_band.y + 52), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 0), 2)
+
+        gray = cv2.cvtColor(page, cv2.COLOR_BGR2GRAY)
+        mask, _, _ = detect_page_layout.foreground_mask(gray)
+        edges = detect_page_layout.canny_edges(gray)
+        ann = detect_page_layout.train_bootstrap_ann()
+        classified = [
+            (
+                detect_page_layout.Block(
+                    ident="003_text",
+                    label="text",
+                    orientation="diagonal",
+                    confidence=0.72,
+                    bbox=drawing.to_list(),
+                    outline=None,
+                    features={
+                        "line_art_score": 0.24,
+                        "edge_density": 0.29,
+                        "ink_density": 0.09,
+                        "gray_std": 0.52,
+                        "max_text_score": 0.66,
+                        "component_signature_score": 0.97,
+                    },
+                ),
+                drawing,
+            ),
+            (
+                detect_page_layout.Block(
+                    ident="004_other",
+                    label="other",
+                    orientation="unknown",
+                    confidence=0.39,
+                    bbox=side_piece.to_list(),
+                    outline=None,
+                    features={
+                        "line_art_score": 0.08,
+                        "edge_density": 0.04,
+                        "ink_density": 0.01,
+                        "gray_std": 0.21,
+                        "max_text_score": 0.09,
+                        "component_signature_score": 0.0,
+                    },
+                ),
+                side_piece,
+            ),
+            (
+                detect_page_layout.Block(
+                    ident="009_text",
+                    label="text",
+                    orientation="horizontal",
+                    confidence=0.73,
+                    bbox=caption_band.to_list(),
+                    outline=None,
+                    features={
+                        "line_art_score": 0.29,
+                        "edge_density": 0.17,
+                        "ink_density": 0.06,
+                        "gray_std": 0.43,
+                        "max_text_score": 0.64,
+                        "component_signature_score": 1.0,
+                    },
+                ),
+                caption_band,
+            ),
+        ]
+
+        merged = detect_page_layout.merge_illustration_fragments_into_images(
+            classified,
+            page,
+            mask,
+            edges,
+            ann,
+            scale=1.0,
+            width=620,
+            height=900,
+        )
+
+        self.assertEqual(len(merged), 1)
+        block, box = merged[0]
+        self.assertEqual(block.ident, "003_image")
+        self.assertEqual(block.label, "image")
+        self.assertEqual(box.to_list(), [80, 70, 450, 272])
+        self.assertEqual(block.features["illustration_fragment_merge"], 1.0)
+
+    def test_does_not_merge_below_prose_into_illustration_image(self) -> None:
+        cv2 = detect_page_layout.cv2
+        np = detect_page_layout.np
+
+        page = np.full((900, 620, 3), 255, dtype=np.uint8)
+        drawing = detect_page_layout.Box(80, 70, 360, 260)
+        caption_band = detect_page_layout.Box(90, 260, 420, 82)
+        prose = detect_page_layout.Box(90, 390, 420, 260)
+        cv2.line(page, (drawing.x + 20, drawing.y + 220), (drawing.x + 280, drawing.y + 20), (0, 0, 0), 2)
+        cv2.putText(page, "Fig. 2", (caption_band.x + 4, caption_band.y + 52), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 0), 2)
+        for row in range(10):
+            y = prose.y + 18 + row * 22
+            cv2.line(page, (prose.x + 12, y), (prose.x2 - 12, y), (0, 0, 0), 2)
+
+        gray = cv2.cvtColor(page, cv2.COLOR_BGR2GRAY)
+        mask, _, _ = detect_page_layout.foreground_mask(gray)
+        edges = detect_page_layout.canny_edges(gray)
+        ann = detect_page_layout.train_bootstrap_ann()
+        classified = [
+            (
+                detect_page_layout.Block(
+                    ident="003_text",
+                    label="text",
+                    orientation="diagonal",
+                    confidence=0.72,
+                    bbox=drawing.to_list(),
+                    outline=None,
+                    features={
+                        "line_art_score": 0.24,
+                        "edge_density": 0.29,
+                        "ink_density": 0.09,
+                        "gray_std": 0.52,
+                        "max_text_score": 0.66,
+                        "component_signature_score": 0.97,
+                    },
+                ),
+                drawing,
+            ),
+            (
+                detect_page_layout.Block(
+                    ident="009_text",
+                    label="text",
+                    orientation="horizontal",
+                    confidence=0.73,
+                    bbox=caption_band.to_list(),
+                    outline=None,
+                    features={
+                        "line_art_score": 0.29,
+                        "edge_density": 0.17,
+                        "ink_density": 0.06,
+                        "gray_std": 0.43,
+                        "max_text_score": 0.64,
+                        "component_signature_score": 1.0,
+                    },
+                ),
+                caption_band,
+            ),
+            (
+                detect_page_layout.Block(
+                    ident="012_text",
+                    label="text",
+                    orientation="horizontal",
+                    confidence=0.91,
+                    bbox=prose.to_list(),
+                    outline=None,
+                    features={
+                        "line_art_score": 0.10,
+                        "edge_density": 0.12,
+                        "ink_density": 0.27,
+                        "gray_std": 0.80,
+                        "max_text_score": 0.87,
+                        "component_signature_score": 0.08,
+                    },
+                ),
+                prose,
+            ),
+        ]
+
+        merged = detect_page_layout.merge_illustration_fragments_into_images(
+            classified,
+            page,
+            mask,
+            edges,
+            ann,
+            scale=1.0,
+            width=620,
+            height=900,
+        )
+
+        self.assertEqual([block.ident for block, _ in merged], ["003_image", "012_text"])
+        self.assertEqual(merged[0][1].to_list(), [80, 70, 430, 272])
 
     def test_merges_stacked_waveform_strips_into_one_diagram(self) -> None:
         cv2 = detect_page_layout.cv2

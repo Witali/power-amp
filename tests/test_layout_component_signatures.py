@@ -41,6 +41,29 @@ class LayoutComponentSignaturesTests(unittest.TestCase):
 
         self.assertLess(features["component_signature_score"], 0.20)
 
+    def test_detects_pcb_trace_and_pad_signature(self) -> None:
+        cv2 = layout_component_signatures.cv2
+        np = layout_component_signatures.np
+
+        mask = np.zeros((260, 220), dtype=np.uint8)
+        cv2.rectangle(mask, (14, 14), (206, 246), 255, 2)
+        traces = [
+            [(34, 38), (84, 38), (84, 82), (128, 82)],
+            [(42, 132), (104, 132), (104, 180), (164, 180)],
+            [(46, 220), (92, 220), (132, 202), (184, 202)],
+        ]
+        for points in traces:
+            cv2.polylines(mask, [np.array(points, dtype=np.int32)], False, 255, 6)
+            for x, y in points:
+                cv2.circle(mask, (x, y), 7, 255, 3)
+        edges = cv2.Canny(mask, 50, 150)
+
+        features = layout_component_signatures.component_signature_features(mask, edges)
+
+        self.assertGreater(features["pcb_signature_score"], 0.45)
+        self.assertGreater(features["pcb_trace_density"], 0.30)
+        self.assertGreater(features["pcb_pad_density"], 0.0)
+
 
 if __name__ == "__main__":
     unittest.main()

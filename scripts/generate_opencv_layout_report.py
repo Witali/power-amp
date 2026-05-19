@@ -62,7 +62,7 @@ def count_blocks(blocks: list[dict[str, Any]]) -> Counter[str]:
 def counts_text(counts: Counter[str]) -> str:
     if not counts:
         return "no blocks"
-    order = ["text", "schematic", "diagram", "image", "table", "other"]
+    order = ["text", "schematic", "pcb", "diagram", "image", "table", "other"]
     parts = [f"{label}: {counts[label]}" for label in order if counts.get(label)]
     parts.extend(f"{label}: {value}" for label, value in sorted(counts.items()) if label not in order)
     return ", ".join(parts)
@@ -137,7 +137,7 @@ def report_notes(entries: list[dict[str, Any]]) -> list[str]:
     no_visuals = [
         entry["id"]
         for entry in entries
-        if not any(int(entry["counts"].get(label, 0)) for label in ("schematic", "diagram", "image", "table"))
+        if not any(int(entry["counts"].get(label, 0)) for label in ("schematic", "pcb", "diagram", "image", "table"))
     ]
     notes.append(f"Processed {len(entries)} page(s).")
     if high_other:

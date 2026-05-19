@@ -9,6 +9,7 @@
     "image",
     "schematic/circuit",
     "diagram",
+    "pcb",
     "table",
     "other"
   ],
@@ -102,7 +103,7 @@
       "ident": "001_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.9055,
+      "confidence": 0.9227,
       "bbox": [
         1556,
         32,
@@ -136,7 +137,11 @@
         "resistor_symbol_density": 1.0,
         "capacitor_symbol_density": 1.0,
         "diode_symbol_density": 1.0,
-        "transistor_symbol_density": 1.0
+        "transistor_symbol_density": 1.0,
+        "pcb_trace_density": 0.05184,
+        "pcb_pad_density": 1.0,
+        "pcb_board_outline_score": 0.0,
+        "pcb_signature_score": 0.29733
       },
       "crop_path": null,
       "figure_ref": null,
@@ -146,7 +151,7 @@
       "ident": "002_image",
       "label": "image",
       "orientation": "unknown",
-      "confidence": 0.8025,
+      "confidence": 0.8321,
       "bbox": [
         2301,
         32,
@@ -199,7 +204,11 @@
         "resistor_symbol_density": 0.0,
         "capacitor_symbol_density": 0.0,
         "diode_symbol_density": 0.0,
-        "transistor_symbol_density": 0.0
+        "transistor_symbol_density": 0.0,
+        "pcb_trace_density": 1.0,
+        "pcb_pad_density": 1.0,
+        "pcb_board_outline_score": 1.0,
+        "pcb_signature_score": 1.0
       },
       "crop_path": null,
       "figure_ref": null,
@@ -209,7 +218,7 @@
       "ident": "003_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.9006,
+      "confidence": 0.9137,
       "bbox": [
         30,
         37,
@@ -243,7 +252,11 @@
         "resistor_symbol_density": 1.0,
         "capacitor_symbol_density": 1.0,
         "diode_symbol_density": 1.0,
-        "transistor_symbol_density": 1.0
+        "transistor_symbol_density": 1.0,
+        "pcb_trace_density": 0.81338,
+        "pcb_pad_density": 1.0,
+        "pcb_board_outline_score": 0.0,
+        "pcb_signature_score": 0.84563
       },
       "crop_path": null,
       "figure_ref": null,
@@ -253,41 +266,14 @@
       "ident": "004_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.9031,
+      "confidence": 0.9171,
       "bbox": [
         20,
         1068,
         777,
         2199
       ],
-      "outline": [
-        [
-          [
-            20,
-            1068
-          ],
-          [
-            20,
-            3267
-          ],
-          [
-            797,
-            3267
-          ],
-          [
-            797,
-            2993
-          ],
-          [
-            791,
-            2993
-          ],
-          [
-            791,
-            1068
-          ]
-        ]
-      ],
+      "outline": null,
       "features": {
         "width_ratio": 0.31083,
         "height_ratio": 0.65889,
@@ -315,7 +301,10 @@
         "capacitor_symbol_density": 1.0,
         "diode_symbol_density": 1.0,
         "transistor_symbol_density": 1.0,
-        "overlap_resolution": 1.0
+        "pcb_trace_density": 0.04622,
+        "pcb_pad_density": 1.0,
+        "pcb_board_outline_score": 0.0,
+        "pcb_signature_score": 0.29328
       },
       "crop_path": null,
       "figure_ref": null,
@@ -325,7 +314,7 @@
       "ident": "005_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.9036,
+      "confidence": 0.9169,
       "bbox": [
         792,
         1068,
@@ -335,11 +324,11 @@
       "outline": [
         [
           [
-            792,
+            794,
             1068
           ],
           [
-            792,
+            794,
             2993
           ],
           [
@@ -379,6 +368,10 @@
         "capacitor_symbol_density": 1.0,
         "diode_symbol_density": 1.0,
         "transistor_symbol_density": 1.0,
+        "pcb_trace_density": 0.04922,
+        "pcb_pad_density": 1.0,
+        "pcb_board_outline_score": 0.0,
+        "pcb_signature_score": 0.29544,
         "overlap_resolution": 1.0
       },
       "crop_path": null,
@@ -389,7 +382,7 @@
       "ident": "006_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.8949,
+      "confidence": 0.8917,
       "bbox": [
         794,
         2986,
@@ -443,6 +436,10 @@
         "capacitor_symbol_density": 1.0,
         "diode_symbol_density": 1.0,
         "transistor_symbol_density": 1.0,
+        "pcb_trace_density": 0.02657,
+        "pcb_pad_density": 1.0,
+        "pcb_board_outline_score": 1.0,
+        "pcb_signature_score": 0.45913,
         "overlap_resolution": 1.0
       },
       "crop_path": null,

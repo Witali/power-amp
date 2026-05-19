@@ -552,7 +552,7 @@ function Export-FigureLinks {
     }
 
     $layout = Get-Content -LiteralPath $LayoutPath -Raw -Encoding UTF8 | ConvertFrom-Json
-    $figureBlocks = @($layout.blocks | Where-Object { $_.label -in @("image", "schematic/circuit", "diagram") })
+    $figureBlocks = @($layout.blocks | Where-Object { $_.label -in @("image", "schematic/circuit", "diagram", "pcb") })
     if ($figureBlocks.Count -eq 0) {
         return
     }

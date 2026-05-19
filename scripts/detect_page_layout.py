@@ -51,13 +51,14 @@ except ImportError:
         layout_component_signatures = None  # type: ignore
 
 
-CLASS_NAMES = ["text", "image", "schematic/circuit", "diagram", "table", "other"]
-FIGURE_LABELS = {"image", "schematic/circuit", "diagram"}
+CLASS_NAMES = ["text", "image", "schematic/circuit", "diagram", "pcb", "table", "other"]
+FIGURE_LABELS = {"image", "schematic/circuit", "diagram", "pcb"}
 CLASS_COLORS = {
     "text": (52, 168, 83),
     "image": (66, 133, 244),
     "schematic/circuit": (234, 67, 53),
     "diagram": (251, 188, 5),
+    "pcb": (0, 170, 180),
     "table": (171, 71, 188),
     "other": (128, 128, 128),
 }
@@ -66,6 +67,14 @@ CAPTION_HIGHLIGHT_OPACITY = 0.30
 CAPTION_HIGHLIGHT_PADDING = 4
 ACCELERATOR_CHOICES = ("cpu", "opencl")
 FREQUENCY_HINT_CHOICES = ("off", "validate", "hints")
+PCB_MIN_TRACE_DENSITY = 0.30
+PCB_MIN_SIGNATURE_SCORE = 0.40
+PCB_MIN_LINE_BALANCE = 0.16
+PCB_MIN_AXIS_LINE_DENSITY = 0.045
+PCB_MIN_AREA_RATIO = 0.030
+PCB_MIN_HEIGHT_RATIO = 0.110
+PCB_MAX_TEXT_SCORE = 0.58
+PCB_MAX_INK_DENSITY = 0.34
 
 
 @dataclass(frozen=True)
@@ -1170,6 +1179,10 @@ def feature_dict(image, mask, edges, box: Box) -> dict[str, float]:
             "capacitor_symbol_density": 0.0,
             "diode_symbol_density": 0.0,
             "transistor_symbol_density": 0.0,
+            "pcb_trace_density": 0.0,
+            "pcb_pad_density": 0.0,
+            "pcb_board_outline_score": 0.0,
+            "pcb_signature_score": 0.0,
         }
 
     features = {
@@ -1237,6 +1250,7 @@ def train_bootstrap_ann():
         "image": [0.28, 0.25, 0.08, 0.25, 0.22, 0.43, 0.58, 0.78, 0.95, 0.18, 0.04, 0.04, 0.25, 0.18, 0.18, 0.16, 0.16, 0.18],
         "schematic/circuit": [0.36, 0.30, 0.09, 0.42, 0.18, 0.07, 0.18, 0.20, 0.34, 0.45, 0.42, 0.34, 0.78, 0.38, 0.38, 0.28, 0.32, 0.38],
         "diagram": [0.32, 0.24, 0.08, 0.36, 0.20, 0.13, 0.28, 0.36, 0.55, 0.52, 0.20, 0.14, 0.45, 0.45, 0.45, 0.28, 0.35, 0.45],
+        "pcb": [0.34, 0.52, 0.16, 0.18, 0.34, 0.16, 0.34, 0.62, 0.72, 0.34, 0.16, 0.18, 0.68, 0.20, 0.20, 0.14, 0.14, 0.20],
         "table": [0.40, 0.24, 0.10, 0.70, 0.08, 0.08, 0.12, 0.16, 0.24, 0.35, 0.58, 0.52, 0.88, 0.68, 0.68, 0.30, 0.22, 0.68],
         "other": [0.08, 0.06, 0.01, 0.18, 0.12, 0.02, 0.04, 0.06, 0.12, 0.08, 0.02, 0.02, 0.08, 0.08, 0.08, 0.08, 0.08, 0.08],
     }
@@ -1279,18 +1293,31 @@ def rule_scores(features: dict[str, float]) -> np.ndarray:
     area = features["area_ratio"]
     component_signature = features.get("component_signature_score", 0.0)
     line_art = features.get("line_art_score", 0.0)
+    pcb_signature = features.get("pcb_signature_score", 0.0)
+    pcb_trace = features.get("pcb_trace_density", 0.0)
+    pcb_pad = features.get("pcb_pad_density", 0.0)
+    pcb_outline = features.get("pcb_board_outline_score", 0.0)
     component_rule_signal = (
         component_signature
         if max_text < 0.62 and line_art > 0.16 and balance > 0.10
         else 0.0
     )
 
-    scores[0] = 1.8 * max_text + 1.1 * components + 0.4 * ink + 0.3 * max(vertical_text, diagonal_text) - 0.45 * balance
-    scores[1] = 1.6 * std + 1.3 * levels + 0.9 * edge + 0.5 * ink - 0.75 * max_text
-    scores[2] = 1.1 * hline + 1.1 * vline + 0.8 * balance + 0.5 * edge + 1.6 * component_rule_signal - 0.5 * std
-    scores[3] = 0.8 * edge + 0.6 * hline + 0.25 * max_text + 0.5 * levels
-    scores[4] = 1.4 * hline + 1.4 * vline + 1.2 * balance + 0.25 * max_text - 0.4 * std
-    scores[5] = 0.5 + (0.08 > area) * 0.2 - 0.4 * ink - 0.2 * edge
+    text_index = CLASS_NAMES.index("text")
+    image_index = CLASS_NAMES.index("image")
+    schematic_index = CLASS_NAMES.index("schematic/circuit")
+    diagram_index = CLASS_NAMES.index("diagram")
+    pcb_index = CLASS_NAMES.index("pcb")
+    table_index = CLASS_NAMES.index("table")
+    other_index = CLASS_NAMES.index("other")
+
+    scores[text_index] = 1.8 * max_text + 1.1 * components + 0.4 * ink + 0.3 * max(vertical_text, diagonal_text) - 0.45 * balance
+    scores[image_index] = 1.6 * std + 1.3 * levels + 0.9 * edge + 0.5 * ink - 0.75 * max_text
+    scores[schematic_index] = 1.1 * hline + 1.1 * vline + 0.8 * balance + 0.5 * edge + 1.6 * component_rule_signal - 0.5 * std
+    scores[diagram_index] = 0.8 * edge + 0.6 * hline + 0.25 * max_text + 0.5 * levels
+    scores[pcb_index] = 1.4 * pcb_signature + 1.2 * pcb_trace + 0.45 * pcb_pad + 0.30 * pcb_outline + 0.35 * line_art - 0.50 * max_text
+    scores[table_index] = 1.4 * hline + 1.4 * vline + 1.2 * balance + 0.25 * max_text - 0.4 * std
+    scores[other_index] = 0.5 + (0.08 > area) * 0.2 - 0.4 * ink - 0.2 * edge
     scores = np.maximum(scores, 0.001)
     return scores / scores.sum()
 
@@ -1306,12 +1333,39 @@ def classify_features(ann, features: dict[str, float]) -> tuple[str, float]:
     line_art = features.get("line_art_score", 0.0)
     saturation_p80 = features.get("saturation_p80", 0.0)
     component_signature = features.get("component_signature_score", 0.0)
+    pcb_signature = features.get("pcb_signature_score", 0.0)
+    pcb_trace = features.get("pcb_trace_density", 0.0)
+    pcb_pad = features.get("pcb_pad_density", 0.0)
+    pcb_outline = features.get("pcb_board_outline_score", 0.0)
+    pcb_axis_line_density = min(features["hline_density"], features["vline_density"])
+    pcb_has_track_grid = features["line_balance"] >= PCB_MIN_LINE_BALANCE and pcb_axis_line_density >= PCB_MIN_AXIS_LINE_DENSITY
+    pcb_size_ok = features["area_ratio"] >= PCB_MIN_AREA_RATIO and features["height_ratio"] >= PCB_MIN_HEIGHT_RATIO
+    pcb_candidate = (
+        pcb_trace >= PCB_MIN_TRACE_DENSITY
+        and pcb_signature >= PCB_MIN_SIGNATURE_SCORE
+        and pcb_has_track_grid
+        and pcb_size_ok
+        and max_text < PCB_MAX_TEXT_SCORE
+        and features["ink_density"] < PCB_MAX_INK_DENSITY
+    )
 
     if features["area_ratio"] < 0.002 and features["textline_density"] < 0.25:
         scores *= 0.65
         scores[CLASS_NAMES.index("other")] += 0.35
     if features["gray_std"] > 0.55 and features["gray_levels"] > 0.75 and features["area_ratio"] > 0.01 and max_text < 0.45:
         scores[CLASS_NAMES.index("image")] += 0.25
+    if (
+        pcb_candidate
+        and features["area_ratio"] > 0.025
+        and pcb_trace > 0.32
+        and pcb_signature > 0.42
+        and line_art > 0.18
+        and max_text < 0.52
+    ):
+        scores[CLASS_NAMES.index("pcb")] += 3.0 + pcb_signature + 0.35 * pcb_pad + 0.20 * pcb_outline
+        scores[CLASS_NAMES.index("schematic/circuit")] *= 0.24
+        scores[CLASS_NAMES.index("diagram")] *= 0.45
+        scores[CLASS_NAMES.index("image")] *= 0.62
     if (
         features["area_ratio"] > 0.035
         and line_art > 0.16
@@ -1496,6 +1550,18 @@ def classify_features(ann, features: dict[str, float]) -> tuple[str, float]:
         scores[CLASS_NAMES.index("text")] += 0.70
         scores[CLASS_NAMES.index("diagram")] *= 0.55
         scores[CLASS_NAMES.index("table")] *= 0.65
+    if (
+        pcb_candidate
+        and pcb_trace > 0.30
+        and pcb_signature > 0.40
+        and max_text < 0.58
+        and features["area_ratio"] > 0.020
+    ):
+        scores[CLASS_NAMES.index("pcb")] += 2.20 + pcb_signature
+        scores[CLASS_NAMES.index("schematic/circuit")] *= 0.28
+        scores[CLASS_NAMES.index("diagram")] *= 0.55
+    if not pcb_candidate or features["width_ratio"] < 0.12:
+        scores[CLASS_NAMES.index("pcb")] *= 0.12
     scores = scores / max(float(scores.sum()), 1e-6)
 
     index = int(scores.argmax())
@@ -1643,13 +1709,65 @@ def text_block_should_cut_visual_outline(visual_block: Block, text_block: Block)
     return not small_internal_label
 
 
+def text_cutout_edge_side(cutout: Box, visual_box: Box, edge_margin: int) -> str | None:
+    if cutout.x2 >= visual_box.x2 - edge_margin:
+        return "right"
+    if cutout.x <= visual_box.x + edge_margin:
+        return "left"
+    if cutout.y2 >= visual_box.y2 - edge_margin:
+        return "bottom"
+    if cutout.y <= visual_box.y + edge_margin:
+        return "top"
+    return None
+
+
+def bridge_aligned_text_cutout_gaps(cutouts: list[Box], visual_box: Box) -> list[Box]:
+    if len(cutouts) < 2:
+        return cutouts
+
+    edge_margin = max(10, min(80, int(round(min(visual_box.w, visual_box.h) * 0.050))))
+    gap_limit = max(24, min(120, int(round(visual_box.h * 0.070))))
+    result = cutouts[:]
+    seen = {(box.x, box.y, box.w, box.h) for box in result}
+
+    for first_index, first in enumerate(cutouts):
+        first_side = text_cutout_edge_side(first, visual_box, edge_margin)
+        if first_side not in {"left", "right"}:
+            continue
+        for second in cutouts[first_index + 1 :]:
+            if text_cutout_edge_side(second, visual_box, edge_margin) != first_side:
+                continue
+
+            upper, lower = (first, second) if first.y <= second.y else (second, first)
+            vertical_gap = lower.y - upper.y2
+            if vertical_gap < 0 or vertical_gap > gap_limit:
+                continue
+            horizontal_overlap = box_horizontal_overlap_width(first, second)
+            if horizontal_overlap < min(first.w, second.w) * 0.62:
+                continue
+
+            if first_side == "right":
+                x1 = min(first.x, second.x)
+                x2 = visual_box.x2
+            else:
+                x1 = visual_box.x
+                x2 = max(first.x2, second.x2)
+            bridge = Box(x1, upper.y2, x2 - x1, vertical_gap).clamp(visual_box.x2 + 1, visual_box.y2 + 1)
+            key = (bridge.x, bridge.y, bridge.w, bridge.h)
+            if bridge.area > 0 and key not in seen:
+                result.append(bridge)
+                seen.add(key)
+
+    return result
+
+
 def visual_outline_from_text_cutouts(visual_block: Block, text_blocks: list[Block]) -> list[list[list[int]]]:
     visual_box = box_from_list(visual_block.bbox)
     if visual_box.area <= 0:
         return []
 
     mask = np.full((visual_box.h, visual_box.w), 255, dtype=np.uint8)
-    cutouts = 0
+    cutouts: list[Box] = []
     pad = max(3, min(14, int(round(min(visual_box.w, visual_box.h) * 0.025))))
     for text_block in text_blocks:
         text_box = box_from_list(text_block.bbox)
@@ -1659,6 +1777,10 @@ def visual_outline_from_text_cutouts(visual_block: Block, text_blocks: list[Bloc
         cutout = intersection_box(visual_box, padded)
         if cutout is None:
             continue
+        cutouts.append(cutout)
+
+    cutouts = bridge_aligned_text_cutout_gaps(cutouts, visual_box)
+    for cutout in cutouts:
         x1 = max(0, cutout.x - visual_box.x)
         y1 = max(0, cutout.y - visual_box.y)
         x2 = min(visual_box.w, cutout.x2 - visual_box.x)
@@ -1666,9 +1788,8 @@ def visual_outline_from_text_cutouts(visual_block: Block, text_blocks: list[Bloc
         if x2 <= x1 or y2 <= y1:
             continue
         mask[y1:y2, x1:x2] = 0
-        cutouts += 1
 
-    if cutouts == 0:
+    if not cutouts:
         return rectangle_polygon(visual_box)
 
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -1698,6 +1819,41 @@ def block_preview_label(block: Block) -> str:
     if block.label == "text" and block.orientation != "unknown":
         label = f"{label} {block.orientation}"
     return f"#{block_number} {label} {block.confidence:.2f}"
+
+
+def preview_label_anchor(block: Block, default_x: int, default_y: int, scale: float) -> tuple[int, int]:
+    if not block.outline:
+        return default_x, default_y
+
+    horizontal_segments: list[tuple[int, int, int]] = []
+    top_points: list[tuple[int, int]] = []
+    for polygon in block.outline:
+        if len(polygon) < 2:
+            continue
+        scaled_points = [(int(round(px * scale)), int(round(py * scale))) for px, py in polygon]
+        top_points.extend(scaled_points)
+        closed_points = scaled_points + [scaled_points[0]]
+        for (x1, y1), (x2, y2) in zip(closed_points, closed_points[1:]):
+            if abs(y1 - y2) > 1:
+                continue
+            left = min(x1, x2)
+            right = max(x1, x2)
+            if right - left < 8:
+                continue
+            horizontal_segments.append((min(y1, y2), left, right))
+
+    if horizontal_segments:
+        top_y = min(segment[0] for segment in horizontal_segments)
+        top_segments = [segment for segment in horizontal_segments if abs(segment[0] - top_y) <= 1]
+        _, left, _ = min(top_segments, key=lambda segment: segment[1])
+        return left, top_y
+
+    if top_points:
+        top_y = min(y for _, y in top_points)
+        left = min(x for x, y in top_points if abs(y - top_y) <= 1)
+        return left, top_y
+
+    return default_x, default_y
 
 
 def block_counts_text(blocks: Iterable[Block]) -> str:
@@ -1839,6 +1995,10 @@ def box_vertical_overlap_height(first: Box, second: Box) -> int:
 def line_bridge_between_schematic_boxes(line_mask, first: Box, second: Box, width: int, height: int) -> bool:
     margin = max(8, min(width, height) // 140)
     pad = max(3, min(width, height) // 360)
+
+    direct_overlap = overlap_area(first, second)
+    if direct_overlap / max(1, min(first.area, second.area)) >= 0.12:
+        return True
 
     vertical_gap = max(0, max(first.y, second.y) - min(first.y2, second.y2))
     horizontal_overlap = box_horizontal_overlap_width(first, second)
@@ -1986,16 +2146,67 @@ def schematic_attachment_candidate(block: Block, box: Box, width: int, height: i
     edge = float(features.get("edge_density", 0.0))
     ink = float(features.get("ink_density", 1.0))
     saturation = float(features.get("saturation_p80", 1.0))
+    component_signature = float(features.get("component_signature_score", 0.0))
+    technical_text_strip = (
+        block.label == "text"
+        and block.orientation == "horizontal"
+        and box.h <= height * 0.055
+        and line_art > 0.22
+        and edge > 0.12
+        and ink < 0.36
+        and saturation < 0.10
+        and component_signature > 0.45
+    )
     low_confidence_text = block.label == "text" and block.confidence < 0.45
     visual_label = block.label in {"diagram", "table", "image", "other"}
-    if not (low_confidence_text or visual_label):
+    if not (low_confidence_text or technical_text_strip or visual_label):
         return False
     if box.h > height * 0.18:
         return False
+    if technical_text_strip:
+        return True
     return line_art > 0.24 and edge > 0.16 and ink < 0.22 and saturation < 0.08
 
 
-def schematic_attachment_touches(candidate: Box, schematic: Box, width: int, height: int) -> bool:
+def schematic_frame_strip_candidate(block: Block, box: Box, schematic: Box, width: int, height: int) -> bool:
+    if block.label not in {"diagram", "image", "other"}:
+        return False
+
+    features = block.features
+    line_art = float(features.get("line_art_score", 0.0))
+    ink = float(features.get("ink_density", 1.0))
+    saturation = float(features.get("saturation_p80", 0.0))
+    thin_vertical = box.w <= max(40, int(round(schematic.w * 0.075))) and box.h >= schematic.h * 0.72
+    thin_horizontal = box.h <= max(40, int(round(schematic.h * 0.075))) and box.w >= schematic.w * 0.72
+    if not (thin_vertical or thin_horizontal):
+        return False
+    if box.area > schematic.area * 0.12:
+        return False
+    if line_art < 0.10 or ink > 0.12 or saturation > 0.45:
+        return False
+
+    margin = max(10, min(width, height) // 100)
+    if thin_vertical:
+        side_touch = (
+            0 <= box.x - schematic.x2 <= margin
+            or 0 <= schematic.x - box.x2 <= margin
+            or intersection_area(box, schematic) > 0
+        )
+        vertical_match = box_vertical_overlap_height(box, schematic) >= schematic.h * 0.72
+        edge_aligned = abs(box.y - schematic.y) <= margin and abs(box.y2 - schematic.y2) <= margin
+        return side_touch and vertical_match and edge_aligned
+
+    top_bottom_touch = (
+        0 <= box.y - schematic.y2 <= margin
+        or 0 <= schematic.y - box.y2 <= margin
+        or intersection_area(box, schematic) > 0
+    )
+    horizontal_match = box_horizontal_overlap_width(box, schematic) >= schematic.w * 0.72
+    edge_aligned = abs(box.x - schematic.x) <= margin and abs(box.x2 - schematic.x2) <= margin
+    return top_bottom_touch and horizontal_match and edge_aligned
+
+
+def schematic_attachment_touches(candidate: Box, schematic: Box, width: int, height: int, allow_side_touch: bool = True) -> bool:
     margin = max(8, min(width, height) // 120)
     vertical_gap = max(0, max(candidate.y, schematic.y) - min(candidate.y2, schematic.y2))
     horizontal_overlap = box_horizontal_overlap_width(candidate, schematic)
@@ -2005,6 +2216,9 @@ def schematic_attachment_touches(candidate: Box, schematic: Box, width: int, hei
         and horizontal_overlap >= schematic.w * 0.38
     ):
         return True
+
+    if not allow_side_touch:
+        return False
 
     horizontal_gap = max(0, max(candidate.x, schematic.x) - min(candidate.x2, schematic.x2))
     vertical_overlap = box_vertical_overlap_height(candidate, schematic)
@@ -2038,9 +2252,14 @@ def merge_line_art_attachments_into_schematics(
             for other_index, (other_block, other_box) in enumerate(items):
                 if other_index == schematic_index:
                     continue
-                if not schematic_attachment_candidate(other_block, other_box, width, height):
+                frame_strip = schematic_frame_strip_candidate(other_block, other_box, schematic_box, width, height)
+                if not frame_strip and not schematic_attachment_candidate(other_block, other_box, width, height):
                     continue
-                if not schematic_attachment_touches(other_box, schematic_box, width, height):
+                high_confidence_text_attachment = other_block.label == "text" and other_block.confidence >= 0.45
+                if high_confidence_text_attachment and (schematic_box.w > width * 0.55 or schematic_box.h > height * 0.16):
+                    continue
+                allow_side_touch = other_block.label != "text"
+                if not frame_strip and not schematic_attachment_touches(other_box, schematic_box, width, height, allow_side_touch=allow_side_touch):
                     continue
                 merged_block, merged_box = merged_classified_item(
                     [items[schematic_index], items[other_index]],
@@ -2061,6 +2280,177 @@ def merge_line_art_attachments_into_schematics(
                 break
             if changed:
                 break
+
+    return sorted(items, key=lambda item: (item[1].y, item[1].x))
+
+
+def illustration_fragment_candidate(block: Block, box: Box, width: int, height: int) -> bool:
+    if block.label in {"schematic/circuit", "table"}:
+        return False
+
+    page_area = max(1, width * height)
+    area_ratio = box.area / page_area
+    if area_ratio < 0.002 or area_ratio > 0.18:
+        return False
+    if box.w < width * 0.035 or box.h < height * 0.018:
+        return False
+
+    features = block.features
+    line_art = float(features.get("line_art_score", 0.0))
+    edge = float(features.get("edge_density", 0.0))
+    ink = float(features.get("ink_density", 1.0))
+    gray_std = float(features.get("gray_std", 0.0))
+    saturation = float(features.get("saturation_p80", 0.0))
+    text_score = float(features.get("max_text_score", 0.0))
+    component_signature = float(features.get("component_signature_score", 0.0))
+
+    if block.label == "other":
+        return (ink < 0.055 and gray_std > 0.12) or (line_art > 0.08 and edge > 0.035)
+
+    if block.label == "image":
+        if box.h <= height * 0.035 and box.w / max(1, box.h) > 7.0:
+            return False
+        return saturation > 0.08 or gray_std > 0.26 or line_art > 0.12
+
+    if block.label == "diagram":
+        return ink < 0.22 and (line_art > 0.12 or edge > 0.10 or component_signature > 0.35)
+
+    if block.label != "text":
+        return False
+
+    likely_prose = (
+        block.orientation == "horizontal"
+        and block.confidence >= 0.86
+        and text_score >= 0.74
+        and box.h >= height * 0.055
+        and component_signature < 0.50
+    )
+    if likely_prose:
+        return False
+
+    line_art_text = (
+        ink < 0.20
+        and gray_std > 0.24
+        and (
+            line_art > 0.16
+            or edge > 0.14
+            or component_signature > 0.50
+        )
+    )
+    return line_art_text and (
+        block.orientation != "horizontal"
+        or block.confidence < 0.82
+        or component_signature > 0.55
+        or line_art > 0.26
+    )
+
+
+def illustration_fragment_seed(block: Block, box: Box, width: int, height: int) -> bool:
+    if not illustration_fragment_candidate(block, box, width, height):
+        return False
+
+    features = block.features
+    line_art = float(features.get("line_art_score", 0.0))
+    edge = float(features.get("edge_density", 0.0))
+    gray_std = float(features.get("gray_std", 0.0))
+    component_signature = float(features.get("component_signature_score", 0.0))
+
+    if box.w < width * 0.12 or box.h < height * 0.07:
+        return False
+    if block.label == "image":
+        return True
+    return (
+        block.orientation in {"diagonal", "vertical"}
+        or (component_signature > 0.65 and edge > 0.10 and gray_std > 0.32)
+        or (line_art > 0.28 and edge > 0.13)
+    )
+
+
+def illustration_fragment_neighbor(group_box: Box, candidate: Box, width: int, height: int) -> bool:
+    margin = max(8, min(width, height) // 100)
+    direct_overlap = overlap_area(group_box, candidate)
+    if direct_overlap / max(1, min(group_box.area, candidate.area)) >= 0.10:
+        return True
+
+    horizontal_gap = max(0, max(group_box.x, candidate.x) - min(group_box.x2, candidate.x2))
+    vertical_overlap = box_vertical_overlap_height(group_box, candidate)
+    if horizontal_gap <= margin and vertical_overlap >= min(group_box.h, candidate.h) * 0.35:
+        return True
+
+    vertical_gap = max(0, max(group_box.y, candidate.y) - min(group_box.y2, candidate.y2))
+    horizontal_overlap = box_horizontal_overlap_width(group_box, candidate)
+    return vertical_gap <= margin and horizontal_overlap >= min(group_box.w, candidate.w) * 0.45
+
+
+def merge_illustration_fragments_into_images(
+    classified: list[tuple[Block, Box]],
+    image,
+    mask,
+    edges,
+    ann,
+    scale: float,
+    width: int,
+    height: int,
+) -> list[tuple[Block, Box]]:
+    if len(classified) < 2:
+        return classified
+
+    page_area = max(1, width * height)
+    items = classified[:]
+    changed = True
+    while changed:
+        changed = False
+        for seed_index, (seed_block, seed_box) in enumerate(items):
+            if not illustration_fragment_seed(seed_block, seed_box, width, height):
+                continue
+
+            group = [seed_index]
+            group_box = seed_box
+            inner_changed = True
+            while inner_changed:
+                inner_changed = False
+                for candidate_index, (candidate_block, candidate_box) in enumerate(items):
+                    if candidate_index in group:
+                        continue
+                    if not illustration_fragment_candidate(candidate_block, candidate_box, width, height):
+                        continue
+                    if not illustration_fragment_neighbor(group_box, candidate_box, width, height):
+                        continue
+
+                    tentative = union_box(group_box, candidate_box)
+                    if tentative.area / page_area > 0.24:
+                        continue
+                    if tentative.w > width * 0.82 or tentative.h > height * 0.34:
+                        continue
+
+                    group.append(candidate_index)
+                    group_box = tentative
+                    inner_changed = True
+
+            if len(group) < 2:
+                continue
+
+            first_index = min(group, key=lambda index: (items[index][1].y, items[index][1].x))
+            first_number = items[first_index][0].ident.split("_", 1)[0]
+            group_items = [items[index] for index in group]
+            merged_block, merged_box = merged_classified_item(
+                group_items,
+                "image",
+                f"{first_number}_image",
+                image,
+                mask,
+                edges,
+                ann,
+                scale,
+                width,
+                height,
+                "illustration_fragment_merge",
+            )
+            kept = [(block, box) for index, (block, box) in enumerate(items) if index not in group]
+            kept.append((merged_block, merged_box))
+            items = sorted(kept, key=lambda item: (item[1].y, item[1].x))
+            changed = True
+            break
 
     return sorted(items, key=lambda item: (item[1].y, item[1].x))
 
@@ -2580,7 +2970,7 @@ def caption_candidate_for_figure(figure_block: Block, text_block: Block) -> dict
 
 
 def internal_caption_probe_candidate(figure_block: Block) -> dict[str, object] | None:
-    if figure_block.label not in {"schematic/circuit", "diagram"}:
+    if figure_block.label not in {"schematic/circuit", "diagram", "pcb"}:
         return None
 
     figure_box = box_from_list(figure_block.bbox)
@@ -2672,6 +3062,9 @@ def classify_blocks(
     classified = merge_line_art_attachments_into_schematics(
         classified, image, mask, edges, ann, scale=scale, width=analysis_w, height=analysis_h
     )
+    classified = merge_illustration_fragments_into_images(
+        classified, image, mask, edges, ann, scale=scale, width=analysis_w, height=analysis_h
+    )
     all_blocks = suppress_nested_text_blocks([block for block, _ in classified])
     assign_visual_outlines(all_blocks)
     blocks = suppress_text_inside_schematics(all_blocks)
@@ -2739,9 +3132,16 @@ def draw_preview(
 
         label = block_preview_label(block)
         (text_w, text_h), baseline = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.52, 1)
-        top = max(0, y1 - text_h - baseline - 5)
-        cv2.rectangle(preview, (x1, top), (x1 + text_w + 6, top + text_h + baseline + 5), color, -1)
-        cv2.putText(preview, label, (x1 + 3, top + text_h + 2), cv2.FONT_HERSHEY_SIMPLEX, 0.52, (255, 255, 255), 1, cv2.LINE_AA)
+        label_w = text_w + 6
+        label_h = text_h + baseline + 5
+        anchor_x, anchor_y = preview_label_anchor(block, x1, y1, scale)
+        label_x = max(0, min(preview_w - label_w, anchor_x))
+        top = anchor_y - label_h
+        if top < 0:
+            top = min(preview_h - label_h, anchor_y)
+        top = max(0, top)
+        cv2.rectangle(preview, (label_x, top), (label_x + label_w, top + label_h), color, -1)
+        cv2.putText(preview, label, (label_x + 3, top + text_h + 2), cv2.FONT_HERSHEY_SIMPLEX, 0.52, (255, 255, 255), 1, cv2.LINE_AA)
 
     if add_header:
         preview_subtitle = subtitle if subtitle is not None else f"{page_dir.name} | blocks: {block_counts_text(blocks)}"

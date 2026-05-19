@@ -38,6 +38,11 @@ CAPACITOR_MIN_LENGTH = 7
 CAPACITOR_MAX_GAP_RATIO = 0.060
 CAPACITOR_MAX_PAIR_COUNT = 24
 SIGNATURE_AREA_NORMALIZER = 42000.0
+PCB_TRACE_DISTANCE_MIN = 2.1
+PCB_PAD_MIN_SIDE = 4
+PCB_PAD_MAX_SIDE_RATIO = 0.070
+PCB_PAD_MIN_CIRCULARITY = 0.28
+PCB_BOARD_EDGE_BAND_RATIO = 0.08
 
 
 def require_dependencies() -> None:
@@ -130,6 +135,58 @@ def contour_symbol_counts(mask) -> dict[str, int]:
     return counts
 
 
+def pcb_signature_features(mask) -> dict[str, float]:
+    require_dependencies()
+    binary = (mask > 0).astype(np.uint8)
+    height, width = binary.shape[:2]
+    area = max(1, width * height)
+
+    distance = cv2.distanceTransform(binary, cv2.DIST_L2, 3)
+    thick_trace = distance >= PCB_TRACE_DISTANCE_MIN
+    thick_trace_density = min(float(thick_trace.sum()) / area * 22.0, 1.0)
+
+    contours, _ = cv2.findContours(binary, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+    pad_count = 0
+    max_pad_side = max(PCB_PAD_MIN_SIDE + 2, int(round(min(width, height) * PCB_PAD_MAX_SIDE_RATIO)))
+    for contour in contours:
+        contour_area = float(cv2.contourArea(contour))
+        if contour_area < 4.0:
+            continue
+        x, y, w, h = cv2.boundingRect(contour)
+        if min(w, h) < PCB_PAD_MIN_SIDE or max(w, h) > max_pad_side:
+            continue
+        aspect = max(w, h) / max(1, min(w, h))
+        if aspect > 1.8:
+            continue
+        perimeter = float(cv2.arcLength(contour, True))
+        if perimeter <= 0.0:
+            continue
+        circularity = 4.0 * np.pi * contour_area / max(perimeter * perimeter, 1e-6)
+        if circularity >= PCB_PAD_MIN_CIRCULARITY:
+            pad_count += 1
+
+    normalizer = max(1.0, area / SIGNATURE_AREA_NORMALIZER)
+    pad_density = min(pad_count / normalizer / 5.0, 1.0)
+
+    h_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (max(12, width // 12), 1))
+    v_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1, max(12, height // 12)))
+    h_lines = cv2.morphologyEx(mask, cv2.MORPH_OPEN, h_kernel)
+    v_lines = cv2.morphologyEx(mask, cv2.MORPH_OPEN, v_kernel)
+    band_x = max(3, int(round(width * PCB_BOARD_EDGE_BAND_RATIO)))
+    band_y = max(3, int(round(height * PCB_BOARD_EDGE_BAND_RATIO)))
+    top_bottom = float((h_lines[:band_y, :] > 0).sum() + (h_lines[max(0, height - band_y) :, :] > 0).sum())
+    left_right = float((v_lines[:, :band_x] > 0).sum() + (v_lines[:, max(0, width - band_x) :] > 0).sum())
+    board_outline_score = min((top_bottom / max(1.0, width * 2.0) + left_right / max(1.0, height * 2.0)) * 2.0, 1.0)
+
+    score = min(0.72 * thick_trace_density + 0.26 * pad_density + 0.18 * board_outline_score, 1.0)
+    return {
+        "pcb_trace_density": float(thick_trace_density),
+        "pcb_pad_density": float(pad_density),
+        "pcb_board_outline_score": float(board_outline_score),
+        "pcb_signature_score": float(score),
+    }
+
+
 def component_signature_features(mask, edges) -> dict[str, float]:
     require_dependencies()
     height, width = mask.shape[:2]
@@ -157,11 +214,14 @@ def component_signature_features(mask, edges) -> dict[str, float]:
         + 0.18 * transistor_density,
         1.0,
     )
+    pcb_features = pcb_signature_features(mask)
 
-    return {
+    features = {
         "component_signature_score": float(score),
         "resistor_symbol_density": float(resistor_density),
         "capacitor_symbol_density": float(capacitor_density),
         "diode_symbol_density": float(diode_density),
         "transistor_symbol_density": float(transistor_density),
     }
+    features.update(pcb_features)
+    return features

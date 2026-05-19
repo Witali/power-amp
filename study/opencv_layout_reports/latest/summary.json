@@ -5,10 +5,10 @@
     "source": "../../opencv_layout_regression_pages/sources/b.1997-04.018.jpg",
     "layout": "detected/b.1997-04.018/layout.json",
     "preview": "detected/b.1997-04.018/preview.png",
-    "block_count": 12,
+    "block_count": 11,
     "counts": {
       "schematic": 2,
-      "text": 9,
+      "text": 8,
       "image": 1
     },
     "warning_count": 12
@@ -19,12 +19,13 @@
     "source": "../../opencv_layout_regression_pages/sources/b.1997-12.015.jpg",
     "layout": "detected/b.1997-12.015/layout.json",
     "preview": "detected/b.1997-12.015/preview.png",
-    "block_count": 12,
+    "block_count": 11,
     "counts": {
-      "text": 11,
+      "text": 9,
+      "image": 1,
       "schematic": 1
     },
-    "warning_count": 8
+    "warning_count": 9
   },
   {
     "id": "b.1997-12.016",
@@ -32,13 +33,12 @@
     "source": "../../opencv_layout_regression_pages/sources/b.1997-12.016.jpg",
     "layout": "detected/b.1997-12.016/layout.json",
     "preview": "detected/b.1997-12.016/preview.png",
-    "block_count": 8,
+    "block_count": 7,
     "counts": {
       "text": 6,
-      "schematic": 1,
-      "diagram": 1
+      "schematic": 1
     },
-    "warning_count": 12
+    "warning_count": 11
   },
   {
     "id": "b.1998-12.018",
@@ -88,11 +88,12 @@
     "preview": "detected/b.1999-10.018/preview.png",
     "block_count": 14,
     "counts": {
-      "image": 2,
+      "image": 1,
       "text": 11,
-      "schematic": 1
+      "schematic": 1,
+      "table": 1
     },
-    "warning_count": 8
+    "warning_count": 6
   },
   {
     "id": "b.2000-02.036",
@@ -100,13 +101,13 @@
     "source": "../../opencv_layout_regression_pages/sources/b.2000-02.036.jpg",
     "layout": "detected/b.2000-02.036/layout.json",
     "preview": "detected/b.2000-02.036/preview.png",
-    "block_count": 12,
+    "block_count": 8,
     "counts": {
-      "schematic": 2,
-      "text": 8,
-      "image": 2
+      "schematic": 1,
+      "text": 4,
+      "image": 3
     },
-    "warning_count": 18
+    "warning_count": 11
   },
   {
     "id": "b.2000-02.037",
@@ -114,12 +115,12 @@
     "source": "../../opencv_layout_regression_pages/sources/b.2000-02.037.jpg",
     "layout": "detected/b.2000-02.037/layout.json",
     "preview": "detected/b.2000-02.037/preview.png",
-    "block_count": 20,
+    "block_count": 18,
     "counts": {
-      "text": 17,
-      "schematic": 3
+      "text": 16,
+      "schematic": 2
     },
-    "warning_count": 12
+    "warning_count": 11
   },
   {
     "id": "b.2000-09.011",
@@ -183,14 +184,13 @@
     "source": "../../opencv_layout_regression_pages/sources/b.2000-11.011.jpg",
     "layout": "detected/b.2000-11.011/layout.json",
     "preview": "detected/b.2000-11.011/preview.png",
-    "block_count": 13,
+    "block_count": 12,
     "counts": {
-      "image": 1,
-      "text": 10,
-      "other": 1,
+      "image": 3,
+      "text": 8,
       "diagram": 1
     },
-    "warning_count": 12
+    "warning_count": 13
   },
   {
     "id": "b.2000-11.012",
@@ -212,13 +212,13 @@
     "source": "../../opencv_layout_regression_pages/sources/b.2000-11.013.jpg",
     "layout": "detected/b.2000-11.013/layout.json",
     "preview": "detected/b.2000-11.013/preview.png",
-    "block_count": 13,
+    "block_count": 14,
     "counts": {
       "image": 3,
-      "text": 9,
+      "text": 10,
       "schematic": 1
     },
-    "warning_count": 17
+    "warning_count": 18
   },
   {
     "id": "b.2000-01.042",
@@ -230,10 +230,11 @@
     "counts": {
       "image": 2,
       "text": 11,
-      "other": 1,
-      "schematic": 3
+      "pcb": 1,
+      "schematic": 2,
+      "table": 1
     },
-    "warning_count": 16
+    "warning_count": 14
   },
   {
     "id": "b.2000-01.043",
@@ -241,14 +242,15 @@
     "source": "../../opencv_layout_regression_pages/sources/b.2000-01.043.jpg",
     "layout": "detected/b.2000-01.043/layout.json",
     "preview": "detected/b.2000-01.043/preview.png",
-    "block_count": 29,
+    "block_count": 20,
     "counts": {
-      "text": 14,
+      "text": 11,
       "diagram": 1,
       "other": 1,
-      "schematic": 13
+      "image": 1,
+      "schematic": 6
     },
-    "warning_count": 36
+    "warning_count": 26
   },
   {
     "id": "b.2000-11.043",

@@ -13,6 +13,7 @@
     "layout:frequency": "python scripts/analyze_page_frequency.py",
     "layout:report": "python scripts/generate_opencv_layout_report.py",
     "lint:svg": "python scripts/lint_svg.py",
+    "project:index": "python scripts/generate_project_index.py",
     "render:svg": "python scripts/project_tasks.py render",
     "spellcheck": "python scripts/project_tasks.py spellcheck",
     "symbols": "python scripts/project_tasks.py symbols",
