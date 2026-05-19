@@ -1,0 +1,281 @@
+[
+  {
+    "id": "b.1997-04.018",
+    "reason": "compact amplifier article with mostly prose and a small technical figure-like area",
+    "source": "../../opencv_layout_regression_pages/sources/b.1997-04.018.jpg",
+    "layout": "detected/b.1997-04.018/layout.json",
+    "preview": "detected/b.1997-04.018/preview.png",
+    "block_count": 12,
+    "counts": {
+      "schematic": 2,
+      "text": 9,
+      "image": 1
+    },
+    "warning_count": 12
+  },
+  {
+    "id": "b.1997-12.015",
+    "reason": "large bold title, dense multi-column Russian text, side material, and mixed scale text",
+    "source": "../../opencv_layout_regression_pages/sources/b.1997-12.015.jpg",
+    "layout": "detected/b.1997-12.015/layout.json",
+    "preview": "detected/b.1997-12.015/preview.png",
+    "block_count": 12,
+    "counts": {
+      "text": 11,
+      "schematic": 1
+    },
+    "warning_count": 8
+  },
+  {
+    "id": "b.1997-12.016",
+    "reason": "continuation page with dense columns and non-standard text flow",
+    "source": "../../opencv_layout_regression_pages/sources/b.1997-12.016.jpg",
+    "layout": "detected/b.1997-12.016/layout.json",
+    "preview": "detected/b.1997-12.016/preview.png",
+    "block_count": 8,
+    "counts": {
+      "text": 6,
+      "schematic": 1,
+      "diagram": 1
+    },
+    "warning_count": 12
+  },
+  {
+    "id": "b.1998-12.018",
+    "reason": "known difficult negative/edge case for separating text from embedded figure regions",
+    "source": "../../opencv_layout_regression_pages/sources/b.1998-12.018.jpg",
+    "layout": "detected/b.1998-12.018/layout.json",
+    "preview": "detected/b.1998-12.018/preview.png",
+    "block_count": 17,
+    "counts": {
+      "text": 16,
+      "schematic": 1
+    },
+    "warning_count": 15
+  },
+  {
+    "id": "b.1999-10.014",
+    "reason": "extra cached page outside the main candidate folder, useful for path and layout diversity",
+    "source": "../../opencv_layout_regression_pages/sources/b.1999-10.014.jpg",
+    "layout": "detected/b.1999-10.014/layout.json",
+    "preview": "detected/b.1999-10.014/preview.png",
+    "block_count": 6,
+    "counts": {
+      "text": 5,
+      "image": 1
+    },
+    "warning_count": 2
+  },
+  {
+    "id": "b.1999-10.017",
+    "reason": "article start with title, normal prose columns, and schematic content",
+    "source": "../../opencv_layout_regression_pages/sources/b.1999-10.017.jpg",
+    "layout": "detected/b.1999-10.017/layout.json",
+    "preview": "detected/b.1999-10.017/preview.png",
+    "block_count": 13,
+    "counts": {
+      "image": 1,
+      "text": 10,
+      "schematic": 2
+    },
+    "warning_count": 7
+  },
+  {
+    "id": "b.1999-10.018",
+    "reason": "mixed page with text, visual material, and side labels",
+    "source": "../../opencv_layout_regression_pages/sources/b.1999-10.018.jpg",
+    "layout": "detected/b.1999-10.018/layout.json",
+    "preview": "detected/b.1999-10.018/preview.png",
+    "block_count": 14,
+    "counts": {
+      "image": 2,
+      "text": 11,
+      "schematic": 1
+    },
+    "warning_count": 8
+  },
+  {
+    "id": "b.2000-02.036",
+    "reason": "large schematic, stacked waveform diagram, captions, and text columns",
+    "source": "../../opencv_layout_regression_pages/sources/b.2000-02.036.jpg",
+    "layout": "detected/b.2000-02.036/layout.json",
+    "preview": "detected/b.2000-02.036/preview.png",
+    "block_count": 12,
+    "counts": {
+      "schematic": 2,
+      "text": 8,
+      "image": 2
+    },
+    "warning_count": 18
+  },
+  {
+    "id": "b.2000-02.037",
+    "reason": "large title, technical characteristics table, small schematic Fig. 4, and prose columns",
+    "source": "../../opencv_layout_regression_pages/sources/b.2000-02.037.jpg",
+    "layout": "detected/b.2000-02.037/layout.json",
+    "preview": "detected/b.2000-02.037/preview.png",
+    "block_count": 20,
+    "counts": {
+      "text": 17,
+      "schematic": 3
+    },
+    "warning_count": 12
+  },
+  {
+    "id": "b.2000-09.011",
+    "reason": "bridge amplifier article start with dense title text and figure/table region",
+    "source": "../../opencv_layout_regression_pages/sources/b.2000-09.011.jpg",
+    "layout": "detected/b.2000-09.011/layout.json",
+    "preview": "detected/b.2000-09.011/preview.png",
+    "block_count": 9,
+    "counts": {
+      "image": 1,
+      "text": 7,
+      "schematic": 1
+    },
+    "warning_count": 7
+  },
+  {
+    "id": "b.2000-09.012",
+    "reason": "continuation with amplifier schematic material and multi-column text",
+    "source": "../../opencv_layout_regression_pages/sources/b.2000-09.012.jpg",
+    "layout": "detected/b.2000-09.012/layout.json",
+    "preview": "detected/b.2000-09.012/preview.png",
+    "block_count": 13,
+    "counts": {
+      "image": 1,
+      "text": 11,
+      "schematic": 1
+    },
+    "warning_count": 9
+  },
+  {
+    "id": "b.2000-10.014",
+    "reason": "text-heavy amplifier page with a large schematic near the bottom",
+    "source": "../../opencv_layout_regression_pages/sources/b.2000-10.014.jpg",
+    "layout": "detected/b.2000-10.014/layout.json",
+    "preview": "detected/b.2000-10.014/preview.png",
+    "block_count": 6,
+    "counts": {
+      "text": 4,
+      "image": 1,
+      "schematic": 1
+    },
+    "warning_count": 3
+  },
+  {
+    "id": "b.2000-10.015",
+    "reason": "continuation page with circuit-related visual regions and dense text",
+    "source": "../../opencv_layout_regression_pages/sources/b.2000-10.015.jpg",
+    "layout": "detected/b.2000-10.015/layout.json",
+    "preview": "detected/b.2000-10.015/preview.png",
+    "block_count": 18,
+    "counts": {
+      "text": 15,
+      "image": 2,
+      "schematic": 1
+    },
+    "warning_count": 14
+  },
+  {
+    "id": "b.2000-11.011",
+    "reason": "title page with illustration-like material, prose columns, and side labels",
+    "source": "../../opencv_layout_regression_pages/sources/b.2000-11.011.jpg",
+    "layout": "detected/b.2000-11.011/layout.json",
+    "preview": "detected/b.2000-11.011/preview.png",
+    "block_count": 13,
+    "counts": {
+      "image": 1,
+      "text": 10,
+      "other": 1,
+      "diagram": 1
+    },
+    "warning_count": 12
+  },
+  {
+    "id": "b.2000-11.012",
+    "reason": "large connected schematic fragments and text; useful for schematic merge regression",
+    "source": "../../opencv_layout_regression_pages/sources/b.2000-11.012.jpg",
+    "layout": "detected/b.2000-11.012/layout.json",
+    "preview": "detected/b.2000-11.012/preview.png",
+    "block_count": 5,
+    "counts": {
+      "image": 1,
+      "text": 3,
+      "schematic": 1
+    },
+    "warning_count": 7
+  },
+  {
+    "id": "b.2000-11.013",
+    "reason": "mixed page with image/table/schematic/text and vertical margin labels",
+    "source": "../../opencv_layout_regression_pages/sources/b.2000-11.013.jpg",
+    "layout": "detected/b.2000-11.013/layout.json",
+    "preview": "detected/b.2000-11.013/preview.png",
+    "block_count": 13,
+    "counts": {
+      "image": 3,
+      "text": 9,
+      "schematic": 1
+    },
+    "warning_count": 17
+  },
+  {
+    "id": "b.2000-01.042",
+    "reason": "power-supply article page with simple stabilizer schematic and technical blocks",
+    "source": "../../opencv_layout_regression_pages/sources/b.2000-01.042.jpg",
+    "layout": "detected/b.2000-01.042/layout.json",
+    "preview": "detected/b.2000-01.042/preview.png",
+    "block_count": 17,
+    "counts": {
+      "image": 2,
+      "text": 11,
+      "other": 1,
+      "schematic": 3
+    },
+    "warning_count": 16
+  },
+  {
+    "id": "b.2000-01.043",
+    "reason": "page with several small schematics/diagrams and repeated figure blocks",
+    "source": "../../opencv_layout_regression_pages/sources/b.2000-01.043.jpg",
+    "layout": "detected/b.2000-01.043/layout.json",
+    "preview": "detected/b.2000-01.043/preview.png",
+    "block_count": 29,
+    "counts": {
+      "text": 14,
+      "diagram": 1,
+      "other": 1,
+      "schematic": 13
+    },
+    "warning_count": 36
+  },
+  {
+    "id": "b.2000-11.043",
+    "reason": "impulse stabilizer article with photo-like and schematic-like content",
+    "source": "../../opencv_layout_regression_pages/sources/b.2000-11.043.jpg",
+    "layout": "detected/b.2000-11.043/layout.json",
+    "preview": "detected/b.2000-11.043/preview.png",
+    "block_count": 11,
+    "counts": {
+      "image": 1,
+      "text": 9,
+      "schematic": 1
+    },
+    "warning_count": 4
+  },
+  {
+    "id": "b.2000-11.044",
+    "reason": "continuation with schematic block and dense technical prose",
+    "source": "../../opencv_layout_regression_pages/sources/b.2000-11.044.jpg",
+    "layout": "detected/b.2000-11.044/layout.json",
+    "preview": "detected/b.2000-11.044/preview.png",
+    "block_count": 12,
+    "counts": {
+      "image": 1,
+      "text": 10,
+      "schematic": 1
+    },
+    "warning_count": 11
+  }
+]

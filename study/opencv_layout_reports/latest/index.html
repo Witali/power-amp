@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OpenCV layout regression report</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #17202a;
+      --muted: #5e6875;
+      --line: #d6dbe1;
+      --panel: #f7f9fb;
+      --accent: #1f6feb;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font: 15px/1.45 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: #ffffff;
+    }
+    main {
+      width: min(1280px, calc(100% - 32px));
+      margin: 28px auto 48px;
+    }
+    h1 { margin: 0 0 6px; font-size: 28px; }
+    h2 { margin: 0; font-size: 18px; }
+    p { margin: 6px 0; }
+    a { color: var(--accent); }
+    .summary {
+      padding: 14px 16px;
+      margin: 18px 0 22px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      border-radius: 8px;
+    }
+    .summary ul { margin: 8px 0 0 18px; padding: 0; }
+    .page-card {
+      padding: 16px 0 24px;
+      border-top: 1px solid var(--line);
+    }
+    .meta { color: var(--muted); font-size: 13px; }
+    .pair {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 14px;
+      align-items: start;
+      margin-top: 10px;
+    }
+    figure { margin: 0; }
+    img {
+      display: block;
+      width: 100%;
+      max-height: 420px;
+      object-fit: contain;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+    figcaption {
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    @media (max-width: 760px) {
+      .pair { grid-template-columns: 1fr; }
+      main { width: min(100% - 20px, 1280px); }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>OpenCV layout regression report</h1>
+    <p class="meta">Manifest: OpenCV layout regression pages | pages: 20 | total blocks: 260 | text: 196, schematic: 37, diagram: 3, image: 21, other: 3</p>
+    <section class="summary">
+      <strong>Automatic notes</strong>
+      <ul>
+        <li>Processed 20 page(s).</li>
+        <li>Frequency validation warnings are present on: b.1997-04.018, b.1997-12.015, b.1997-12.016, b.1998-12.018, b.1999-10.014, b.1999-10.017, b.1999-10.018, b.2000-02.036, b.2000-02.037, b.2000-09.011, b.2000-09.012, b.2000-10.014, b.2000-10.015, b.2000-11.011, b.2000-11.012, b.2000-11.013, b.2000-01.042, b.2000-01.043, b.2000-11.043, b.2000-11.044.</li>
+      </ul>
+    </section>
+
+    <section class="page-card">
+      <header>
+        <h2>b.1997-04.018</h2>
+        <p>compact amplifier article with mostly prose and a small technical figure-like area</p>
+        <p class="meta">blocks: 12 | text: 9, schematic: 2, image: 1 | warnings: 12 | <a href="detected/b.1997-04.018/layout.json">layout.json</a></p>
+      </header>
+      <div class="pair">
+        <figure>
+          <a href="../../opencv_layout_regression_pages/sources/b.1997-04.018.jpg" target="_blank"><img src="../../opencv_layout_regression_pages/sources/b.1997-04.018.jpg" alt="b.1997-04.018 original"></a>
+          <figcaption>Original scan</figcaption>
+        </figure>
+        <figure>
+          <a href="detected/b.1997-04.018/preview.png" target="_blank"><img src="detected/b.1997-04.018/preview.png" alt="b.1997-04.018 OpenCV markup"></a>
+          <figcaption>OpenCV markup</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="page-card">
+      <header>
+        <h2>b.1997-12.015</h2>
+        <p>large bold title, dense multi-column Russian text, side material, and mixed scale text</p>
+        <p class="meta">blocks: 12 | text: 11, schematic: 1 | warnings: 8 | <a href="detected/b.1997-12.015/layout.json">layout.json</a></p>
+      </header>
+      <div class="pair">
+        <figure>
+          <a href="../../opencv_layout_regression_pages/sources/b.1997-12.015.jpg" target="_blank"><img src="../../opencv_layout_regression_pages/sources/b.1997-12.015.jpg" alt="b.1997-12.015 original"></a>
+          <figcaption>Original scan</figcaption>
+        </figure>
+        <figure>
+          <a href="detected/b.1997-12.015/preview.png" target="_blank"><img src="detected/b.1997-12.015/preview.png" alt="b.1997-12.015 OpenCV markup"></a>
+          <figcaption>OpenCV markup</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="page-card">
+      <header>
+        <h2>b.1997-12.016</h2>
+        <p>continuation page with dense columns and non-standard text flow</p>
+        <p class="meta">blocks: 8 | text: 6, schematic: 1, diagram: 1 | warnings: 12 | <a href="detected/b.1997-12.016/layout.json">layout.json</a></p>
+      </header>
+      <div class="pair">
+        <figure>
+          <a href="../../opencv_layout_regression_pages/sources/b.1997-12.016.jpg" target="_blank"><img src="../../opencv_layout_regression_pages/sources/b.1997-12.016.jpg" alt="b.1997-12.016 original"></a>
+          <figcaption>Original scan</figcaption>
+        </figure>
+        <figure>
+          <a href="detected/b.1997-12.016/preview.png" target="_blank"><img src="detected/b.1997-12.016/preview.png" alt="b.1997-12.016 OpenCV markup"></a>
+          <figcaption>OpenCV markup</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="page-card">
+      <header>
+        <h2>b.1998-12.018</h2>
+        <p>known difficult negative/edge case for separating text from embedded figure regions</p>
+        <p class="meta">blocks: 17 | text: 16, schematic: 1 | warnings: 15 | <a href="detected/b.1998-12.018/layout.json">layout.json</a></p>
+      </header>
+      <div class="pair">
+        <figure>
+          <a href="../../opencv_layout_regression_pages/sources/b.1998-12.018.jpg" target="_blank"><img src="../../opencv_layout_regression_pages/sources/b.1998-12.018.jpg" alt="b.1998-12.018 original"></a>
+          <figcaption>Original scan</figcaption>
+        </figure>
+        <figure>
+          <a href="detected/b.1998-12.018/preview.png" target="_blank"><img src="detected/b.1998-12.018/preview.png" alt="b.1998-12.018 OpenCV markup"></a>
+          <figcaption>OpenCV markup</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="page-card">
+      <header>
+        <h2>b.1999-10.014</h2>
+        <p>extra cached page outside the main candidate folder, useful for path and layout diversity</p>
+        <p class="meta">blocks: 6 | text: 5, image: 1 | warnings: 2 | <a href="detected/b.1999-10.014/layout.json">layout.json</a></p>
+      </header>
+      <div class="pair">
+        <figure>
+          <a href="../../opencv_layout_regression_pages/sources/b.1999-10.014.jpg" target="_blank"><img src="../../opencv_layout_regression_pages/sources/b.1999-10.014.jpg" alt="b.1999-10.014 original"></a>
+          <figcaption>Original scan</figcaption>
+        </figure>
+        <figure>
+          <a href="detected/b.1999-10.014/preview.png" target="_blank"><img src="detected/b.1999-10.014/preview.png" alt="b.1999-10.014 OpenCV markup"></a>
+          <figcaption>OpenCV markup</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="page-card">
+      <header>
+        <h2>b.1999-10.017</h2>
+        <p>article start with title, normal prose columns, and schematic content</p>
+        <p class="meta">blocks: 13 | text: 10, schematic: 2, image: 1 | warnings: 7 | <a href="detected/b.1999-10.017/layout.json">layout.json</a></p>
+      </header>
+      <div class="pair">
+        <figure>
+          <a href="../../opencv_layout_regression_pages/sources/b.1999-10.017.jpg" target="_blank"><img src="../../opencv_layout_regression_pages/sources/b.1999-10.017.jpg" alt="b.1999-10.017 original"></a>
+          <figcaption>Original scan</figcaption>
+        </figure>
+        <figure>
+          <a href="detected/b.1999-10.017/preview.png" target="_blank"><img src="detected/b.1999-10.017/preview.png" alt="b.1999-10.017 OpenCV markup"></a>
+          <figcaption>OpenCV markup</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="page-card">
+      <header>
+        <h2>b.1999-10.018</h2>
+        <p>mixed page with text, visual material, and side labels</p>
+        <p class="meta">blocks: 14 | text: 11, schematic: 1, image: 2 | warnings: 8 | <a href="detected/b.1999-10.018/layout.json">layout.json</a></p>
+      </header>
+      <div class="pair">
+        <figure>
+          <a href="../../opencv_layout_regression_pages/sources/b.1999-10.018.jpg" target="_blank"><img src="../../opencv_layout_regression_pages/sources/b.1999-10.018.jpg" alt="b.1999-10.018 original"></a>
+          <figcaption>Original scan</figcaption>
+        </figure>
+        <figure>
+          <a href="detected/b.1999-10.018/preview.png" target="_blank"><img src="detected/b.1999-10.018/preview.png" alt="b.1999-10.018 OpenCV markup"></a>
+          <figcaption>OpenCV markup</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="page-card">
+      <header>
+        <h2>b.2000-02.036</h2>
+        <p>large schematic, stacked waveform diagram, captions, and text columns</p>
+        <p class="meta">blocks: 12 | text: 8, schematic: 2, image: 2 | warnings: 18 | <a href="detected/b.2000-02.036/layout.json">layout.json</a></p>
+      </header>
+      <div class="pair">
+        <figure>
+          <a href="../../opencv_layout_regression_pages/sources/b.2000-02.036.jpg" target="_blank"><img src="../../opencv_layout_regression_pages/sources/b.2000-02.036.jpg" alt="b.2000-02.036 original"></a>
+          <figcaption>Original scan</figcaption>
+        </figure>
+        <figure>
+          <a href="detected/b.2000-02.036/preview.png" target="_blank"><img src="detected/b.2000-02.036/preview.png" alt="b.2000-02.036 OpenCV markup"></a>
+          <figcaption>OpenCV markup</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="page-card">
+      <header>
+        <h2>b.2000-02.037</h2>
+        <p>large title, technical characteristics table, small schematic Fig. 4, and prose columns</p>
+        <p class="meta">blocks: 20 | text: 17, schematic: 3 | warnings: 12 | <a href="detected/b.2000-02.037/layout.json">layout.json</a></p>
+      </header>
+      <div class="pair">
+        <figure>
+          <a href="../../opencv_layout_regression_pages/sources/b.2000-02.037.jpg" target="_blank"><img src="../../opencv_layout_regression_pages/sources/b.2000-02.037.jpg" alt="b.2000-02.037 original"></a>
+          <figcaption>Original scan</figcaption>
+        </figure>
+        <figure>
+          <a href="detected/b.2000-02.037/preview.png" target="_blank"><img src="detected/b.2000-02.037/preview.png" alt="b.2000-02.037 OpenCV markup"></a>
+          <figcaption>OpenCV markup</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="page-card">
+      <header>
+        <h2>b.2000-09.011</h2>
+        <p>bridge amplifier article start with dense title text and figure/table region</p>
+        <p class="meta">blocks: 9 | text: 7, schematic: 1, image: 1 | warnings: 7 | <a href="detected/b.2000-09.011/layout.json">layout.json</a></p>
+      </header>
+      <div class="pair">
+        <figure>
+          <a href="../../opencv_layout_regression_pages/sources/b.2000-09.011.jpg" target="_blank"><img src="../../opencv_layout_regression_pages/sources/b.2000-09.011.jpg" alt="b.2000-09.011 original"></a>
+          <figcaption>Original scan</figcaption>
+        </figure>
+        <figure>
+          <a href="detected/b.2000-09.011/preview.png" target="_blank"><img src="detected/b.2000-09.011/preview.png" alt="b.2000-09.011 OpenCV markup"></a>
+          <figcaption>OpenCV markup</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="page-card">
+      <header>
+        <h2>b.2000-09.012</h2>
+        <p>continuation with amplifier schematic material and multi-column text</p>
+        <p class="meta">blocks: 13 | text: 11, schematic: 1, image: 1 | warnings: 9 | <a href="detected/b.2000-09.012/layout.json">layout.json</a></p>
+      </header>
+      <div class="pair">
+        <figure>
+          <a href="../../opencv_layout_regression_pages/sources/b.2000-09.012.jpg" target="_blank"><img src="../../opencv_layout_regression_pages/sources/b.2000-09.012.jpg" alt="b.2000-09.012 original"></a>
+          <figcaption>Original scan</figcaption>
+        </figure>
+        <figure>
+          <a href="detected/b.2000-09.012/preview.png" target="_blank"><img src="detected/b.2000-09.012/preview.png" alt="b.2000-09.012 OpenCV markup"></a>
+          <figcaption>OpenCV markup</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="page-card">
+      <header>
+        <h2>b.2000-10.014</h2>
+        <p>text-heavy amplifier page with a large schematic near the bottom</p>
+        <p class="meta">blocks: 6 | text: 4, schematic: 1, image: 1 | warnings: 3 | <a href="detected/b.2000-10.014/layout.json">layout.json</a></p>
+      </header>
+      <div class="pair">
+        <figure>
+          <a href="../../opencv_layout_regression_pages/sources/b.2000-10.014.jpg" target="_blank"><img src="../../opencv_layout_regression_pages/sources/b.2000-10.014.jpg" alt="b.2000-10.014 original"></a>
+          <figcaption>Original scan</figcaption>
+        </figure>
+        <figure>
+          <a href="detected/b.2000-10.014/preview.png" target="_blank"><img src="detected/b.2000-10.014/preview.png" alt="b.2000-10.014 OpenCV markup"></a>
+          <figcaption>OpenCV markup</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="page-card">
+      <header>
+        <h2>b.2000-10.015</h2>
+        <p>continuation page with circuit-related visual regions and dense text</p>
+        <p class="meta">blocks: 18 | text: 15, schematic: 1, image: 2 | warnings: 14 | <a href="detected/b.2000-10.015/layout.json">layout.json</a></p>
+      </header>
+      <div class="pair">
+        <figure>
+          <a href="../../opencv_layout_regression_pages/sources/b.2000-10.015.jpg" target="_blank"><img src="../../opencv_layout_regression_pages/sources/b.2000-10.015.jpg" alt="b.2000-10.015 original"></a>
+          <figcaption>Original scan</figcaption>
+        </figure>
+        <figure>
+          <a href="detected/b.2000-10.015/preview.png" target="_blank"><img src="detected/b.2000-10.015/preview.png" alt="b.2000-10.015 OpenCV markup"></a>
+          <figcaption>OpenCV markup</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="page-card">
+      <header>
+        <h2>b.2000-11.011</h2>
+        <p>title page with illustration-like material, prose columns, and side labels</p>
+        <p class="meta">blocks: 13 | text: 10, diagram: 1, image: 1, other: 1 | warnings: 12 | <a href="detected/b.2000-11.011/layout.json">layout.json</a></p>
+      </header>
+      <div class="pair">
+        <figure>
+          <a href="../../opencv_layout_regression_pages/sources/b.2000-11.011.jpg" target="_blank"><img src="../../opencv_layout_regression_pages/sources/b.2000-11.011.jpg" alt="b.2000-11.011 original"></a>
+          <figcaption>Original scan</figcaption>
+        </figure>
+        <figure>
+          <a href="detected/b.2000-11.011/preview.png" target="_blank"><img src="detected/b.2000-11.011/preview.png" alt="b.2000-11.011 OpenCV markup"></a>
+          <figcaption>OpenCV markup</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="page-card">
+      <header>
+        <h2>b.2000-11.012</h2>
+        <p>large connected schematic fragments and text; useful for schematic merge regression</p>
+        <p class="meta">blocks: 5 | text: 3, schematic: 1, image: 1 | warnings: 7 | <a href="detected/b.2000-11.012/layout.json">layout.json</a></p>
+      </header>
+      <div class="pair">
+        <figure>
+          <a href="../../opencv_layout_regression_pages/sources/b.2000-11.012.jpg" target="_blank"><img src="../../opencv_layout_regression_pages/sources/b.2000-11.012.jpg" alt="b.2000-11.012 original"></a>
+          <figcaption>Original scan</figcaption>
+        </figure>
+        <figure>
+          <a href="detected/b.2000-11.012/preview.png" target="_blank"><img src="detected/b.2000-11.012/preview.png" alt="b.2000-11.012 OpenCV markup"></a>
+          <figcaption>OpenCV markup</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="page-card">
+      <header>
+        <h2>b.2000-11.013</h2>
+        <p>mixed page with image/table/schematic/text and vertical margin labels</p>
+        <p class="meta">blocks: 13 | text: 9, schematic: 1, image: 3 | warnings: 17 | <a href="detected/b.2000-11.013/layout.json">layout.json</a></p>
+      </header>
+      <div class="pair">
+        <figure>
+          <a href="../../opencv_layout_regression_pages/sources/b.2000-11.013.jpg" target="_blank"><img src="../../opencv_layout_regression_pages/sources/b.2000-11.013.jpg" alt="b.2000-11.013 original"></a>
+          <figcaption>Original scan</figcaption>
+        </figure>
+        <figure>
+          <a href="detected/b.2000-11.013/preview.png" target="_blank"><img src="detected/b.2000-11.013/preview.png" alt="b.2000-11.013 OpenCV markup"></a>
+          <figcaption>OpenCV markup</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="page-card">
+      <header>
+        <h2>b.2000-01.042</h2>
+        <p>power-supply article page with simple stabilizer schematic and technical blocks</p>
+        <p class="meta">blocks: 17 | text: 11, schematic: 3, image: 2, other: 1 | warnings: 16 | <a href="detected/b.2000-01.042/layout.json">layout.json</a></p>
+      </header>
+      <div class="pair">
+        <figure>
+          <a href="../../opencv_layout_regression_pages/sources/b.2000-01.042.jpg" target="_blank"><img src="../../opencv_layout_regression_pages/sources/b.2000-01.042.jpg" alt="b.2000-01.042 original"></a>
+          <figcaption>Original scan</figcaption>
+        </figure>
+        <figure>
+          <a href="detected/b.2000-01.042/preview.png" target="_blank"><img src="detected/b.2000-01.042/preview.png" alt="b.2000-01.042 OpenCV markup"></a>
+          <figcaption>OpenCV markup</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="page-card">
+      <header>
+        <h2>b.2000-01.043</h2>
+        <p>page with several small schematics/diagrams and repeated figure blocks</p>
+        <p class="meta">blocks: 29 | text: 14, schematic: 13, diagram: 1, other: 1 | warnings: 36 | <a href="detected/b.2000-01.043/layout.json">layout.json</a></p>
+      </header>
+      <div class="pair">
+        <figure>
+          <a href="../../opencv_layout_regression_pages/sources/b.2000-01.043.jpg" target="_blank"><img src="../../opencv_layout_regression_pages/sources/b.2000-01.043.jpg" alt="b.2000-01.043 original"></a>
+          <figcaption>Original scan</figcaption>
+        </figure>
+        <figure>
+          <a href="detected/b.2000-01.043/preview.png" target="_blank"><img src="detected/b.2000-01.043/preview.png" alt="b.2000-01.043 OpenCV markup"></a>
+          <figcaption>OpenCV markup</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="page-card">
+      <header>
+        <h2>b.2000-11.043</h2>
+        <p>impulse stabilizer article with photo-like and schematic-like content</p>
+        <p class="meta">blocks: 11 | text: 9, schematic: 1, image: 1 | warnings: 4 | <a href="detected/b.2000-11.043/layout.json">layout.json</a></p>
+      </header>
+      <div class="pair">
+        <figure>
+          <a href="../../opencv_layout_regression_pages/sources/b.2000-11.043.jpg" target="_blank"><img src="../../opencv_layout_regression_pages/sources/b.2000-11.043.jpg" alt="b.2000-11.043 original"></a>
+          <figcaption>Original scan</figcaption>
+        </figure>
+        <figure>
+          <a href="detected/b.2000-11.043/preview.png" target="_blank"><img src="detected/b.2000-11.043/preview.png" alt="b.2000-11.043 OpenCV markup"></a>
+          <figcaption>OpenCV markup</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="page-card">
+      <header>
+        <h2>b.2000-11.044</h2>
+        <p>continuation with schematic block and dense technical prose</p>
+        <p class="meta">blocks: 12 | text: 10, schematic: 1, image: 1 | warnings: 11 | <a href="detected/b.2000-11.044/layout.json">layout.json</a></p>
+      </header>
+      <div class="pair">
+        <figure>
+          <a href="../../opencv_layout_regression_pages/sources/b.2000-11.044.jpg" target="_blank"><img src="../../opencv_layout_regression_pages/sources/b.2000-11.044.jpg" alt="b.2000-11.044 original"></a>
+          <figcaption>Original scan</figcaption>
+        </figure>
+        <figure>
+          <a href="detected/b.2000-11.044/preview.png" target="_blank"><img src="detected/b.2000-11.044/preview.png" alt="b.2000-11.044 OpenCV markup"></a>
+          <figcaption>OpenCV markup</figcaption>
+        </figure>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

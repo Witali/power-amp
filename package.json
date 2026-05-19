@@ -11,6 +11,7 @@
     "go:smoke": "pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/build_go_tools.ps1 -Smoke -Crops",
     "layout:calibrate": "python scripts/project_tasks.py layout-calibrate",
     "layout:frequency": "python scripts/analyze_page_frequency.py",
+    "layout:report": "python scripts/generate_opencv_layout_report.py",
     "lint:svg": "python scripts/lint_svg.py",
     "render:svg": "python scripts/project_tasks.py render",
     "spellcheck": "python scripts/project_tasks.py spellcheck",
