@@ -51,6 +51,7 @@ Use these standards as the baseline when drawing Russian-style radio schematics:
 - Keep a visible straight lead before each bend at a component terminal. Do not turn a wire immediately next to a component body or symbol outline.
 - Avoid crossing components, wires, and labels. Rearrange the schematic before accepting an ambiguous crossing.
 - Leave readable clearance around component bodies, transistor circles, labels, polarity marks, and node dots.
+- As a practical minimum, leave about one quarter of the nearest component width or height between a component body and unrelated conductors or labels. Increase this clearance around transistor circles and polarized capacitors when the symbol would otherwise look crowded.
 - Use net labels for long feedback, bootstrap, supply, or output links when a physical wire would make the schematic less readable.
 - Draw electrical links as continuous visible conductors unless a net label or explicit break makes the circuit easier to read.
 - Do not use corners, symbol endpoints, graphical dots inside component symbols, or line crossings as implicit branch points.

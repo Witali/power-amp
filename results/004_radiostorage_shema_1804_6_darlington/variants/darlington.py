@@ -53,11 +53,11 @@ THD_FREQUENCY_TARGET_POWERS_MW = [20.0, 50.0, 100.0]
 POWER_SWEEP_FREQS_HZ = [100.0, 500.0, 1000.0, 5000.0, 10000.0]
 POWER_SWEEP_INPUT_MVPP = [20.0, 50.0, 100.0, 200.0, 500.0, 1000.0, 2000.0, 5000.0]
 C2_VALUE_UF = 4700.0
-R2_VALUE = 47000.0
+R2_VALUE = 62000.0
 R3_VALUE = 10000.0
-RE_VT1_VALUE = 100.0
-R1A_BOOT_VALUE = 560.0
-R1B_BOOT_VALUE = 1800.0
+RE_VT1_VALUE = 51.0
+R1A_BOOT_VALUE = 620.0
+R1B_BOOT_VALUE = 3300.0
 CBOOT_VALUE_UF = 470.0
 
 
@@ -82,73 +82,84 @@ def diode_v_left_label(x: float, y1: float, y2: float, label: str) -> list[str]:
     ]
 
 
+def resistor_value_label(value: float) -> str:
+    if value >= 1000.0:
+        scaled = value / 1000.0
+        return f"{scaled:g}k"
+    return f"{value:g}"
+
+
 def darlington_schematic_svg() -> str:
     body: list[str] = [
         text(42, 42, "004 shema-1804-6 BJT audio amplifier, upper Darlington variant", 22, 700),
         text(42, 68, "Based on 003 bootstrap circuit; VT2A + VT2B form the upper Darlington emitter follower", 13),
-        line(300, 98, 1010, 98),
-        poly([(1010, 90), (1027, 98), (1010, 106)], "wire"),
-        text(1045, 104, "+12 V", 18, 700),
+        line(300, 98, 1080, 98),
+        poly([(1080, 90), (1097, 98), (1080, 106)], "wire"),
+        text(1115, 104, "+12 V", 18, 700),
         '<circle cx="460" cy="98" r="5" class="node"/>',
-        '<circle cx="710" cy="98" r="5" class="node"/>',
-        '<circle cx="860" cy="98" r="5" class="node"/>',
+        '<circle cx="720" cy="98" r="5" class="node"/>',
+        '<circle cx="870" cy="98" r="5" class="node"/>',
         *capacitor_v(300, 98, 220, "C1 1000u", "left", "top"),
         *ground(300, 220),
-        *resistor_v(460, 98, 190, "R1A 560", "left"),
-        '<circle cx="460" cy="190" r="5" class="node"/>',
-        *resistor_v(460, 190, 282, "R1B 1.8k", "left"),
-        '<circle cx="460" cy="282" r="5" class="node"/>',
-        *diode_v_left_label(460, 282, 338, "VD1 KD521A"),
-        *diode_v_left_label(460, 338, 394, "VD2 KD521A"),
-        *diode_v_left_label(460, 394, 450, "VD3 KD521A"),
-        line(460, 190, 560, 190),
-        line(560, 190, 560, 276),
-        line(536, 276, 584, 276),
-        line(536, 304, 584, 304),
-        line(560, 304, 560, 390),
-        text(560, 176, f"C4 {CBOOT_VALUE_UF:g}u", 14, 700, "middle"),
-        text(532, 268, "+", 18, 700, "middle"),
-        line(560, 390, 950, 390),
-        *npn(680, 282, ""),
-        text(610, 238, "VT2A KT3102A", 14, 700, "end"),
-        line(710, 237, 710, 98),
-        line(460, 282, 626, 282),
-        *npn(830, 327, ""),
-        text(900, 316, "VT2B KT817A", 14, 700),
-        line(860, 282, 860, 98),
-        line(710, 327, 776, 327),
-        line(860, 372, 860, 405),
-        '<circle cx="860" cy="390" r="5" class="node"/>',
-        *pnp(830, 450, "VT3 KT816A"),
-        line(860, 495, 860, 610),
-        *ground(860, 610),
-        text(888, 420, "OUT", 13, 700),
-        *capacitor_h(950, 390, 1095, f"C2 {C2_VALUE_UF:g}u", "left"),
-        line(1095, 390, 1148, 390),
-        *speaker_v(1148, 390, 570, "B1 8 ohm"),
-        *ground(1148, 570),
-        text(1102, 364, "speaker", 14, 700),
-        text(42, 532, "Input", 16, 700),
-        line(42, 540, 96, 540),
-        *capacitor_h(96, 540, 252, "C3 10u", "right"),
-        line(252, 540, 306, 540),
-        '<circle cx="306" cy="540" r="5" class="node"/>',
-        *resistor_v(306, 540, 670, "R3 10k", "left"),
-        *ground(306, 670),
-        *npn(430, 540, "VT1 KT3102A"),
-        line(306, 540, 376, 540),
-        line(460, 450, 460, 495),
-        '<circle cx="460" cy="450" r="5" class="node"/>',
-        line(460, 450, 776, 450),
-        line(460, 585, 460, 610),
-        *resistor_v(460, 610, 700, "R4 100", "right"),
-        *ground(460, 700),
-        *resistor_h(180, 430, 306, "R2 47k"),
-        line(156, 430, 180, 430),
-        text(130, 435, "OUT", 12, 700),
-        line(306, 430, 306, 540),
+        *resistor_v(460, 98, 195, f"R1A {resistor_value_label(R1A_BOOT_VALUE)}", "left"),
+        '<circle cx="460" cy="195" r="5" class="node"/>',
+        *resistor_v(460, 195, 295, f"R1B {resistor_value_label(R1B_BOOT_VALUE)}", "left"),
+        '<circle cx="460" cy="295" r="5" class="node"/>',
+        *diode_v_left_label(460, 295, 355, "VD1 KD521A"),
+        *diode_v_left_label(460, 355, 415, "VD2 KD521A"),
+        *diode_v_left_label(460, 415, 475, "VD3 KD521A"),
+        line(460, 475, 460, 510),
+        line(460, 195, 500, 195),
+        line(500, 195, 500, 225),
+        line(500, 225, 520, 225),
+        *capacitor_h(520, 225, 620, f"C4 {CBOOT_VALUE_UF:g}u", "left"),
+        line(620, 225, 660, 225),
+        text(676, 230, "OUT", 12, 700),
+        line(950, 385, 950, 770),
+        *npn(690, 295, ""),
+        text(628, 372, "VT2A KT3102A", 14, 700, "middle"),
+        line(720, 250, 720, 98),
+        line(460, 295, 636, 295),
+        *npn(840, 340, ""),
+        text(912, 334, "VT2B KT817A", 14, 700),
+        line(870, 295, 870, 98),
+        line(720, 340, 786, 340),
+        line(870, 385, 950, 385),
+        '<circle cx="950" cy="385" r="5" class="node"/>',
+        *pnp(840, 510, "VT3 KT816A"),
+        line(870, 465, 950, 465),
+        '<circle cx="950" cy="465" r="5" class="node"/>',
+        line(870, 555, 870, 670),
+        *ground(870, 670),
+        '<circle cx="950" cy="425" r="5" class="node"/>',
+        text(970, 450, "OUT", 13, 700),
+        line(950, 425, 990, 425),
+        *capacitor_h(990, 425, 1135, f"C2 {C2_VALUE_UF:g}u", "left"),
+        line(1135, 425, 1190, 425),
+        *speaker_v(1190, 425, 603, "B1 8 ohm"),
+        *ground(1190, 603),
+        text(1144, 399, "speaker", 14, 700),
+        text(42, 547, "Input", 16, 700),
+        line(42, 555, 96, 555),
+        *capacitor_h(96, 555, 252, "C3 10u", "right"),
+        line(252, 555, 306, 555),
+        '<circle cx="306" cy="555" r="5" class="node"/>',
+        *resistor_v(306, 555, 695, "R3 10k", "left"),
+        *ground(306, 695),
+        *npn(430, 555, "VT1 KT3102A"),
+        line(306, 555, 376, 555),
+        '<circle cx="460" cy="510" r="5" class="node"/>',
+        line(460, 510, 786, 510),
+        line(460, 600, 460, 620),
+        *resistor_v(460, 620, 735, f"R4 {resistor_value_label(RE_VT1_VALUE)}", "right"),
+        *ground(460, 735),
+        *resistor_h(180, 450, 306, f"R2 {resistor_value_label(R2_VALUE)}"),
+        line(24, 770, 950, 770),
+        line(24, 450, 24, 770),
+        line(24, 450, 180, 450),
+        line(306, 450, 306, 555),
     ]
-    return base_svg(1260, 760, body)
+    return base_svg(1320, 840, body)
 
 
 def darlington_bias() -> str:
@@ -571,7 +582,9 @@ Source image:
 - `VT2B`: existing KT817A NPN upper power transistor, `Bf = 50`.
 - `VD3`: added KD521A diode in the bias chain so the upper Darlington pair has an extra base-emitter drop available.
 - `VT3`: lower KT816A PNP emitter follower, unchanged.
-- `R1A`, `R1B`, `R2`, `R3`, `R4`, `C2`, and `C4`: kept from the 003 bootstrap run for a direct comparison.
+- `R1A`, `R1B`, and `R2`: retuned to common E24 values (`{resistor_value_label(R1A_BOOT_VALUE)}`, `{resistor_value_label(R1B_BOOT_VALUE)}`, `{resistor_value_label(R2_VALUE)}`) so the output emitter node sits close to half of the 12 V supply.
+- `R3`, `C2`, and `C4`: kept from the 003 bootstrap run for a direct comparison.
+- `R4`: changed to `{resistor_value_label(RE_VT1_VALUE)}` in the VT1 emitter path; the bias network was retuned after this change.
 
 ## ngspice Check
 

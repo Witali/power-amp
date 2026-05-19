@@ -9,21 +9,21 @@ Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
 Using SPARSE 1.3 as Direct Linear Solver
 
 No. of Data Rows : 1
-v(b_in) = 8.914079e-01
-v(e_vt1) = 2.305428e-01
-v(drive) = 5.489941e+00
-v(d_mid1) = 6.794061e+00
-v(d_mid2) = 6.142001e+00
-v(b_top) = 7.446122e+00
-v(b_upper) = 6.835267e+00
-v(boot) = 1.091942e+01
-v(out) = 6.159859e+00
+v(b_in) = 7.165538e-01
+v(e_vt1) = 7.015251e-02
+v(drive) = 5.355076e+00
+v(d_mid1) = 6.612343e+00
+v(d_mid2) = 5.983709e+00
+v(b_top) = 7.240976e+00
+v(b_upper) = 6.652913e+00
+v(boot) = 1.124730e+01
+v(out) = 6.001160e+00
 v(load) = 0.000000e+00
-i(vcc) = -2.09219e-02
-@q1[ic] = 2.282474e-03
-@q2a[ic] = 3.607944e-04
-@q2b[ic] = 1.863151e-02
-@q3[ic] = -1.85273e-02
+i(vcc) = -9.23990e-03
+@q1[ic] = 1.361959e-03
+@q2a[ic] = 1.513637e-04
+@q2b[ic] = 7.874534e-03
+@q3[ic] = -7.79274e-03
 Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
 
 Using SPARSE 1.3 as Direct Linear Solver
@@ -40,19 +40,19 @@ Node                                   Voltage
 ----                                   -------
 vcc                                         12
 vin                                          0
-b_in                                  0.891408
-out                                    6.15986
-drive                                  5.48994
-e_vt1                                 0.230543
-boot                                   10.9194
-b_top                                  7.44612
-d_mid1                                 6.79406
-d_mid2                                   6.142
-b_upper                                6.83527
+b_in                                  0.716554
+out                                    6.00116
+drive                                  5.35508
+e_vt1                                0.0701525
+boot                                   11.2473
+b_top                                  7.24098
+d_mid1                                 6.61234
+d_mid2                                 5.98371
+b_upper                                6.65291
 load                                         0
 vin#branch                                   0
-vcc#branch                          -0.0209219
+vcc#branch                          -0.0092399
 
 
-No. of Data Rows : 4001
+No. of Data Rows : 4002
 ngspice-46 done

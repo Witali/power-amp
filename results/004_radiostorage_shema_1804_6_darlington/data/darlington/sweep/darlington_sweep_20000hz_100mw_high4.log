@@ -15,18 +15,18 @@ Node                                   Voltage
 ----                                   -------
 vcc                                         12
 vin                                          0
-b_in                                  0.891408
-out                                    6.15986
-drive                                  5.48994
-e_vt1                                 0.230543
-boot                                   10.9194
-b_top                                  7.44612
-d_mid1                                 6.79406
-d_mid2                                   6.142
-b_upper                                6.83527
+b_in                                  0.789307
+out                                    5.99548
+drive                                  5.34792
+e_vt1                                 0.142008
+boot                                   11.3626
+b_top                                  7.23818
+d_mid1                                  6.6081
+d_mid2                                 5.97801
+b_upper                                6.64869
 load                                         0
 vin#branch                                   0
-vcc#branch                          -0.0209219
+vcc#branch                         -0.00972592
 
 
 No. of Data Rows : 3083

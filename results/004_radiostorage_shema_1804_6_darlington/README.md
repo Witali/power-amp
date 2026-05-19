@@ -38,7 +38,9 @@ Source image:
 - `VT2B`: existing KT817A NPN upper power transistor, `Bf = 50`.
 - `VD3`: added KD521A diode in the bias chain so the upper Darlington pair has an extra base-emitter drop available.
 - `VT3`: lower KT816A PNP emitter follower, unchanged.
-- `R1A`, `R1B`, `R2`, `R3`, `R4`, `C2`, and `C4`: kept from the 003 bootstrap run for a direct comparison.
+- `R1A`, `R1B`, and `R2`: retuned to common E24 values (`620`, `3.3k`, `62k`) so the output emitter node sits close to half of the 12 V supply.
+- `R3`, `C2`, and `C4`: kept from the 003 bootstrap run for a direct comparison.
+- `R4`: changed to `51` in the VT1 emitter path; the bias network was retuned after this change.
 
 ## ngspice Check
 
@@ -46,17 +48,17 @@ The Darlington model converged in ngspice.
 
 Operating point from `data/darlington/ngspice.log`:
 
-- `V(b_in)`: about 0.891 V
-- `V(e_vt1)`: about 0.231 V
-- `V(drive)`: about 5.490 V
-- `V(b_top)`: about 7.446 V
-- `V(b_upper)`: about 6.835 V
-- `V(out)`: about 6.160 V before output capacitor
+- `V(b_in)`: about 0.717 V
+- `V(e_vt1)`: about 0.070 V
+- `V(drive)`: about 5.355 V
+- `V(b_top)`: about 7.241 V
+- `V(b_upper)`: about 6.653 V
+- `V(out)`: about 6.001 V before output capacitor
 - `V(load)`: about 0.000 V DC after output capacitor
-- VT2A collector current: about 0.36 mA
-- VT2B collector current: about 18.63 mA
-- VT3 collector current: about 18.53 mA
-- Total supply current in this simplified transistor model: about 20.92 mA
+- VT2A collector current: about 0.15 mA
+- VT2B collector current: about 7.87 mA
+- VT3 collector current: about 7.79 mA
+- Total supply current in this simplified transistor model: about 9.24 mA
 
 ## THD Sweeps
 
@@ -64,24 +66,24 @@ The THD-vs-frequency graph now has separate target-power curves at 20 mW, 50 mW,
 
 At 1 kHz and the 100 mW target, the simulated point is:
 
-- Output power: `107.50 mW`
-- Load RMS voltage: `0.927 V`
-- Input swing: `179.7 mVpp`
-- THD estimate: `73.850 %`
+- Output power: `96.87 mW`
+- Load RMS voltage: `0.880 V`
+- Input swing: `85.9 mVpp`
+- THD estimate: `81.425 %`
 
-The THD-vs-output-power graph now includes 100 Hz, 500 Hz, 1 kHz, 5 kHz, 10 kHz. The largest simulated power-sweep point is about `1704.35 mW` into 8 ohm with `45.06 %` THD.
+The THD-vs-output-power graph now includes 100 Hz, 500 Hz, 1 kHz, 5 kHz, 10 kHz. The largest simulated power-sweep point is about `1904.35 mW` into 8 ohm with `31.57 %` THD.
 
 ## Non-Clipping Check
 
 - Sine input swing: `1.0000 Vpp`.
-- Output node before C2: `5.1544..11.7244 V`.
-- Rail headroom at that node: at least `0.2756 V`.
-- Speaker/load swing after C2: `6.6022 Vpp`.
+- Output node before C2: `3.7904..11.7762 V`.
+- Rail headroom at that node: at least `0.2238 V`.
+- Speaker/load swing after C2: `8.0192 Vpp`.
 
 ## Square-Wave Response
 
-- 1 kHz: load swing about `7.163 Vpp`.
-- 10 kHz: load swing about `6.392 Vpp`.
+- 1 kHz: load swing about `8.047 Vpp`.
+- 10 kHz: load swing about `7.805 Vpp`.
 
 ## Reusable Runner
 

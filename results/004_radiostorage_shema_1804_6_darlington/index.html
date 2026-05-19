@@ -114,7 +114,7 @@
 <body>
   <header>
     <h1>004 radiostorage shema 1804 6 darlington</h1>
-    <p class="muted">Generated 2026-05-19 18:29:08 from local result files.</p>
+    <p class="muted">Generated 2026-05-19 21:00:23 from local result files.</p>
   </header>
   <main>
     <section><h2>Source Image</h2><div class="image-grid"><figure class="image-card">
@@ -147,45 +147,47 @@
 <li><code>VT2B</code>: existing KT817A NPN upper power transistor, <code>Bf = 50</code>.</li>
 <li><code>VD3</code>: added KD521A diode in the bias chain so the upper Darlington pair has an extra base-emitter drop available.</li>
 <li><code>VT3</code>: lower KT816A PNP emitter follower, unchanged.</li>
-<li><code>R1A</code>, <code>R1B</code>, <code>R2</code>, <code>R3</code>, <code>R4</code>, <code>C2</code>, and <code>C4</code>: kept from the 003 bootstrap run for a direct comparison.</li>
+<li><code>R1A</code>, <code>R1B</code>, and <code>R2</code>: retuned to common E24 values (<code>620</code>, <code>3.3k</code>, <code>62k</code>) so the output emitter node sits close to half of the 12 V supply.</li>
+<li><code>R3</code>, <code>C2</code>, and <code>C4</code>: kept from the 003 bootstrap run for a direct comparison.</li>
+<li><code>R4</code>: changed to <code>51</code> in the VT1 emitter path; the bias network was retuned after this change.</li>
 </ul>
 <h2>ngspice Check</h2>
 <p>The Darlington model converged in ngspice.</p>
 <p>Operating point from <code>data/darlington/ngspice.log</code>:</p>
 <ul>
-<li><code>V(b_in)</code>: about 0.891 V</li>
-<li><code>V(e_vt1)</code>: about 0.231 V</li>
-<li><code>V(drive)</code>: about 5.490 V</li>
-<li><code>V(b_top)</code>: about 7.446 V</li>
-<li><code>V(b_upper)</code>: about 6.835 V</li>
-<li><code>V(out)</code>: about 6.160 V before output capacitor</li>
+<li><code>V(b_in)</code>: about 0.717 V</li>
+<li><code>V(e_vt1)</code>: about 0.070 V</li>
+<li><code>V(drive)</code>: about 5.355 V</li>
+<li><code>V(b_top)</code>: about 7.241 V</li>
+<li><code>V(b_upper)</code>: about 6.653 V</li>
+<li><code>V(out)</code>: about 6.001 V before output capacitor</li>
 <li><code>V(load)</code>: about 0.000 V DC after output capacitor</li>
-<li>VT2A collector current: about 0.36 mA</li>
-<li>VT2B collector current: about 18.63 mA</li>
-<li>VT3 collector current: about 18.53 mA</li>
-<li>Total supply current in this simplified transistor model: about 20.92 mA</li>
+<li>VT2A collector current: about 0.15 mA</li>
+<li>VT2B collector current: about 7.87 mA</li>
+<li>VT3 collector current: about 7.79 mA</li>
+<li>Total supply current in this simplified transistor model: about 9.24 mA</li>
 </ul>
 <h2>THD Sweeps</h2>
 <p>The THD-vs-frequency graph now has separate target-power curves at 20 mW, 50 mW, 100 mW. Each point retunes the input amplitude toward the requested output power before estimating harmonics 2-5 from transient data.</p>
 <p>At 1 kHz and the 100 mW target, the simulated point is:</p>
 <ul>
-<li>Output power: <code>107.50 mW</code></li>
-<li>Load RMS voltage: <code>0.927 V</code></li>
-<li>Input swing: <code>179.7 mVpp</code></li>
-<li>THD estimate: <code>73.850 %</code></li>
+<li>Output power: <code>96.87 mW</code></li>
+<li>Load RMS voltage: <code>0.880 V</code></li>
+<li>Input swing: <code>85.9 mVpp</code></li>
+<li>THD estimate: <code>81.425 %</code></li>
 </ul>
-<p>The THD-vs-output-power graph now includes 100 Hz, 500 Hz, 1 kHz, 5 kHz, 10 kHz. The largest simulated power-sweep point is about <code>1704.35 mW</code> into 8 ohm with <code>45.06 %</code> THD.</p>
+<p>The THD-vs-output-power graph now includes 100 Hz, 500 Hz, 1 kHz, 5 kHz, 10 kHz. The largest simulated power-sweep point is about <code>1904.35 mW</code> into 8 ohm with <code>31.57 %</code> THD.</p>
 <h2>Non-Clipping Check</h2>
 <ul>
 <li>Sine input swing: <code>1.0000 Vpp</code>.</li>
-<li>Output node before C2: <code>5.1544..11.7244 V</code>.</li>
-<li>Rail headroom at that node: at least <code>0.2756 V</code>.</li>
-<li>Speaker/load swing after C2: <code>6.6022 Vpp</code>.</li>
+<li>Output node before C2: <code>3.7904..11.7762 V</code>.</li>
+<li>Rail headroom at that node: at least <code>0.2238 V</code>.</li>
+<li>Speaker/load swing after C2: <code>8.0192 Vpp</code>.</li>
 </ul>
 <h2>Square-Wave Response</h2>
 <ul>
-<li>1 kHz: load swing about <code>7.163 Vpp</code>.</li>
-<li>10 kHz: load swing about <code>6.392 Vpp</code>.</li>
+<li>1 kHz: load swing about <code>8.047 Vpp</code>.</li>
+<li>10 kHz: load swing about <code>7.805 Vpp</code>.</li>
 </ul>
 <h2>Reusable Runner</h2>
 <p>Run the complete regeneration flow from the repository root with:</p>

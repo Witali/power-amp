@@ -16,19 +16,19 @@ Node                                   Voltage
 ----                                   -------
 vcc                                         12
 vin                                       -0.5
-b_in                                  0.891408
-out                                    6.15986
-drive                                  5.48994
-e_vt1                                 0.230543
-boot                                   10.9194
-b_top                                  7.44612
-d_mid1                                 6.79406
-d_mid2                                   6.142
-b_upper                                6.83527
+b_in                                  0.716554
+out                                    6.00116
+drive                                  5.35508
+e_vt1                                0.0701525
+boot                                   11.2473
+b_top                                  7.24098
+d_mid1                                 6.61234
+d_mid2                                 5.98371
+b_upper                                6.65291
 load                                         0
 vin#branch                                   0
-vcc#branch                          -0.0209219
+vcc#branch                          -0.0092399
 
 
-No. of Data Rows : 2105
+No. of Data Rows : 2113
 ngspice-46 done
