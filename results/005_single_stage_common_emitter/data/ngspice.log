@@ -1,0 +1,45 @@
+
+Note: No compatibility mode selected!
+
+
+Circuit: * single-stage npn common-emitter amplifier, collector near half supply
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+No. of Data Rows : 1
+v(base) = 1.938197e+00
+v(emitter) = 1.298186e+00
+v(collector) = 6.001788e+00
+v(out) = 0.000000e+00
+i(vcc) = -1.16258e-03
+@q1[ic] = 1.071883e-03
+@q1[ib] = 1.072067e-05
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+No. of Data Rows : 401
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vcc                                         12
+src                                          0
+input                                        0
+base                                    1.9382
+collector                              6.00179
+emitter                                1.29819
+out                                          0
+vin#branch                                   0
+vcc#branch                         -0.00116258
+
+
+No. of Data Rows : 4001
+ngspice-46 done

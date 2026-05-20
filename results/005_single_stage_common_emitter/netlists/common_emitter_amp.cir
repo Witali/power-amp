@@ -1,0 +1,34 @@
+* Single-stage NPN common-emitter amplifier, collector near half supply
+.options abstol=1n reltol=0.003 itl1=500 itl4=500
+.temp 27
+
+VCC vcc 0 12
+VIN src 0 DC 0 AC 1 SIN(0 0.01 1k)
+RS src input 1000
+C1 input base 1u
+R1 vcc base 110000
+R2 base 0 24000
+RC vcc collector 5600
+Q1 collector base emitter KT3102A
+RE emitter 0 1200
+CE emitter 0 100u
+C2 collector out 10u
+RLOAD out 0 10000
+C3 vcc 0 100u
+
+.model KT3102A NPN(Is=2e-14 Bf=100 Br=6 Vaf=100 Var=20 Ikf=0.12 Ikr=0.02
++ Rc=1 Re=0.35 Rb=60 Cje=9p Cjc=4p Tf=0.4n Tr=35n)
+
+.control
+set noaskquit
+op
+print v(base) v(emitter) v(collector) v(out)
+print i(vcc)
+print @q1[ic] @q1[ib]
+ac dec 80 5 500k
+wrdata ac_response.csv frequency vdb(out) vp(out)
+tran 5u 80m 60m
+wrdata transient_1khz.csv time v(src) v(base) v(collector) v(out)
+quit
+.endc
+.end

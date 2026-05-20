@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>005 single stage common emitter</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #172033;
+      --muted: #647083;
+      --line: #d8dee8;
+      --panel: #f6f8fb;
+      --accent: #1665d8;
+      --image-max-width: 920px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--ink);
+      background: #ffffff;
+      line-height: 1.5;
+    }
+    header {
+      padding: 32px 28px 18px;
+      border-bottom: 1px solid var(--line);
+      background: var(--panel);
+    }
+    main {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 24px 28px 42px;
+    }
+    h1, h2, h3 {
+      margin: 0 0 12px;
+      line-height: 1.18;
+    }
+    h1 { font-size: 30px; }
+    h2 {
+      margin-top: 28px;
+      padding-top: 8px;
+      font-size: 22px;
+    }
+    h3 { font-size: 18px; }
+    p, ul { margin: 0 0 12px; }
+    code {
+      padding: 1px 5px;
+      border-radius: 4px;
+      background: #edf1f7;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 0.95em;
+    }
+    pre {
+      overflow: auto;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #101827;
+      color: #f7fafc;
+    }
+    pre code {
+      padding: 0;
+      background: transparent;
+      color: inherit;
+    }
+    a { color: var(--accent); }
+    .muted { color: var(--muted); }
+    .description {
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+    }
+    .description img {
+      display: block;
+      width: auto;
+      max-width: min(100%, var(--image-max-width));
+      height: auto;
+      margin: 12px auto 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+    }
+    .image-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 16px;
+      justify-items: center;
+    }
+    .image-card {
+      margin: 0;
+      width: 100%;
+      max-width: var(--image-max-width);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      overflow: hidden;
+    }
+    .image-card img {
+      display: block;
+      width: 100%;
+      height: auto;
+      background: #fff;
+    }
+    .image-card figcaption {
+      padding: 10px 12px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>005 single stage common emitter</h1>
+    <p class="muted">Generated 2026-05-19 23:58:56 from local result files.</p>
+  </header>
+  <main>
+    <section><h2>Source Image</h2><p class="muted">No source images found.</p></section>
+    <section>
+      <h2>Description</h2>
+      <article class="description">
+        <h1>005 single-stage NPN common-emitter amplifier</h1>
+<p>This result is a simple one-transistor common-emitter voltage amplifier.  The circuit uses a KT3102A-like NPN model, a base divider, an emitter resistor for DC stability, an emitter bypass capacitor for higher AC gain, and input/output coupling capacitors.</p>
+<p>The main design target was to bias the collector near half of the 12 V supply so the collector can swing in both directions before clipping.  The chosen E24 values are:</p>
+<ul>
+<li><code>R1</code>: 110k from +12 V to base</li>
+<li><code>R2</code>: 24k from base to ground</li>
+<li><code>RC</code>: 5.6k collector resistor</li>
+<li><code>RE</code>: 1.2k emitter resistor</li>
+<li><code>Rload</code>: 10k</li>
+<li><code>C1</code>: 1u input coupling</li>
+<li><code>C2</code>: 10u output coupling</li>
+<li><code>C3</code>: 100u supply bypass</li>
+<li><code>C4</code>: 100u emitter bypass, positive terminal toward the emitter</li>
+</ul>
+<h2>Operating point</h2>
+<p>ngspice DC operating point:</p>
+<ul>
+<li>Base voltage: <code>1.938 V</code></li>
+<li>Emitter voltage: <code>1.298 V</code></li>
+<li>Collector voltage: <code>6.002 V</code></li>
+<li>Collector current: <code>1.072 mA</code></li>
+<li>Total supply current in this small-signal model: <code>1.163 mA</code></li>
+</ul>
+<h2>Simulation</h2>
+<p>At 1 kHz with <code>20 mVpp</code> input:</p>
+<ul>
+<li>Transient voltage gain: <code>93.17 V/V</code></li>
+<li>AC gain at 1 kHz: <code>39.44 dB</code></li>
+<li>Output RMS voltage: <code>658.71 mV</code></li>
+</ul>
+<p><img src="schematic/common_emitter_amplifier.png" alt="Schematic" loading="lazy"></p>
+<p><img src="plots/common_emitter_sine_response_1khz.png" alt="1 kHz sine response" loading="lazy"></p>
+<p><img src="plots/common_emitter_gain_vs_frequency.png" alt="AC gain" loading="lazy"></p>
+<h2>Files</h2>
+<ul>
+<li><code>variants/common_emitter.py</code>: reusable circuit variant with schematic drawing, SPICE netlist, plots, and README generation.</li>
+<li><code>schematic/common_emitter_amplifier.svg/png</code>: generated schematic.</li>
+<li><code>netlists/common_emitter_amp.cir</code>: main ngspice netlist.</li>
+<li><code>data/ngspice.log</code>: operating point and ngspice run log.</li>
+<li><code>data/ac_response.csv</code>: AC gain/phase data.</li>
+<li><code>data/transient_1khz.csv</code>: 1 kHz transient data.</li>
+<li><code>data/summary.csv</code>: compact numeric summary.</li>
+</ul>
+      </article>
+    </section>
+    <section><h2>Reconstructed Schematic</h2><div class="image-grid"><figure class="image-card">
+  <a href="schematic/common_emitter_amplifier.png"><img src="schematic/common_emitter_amplifier.png" alt="common emitter amplifier" loading="lazy"></a>
+  <figcaption>common emitter amplifier</figcaption>
+</figure></div></section>
+    <section><h2>Plots</h2><div class="image-grid"><figure class="image-card">
+  <a href="plots/common_emitter_gain_vs_frequency.png"><img src="plots/common_emitter_gain_vs_frequency.png" alt="common emitter gain vs frequency" loading="lazy"></a>
+  <figcaption>common emitter gain vs frequency</figcaption>
+</figure>
+<figure class="image-card">
+  <a href="plots/common_emitter_sine_response_1khz.png"><img src="plots/common_emitter_sine_response_1khz.png" alt="common emitter sine response 1khz" loading="lazy"></a>
+  <figcaption>common emitter sine response 1khz</figcaption>
+</figure></div></section>
+  </main>
+</body>
+</html>
