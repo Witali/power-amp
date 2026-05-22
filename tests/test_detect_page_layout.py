@@ -777,6 +777,48 @@ class DetectPageLayoutTests(unittest.TestCase):
 
         self.assertGreater(text_score, schematic_score)
 
+    def test_overlap_owner_score_prefers_stacked_diagram_for_line_art_overlap(self) -> None:
+        text = detect_page_layout.Block(
+            ident="017_text",
+            label="text",
+            orientation="horizontal",
+            confidence=0.87,
+            bbox=[812, 2390, 770, 868],
+            outline=None,
+            features={},
+        )
+        diagram = detect_page_layout.Block(
+            ident="018_diagram",
+            label="diagram",
+            orientation="unknown",
+            confidence=0.89,
+            bbox=[52, 2585, 1050, 666],
+            outline=None,
+            features={"stacked_diagram_merge": 1.0},
+        )
+        overlap = detect_page_layout.Box(812, 2585, 290, 666)
+        features = {
+            "max_text_score": 0.75,
+            "textline_density": 0.75,
+            "line_art_score": 0.42,
+            "hline_density": 0.36,
+            "vline_density": 0.0,
+            "saturation_p80": 0.0,
+            "gray_std": 0.5,
+            "component_signature_score": 0.82,
+        }
+
+        text_score = detect_page_layout.overlap_owner_score(text, detect_page_layout.box_from_list(text.bbox), overlap, "text", features)
+        diagram_score = detect_page_layout.overlap_owner_score(
+            diagram,
+            detect_page_layout.box_from_list(diagram.bbox),
+            overlap,
+            "text",
+            features,
+        )
+
+        self.assertGreater(diagram_score, text_score)
+
     def test_block_preview_label_includes_block_number(self) -> None:
         block = detect_page_layout.Block(
             ident="023_text",
@@ -1038,6 +1080,20 @@ class DetectPageLayoutTests(unittest.TestCase):
         self.assertEqual(len(pieces), 2)
         self.assertLessEqual(pieces[0].x2, 180)
         self.assertGreaterEqual(pieces[1].x, 150)
+
+    def test_split_box_by_horizontal_gap_separates_stacked_mixed_regions(self) -> None:
+        np = detect_page_layout.np
+
+        mask = np.zeros((520, 320), dtype=np.uint8)
+        mask[30:190, 30:270] = 255
+        mask[265:500, 30:270] = 255
+        box = detect_page_layout.Box(20, 20, 270, 490)
+
+        pieces = detect_page_layout.split_box_by_horizontal_gaps(mask, box, 320, 520)
+
+        self.assertEqual(len(pieces), 2)
+        self.assertLess(pieces[0].h, box.h)
+        self.assertGreaterEqual(pieces[1].y, 210)
 
     def test_split_box_by_side_color_strip_separates_colored_margin(self) -> None:
         np = detect_page_layout.np
@@ -1818,6 +1874,79 @@ class DetectPageLayoutTests(unittest.TestCase):
 
         self.assertEqual(demoted[0][0].label, "diagram")
         self.assertEqual(demoted[0][0].ident, "016_diagram")
+
+    def test_stacked_diagram_seed_accepts_single_axis_waveform_strip(self) -> None:
+        block = detect_page_layout.Block(
+            ident="018_text",
+            label="text",
+            orientation="horizontal",
+            confidence=0.69,
+            bbox=[20, 200, 500, 70],
+            outline=None,
+            features={
+                "saturation_p80": 0.0,
+                "hline_density": 0.0,
+                "vline_density": 0.32,
+                "line_art_score": 0.45,
+                "edge_density": 0.30,
+            },
+        )
+
+        self.assertTrue(detect_page_layout.stacked_diagram_seed(block, detect_page_layout.Box(20, 200, 500, 70), 900, 1000))
+
+    def test_illustration_fragment_rejects_confident_prose_with_false_component_signature(self) -> None:
+        block = detect_page_layout.Block(
+            ident="017_text",
+            label="text",
+            orientation="horizontal",
+            confidence=0.87,
+            bbox=[420, 1200, 420, 250],
+            outline=None,
+            features={
+                "ink_density": 0.12,
+                "gray_std": 0.42,
+                "saturation_p80": 0.0,
+                "max_text_score": 0.86,
+                "line_art_score": 0.22,
+                "hline_density": 0.06,
+                "vline_density": 0.0,
+                "edge_density": 0.20,
+                "component_signature_score": 1.0,
+            },
+        )
+
+        self.assertFalse(
+            detect_page_layout.illustration_fragment_candidate(block, detect_page_layout.Box(420, 1200, 420, 250), 900, 1600)
+        )
+
+    def test_suppresses_weak_visual_wrapper_inside_stronger_visual(self) -> None:
+        wrapper = detect_page_layout.Block(
+            ident="001_diagram",
+            label="diagram",
+            orientation="unknown",
+            confidence=0.39,
+            bbox=[500, 20, 300, 420],
+            outline=None,
+            features={},
+        )
+        schematic = detect_page_layout.Block(
+            ident="005_schematic",
+            label="schematic/circuit",
+            orientation="unknown",
+            confidence=0.94,
+            bbox=[20, 0, 900, 520],
+            outline=None,
+            features={},
+        )
+
+        filtered = detect_page_layout.suppress_weak_visual_wrappers(
+            [
+                (wrapper, detect_page_layout.Box(500, 20, 300, 420)),
+                (schematic, detect_page_layout.Box(20, 0, 900, 520)),
+            ]
+        )
+
+        self.assertEqual([item[0].ident for item in filtered], ["005_schematic"])
 
     def test_suppresses_small_artifact_strip_touching_schematic(self) -> None:
         schematic = detect_page_layout.Block(

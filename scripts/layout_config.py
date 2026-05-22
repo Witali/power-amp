@@ -52,6 +52,17 @@ TEXT_COLUMN_SPLIT_MIN_GAP_PX = 10
 TEXT_COLUMN_SPLIT_MIN_PIECE_WIDTH_RATIO = 0.080
 TEXT_COLUMN_SPLIT_MAX_PIECES = 4
 
+# Split tall mixed page regions when a real horizontal whitespace corridor
+# separates a figure area from the prose below it. Paragraph gaps are shorter
+# and should remain inside one text column.
+HORIZONTAL_GAP_SPLIT_MIN_WIDTH_RATIO = 0.16
+HORIZONTAL_GAP_SPLIT_MIN_HEIGHT_RATIO = 0.34
+HORIZONTAL_GAP_SPLIT_MIN_GAP_RATIO = 0.012
+HORIZONTAL_GAP_SPLIT_MIN_GAP_PX = 16
+HORIZONTAL_GAP_SPLIT_MIN_PIECE_HEIGHT_RATIO = 0.080
+HORIZONTAL_GAP_SPLIT_EDGE_SKIP_RATIO = 0.025
+HORIZONTAL_GAP_SPLIT_MAX_PIECES = 3
+
 # Small technical labels attached to figures should not become OCR text
 # columns. They are usually thin, low-area fragments touching a PCB or
 # schematic outline.
@@ -76,6 +87,38 @@ HEADING_MIN_INK_DENSITY = 0.10
 HEADING_MIN_GRAY_STD = 0.36
 HEADING_MAX_LINE_BALANCE = 0.18
 HEADING_MIN_COMPONENT_DENSITY = 0.18
+
+# Avoid merging confident prose columns into image/diagram groups when text
+# happens to trigger component-like signatures.
+ILLUSTRATION_TEXT_REJECT_MIN_CONFIDENCE = 0.84
+ILLUSTRATION_TEXT_REJECT_MIN_TEXT_SCORE = 0.74
+ILLUSTRATION_TEXT_REJECT_MIN_HEIGHT_RATIO = 0.055
+ILLUSTRATION_TEXT_REJECT_MAX_LINE_ART = 0.30
+ILLUSTRATION_TEXT_REJECT_MAX_HLINE = 0.10
+ILLUSTRATION_TEXT_REJECT_MAX_VLINE = 0.06
+
+# Waveform diagrams often appear as stacked strips: each strip can have strong
+# vertical transitions while horizontal baselines are too fragmented for the
+# generic line-density detector.
+STACKED_DIAGRAM_MIN_AXIS_LINE_DENSITY = 0.04
+STACKED_DIAGRAM_MIN_SINGLE_AXIS_LINE_DENSITY = 0.18
+STACKED_DIAGRAM_MIN_LINE_ART_WITH_SINGLE_AXIS = 0.34
+
+# Low-confidence visual wrappers that mostly sit inside a stronger visual block
+# are usually segmentation leftovers and should not cut the stronger block.
+VISUAL_WRAPPER_MIN_INNER_OVERLAP = 0.78
+VISUAL_WRAPPER_MIN_CONFIDENCE_DELTA = 0.18
+VISUAL_WRAPPER_MIN_OUTER_AREA_RATIO = 1.25
+
+# When resolving overlaps, waveform fragments can look textual because each
+# row has labels. Dense axis-aligned lines should keep that region with the
+# diagram block instead of donating it to adjacent prose.
+OVERLAP_DIAGRAM_MIN_LINE_ART = 0.34
+OVERLAP_DIAGRAM_MIN_AXIS_DENSITY = 0.18
+OVERLAP_DIAGRAM_LINE_ART_BOOST = 2.40
+OVERLAP_DIAGRAM_STACKED_MERGE_BOOST = 1.10
+OVERLAP_TEXT_LINE_ART_PENALTY = 2.80
+STACKED_DIAGRAM_TEXT_CUTOUT_MIN_MERGE_SCORE = 0.50
 
 # Component and PCB signature detector thresholds.
 MIN_COMPONENT_PIXELS = 4

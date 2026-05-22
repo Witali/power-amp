@@ -80,6 +80,13 @@ TEXT_COLUMN_SPLIT_MIN_GAP_RATIO = layout_config.TEXT_COLUMN_SPLIT_MIN_GAP_RATIO
 TEXT_COLUMN_SPLIT_MIN_GAP_PX = layout_config.TEXT_COLUMN_SPLIT_MIN_GAP_PX
 TEXT_COLUMN_SPLIT_MIN_PIECE_WIDTH_RATIO = layout_config.TEXT_COLUMN_SPLIT_MIN_PIECE_WIDTH_RATIO
 TEXT_COLUMN_SPLIT_MAX_PIECES = layout_config.TEXT_COLUMN_SPLIT_MAX_PIECES
+HORIZONTAL_GAP_SPLIT_MIN_WIDTH_RATIO = layout_config.HORIZONTAL_GAP_SPLIT_MIN_WIDTH_RATIO
+HORIZONTAL_GAP_SPLIT_MIN_HEIGHT_RATIO = layout_config.HORIZONTAL_GAP_SPLIT_MIN_HEIGHT_RATIO
+HORIZONTAL_GAP_SPLIT_MIN_GAP_RATIO = layout_config.HORIZONTAL_GAP_SPLIT_MIN_GAP_RATIO
+HORIZONTAL_GAP_SPLIT_MIN_GAP_PX = layout_config.HORIZONTAL_GAP_SPLIT_MIN_GAP_PX
+HORIZONTAL_GAP_SPLIT_MIN_PIECE_HEIGHT_RATIO = layout_config.HORIZONTAL_GAP_SPLIT_MIN_PIECE_HEIGHT_RATIO
+HORIZONTAL_GAP_SPLIT_EDGE_SKIP_RATIO = layout_config.HORIZONTAL_GAP_SPLIT_EDGE_SKIP_RATIO
+HORIZONTAL_GAP_SPLIT_MAX_PIECES = layout_config.HORIZONTAL_GAP_SPLIT_MAX_PIECES
 TEXT_ARTIFACT_VISUAL_LABELS = layout_config.TEXT_ARTIFACT_VISUAL_LABELS
 TEXT_ARTIFACT_MAX_AREA_RATIO = layout_config.TEXT_ARTIFACT_MAX_AREA_RATIO
 TEXT_ARTIFACT_MAX_HEIGHT_PX = layout_config.TEXT_ARTIFACT_MAX_HEIGHT_PX
@@ -97,6 +104,24 @@ HEADING_MIN_INK_DENSITY = layout_config.HEADING_MIN_INK_DENSITY
 HEADING_MIN_GRAY_STD = layout_config.HEADING_MIN_GRAY_STD
 HEADING_MAX_LINE_BALANCE = layout_config.HEADING_MAX_LINE_BALANCE
 HEADING_MIN_COMPONENT_DENSITY = layout_config.HEADING_MIN_COMPONENT_DENSITY
+ILLUSTRATION_TEXT_REJECT_MIN_CONFIDENCE = layout_config.ILLUSTRATION_TEXT_REJECT_MIN_CONFIDENCE
+ILLUSTRATION_TEXT_REJECT_MIN_TEXT_SCORE = layout_config.ILLUSTRATION_TEXT_REJECT_MIN_TEXT_SCORE
+ILLUSTRATION_TEXT_REJECT_MIN_HEIGHT_RATIO = layout_config.ILLUSTRATION_TEXT_REJECT_MIN_HEIGHT_RATIO
+ILLUSTRATION_TEXT_REJECT_MAX_LINE_ART = layout_config.ILLUSTRATION_TEXT_REJECT_MAX_LINE_ART
+ILLUSTRATION_TEXT_REJECT_MAX_HLINE = layout_config.ILLUSTRATION_TEXT_REJECT_MAX_HLINE
+ILLUSTRATION_TEXT_REJECT_MAX_VLINE = layout_config.ILLUSTRATION_TEXT_REJECT_MAX_VLINE
+STACKED_DIAGRAM_MIN_AXIS_LINE_DENSITY = layout_config.STACKED_DIAGRAM_MIN_AXIS_LINE_DENSITY
+STACKED_DIAGRAM_MIN_SINGLE_AXIS_LINE_DENSITY = layout_config.STACKED_DIAGRAM_MIN_SINGLE_AXIS_LINE_DENSITY
+STACKED_DIAGRAM_MIN_LINE_ART_WITH_SINGLE_AXIS = layout_config.STACKED_DIAGRAM_MIN_LINE_ART_WITH_SINGLE_AXIS
+VISUAL_WRAPPER_MIN_INNER_OVERLAP = layout_config.VISUAL_WRAPPER_MIN_INNER_OVERLAP
+VISUAL_WRAPPER_MIN_CONFIDENCE_DELTA = layout_config.VISUAL_WRAPPER_MIN_CONFIDENCE_DELTA
+VISUAL_WRAPPER_MIN_OUTER_AREA_RATIO = layout_config.VISUAL_WRAPPER_MIN_OUTER_AREA_RATIO
+OVERLAP_DIAGRAM_MIN_LINE_ART = layout_config.OVERLAP_DIAGRAM_MIN_LINE_ART
+OVERLAP_DIAGRAM_MIN_AXIS_DENSITY = layout_config.OVERLAP_DIAGRAM_MIN_AXIS_DENSITY
+OVERLAP_DIAGRAM_LINE_ART_BOOST = layout_config.OVERLAP_DIAGRAM_LINE_ART_BOOST
+OVERLAP_DIAGRAM_STACKED_MERGE_BOOST = layout_config.OVERLAP_DIAGRAM_STACKED_MERGE_BOOST
+OVERLAP_TEXT_LINE_ART_PENALTY = layout_config.OVERLAP_TEXT_LINE_ART_PENALTY
+STACKED_DIAGRAM_TEXT_CUTOUT_MIN_MERGE_SCORE = layout_config.STACKED_DIAGRAM_TEXT_CUTOUT_MIN_MERGE_SCORE
 
 
 @dataclass(frozen=True)
@@ -423,6 +448,20 @@ def vertical_whitespace_corridor_runs(mask, box: Box, min_gap: int) -> list[tupl
     return low_projection_runs(corridor_values, threshold=0.0, min_run=min_gap)
 
 
+def horizontal_whitespace_corridor_runs(mask, box: Box, min_gap: int) -> list[tuple[int, int, float]]:
+    roi = mask[box.y : box.y2, box.x : box.x2]
+    if roi.size == 0:
+        return []
+
+    row_projection = (roi > 0).sum(axis=1).astype(np.float32)
+    smooth_radius = max(1, box.h // 180)
+    smoothed = smooth_projection(row_projection, smooth_radius)
+    raw_limit = max(1.0, box.w * 0.006)
+    smooth_limit = max(1.5, box.w * 0.010)
+    corridor_values = np.where((row_projection <= raw_limit) & (smoothed <= smooth_limit), 0.0, smoothed)
+    return low_projection_runs(corridor_values, threshold=0.0, min_run=min_gap)
+
+
 def split_box_by_vertical_gaps(mask, box: Box, page_width: int, page_height: int) -> list[Box]:
     if box.h < page_height * 0.18 or box.w < page_width * 0.20:
         return [box]
@@ -455,6 +494,61 @@ def split_box_by_vertical_gaps(mask, box: Box, page_width: int, page_height: int
     left = Box(box.x, box.y, center, box.h)
     right = Box(box.x + center, box.y, box.w - center, box.h)
     return [piece for piece in (left, right) if piece.area > 0]
+
+
+def split_box_by_horizontal_gaps(mask, box: Box, page_width: int, page_height: int) -> list[Box]:
+    if box.w < page_width * HORIZONTAL_GAP_SPLIT_MIN_WIDTH_RATIO:
+        return [box]
+    if box.h < page_height * HORIZONTAL_GAP_SPLIT_MIN_HEIGHT_RATIO:
+        return [box]
+
+    roi = mask[box.y : box.y2, box.x : box.x2]
+    if roi.size == 0:
+        return [box]
+
+    row_projection = (roi > 0).sum(axis=1)
+    smoothed = smooth_projection(row_projection, max(2, box.h // 120))
+    low_limit = max(2.0, box.w * 0.012)
+    min_gap = max(HORIZONTAL_GAP_SPLIT_MIN_GAP_PX, int(round(box.h * HORIZONTAL_GAP_SPLIT_MIN_GAP_RATIO)))
+    min_piece = max(45, int(round(page_height * HORIZONTAL_GAP_SPLIT_MIN_PIECE_HEIGHT_RATIO)))
+    edge_skip = max(8, int(round(box.h * HORIZONTAL_GAP_SPLIT_EDGE_SKIP_RATIO)))
+
+    runs = low_projection_runs(smoothed, low_limit, min_gap)
+    runs.extend(horizontal_whitespace_corridor_runs(mask, box, min_gap))
+
+    candidates = []
+    for start, end, mean_density in runs:
+        if start <= edge_skip or end >= box.h - edge_skip:
+            continue
+        center = (start + end) // 2
+        if center < min_piece or box.h - center < min_piece:
+            continue
+        gap_height = end - start + 1
+        center_balance = 1.0 - abs((center / float(box.h)) - 0.5)
+        candidates.append((gap_height, center_balance, -mean_density, center))
+    if not candidates:
+        return [box]
+
+    _, _, _, center = max(candidates)
+    top = Box(box.x, box.y, box.w, center)
+    bottom = Box(box.x, box.y + center, box.w, box.h - center)
+    return [piece for piece in (top, bottom) if piece.area > 0]
+
+
+def split_box_by_horizontal_gaps_recursive(mask, box: Box, page_width: int, page_height: int) -> list[Box]:
+    pieces = [box]
+    for _ in range(HORIZONTAL_GAP_SPLIT_MAX_PIECES - 1):
+        changed = False
+        next_pieces: list[Box] = []
+        for piece in pieces:
+            split = split_box_by_horizontal_gaps(mask, piece, page_width, page_height)
+            if len(split) > 1:
+                changed = True
+            next_pieces.extend(split)
+        pieces = next_pieces
+        if not changed or len(pieces) >= HORIZONTAL_GAP_SPLIT_MAX_PIECES:
+            break
+    return sorted(pieces[:HORIZONTAL_GAP_SPLIT_MAX_PIECES], key=lambda item: (item.y, item.x))
 
 
 def text_row_run_count(mask, box: Box) -> int:
@@ -514,7 +608,8 @@ def split_multiline_text_box_recursive(mask, box: Box, page_width: int, page_hei
 def split_boxes_by_internal_gaps(mask, boxes: list[Box], width: int, height: int) -> list[Box]:
     split: list[Box] = []
     for box in boxes:
-        split.extend(split_box_by_vertical_gaps(mask, box, width, height))
+        for vertical_piece in split_box_by_vertical_gaps(mask, box, width, height):
+            split.extend(split_box_by_horizontal_gaps_recursive(mask, vertical_piece, width, height))
     return sorted(split, key=lambda item: (item.y, item.x))
 
 
@@ -1787,6 +1882,12 @@ def text_block_should_cut_visual_outline(visual_block: Block, text_block: Block)
     if overlap is None:
         return False
 
+    if (
+        visual_block.label == "diagram"
+        and float(visual_block.features.get("stacked_diagram_merge", 0.0)) >= STACKED_DIAGRAM_TEXT_CUTOUT_MIN_MERGE_SCORE
+    ):
+        return False
+
     text_overlap_fraction = overlap.area / max(1, text_box.area)
     visual_overlap_fraction = overlap.area / max(1, visual_box.area)
     if text_overlap_fraction < 0.18 and visual_overlap_fraction < 0.01:
@@ -2528,10 +2629,12 @@ def illustration_fragment_candidate(block: Block, box: Box, width: int, height: 
 
     likely_prose = (
         block.orientation == "horizontal"
-        and block.confidence >= 0.86
-        and text_score >= 0.74
-        and box.h >= height * 0.055
-        and component_signature < 0.50
+        and block.confidence >= ILLUSTRATION_TEXT_REJECT_MIN_CONFIDENCE
+        and text_score >= ILLUSTRATION_TEXT_REJECT_MIN_TEXT_SCORE
+        and box.h >= height * ILLUSTRATION_TEXT_REJECT_MIN_HEIGHT_RATIO
+        and line_art <= ILLUSTRATION_TEXT_REJECT_MAX_LINE_ART
+        and float(features.get("hline_density", 0.0)) <= ILLUSTRATION_TEXT_REJECT_MAX_HLINE
+        and float(features.get("vline_density", 0.0)) <= ILLUSTRATION_TEXT_REJECT_MAX_VLINE
     )
     if likely_prose:
         return False
@@ -2665,6 +2768,7 @@ def merge_illustration_fragments_into_images(
 
 def stacked_diagram_seed(block: Block, box: Box, width: int, height: int) -> bool:
     features = block.features
+    line_art = float(features.get("line_art_score", 0.0))
     if box.w < width * 0.20 or box.h > height * 0.12:
         return False
     if box.w / max(1, box.h) < 1.55:
@@ -2674,11 +2778,17 @@ def stacked_diagram_seed(block: Block, box: Box, width: int, height: int) -> boo
     if "hline_density" in features and "vline_density" in features and min(
         float(features.get("hline_density", 0.0)),
         float(features.get("vline_density", 0.0)),
-    ) < 0.04:
-        return False
+    ) < STACKED_DIAGRAM_MIN_AXIS_LINE_DENSITY:
+        single_axis_waveform = (
+            max(float(features.get("hline_density", 0.0)), float(features.get("vline_density", 0.0)))
+            >= STACKED_DIAGRAM_MIN_SINGLE_AXIS_LINE_DENSITY
+            and line_art >= STACKED_DIAGRAM_MIN_LINE_ART_WITH_SINGLE_AXIS
+        )
+        if not single_axis_waveform:
+            return False
     return (
         block.label in {"diagram", "table", "schematic/circuit", "image"}
-        or float(features.get("line_art_score", 0.0)) > 0.32
+        or line_art > 0.32
     ) and float(features.get("edge_density", 0.0)) > 0.18
 
 
@@ -2815,6 +2925,43 @@ def demote_textual_diagram_wrappers(classified: list[tuple[Block, Box]]) -> list
     return result
 
 
+def weak_visual_wrapper_inside_stronger_visual(inner_block: Block, inner_box: Box, outer_block: Block, outer_box: Box) -> bool:
+    if inner_block.ident == outer_block.ident:
+        return False
+    if inner_block.label not in FIGURE_LABELS or outer_block.label not in FIGURE_LABELS:
+        return False
+    if inner_box.area <= 0 or outer_box.area <= 0:
+        return False
+    if outer_box.area < inner_box.area * VISUAL_WRAPPER_MIN_OUTER_AREA_RATIO:
+        return False
+    if outer_block.confidence < inner_block.confidence + VISUAL_WRAPPER_MIN_CONFIDENCE_DELTA:
+        return False
+    inner_overlap = overlap_area(inner_box, outer_box) / max(1, inner_box.area)
+    if inner_overlap < VISUAL_WRAPPER_MIN_INNER_OVERLAP:
+        return False
+    if inner_block.label == "image" and outer_block.label != "image":
+        return False
+    return True
+
+
+def suppress_weak_visual_wrappers(classified: list[tuple[Block, Box]]) -> list[tuple[Block, Box]]:
+    if len(classified) < 2:
+        return classified
+
+    suppressed: set[int] = set()
+    for inner_index, (inner_block, inner_box) in enumerate(classified):
+        for outer_index, (outer_block, outer_box) in enumerate(classified):
+            if inner_index == outer_index:
+                continue
+            if weak_visual_wrapper_inside_stronger_visual(inner_block, inner_box, outer_block, outer_box):
+                suppressed.add(inner_index)
+                break
+
+    if not suppressed:
+        return classified
+    return [item for index, item in enumerate(classified) if index not in suppressed]
+
+
 OverlapOwnerFn = Callable[[Block, Block, Box], str]
 
 
@@ -2940,6 +3087,8 @@ def overlap_owner_score(block: Block, block_box: Box, overlap: Box, overlap_labe
         score += text_score * 2.2 + textline * 1.4
         if overlap_label in TEXTUAL_LABELS:
             score += 1.2
+        if line_art >= OVERLAP_DIAGRAM_MIN_LINE_ART and max(hline, vline) >= OVERLAP_DIAGRAM_MIN_AXIS_DENSITY:
+            score -= OVERLAP_TEXT_LINE_ART_PENALTY
         if line_art > 0.45 and (hline > 0.04 or vline > 0.04):
             score -= 0.9
         if block.label == "heading":
@@ -2954,6 +3103,10 @@ def overlap_owner_score(block: Block, block_box: Box, overlap: Box, overlap_labe
             score -= 1.2
     elif block.label == "diagram":
         score += line_art * 1.4 + hline * 1.8 + vline * 0.7
+        if line_art >= OVERLAP_DIAGRAM_MIN_LINE_ART and max(hline, vline) >= OVERLAP_DIAGRAM_MIN_AXIS_DENSITY:
+            score += OVERLAP_DIAGRAM_LINE_ART_BOOST
+        if float(block.features.get("stacked_diagram_merge", 0.0)) >= 0.5:
+            score += OVERLAP_DIAGRAM_STACKED_MERGE_BOOST
         if overlap_label == "diagram":
             score += 1.4
     elif block.label == "image":
@@ -3278,6 +3431,7 @@ def classify_blocks(
     classified = merge_illustration_fragments_into_images(
         classified, image, mask, edges, ann, scale=scale, width=analysis_w, height=analysis_h
     )
+    classified = suppress_weak_visual_wrappers(classified)
     all_blocks = suppress_nested_text_blocks([block for block, _ in classified])
     assign_visual_outlines(all_blocks)
     blocks = suppress_text_inside_schematics(all_blocks)
