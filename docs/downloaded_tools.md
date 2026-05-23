@@ -3,8 +3,10 @@
 Last updated: 2026-05-23.
 
 This project keeps downloaded binaries, installers, package caches, and generated
-tool output outside Git. The default locations are `local_tools/`, `.tmp/`,
-`node_cache/`, and `node_modules/`; these paths are ignored by `.gitignore`.
+tool output outside Git. Prefer `.tmp/tools/` for newly downloaded portable
+tools such as OCR runtimes; existing tools may still live under `local_tools/`.
+The default ignored locations are `.tmp/`, `local_tools/`, `node_cache/`, and
+`node_modules/`.
 
 When a new tool is added to the project workflow, update this file with the tool
 name, version, source URL, local path, purpose, and whether it is committed.
@@ -44,7 +46,8 @@ name, version, source URL, local path, purpose, and whether it is committed.
 
 - Prefer official project sources for compilers and runtimes, for example
   `go.dev` for Go and `nodejs.org` for Node.js.
-- Keep downloaded binary distributions and installers under ignored paths.
+- Keep downloaded binary distributions and installers under ignored paths,
+  preferring `.tmp/tools/` for new local tool payloads.
 - Commit small, reproducible scripts and documentation, not downloaded tool
   payloads.
 - Record new downloads in this file in the same change that introduces them.
