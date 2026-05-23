@@ -32,7 +32,21 @@
 Перегенерировать файлы можно так:
 
 ```powershell
+scripts\ocr_radio_ru_page_columns.ps1 `
+  -InputPath .tmp\archive_radio_ru\2000\12\b.2000-12.063.jpg `
+  -OutDir .tmp\annual_contents_1999_2000\layout_ocr `
+  -LayoutOnly `
+  -PsmModes 6 `
+  -OcrProfiles prose
+
 python scripts\extract_radio_ru_annual_contents.py `
-  --ocr-root .tmp\annual_contents_1999_2000\column_ocr_wide `
+  --ocr-root .tmp\annual_contents_1999_2000\layout_ocr `
   --out-dir study\radio_ru_annual_contents
 ```
+
+Для страниц оглавления предпочтительный путь - `ocr_radio_ru_page_columns.ps1 -LayoutOnly`.
+В этом режиме скрипт сначала запускает основной OpenCV-детектор
+`scripts/detect_page_layout.py`, затем режет OCR-кропы по горизонтальным
+блокам `text`/`heading` из `layout.json` и сохраняет их в варианте
+`layout_text_blocks`. Старый вариант `columns2` остается запасным входом для
+`extract_radio_ru_annual_contents.py`, если layout-кропы еще не созданы.

@@ -15,6 +15,7 @@ DEFAULT_PAGES = {
     1999: ["b.1999-12.064", "b.1999-12.065", "b.1999-12.066", "b.1999-12.067"],
     2000: ["b.2000-12.063", "b.2000-12.064", "b.2000-12.065", "b.2000-12.066"],
 }
+DEFAULT_OCR_VARIANTS = ["layout_text_blocks", "columns2"]
 
 SECTION_WORDS = {
     "НАУКА",
@@ -330,15 +331,17 @@ def parse_text_file(year: int, page_name: str, source: Path, state: ParseState) 
     return state.records[start_count:]
 
 
-def find_ocr_file(ocr_root: Path, page_name: str) -> Path:
-    base = ocr_root / page_name / "columns2"
-    corrected = base / "merged.prose.psm6.corrected.txt"
-    raw = base / "merged.prose.psm6.txt"
-    if corrected.exists():
-        return corrected
-    if raw.exists():
-        return raw
-    raise FileNotFoundError(f"OCR file not found for {page_name} under {ocr_root}")
+def find_ocr_file(ocr_root: Path, page_name: str, variants: list[str]) -> Path:
+    checked: list[Path] = []
+    for variant in variants:
+        base = ocr_root / page_name / variant
+        for filename in ("merged.prose.psm6.corrected.txt", "merged.prose.psm6.txt"):
+            candidate = base / filename
+            checked.append(candidate)
+            if candidate.exists():
+                return candidate
+    checked_text = "\n  ".join(rel(path) for path in checked)
+    raise FileNotFoundError(f"OCR file not found for {page_name}. Checked:\n  {checked_text}")
 
 
 def write_csv(records: list[Record], path: Path) -> None:
@@ -428,16 +431,22 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--ocr-root", type=Path, default=Path(".tmp/annual_contents_1999_2000/column_ocr_wide"))
     parser.add_argument("--out-dir", type=Path, default=Path("study/radio_ru_annual_contents"))
+    parser.add_argument(
+        "--ocr-variants",
+        default=",".join(DEFAULT_OCR_VARIANTS),
+        help="Comma-separated OCR variant directories to try under each page, in priority order.",
+    )
     return parser.parse_args()
 
 
 def main() -> int:
     args = parse_args()
+    variants = [part.strip() for part in args.ocr_variants.split(",") if part.strip()]
     records: list[Record] = []
     for year in sorted(DEFAULT_PAGES):
         state = ParseState(year=year)
         for page_name in DEFAULT_PAGES[year]:
-            source = find_ocr_file(args.ocr_root, page_name)
+            source = find_ocr_file(args.ocr_root, page_name, variants)
             records.extend(parse_text_file(year, page_name, source, state))
 
     write_csv(records, args.out_dir / "radio_annual_contents_1999_2000.csv")

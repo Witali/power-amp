@@ -131,6 +131,18 @@ CONTENTS_ROW_MERGE_MAX_VERTICAL_GAP_RATIO = layout_config.CONTENTS_ROW_MERGE_MAX
 CONTENTS_ROW_MERGE_MAX_VERTICAL_GAP_PX = layout_config.CONTENTS_ROW_MERGE_MAX_VERTICAL_GAP_PX
 CONTENTS_ROW_MERGE_MIN_TOTAL_HEIGHT_RATIO = layout_config.CONTENTS_ROW_MERGE_MIN_TOTAL_HEIGHT_RATIO
 CONTENTS_ROW_MERGE_MAX_TOTAL_HEIGHT_RATIO = layout_config.CONTENTS_ROW_MERGE_MAX_TOTAL_HEIGHT_RATIO
+CONTENTS_COLUMN_MERGE_MIN_WIDTH_RATIO = layout_config.CONTENTS_COLUMN_MERGE_MIN_WIDTH_RATIO
+CONTENTS_COLUMN_MERGE_MAX_WIDTH_RATIO = layout_config.CONTENTS_COLUMN_MERGE_MAX_WIDTH_RATIO
+CONTENTS_COLUMN_MERGE_MIN_WIDTH_SIMILARITY = layout_config.CONTENTS_COLUMN_MERGE_MIN_WIDTH_SIMILARITY
+CONTENTS_COLUMN_MERGE_MIN_HORIZONTAL_OVERLAP = layout_config.CONTENTS_COLUMN_MERGE_MIN_HORIZONTAL_OVERLAP
+CONTENTS_COLUMN_MERGE_MAX_VERTICAL_GAP_RATIO = layout_config.CONTENTS_COLUMN_MERGE_MAX_VERTICAL_GAP_RATIO
+CONTENTS_COLUMN_MERGE_MAX_VERTICAL_GAP_PX = layout_config.CONTENTS_COLUMN_MERGE_MAX_VERTICAL_GAP_PX
+CONTENTS_HEADING_SPLIT_MIN_WIDTH_RATIO = layout_config.CONTENTS_HEADING_SPLIT_MIN_WIDTH_RATIO
+CONTENTS_HEADING_SPLIT_MIN_HEIGHT_RATIO = layout_config.CONTENTS_HEADING_SPLIT_MIN_HEIGHT_RATIO
+CONTENTS_HEADING_SPLIT_MIN_RATIO = layout_config.CONTENTS_HEADING_SPLIT_MIN_RATIO
+CONTENTS_HEADING_SPLIT_MAX_RATIO = layout_config.CONTENTS_HEADING_SPLIT_MAX_RATIO
+CONTENTS_HEADING_SPLIT_MIN_GAP_PX = layout_config.CONTENTS_HEADING_SPLIT_MIN_GAP_PX
+CONTENTS_HEADING_SPLIT_MIN_BODY_ROWS = layout_config.CONTENTS_HEADING_SPLIT_MIN_BODY_ROWS
 PAGE_MARGIN_VISUAL_ARTIFACT_MAX_WIDTH_RATIO = layout_config.PAGE_MARGIN_VISUAL_ARTIFACT_MAX_WIDTH_RATIO
 PAGE_MARGIN_VISUAL_ARTIFACT_MIN_HEIGHT_RATIO = layout_config.PAGE_MARGIN_VISUAL_ARTIFACT_MIN_HEIGHT_RATIO
 PAGE_MARGIN_VISUAL_ARTIFACT_EDGE_RATIO = layout_config.PAGE_MARGIN_VISUAL_ARTIFACT_EDGE_RATIO
@@ -2529,6 +2541,211 @@ def merge_fragmented_contents_text_rows(
     return sorted(result, key=lambda item: (item[1].y, item[1].x))
 
 
+def contents_heading_split_candidate(block: Block, box: Box, width: int, height: int) -> bool:
+    if block.label != "text":
+        return False
+    if float(block.features.get("contents_row_merge", 0.0)) < 0.5:
+        return False
+    if box.w < width * CONTENTS_HEADING_SPLIT_MIN_WIDTH_RATIO:
+        return False
+    if box.h < height * CONTENTS_HEADING_SPLIT_MIN_HEIGHT_RATIO:
+        return False
+    return True
+
+
+def annual_contents_heading_split(mask, box: Box, page_width: int, page_height: int) -> tuple[int, int] | None:
+    min_gap = max(CONTENTS_HEADING_SPLIT_MIN_GAP_PX, int(round(box.h * 0.010)))
+    candidates: list[tuple[int, float, int, int]] = []
+    for start, end, mean_density in horizontal_whitespace_corridor_runs(mask, box, min_gap):
+        center = (start + end) // 2
+        ratio = center / max(1, box.h)
+        if not (CONTENTS_HEADING_SPLIT_MIN_RATIO <= ratio <= CONTENTS_HEADING_SPLIT_MAX_RATIO):
+            continue
+        top = Box(box.x, box.y, box.w, start)
+        bottom_start = min(box.h, end + 1)
+        bottom = Box(box.x, box.y + bottom_start, box.w, box.h - bottom_start)
+        if text_row_run_count(mask, top) < 2:
+            continue
+        if text_row_run_count(mask, bottom) < CONTENTS_HEADING_SPLIT_MIN_BODY_ROWS:
+            continue
+        gap_height = end - start + 1
+        preferred_ratio = 0.18
+        ratio_score = 1.0 - abs(ratio - preferred_ratio)
+        candidates.append((gap_height, ratio_score - mean_density, start, end))
+
+    if not candidates:
+        return None
+    _, _, start, end = max(candidates)
+    return start, end
+
+
+def split_annual_contents_heading_blocks(
+    classified: list[tuple[Block, Box]],
+    image,
+    mask,
+    edges,
+    ann,
+    scale: float,
+    width: int,
+    height: int,
+) -> list[tuple[Block, Box]]:
+    result: list[tuple[Block, Box]] = []
+    for block, box in classified:
+        split_gap = None
+        if contents_heading_split_candidate(block, box, width, height):
+            split_gap = annual_contents_heading_split(mask, box, width, height)
+        if split_gap is None:
+            result.append((block, box))
+            continue
+
+        gap_start, gap_end = split_gap
+        bottom_start = min(box.h, gap_end + 1)
+        top_box = Box(box.x, box.y, box.w, gap_start).clamp(width, height)
+        bottom_box = Box(box.x, box.y + bottom_start, box.w, box.h - bottom_start).clamp(width, height)
+        if top_box.area <= 0 or bottom_box.area <= 0:
+            result.append((block, box))
+            continue
+
+        block_number = block.ident.split("_", 1)[0]
+        for label, piece, suffix in (("heading", top_box, ""), ("text", bottom_box, "b")):
+            features = feature_dict(image, mask, edges, piece)
+            _, confidence = classify_features(ann, features)
+            original_box = Box(
+                int(round(piece.x / scale)),
+                int(round(piece.y / scale)),
+                int(round(piece.w / scale)),
+                int(round(piece.h / scale)),
+            )
+            rounded_features = {key: round(float(value), 5) for key, value in features.items()}
+            rounded_features["annual_contents_heading_split"] = 1.0
+            ident_number = f"{block_number}{suffix}"
+            result.append(
+                (
+                    Block(
+                        ident=f"{ident_number}_{label}",
+                        label=label,
+                        orientation=infer_orientation(features),
+                        confidence=round(max(confidence, block.confidence), 4),
+                        bbox=original_box.to_list(),
+                        outline=None,
+                        features=rounded_features,
+                    ),
+                    piece,
+                )
+            )
+
+    return sorted(result, key=lambda item: (item[1].y, item[1].x))
+
+
+def contents_column_fragment_candidate(block: Block, box: Box, width: int) -> bool:
+    if block.label not in TEXTUAL_LABELS:
+        return False
+    if block.orientation not in {"horizontal", "unknown"}:
+        return False
+    width_ratio = box.w / max(1, width)
+    if not (CONTENTS_COLUMN_MERGE_MIN_WIDTH_RATIO <= width_ratio <= CONTENTS_COLUMN_MERGE_MAX_WIDTH_RATIO):
+        return False
+    if box.h <= 0:
+        return False
+    features = block.features
+    if float(features.get("max_text_score", 0.0)) < 0.20:
+        return False
+    if float(features.get("saturation_p80", 0.0)) > 0.22 and float(features.get("line_art_score", 0.0)) > 0.55:
+        return False
+    return True
+
+
+def contents_column_fragments_are_adjacent(first: Box, second: Box, width: int, height: int) -> bool:
+    if second.y < first.y:
+        first, second = second, first
+    vertical_gap = second.y - first.y2
+    max_gap = max(
+        CONTENTS_COLUMN_MERGE_MAX_VERTICAL_GAP_PX,
+        int(round(height * CONTENTS_COLUMN_MERGE_MAX_VERTICAL_GAP_RATIO)),
+    )
+    if vertical_gap < 0 or vertical_gap > max_gap:
+        return False
+
+    overlap = box_horizontal_overlap_width(first, second)
+    if overlap < min(first.w, second.w) * CONTENTS_COLUMN_MERGE_MIN_HORIZONTAL_OVERLAP:
+        return False
+
+    width_similarity = min(first.w, second.w) / max(1, max(first.w, second.w))
+    if width_similarity < CONTENTS_COLUMN_MERGE_MIN_WIDTH_SIMILARITY:
+        return False
+
+    drift_limit = max(18, int(round(width * 0.025)))
+    return abs(first.x - second.x) <= drift_limit and abs(first.x2 - second.x2) <= drift_limit
+
+
+def merge_fragmented_contents_columns(
+    classified: list[tuple[Block, Box]],
+    image,
+    mask,
+    edges,
+    ann,
+    scale: float,
+    width: int,
+    height: int,
+) -> list[tuple[Block, Box]]:
+    candidates = [
+        item
+        for item in classified
+        if contents_column_fragment_candidate(item[0], item[1], width)
+    ]
+    if len(candidates) < 2:
+        return classified
+
+    consumed: set[str] = set()
+    merged_items: list[tuple[Block, Box]] = []
+    for seed_block, seed_box in sorted(candidates, key=lambda item: (item[1].x, item[1].y)):
+        if seed_block.ident in consumed:
+            continue
+        group = [(seed_block, seed_box)]
+        consumed.add(seed_block.ident)
+        changed = True
+        while changed:
+            changed = False
+            current_box = group[0][1]
+            for _, box in group[1:]:
+                current_box = union_box(current_box, box)
+            for block, box in sorted(candidates, key=lambda item: (item[1].y, item[1].x)):
+                if block.ident in consumed:
+                    continue
+                if contents_column_fragments_are_adjacent(current_box, box, width, height):
+                    group.append((block, box))
+                    consumed.add(block.ident)
+                    changed = True
+
+        if len(group) < 2:
+            consumed.remove(seed_block.ident)
+            continue
+
+        first_number = sorted(group, key=lambda item: (item[1].y, item[1].x))[0][0].ident.split("_", 1)[0]
+        merged_items.append(
+            merged_classified_item(
+                group,
+                "text",
+                f"{first_number}_text",
+                image,
+                mask,
+                edges,
+                ann,
+                scale,
+                width,
+                height,
+                "contents_column_merge",
+            )
+        )
+
+    if not merged_items:
+        return classified
+
+    result = [item for item in classified if item[0].ident not in consumed]
+    result.extend(merged_items)
+    return sorted(result, key=lambda item: (item[1].y, item[1].x))
+
+
 def merge_connected_schematic_blocks(
     classified: list[tuple[Block, Box]],
     image,
@@ -3590,7 +3807,13 @@ def classify_blocks(
     classified = merge_fragmented_contents_text_rows(
         classified, image, mask, edges, ann, scale=scale, width=analysis_w, height=analysis_h
     )
+    classified = split_annual_contents_heading_blocks(
+        classified, image, mask, edges, ann, scale=scale, width=analysis_w, height=analysis_h
+    )
     classified = split_text_columns_in_classified_blocks(
+        classified, image, mask, edges, ann, scale=scale, width=analysis_w, height=analysis_h
+    )
+    classified = merge_fragmented_contents_columns(
         classified, image, mask, edges, ann, scale=scale, width=analysis_w, height=analysis_h
     )
     classified = merge_stacked_diagram_blocks(

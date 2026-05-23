@@ -21,6 +21,8 @@ param(
     [switch]$NoAutoInvert,
     [switch]$NoTextCorrection,
     [switch]$DetectLayout,
+    [switch]$LayoutTextBlocks,
+    [switch]$LayoutOnly,
     [string]$LayoutOutDir = ".tmp\page_layout",
     [int]$MaxParallelOcr = 0,
     [int]$TesseractThreadLimit = 1,
@@ -868,6 +870,41 @@ function Get-ColumnRectsFromSplits {
     return @($rects)
 }
 
+function Get-LayoutTextRects {
+    param([string]$LayoutPath)
+
+    if (!(Test-Path -LiteralPath $LayoutPath)) {
+        throw "OpenCV layout JSON not found at $LayoutPath"
+    }
+
+    $layout = Get-Content -LiteralPath $LayoutPath -Raw -Encoding UTF8 | ConvertFrom-Json
+    $textBlocks = @(
+        $layout.blocks |
+            Where-Object {
+                $_.label -in @("text", "heading") -and
+                ($null -eq $_.orientation -or $_.orientation -in @("horizontal", "unknown"))
+            } |
+            Sort-Object -Property @{ Expression = { [int]$_.bbox[1] } }, @{ Expression = { [int]$_.bbox[0] } }
+    )
+
+    $rects = New-Object System.Collections.Generic.List[System.Drawing.Rectangle]
+    foreach ($block in $textBlocks) {
+        if ($null -eq $block.bbox -or $block.bbox.Count -lt 4) {
+            continue
+        }
+        $x = [int]$block.bbox[0]
+        $y = [int]$block.bbox[1]
+        $w = [int]$block.bbox[2]
+        $h = [int]$block.bbox[3]
+        if ($w -le 4 -or $h -le 4) {
+            continue
+        }
+        $rects.Add([System.Drawing.Rectangle]::new($x, $y, $w, $h))
+    }
+
+    return @($rects)
+}
+
 function Invoke-OcrVariant {
     param(
         [System.Drawing.Bitmap]$Image,
@@ -929,8 +966,11 @@ $resolvedInput = (Resolve-Path -LiteralPath $InputPath).Path
 $imageName = [IO.Path]::GetFileNameWithoutExtension($resolvedInput)
 $pageOutDir = Join-Path $OutputRoot $imageName
 New-Directory $pageOutDir
+$shouldDetectLayout = $DetectLayout -or $LayoutTextBlocks -or $LayoutOnly
+$resolvedLayoutOutDir = if ([IO.Path]::IsPathRooted($LayoutOutDir)) { $LayoutOutDir } else { Join-Path $Root $LayoutOutDir }
+$layoutJsonPath = Join-Path (Join-Path $resolvedLayoutOutDir $imageName) "layout.json"
 
-if ($DetectLayout) {
+if ($shouldDetectLayout) {
     $layoutScript = Join-Path $PSScriptRoot "detect_page_layout.py"
     Write-ProgressLog "Running OpenCV layout detector before OCR."
     & python $layoutScript --image $resolvedInput --out-dir $LayoutOutDir
@@ -944,8 +984,6 @@ try {
     Write-ProgressLog "Processing page image: $resolvedInput"
     Write-ProgressLog "Image size: $($image.Width)x$($image.Height). Output: $pageOutDir"
     if ($DetectLayout) {
-        $resolvedLayoutOutDir = if ([IO.Path]::IsPathRooted($LayoutOutDir)) { $LayoutOutDir } else { Join-Path $Root $LayoutOutDir }
-        $layoutJsonPath = Join-Path (Join-Path $resolvedLayoutOutDir $imageName) "layout.json"
         Export-FigureLinks -Image $image -LayoutPath $layoutJsonPath -PageOutDir $pageOutDir
     }
     $left = [int][Math]::Round($image.Width * $LeftCrop)
@@ -955,7 +993,19 @@ try {
     $contentWidth = $right - $left
     $contentHeight = $bottom - $top
 
-    if (!$AutoOnly) {
+    if (($LayoutTextBlocks -or $LayoutOnly) -and $shouldDetectLayout) {
+        Write-ProgressLog "Running OpenCV layout text-block OCR variant from $layoutJsonPath."
+        $layoutRects = @(Get-LayoutTextRects -LayoutPath $layoutJsonPath)
+        if ($layoutRects.Count -gt 0) {
+            $variantDir = Join-Path $pageOutDir "layout_text_blocks"
+            Invoke-OcrVariant -Image $image -VariantDir $variantDir -ColumnRects $layoutRects -PsmModes $PsmModes -Profiles $SelectedOcrProfiles
+        }
+        else {
+            Write-Warning "OpenCV layout produced no horizontal text blocks for OCR."
+        }
+    }
+
+    if (!$AutoOnly -and !$LayoutOnly) {
         $manualCounter = 0
         Write-ProgressLog "Running manual column trials: $(@($ColumnCounts) -join ', ') column(s); PSM modes: $(@($PsmModes) -join ', '); profiles: $(@($SelectedOcrProfiles | ForEach-Object { $_.Name }) -join ', ')."
         foreach ($columnCount in $ColumnCounts) {
@@ -977,7 +1027,7 @@ try {
         Complete-StepProgress -Id 1 -Activity "Manual column trials"
     }
 
-    if ($AutoColumns -or $AutoOnly) {
+    if (($AutoColumns -or $AutoOnly) -and !$LayoutOnly) {
         Write-ProgressLog "Detecting automatic column splits up to $AutoMaxColumns column(s)."
         $contentRect = [System.Drawing.Rectangle]::new($left, $top, $contentWidth, $contentHeight)
         $projection = [RadioRuOcrLayout]::DetectVerticalSplits(
@@ -1036,15 +1086,22 @@ Write-ProgressLog "Scoring OCR variants: $($textFiles.Count) merged text file(s)
 foreach ($textFile in $textFiles) {
     $summaryCounter++
     Show-StepProgress -Id 5 -Activity "Scoring OCR variants" -Status "$summaryCounter/$($textFiles.Count): $($textFile.Directory.Name)/$($textFile.Name)" -Current $summaryCounter -Total $textFiles.Count
-    if ($textFile.Directory.Name -notmatch "^(?:auto_)?columns(\d+)$") {
+    $variantName = $textFile.Directory.Name
+    $isLayoutVariant = $variantName -eq "layout_text_blocks"
+    if ($variantName -match "^(?:auto_)?columns(\d+)$") {
+        $fileColumnCount = [int]$Matches[1]
+    }
+    elseif ($isLayoutVariant) {
+        $fileColumnCount = @(Get-ChildItem -LiteralPath $textFile.DirectoryName -Filter "column*.png").Count
+    }
+    else {
         continue
     }
-    $isAutoVariant = $textFile.Directory.Name -match "^auto_"
-    if ($AutoOnly -and !$isAutoVariant) {
+    $isAutoVariant = $variantName -match "^auto_"
+    if ($AutoOnly -and !$isAutoVariant -and !$isLayoutVariant) {
         continue
     }
-    $fileColumnCount = [int]$Matches[1]
-    if (!$AutoOnly -and !$isAutoVariant -and $ColumnCounts -notcontains $fileColumnCount) {
+    if (!$AutoOnly -and !$isAutoVariant -and !$isLayoutVariant -and $ColumnCounts -notcontains $fileColumnCount) {
         continue
     }
     if ($textFile.BaseName -notmatch "^merged\.([^.]+)\.psm(\d+)$") {

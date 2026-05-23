@@ -497,6 +497,101 @@ class DetectPageLayoutTests(unittest.TestCase):
         self.assertEqual(len(split), 2)
         self.assertLessEqual(split[0][1].x2, split[1][1].x)
 
+    def test_merges_adjacent_annual_contents_column_fragments(self) -> None:
+        np = detect_page_layout.np
+
+        image = np.full((1400, 1000, 3), 255, dtype=np.uint8)
+        mask = np.zeros((1400, 1000), dtype=np.uint8)
+        edges = mask.copy()
+        ann = detect_page_layout.train_bootstrap_ann()
+        features = {
+            "max_text_score": 0.74,
+            "line_art_score": 0.10,
+            "saturation_p80": 0.0,
+        }
+        upper_box = detect_page_layout.Box(42, 360, 420, 260)
+        lower_box = detect_page_layout.Box(42, 620, 420, 510)
+        right_box = detect_page_layout.Box(510, 360, 430, 770)
+        classified = [
+            (
+                detect_page_layout.Block("003_text", "text", "horizontal", 0.85, upper_box.to_list(), None, features),
+                upper_box,
+            ),
+            (
+                detect_page_layout.Block("005_text", "text", "horizontal", 0.87, lower_box.to_list(), None, features),
+                lower_box,
+            ),
+            (
+                detect_page_layout.Block("004_text", "text", "horizontal", 0.87, right_box.to_list(), None, features),
+                right_box,
+            ),
+        ]
+
+        merged = detect_page_layout.merge_fragmented_contents_columns(
+            classified,
+            image,
+            mask,
+            edges,
+            ann,
+            scale=1.0,
+            width=1000,
+            height=1400,
+        )
+
+        self.assertEqual(len(merged), 2)
+        merged_boxes = {item[0].ident: item[1].to_list() for item in merged}
+        self.assertEqual(merged_boxes["003_text"], [42, 360, 420, 770])
+        self.assertEqual(merged_boxes["004_text"], right_box.to_list())
+        self.assertEqual(merged[0][0].features["contents_column_merge"], 1.0)
+
+    def test_splits_annual_contents_heading_at_whitespace_corridor(self) -> None:
+        cv2 = detect_page_layout.cv2
+        np = detect_page_layout.np
+
+        image = np.full((1000, 1000, 3), 255, dtype=np.uint8)
+        mask = np.zeros((1000, 1000), dtype=np.uint8)
+        cv2.rectangle(mask, (180, 120), (820, 150), 255, -1)
+        cv2.rectangle(mask, (80, 190), (910, 205), 255, -1)
+        cv2.rectangle(mask, (80, 215), (620, 230), 255, -1)
+        for row in range(8):
+            y = 310 + row * 45
+            cv2.rectangle(mask, (60, y), (420, y + 14), 255, -1)
+            cv2.rectangle(mask, (555, y), (930, y + 14), 255, -1)
+        edges = mask.copy()
+        ann = detect_page_layout.train_bootstrap_ann()
+        box = detect_page_layout.Box(40, 100, 920, 620)
+        block = detect_page_layout.Block(
+            ident="002_text",
+            label="text",
+            orientation="unknown",
+            confidence=0.89,
+            bbox=box.to_list(),
+            outline=None,
+            features={
+                "contents_row_merge": 1.0,
+                "max_text_score": 0.74,
+                "line_art_score": 0.10,
+                "saturation_p80": 0.0,
+            },
+        )
+
+        split = detect_page_layout.split_annual_contents_heading_blocks(
+            [(block, box)],
+            image,
+            mask,
+            edges,
+            ann,
+            scale=1.0,
+            width=1000,
+            height=1000,
+        )
+
+        self.assertEqual([item[0].label for item in split], ["heading", "text"])
+        self.assertLess(split[0][1].y2, 310)
+        self.assertGreater(split[1][1].y, split[0][1].y2)
+        self.assertGreaterEqual(split[1][1].y, 250)
+        self.assertEqual(split[0][0].features["annual_contents_heading_split"], 1.0)
+
     def test_suppresses_small_text_artifact_touching_pcb(self) -> None:
         pcb = detect_page_layout.Block(
             ident="004_pcb",
