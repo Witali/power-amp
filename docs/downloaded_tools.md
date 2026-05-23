@@ -1,6 +1,6 @@
 # Downloaded Local Tools
 
-Last updated: 2026-05-19.
+Last updated: 2026-05-23.
 
 This project keeps downloaded binaries, installers, package caches, and generated
 tool output outside Git. The default locations are `local_tools/`, `.tmp/`,
@@ -24,7 +24,7 @@ name, version, source URL, local path, purpose, and whether it is committed.
 | Hunspell fallback binary | `hunspell-msvc-Release-x64.zip` | `https://github.com/mlt/hunspell/releases/download/appveyor_v1.7.0/hunspell-msvc-Release-x64.zip` | `local_tools/hunspell` | Fallback executable if the portable package does not expose `hunspell.exe`. | Ignored. |
 | Hunspell Russian dictionary | `ru_RU.aff`, `ru_RU.dic` | `https://raw.githubusercontent.com/LibreOffice/dictionaries/master/ru_RU/` | `local_tools/hunspell-dictionaries` | Russian spelling checks for OCR output. | Ignored. |
 | Hunspell English dictionary | `en_US.aff`, `en_US.dic` | `https://raw.githubusercontent.com/LibreOffice/dictionaries/master/en/` | `local_tools/hunspell-dictionaries` | English spelling checks for OCR output. | Ignored. |
-| Python layout packages | `opencv-python-headless`, `numpy`, `pillow` | PyPI via `python -m pip install --target local_tools/python_packages` | `local_tools/python_packages` | OpenCV page segmentation, previews, and image processing. | Ignored. |
+| Python layout packages | `opencv-python-headless`, `numpy`, `pillow` | PyPI via selected Python: `python -m pip install --target local_tools/python_packages/pyXY` | `local_tools/python_packages/pyXY` | OpenCV page segmentation, previews, and image processing. | Ignored. |
 | Node.js | `node-v20.11.1-win-x64.zip` | `https://nodejs.org/dist/v20.11.1/node-v20.11.1-win-x64.zip` | `local_tools/node` | Portable Node runtime when system Node is unavailable. | Ignored. |
 | npm dependencies | `@resvg/resvg-js` | npm registry from `package.json` | `node_modules/` and `node_cache/` | SVG rendering/linting support. | Ignored. |
 | 7-Zip | `7zip.portable.nupkg` | `https://community.chocolatey.org/api/v2/package/7zip.portable` | `local_tools/7zip-portable` | Archive extraction for `.7z`, `.nupkg`, and installer payloads when system 7-Zip is unavailable. | Ignored. |
@@ -34,6 +34,9 @@ name, version, source URL, local path, purpose, and whether it is committed.
 - `init.ps1` forwards to `scripts/setup_local_tools.ps1`.
 - `scripts/setup_local_tools.ps1` downloads and extracts the tools above when
   they are missing, unless the matching `-Skip...` option is used.
+- Python layout packages are installed per Python minor version. Use
+  `.\init.ps1 -PythonPath C:\path\to\python.exe` when the project scripts should
+  use a specific interpreter.
 - `scripts/build_go_tools.ps1` uses Go from `local_tools/go`, writes Go caches
   into `.tmp`, and builds local binaries into `local_tools/bin`.
 

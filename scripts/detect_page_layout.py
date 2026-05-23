@@ -20,9 +20,12 @@ from typing import Callable, Iterable
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-LOCAL_PACKAGES = PROJECT_ROOT / "local_tools" / "python_packages"
-if LOCAL_PACKAGES.exists():
-    sys.path.insert(0, str(LOCAL_PACKAGES))
+try:
+    from scripts.local_python_packages import add_local_python_packages  # type: ignore
+except ImportError:
+    from local_python_packages import add_local_python_packages  # type: ignore
+
+add_local_python_packages(PROJECT_ROOT)
 
 try:
     import cv2  # type: ignore
@@ -202,8 +205,7 @@ def require_dependencies() -> None:
         return
     raise SystemExit(
         "OpenCV layout detector dependencies are missing. "
-        "Run: python -m pip install --target local_tools\\python_packages "
-        "opencv-python-headless numpy pillow"
+        "Run: .\\init.ps1 or .\\init.ps1 -PythonPath <python.exe>."
     )
 
 

@@ -17,7 +17,7 @@ policy is maintained in `docs/downloaded_tools.md`.
 - Tesseract OCR 5.5.0 Windows package, extracted locally.
 - Tesseract language data: `rus`, `eng`, and `osd`.
 - Optional Hunspell spell checker plus `ru_RU` and `en_US` dictionaries for OCR text checks.
-- Python packages for page-layout detection before OCR: `opencv-python-headless`, `numpy`, and `pillow`, installed into `local_tools/python_packages`.
+- Python packages for page-layout detection before OCR: `opencv-python-headless`, `numpy`, and `pillow`, installed into the matching versioned directory under `local_tools/python_packages/`, for example `local_tools/python_packages/py312`.
 - Go 1.26.3 portable for native layout-analysis tools.
 - Node.js 20.11.1 portable, only if no system `node.exe` is found.
 - 7-Zip portable, only if no system `7z.exe` is found.
@@ -28,11 +28,21 @@ policy is maintained in `docs/downloaded_tools.md`.
 - Windows PowerShell or PowerShell 7.
 
 The script can use already installed Node.js and 7-Zip. If they are missing, it downloads local portable copies under `local_tools/`.
+For Python layout dependencies it uses `-PythonPath`, the `PYTHON` environment
+variable, or the first runnable `python.exe`/`python`/`py.exe` on `PATH`.
+Compiled wheels are installed per Python minor version, so Python 3.12 and 3.14
+do not overwrite each other's local packages.
 
 If you want to force a specific 7-Zip binary, pass it explicitly:
 
 ```powershell
 .\init.ps1 -SevenZipPath "C:\path\to\7z.exe"
+```
+
+If you want to force the Python used for OpenCV layout dependencies, pass:
+
+```powershell
+.\init.ps1 -PythonPath "C:\path\to\python.exe"
 ```
 
 The root `init.ps1` forwards to:
@@ -52,6 +62,7 @@ scripts/setup_local_tools.ps1
 .\init.ps1 -SkipLayoutCv
 .\init.ps1 -SkipGo
 .\init.ps1 -SkipNode
+.\init.ps1 -PythonPath "C:\path\to\python.exe"
 ```
 
 `-Force` redownloads/reextracts tools where applicable.

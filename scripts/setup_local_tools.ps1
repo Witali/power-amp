@@ -7,6 +7,7 @@ param(
     [switch]$SkipLayoutCv,
     [switch]$SkipGo,
     [switch]$SkipNode,
+    [string]$PythonPath,
     [string]$SevenZipPath
 )
 
@@ -16,7 +17,7 @@ $Root = Split-Path -Parent $PSScriptRoot
 $Tools = Join-Path $Root "local_tools"
 $Downloads = Join-Path $Tools "downloads"
 $NodeCache = Join-Path $Root "node_cache"
-$PythonPackages = Join-Path $Tools "python_packages"
+$PythonPackagesRoot = Join-Path $Tools "python_packages"
 $LayoutPythonPackages = @("opencv-python-headless", "numpy", "pillow")
 
 $SevenZipPackage = "7zip.portable.nupkg"
@@ -454,43 +455,177 @@ function Install-NodeDependencies {
     }
 }
 
-function Test-LocalPythonPackage {
-    param([string]$PackageName)
+function Resolve-ExecutablePath {
+    param([string]$Command)
 
-    if (!(Test-Path -LiteralPath $PythonPackages)) {
+    if (!$Command) {
+        return $null
+    }
+
+    if (Test-Path -LiteralPath $Command) {
+        return (Resolve-Path -LiteralPath $Command).Path
+    }
+
+    $cmd = Get-Command $Command -ErrorAction SilentlyContinue | Select-Object -First 1
+    if ($cmd) {
+        return $cmd.Source
+    }
+
+    return $null
+}
+
+function Test-PythonExecutable {
+    param([string]$PythonExe)
+
+    try {
+        & $PythonExe -c "import sys" 2>$null
+        return ($LASTEXITCODE -eq 0)
+    }
+    catch {
+        return $false
+    }
+}
+
+function Find-Python {
+    param([switch]$Quiet)
+
+    $candidates = @()
+    if ($PythonPath) {
+        $candidates += $PythonPath
+    }
+    if ($env:PYTHON) {
+        $candidates += $env:PYTHON
+    }
+    $candidates += @("python.exe", "python", "py.exe")
+
+    foreach ($candidate in $candidates) {
+        $resolved = Resolve-ExecutablePath -Command $candidate
+        if ($resolved -and (Test-PythonExecutable -PythonExe $resolved)) {
+            return $resolved
+        }
+    }
+
+    if ($Quiet) {
+        return $null
+    }
+
+    if ($PythonPath) {
+        throw "Python was not found or could not run: $PythonPath"
+    }
+    throw "Python was not found. Install Python or pass -PythonPath C:\path\to\python.exe."
+}
+
+function Get-PythonVersionTag {
+    param([string]$PythonExe)
+
+    $tag = & $PythonExe -c "import sys; print(f'py{sys.version_info.major}{sys.version_info.minor}')"
+    if ($LASTEXITCODE -ne 0 -or !$tag) {
+        throw "Could not determine Python version for $PythonExe"
+    }
+    return ($tag | Select-Object -First 1).Trim()
+}
+
+function Get-PythonIdentity {
+    param([string]$PythonExe)
+
+    $identity = & $PythonExe -c "import sys; print(f'{sys.executable} ({sys.version.split()[0]})')"
+    if ($LASTEXITCODE -ne 0 -or !$identity) {
+        return $PythonExe
+    }
+    return ($identity | Select-Object -First 1).Trim()
+}
+
+function Get-PythonPackageTarget {
+    param([string]$PythonExe)
+
+    $tag = Get-PythonVersionTag -PythonExe $PythonExe
+    return (Join-Path $PythonPackagesRoot $tag)
+}
+
+function Ensure-Pip {
+    param([string]$PythonExe)
+
+    & $PythonExe -m pip --version | Out-Null
+    if ($LASTEXITCODE -eq 0) {
+        return
+    }
+
+    Write-Host "pip was not found for $PythonExe. Trying ensurepip."
+    & $PythonExe -m ensurepip --upgrade
+    if ($LASTEXITCODE -ne 0) {
+        throw "Could not bootstrap pip for $PythonExe"
+    }
+}
+
+function Test-PythonLayoutDependencies {
+    param(
+        [string]$PythonExe,
+        [string]$PackageTarget
+    )
+
+    if (!(Test-Path -LiteralPath $PackageTarget)) {
         return $false
     }
 
-    $oldPythonPath = $env:PYTHONPATH
+    $oldPackagePath = $env:POWER_AMP_PYTHON_PACKAGES
     try {
-        $env:PYTHONPATH = if ($oldPythonPath) { "$PythonPackages;$oldPythonPath" } else { $PythonPackages }
-        & python -c "import importlib.util, sys; sys.exit(0 if importlib.util.find_spec('$PackageName') else 1)"
-        return $LASTEXITCODE -eq 0
+        $env:POWER_AMP_PYTHON_PACKAGES = $PackageTarget
+        $code = @'
+import os
+import sys
+
+target = os.environ['POWER_AMP_PYTHON_PACKAGES']
+sys.path.insert(0, target)
+
+try:
+    import cv2
+    import numpy
+    import PIL
+except Exception as exc:
+    print('Python layout import failed: {}'.format(exc), file=sys.stderr)
+    sys.exit(1)
+
+missing = [name for name in ('imdecode', 'imencode', 'resize') if not hasattr(cv2, name)]
+if missing:
+    print('cv2 is incomplete; missing: {}'.format(', '.join(missing)), file=sys.stderr)
+    sys.exit(1)
+
+print('cv2 {}; numpy {}; pillow {}'.format(getattr(cv2, '__version__', 'unknown'), numpy.__version__, PIL.__version__))
+'@
+        & $PythonExe -c $code
+        return ($LASTEXITCODE -eq 0)
     }
     finally {
-        $env:PYTHONPATH = $oldPythonPath
+        $env:POWER_AMP_PYTHON_PACKAGES = $oldPackagePath
     }
 }
 
 function Install-PythonLayoutDependencies {
     Write-Step "Checking Python OpenCV layout dependencies"
 
-    $missing = @()
-    foreach ($packageName in @("cv2", "numpy", "PIL")) {
-        if (!(Test-LocalPythonPackage -PackageName $packageName)) {
-            $missing += $packageName
-        }
-    }
+    $python = Find-Python
+    $target = Get-PythonPackageTarget -PythonExe $python
+    Write-Host "Using Python: $(Get-PythonIdentity -PythonExe $python)"
+    Write-Host "Package target: $target"
 
-    if (!$Force -and $missing.Count -eq 0) {
-        Write-Host "Python layout dependencies are already installed in $PythonPackages"
+    if (!$Force -and (Test-PythonLayoutDependencies -PythonExe $python -PackageTarget $target)) {
+        Write-Host "Python layout dependencies are already installed."
         return
     }
 
-    Ensure-Directory $PythonPackages
-    & python -m pip install --target $PythonPackages @LayoutPythonPackages
+    if (Test-Path -LiteralPath $target) {
+        Remove-Item -LiteralPath $target -Recurse -Force
+    }
+    Ensure-Directory $target
+    Ensure-Pip -PythonExe $python
+
+    & $python -m pip install --target $target --upgrade --force-reinstall @LayoutPythonPackages
     if ($LASTEXITCODE -ne 0) {
         throw "pip install for Python layout dependencies failed with exit code $LASTEXITCODE"
+    }
+
+    if (!(Test-PythonLayoutDependencies -PythonExe $python -PackageTarget $target)) {
+        throw "Python layout dependencies were installed, but validation failed for $target"
     }
 }
 
@@ -513,8 +648,13 @@ function Show-Summary {
     if (Test-Path -LiteralPath (Join-Path $Root "node_modules\@resvg\resvg-js")) {
         Write-Host "Node deps: node_modules installed"
     }
-    if (Test-LocalPythonPackage -PackageName "cv2") {
-        Write-Host "Layout CV: $PythonPackages"
+    $python = Find-Python -Quiet
+    if ($python) {
+        $target = Get-PythonPackageTarget -PythonExe $python
+        if (Test-PythonLayoutDependencies -PythonExe $python -PackageTarget $target) {
+            Write-Host "Layout CV: $target"
+            Write-Host "Python:    $(Get-PythonIdentity -PythonExe $python)"
+        }
     }
     if (Test-Path -LiteralPath $GoExe) {
         Write-Host "Go:        $GoExe"
