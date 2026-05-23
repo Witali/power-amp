@@ -153,6 +153,24 @@ CONTENTS_HEADING_SPLIT_MIN_RATIO = layout_config.CONTENTS_HEADING_SPLIT_MIN_RATI
 CONTENTS_HEADING_SPLIT_MAX_RATIO = layout_config.CONTENTS_HEADING_SPLIT_MAX_RATIO
 CONTENTS_HEADING_SPLIT_MIN_GAP_PX = layout_config.CONTENTS_HEADING_SPLIT_MIN_GAP_PX
 CONTENTS_HEADING_SPLIT_MIN_BODY_ROWS = layout_config.CONTENTS_HEADING_SPLIT_MIN_BODY_ROWS
+CONTENTS_TEXT_MIN_SCORE = layout_config.CONTENTS_TEXT_MIN_SCORE
+CONTENTS_TEXT_MIN_TEXTLINE_DENSITY = layout_config.CONTENTS_TEXT_MIN_TEXTLINE_DENSITY
+CONTENTS_TEXT_MIN_COMPONENT_DENSITY = layout_config.CONTENTS_TEXT_MIN_COMPONENT_DENSITY
+CONTENTS_TEXT_MAX_AXIS_LINE_DENSITY = layout_config.CONTENTS_TEXT_MAX_AXIS_LINE_DENSITY
+CONTENTS_TEXT_MAX_LINE_BALANCE = layout_config.CONTENTS_TEXT_MAX_LINE_BALANCE
+CONTENTS_TEXT_MAX_SATURATION = layout_config.CONTENTS_TEXT_MAX_SATURATION
+CONTENTS_TEXT_MIN_WIDTH_RATIO = layout_config.CONTENTS_TEXT_MIN_WIDTH_RATIO
+CONTENTS_TEXT_MAX_WIDTH_RATIO = layout_config.CONTENTS_TEXT_MAX_WIDTH_RATIO
+CONTENTS_TEXT_MIN_HEIGHT_RATIO = layout_config.CONTENTS_TEXT_MIN_HEIGHT_RATIO
+CONTENTS_NUMBER_COLUMN_MAX_WIDTH_RATIO = layout_config.CONTENTS_NUMBER_COLUMN_MAX_WIDTH_RATIO
+CONTENTS_NUMBER_COLUMN_MIN_HEIGHT_RATIO = layout_config.CONTENTS_NUMBER_COLUMN_MIN_HEIGHT_RATIO
+CONTENTS_NUMBER_COLUMN_MAX_GAP_RATIO = layout_config.CONTENTS_NUMBER_COLUMN_MAX_GAP_RATIO
+CONTENTS_NUMBER_COLUMN_MIN_TARGET_OVERLAP = layout_config.CONTENTS_NUMBER_COLUMN_MIN_TARGET_OVERLAP
+CONTENTS_FOOTER_ARTIFACT_TOP_RATIO = layout_config.CONTENTS_FOOTER_ARTIFACT_TOP_RATIO
+CONTENTS_FOOTER_ARTIFACT_MAX_HEIGHT_RATIO = layout_config.CONTENTS_FOOTER_ARTIFACT_MAX_HEIGHT_RATIO
+CONTENTS_FOOTER_ARTIFACT_MAX_WIDTH_RATIO = layout_config.CONTENTS_FOOTER_ARTIFACT_MAX_WIDTH_RATIO
+CONTENTS_FOOTER_ARTIFACT_EDGE_RATIO = layout_config.CONTENTS_FOOTER_ARTIFACT_EDGE_RATIO
+CONTENTS_FOOTER_ARTIFACT_MAX_AREA_RATIO = layout_config.CONTENTS_FOOTER_ARTIFACT_MAX_AREA_RATIO
 PAGE_MARGIN_VISUAL_ARTIFACT_MAX_WIDTH_RATIO = layout_config.PAGE_MARGIN_VISUAL_ARTIFACT_MAX_WIDTH_RATIO
 PAGE_MARGIN_VISUAL_ARTIFACT_MIN_HEIGHT_RATIO = layout_config.PAGE_MARGIN_VISUAL_ARTIFACT_MIN_HEIGHT_RATIO
 PAGE_MARGIN_VISUAL_ARTIFACT_EDGE_RATIO = layout_config.PAGE_MARGIN_VISUAL_ARTIFACT_EDGE_RATIO
@@ -1498,6 +1516,32 @@ def heading_candidate_features(features: dict[str, float]) -> bool:
     )
 
 
+def annual_contents_text_features(features: dict[str, float]) -> bool:
+    """Recognize dense contents-list text that can look image-like at block scale."""
+
+    return (
+        CONTENTS_TEXT_MIN_WIDTH_RATIO <= features.get("width_ratio", 0.0) <= CONTENTS_TEXT_MAX_WIDTH_RATIO
+        and features.get("height_ratio", 0.0) >= CONTENTS_TEXT_MIN_HEIGHT_RATIO
+        and features.get("max_text_score", 0.0) >= CONTENTS_TEXT_MIN_SCORE
+        and features.get("textline_density", 0.0) >= CONTENTS_TEXT_MIN_TEXTLINE_DENSITY
+        and features.get("component_density", 0.0) >= CONTENTS_TEXT_MIN_COMPONENT_DENSITY
+        and max(features.get("hline_density", 0.0), features.get("vline_density", 0.0)) <= CONTENTS_TEXT_MAX_AXIS_LINE_DENSITY
+        and features.get("line_balance", 1.0) <= CONTENTS_TEXT_MAX_LINE_BALANCE
+        and features.get("saturation_p80", 0.0) <= CONTENTS_TEXT_MAX_SATURATION
+    )
+
+
+def wide_rule_heading_features(features: dict[str, float]) -> bool:
+    return (
+        features["width_ratio"] >= 0.45
+        and features["height_ratio"] <= 0.040
+        and features["area_ratio"] <= 0.035
+        and features["max_text_score"] >= 0.30
+        and features["textline_density"] >= 0.25
+        and features["ink_density"] >= 0.06
+    )
+
+
 def rule_scores(features: dict[str, float]) -> np.ndarray:
     scores = np.zeros(len(CLASS_NAMES), dtype=np.float32)
     ink = features["ink_density"]
@@ -1574,6 +1618,8 @@ def classify_features(ann, features: dict[str, float]) -> tuple[str, float]:
     pcb_has_track_grid = features["line_balance"] >= PCB_MIN_LINE_BALANCE and pcb_axis_line_density >= PCB_MIN_AXIS_LINE_DENSITY
     pcb_size_ok = features["area_ratio"] >= PCB_MIN_AREA_RATIO and features["height_ratio"] >= PCB_MIN_HEIGHT_RATIO
     heading_candidate = heading_candidate_features(features)
+    contents_text_candidate = annual_contents_text_features(features)
+    wide_rule_heading_candidate = wide_rule_heading_features(features)
     pcb_candidate = (
         pcb_trace >= PCB_MIN_TRACE_DENSITY
         and pcb_signature >= PCB_MIN_SIGNATURE_SCORE
@@ -1586,6 +1632,19 @@ def classify_features(ann, features: dict[str, float]) -> tuple[str, float]:
     if features["area_ratio"] < 0.002 and features["textline_density"] < 0.25:
         scores *= 0.65
         scores[CLASS_NAMES.index("other")] += 0.35
+    if contents_text_candidate:
+        scores[CLASS_NAMES.index("text")] += 2.40
+        scores[CLASS_NAMES.index("image")] *= 0.08
+        scores[CLASS_NAMES.index("schematic/circuit")] *= 0.30
+        scores[CLASS_NAMES.index("diagram")] *= 0.45
+        scores[CLASS_NAMES.index("table")] *= 0.55
+        scores[CLASS_NAMES.index("pcb")] *= 0.10
+    if wide_rule_heading_candidate:
+        scores[CLASS_NAMES.index("heading")] += 1.85
+        scores[CLASS_NAMES.index("text")] += 0.30
+        scores[CLASS_NAMES.index("schematic/circuit")] *= 0.22
+        scores[CLASS_NAMES.index("diagram")] *= 0.50
+        scores[CLASS_NAMES.index("image")] *= 0.40
     if features["gray_std"] > 0.55 and features["gray_levels"] > 0.75 and features["area_ratio"] > 0.01 and max_text < 0.45:
         scores[CLASS_NAMES.index("image")] += 0.25
     if (
@@ -1804,6 +1863,14 @@ def classify_features(ann, features: dict[str, float]) -> tuple[str, float]:
         scores[CLASS_NAMES.index("diagram")] *= 0.38
         scores[CLASS_NAMES.index("table")] *= 0.48
         scores[CLASS_NAMES.index("pcb")] *= 0.06
+    if wide_rule_heading_candidate:
+        scores[CLASS_NAMES.index("heading")] += 4.20
+        scores[CLASS_NAMES.index("text")] += 0.40
+        scores[CLASS_NAMES.index("image")] *= 0.12
+        scores[CLASS_NAMES.index("schematic/circuit")] *= 0.06
+        scores[CLASS_NAMES.index("diagram")] *= 0.25
+        scores[CLASS_NAMES.index("table")] *= 0.35
+        scores[CLASS_NAMES.index("pcb")] *= 0.04
     scores = scores / max(float(scores.sum()), 1e-6)
 
     index = int(scores.argmax())
@@ -2265,6 +2332,27 @@ def text_fragment_inside_visual(text_box: Box, visual_blocks: list[Block]) -> bo
     return False
 
 
+def dense_multiline_text_block(block: Block, box: Box) -> bool:
+    if box.w < TEXT_MIN_ABSOLUTE_WIDTH_PX * 4 or box.h < TEXT_MIN_ABSOLUTE_HEIGHT_PX * 4:
+        return False
+    features = block.features
+    large_plain_text = (
+        box.w >= TEXT_MIN_ABSOLUTE_WIDTH_PX * 10
+        and box.h >= TEXT_MIN_ABSOLUTE_HEIGHT_PX * 20
+        and float(features.get("ink_density", 0.0)) >= 0.02
+        and max(float(features.get("hline_density", 0.0)), float(features.get("vline_density", 0.0))) <= 0.12
+        and float(features.get("line_balance", 0.0)) <= 0.18
+        and float(features.get("saturation_p80", 0.0)) <= 0.18
+    )
+    if large_plain_text:
+        return True
+    return (
+        float(features.get("max_text_score", 0.0)) >= 0.50
+        and float(features.get("textline_density", 0.0)) >= 0.35
+        and float(features.get("saturation_p80", 0.0)) <= 0.18
+    )
+
+
 def tiny_text_fragment(block: Block, visual_blocks: list[Block]) -> bool:
     if block.label != "text":
         return False
@@ -2272,6 +2360,8 @@ def tiny_text_fragment(block: Block, visual_blocks: list[Block]) -> bool:
     box = box_from_list(block.bbox)
     if box.area <= 0:
         return True
+    if dense_multiline_text_block(block, box):
+        return False
 
     reading_axis, cross_axis = text_fragment_axes(block, box)
     if cross_axis < TEXT_MIN_ABSOLUTE_HEIGHT_PX:
@@ -2811,6 +2901,193 @@ def merge_fragmented_contents_columns(
     return sorted(result, key=lambda item: (item[1].y, item[1].x))
 
 
+def contents_number_column_candidate(block: Block, box: Box, width: int, height: int) -> bool:
+    if block.label not in TEXTUAL_LABELS:
+        return False
+    if box.w > width * CONTENTS_NUMBER_COLUMN_MAX_WIDTH_RATIO:
+        return False
+    if box.h < height * CONTENTS_NUMBER_COLUMN_MIN_HEIGHT_RATIO:
+        return False
+    if box.y < height * 0.025 or box.y2 > height * 0.965:
+        return False
+    features = block.features
+    if float(features.get("max_text_score", 0.0)) < 0.45:
+        return False
+    if float(features.get("saturation_p80", 0.0)) > 0.12:
+        return False
+    if max(float(features.get("hline_density", 0.0)), float(features.get("vline_density", 0.0))) > 0.16:
+        return False
+    return block.orientation in {"vertical", "diagonal"} or box.w < width * 0.075
+
+
+def contents_number_column_target(block: Block, box: Box, number_box: Box, width: int, height: int) -> bool:
+    if block.label not in TEXTUAL_LABELS:
+        return False
+    if block.orientation not in {"horizontal", "unknown"}:
+        return False
+    if box.area <= 0:
+        return False
+    if box.h < height * 0.045 or box.w < width * 0.18:
+        return False
+
+    horizontal_gap = min(abs(number_box.x - box.x2), abs(box.x - number_box.x2))
+    if horizontal_gap > max(8, int(round(width * CONTENTS_NUMBER_COLUMN_MAX_GAP_RATIO))):
+        return False
+
+    overlap = box_vertical_overlap_height(box, number_box)
+    if overlap <= 0:
+        return False
+    target_overlap = overlap / max(1, box.h)
+    number_overlap = overlap / max(1, number_box.h)
+    return (
+        target_overlap >= CONTENTS_NUMBER_COLUMN_MIN_TARGET_OVERLAP
+        or number_overlap >= CONTENTS_NUMBER_COLUMN_MIN_TARGET_OVERLAP
+    )
+
+
+def contents_number_column_horizontal_gap(box: Box, number_box: Box) -> int:
+    if number_box.x >= box.x2:
+        return number_box.x - box.x2
+    if box.x >= number_box.x2:
+        return box.x - number_box.x2
+    return 0
+
+
+def contents_number_column_target_side(box: Box, number_box: Box) -> str:
+    if number_box.x >= box.x2:
+        return "left"
+    if box.x >= number_box.x2:
+        return "right"
+    if box.x <= number_box.x and box.x2 >= number_box.x2:
+        return "contains"
+    return "overlap"
+
+
+def closest_contents_number_column_targets(
+    targets: list[tuple[Block, Box]],
+    number_box: Box,
+    width: int,
+) -> list[tuple[Block, Box]]:
+    if len(targets) < 2:
+        return targets
+
+    min_gap = min(contents_number_column_horizontal_gap(box, number_box) for _, box in targets)
+    gap_slack = max(4, int(round(width * 0.006)))
+    nearest = [
+        item
+        for item in targets
+        if contents_number_column_horizontal_gap(item[1], number_box) <= min_gap + gap_slack
+    ]
+    for side in ("left", "contains", "overlap", "right"):
+        same_side = [
+            item
+            for item in nearest
+            if contents_number_column_target_side(item[1], number_box) == side
+        ]
+        if same_side:
+            return same_side
+    return nearest
+
+
+def merge_contents_number_columns_once(
+    classified: list[tuple[Block, Box]],
+    image,
+    mask,
+    edges,
+    ann,
+    scale: float,
+    width: int,
+    height: int,
+) -> list[tuple[Block, Box]]:
+    number_columns = [
+        item
+        for item in classified
+        if contents_number_column_candidate(item[0], item[1], width, height)
+    ]
+    if not number_columns:
+        return classified
+
+    consumed: set[str] = set()
+    merged: list[tuple[Block, Box]] = []
+    for number_block, number_box in sorted(number_columns, key=lambda item: (item[1].y, item[1].x)):
+        if number_block.ident in consumed:
+            continue
+
+        targets = []
+        for block, box in classified:
+            if block.ident == number_block.ident or block.ident in consumed:
+                continue
+            if contents_number_column_target(block, box, number_box, width, height):
+                targets.append((block, box))
+
+        targets = closest_contents_number_column_targets(targets, number_box, width)
+        if not targets:
+            continue
+
+        group = [(number_block, number_box), *targets]
+        group_box = group[0][1]
+        for _, box in group[1:]:
+            group_box = union_box(group_box, box)
+        target_sides = {contents_number_column_target_side(box, number_box) for _, box in targets}
+        if group_box.w > width * CONTENTS_TEXT_MAX_WIDTH_RATIO and target_sides != {"contains"}:
+            continue
+
+        consumed.update(block.ident for block, _ in group)
+        first_number = sorted(group, key=lambda item: (item[1].y, item[1].x))[0][0].ident.split("_", 1)[0]
+        merged.append(
+            merged_classified_item(
+                group,
+                "text",
+                f"{first_number}_text",
+                image,
+                mask,
+                edges,
+                ann,
+                scale,
+                width,
+                height,
+                "contents_number_column_merge",
+            )
+        )
+
+    if not merged:
+        return classified
+
+    result = [item for item in classified if item[0].ident not in consumed]
+    result.extend(merged)
+    return sorted(result, key=lambda item: (item[1].y, item[1].x))
+
+
+def merge_contents_number_columns(
+    classified: list[tuple[Block, Box]],
+    image,
+    mask,
+    edges,
+    ann,
+    scale: float,
+    width: int,
+    height: int,
+) -> list[tuple[Block, Box]]:
+    result = classified
+    for _ in range(3):
+        before = [(block.ident, block.label, box.to_list()) for block, box in result]
+        merged = merge_contents_number_columns_once(
+            result,
+            image,
+            mask,
+            edges,
+            ann,
+            scale,
+            width,
+            height,
+        )
+        after = [(block.ident, block.label, box.to_list()) for block, box in merged]
+        if after == before:
+            return result
+        result = merged
+    return result
+
+
 def merge_connected_schematic_blocks(
     classified: list[tuple[Block, Box]],
     image,
@@ -3029,6 +3306,9 @@ def illustration_fragment_candidate(block: Block, box: Box, width: int, height: 
     text_score = float(features.get("max_text_score", 0.0))
     component_signature = float(features.get("component_signature_score", 0.0))
 
+    if annual_contents_text_features(features):
+        return False
+
     if block.label == "other":
         return (ink < 0.055 and gray_std > 0.12) or (line_art > 0.08 and edge > 0.035)
 
@@ -3173,6 +3453,12 @@ def merge_illustration_fragments_into_images(
                 height,
                 "illustration_fragment_merge",
             )
+            if annual_contents_text_features(merged_block.features):
+                merged_block.ident = f"{first_number}_text"
+                merged_block.label = "text"
+                merged_block.orientation = infer_orientation(merged_block.features)
+                merged_block.features.pop("illustration_fragment_merge", None)
+                merged_block.features["contents_text_fragment_merge"] = 1.0
             kept = [(block, box) for index, (block, box) in enumerate(items) if index not in group]
             kept.append((merged_block, merged_box))
             items = sorted(kept, key=lambda item: (item[1].y, item[1].x))
@@ -3723,6 +4009,49 @@ def suppress_page_margin_visual_artifacts(blocks: list[Block], page_width: int, 
     return [block for block in blocks if block.ident not in suppressed]
 
 
+def annual_contents_footer_artifact(block: Block, page_width: int, page_height: int) -> bool:
+    if block.label not in TEXTUAL_LABELS:
+        return False
+    box = box_from_list(block.bbox)
+    if box.area <= 0:
+        return False
+    page_area = max(1, page_width * page_height)
+    if box.y < page_height * CONTENTS_FOOTER_ARTIFACT_TOP_RATIO:
+        return False
+    if box.h > page_height * CONTENTS_FOOTER_ARTIFACT_MAX_HEIGHT_RATIO:
+        return False
+    if box.w > page_width * CONTENTS_FOOTER_ARTIFACT_MAX_WIDTH_RATIO:
+        return False
+    if box.area > page_area * CONTENTS_FOOTER_ARTIFACT_MAX_AREA_RATIO:
+        return False
+
+    edge_band = page_width * CONTENTS_FOOTER_ARTIFACT_EDGE_RATIO
+    if box.x > edge_band and box.x2 < page_width - edge_band:
+        return False
+
+    features = block.features
+    return (
+        block.orientation in {"horizontal", "vertical", "diagonal", "unknown"}
+        and float(features.get("max_text_score", 0.0)) >= 0.45
+        and float(features.get("saturation_p80", 0.0)) <= 0.12
+    )
+
+
+def suppress_annual_contents_footer_artifacts(
+    blocks: list[Block],
+    page_width: int,
+    page_height: int,
+) -> list[Block]:
+    suppressed = {
+        block.ident
+        for block in blocks
+        if annual_contents_footer_artifact(block, page_width, page_height)
+    }
+    if not suppressed:
+        return blocks
+    return [block for block in blocks if block.ident not in suppressed]
+
+
 def caption_candidate_for_figure(figure_block: Block, text_block: Block) -> dict[str, object] | None:
     figure_box = box_from_list(figure_block.bbox)
     text_box = box_from_list(text_block.bbox)
@@ -3878,7 +4207,13 @@ def classify_blocks(
     classified = split_text_columns_in_classified_blocks(
         classified, image, mask, edges, ann, scale=scale, width=analysis_w, height=analysis_h
     )
+    classified = merge_contents_number_columns(
+        classified, image, mask, edges, ann, scale=scale, width=analysis_w, height=analysis_h
+    )
     classified = merge_fragmented_contents_columns(
+        classified, image, mask, edges, ann, scale=scale, width=analysis_w, height=analysis_h
+    )
+    classified = merge_contents_number_columns(
         classified, image, mask, edges, ann, scale=scale, width=analysis_w, height=analysis_h
     )
     classified = merge_stacked_diagram_blocks(
@@ -3904,6 +4239,7 @@ def classify_blocks(
     page_width = int(round(analysis_w / max(scale, 1e-6)))
     page_height = int(round(analysis_h / max(scale, 1e-6)))
     blocks = suppress_page_margin_visual_artifacts(blocks, page_width, page_height)
+    blocks = suppress_annual_contents_footer_artifacts(blocks, page_width, page_height)
     blocks = resolve_block_overlaps(blocks, image, mask, edges, ann, scale)
     attach_caption_candidates(blocks, [block for block in all_blocks if block.label == "text"])
     kept_idents = {block.ident for block in blocks}

@@ -544,6 +544,149 @@ class DetectPageLayoutTests(unittest.TestCase):
         self.assertEqual(merged_boxes["004_text"], right_box.to_list())
         self.assertEqual(merged[0][0].features["contents_column_merge"], 1.0)
 
+    def test_merges_annual_contents_number_columns_into_text_blocks(self) -> None:
+        np = detect_page_layout.np
+
+        image = np.full((1400, 1000, 3), 255, dtype=np.uint8)
+        mask = np.zeros((1400, 1000), dtype=np.uint8)
+        edges = mask.copy()
+        ann = detect_page_layout.train_bootstrap_ann()
+        text_box = detect_page_layout.Box(80, 220, 390, 740)
+        numbers_box = detect_page_layout.Box(470, 220, 64, 740)
+        text_features = {"max_text_score": 0.82, "saturation_p80": 0.0}
+        numbers_features = {
+            "max_text_score": 0.92,
+            "saturation_p80": 0.0,
+            "hline_density": 0.0,
+            "vline_density": 0.0,
+        }
+        classified = [
+            (
+                detect_page_layout.Block("008_text", "text", "horizontal", 0.87, text_box.to_list(), None, text_features),
+                text_box,
+            ),
+            (
+                detect_page_layout.Block("009_text", "text", "vertical", 0.85, numbers_box.to_list(), None, numbers_features),
+                numbers_box,
+            ),
+        ]
+
+        merged = detect_page_layout.merge_contents_number_columns(
+            classified,
+            image,
+            mask,
+            edges,
+            ann,
+            scale=1.0,
+            width=1000,
+            height=1400,
+        )
+
+        self.assertEqual(len(merged), 1)
+        block, box = merged[0]
+        self.assertEqual(block.label, "text")
+        self.assertEqual(box.to_list(), [80, 220, 454, 740])
+        self.assertEqual(block.features["contents_number_column_merge"], 1.0)
+
+    def test_repeats_annual_contents_number_column_merge_for_shared_targets(self) -> None:
+        np = detect_page_layout.np
+
+        image = np.full((1400, 1000, 3), 255, dtype=np.uint8)
+        mask = np.zeros((1400, 1000), dtype=np.uint8)
+        edges = mask.copy()
+        ann = detect_page_layout.train_bootstrap_ann()
+        text_box = detect_page_layout.Box(80, 220, 390, 740)
+        first_numbers = detect_page_layout.Box(470, 220, 64, 740)
+        second_numbers = detect_page_layout.Box(536, 300, 50, 500)
+        text_features = {"max_text_score": 0.82, "saturation_p80": 0.0}
+        numbers_features = {
+            "max_text_score": 0.92,
+            "saturation_p80": 0.0,
+            "hline_density": 0.0,
+            "vline_density": 0.0,
+        }
+        classified = [
+            (
+                detect_page_layout.Block("008_text", "text", "horizontal", 0.87, text_box.to_list(), None, text_features),
+                text_box,
+            ),
+            (
+                detect_page_layout.Block("009_text", "text", "vertical", 0.85, first_numbers.to_list(), None, numbers_features),
+                first_numbers,
+            ),
+            (
+                detect_page_layout.Block("010_text", "text", "vertical", 0.85, second_numbers.to_list(), None, numbers_features),
+                second_numbers,
+            ),
+        ]
+
+        merged = detect_page_layout.merge_contents_number_columns(
+            classified,
+            image,
+            mask,
+            edges,
+            ann,
+            scale=1.0,
+            width=1000,
+            height=1400,
+        )
+
+        self.assertEqual(len(merged), 1)
+        block, box = merged[0]
+        self.assertEqual(block.label, "text")
+        self.assertEqual(box.to_list(), [80, 220, 506, 740])
+        self.assertEqual(block.features["contents_number_column_merge"], 1.0)
+
+    def test_number_column_merge_prefers_nearest_printed_column(self) -> None:
+        np = detect_page_layout.np
+
+        image = np.full((1400, 1000, 3), 255, dtype=np.uint8)
+        mask = np.zeros((1400, 1000), dtype=np.uint8)
+        edges = mask.copy()
+        ann = detect_page_layout.train_bootstrap_ann()
+        left_box = detect_page_layout.Box(80, 220, 390, 740)
+        numbers_box = detect_page_layout.Box(470, 220, 64, 740)
+        right_box = detect_page_layout.Box(540, 220, 390, 740)
+        text_features = {"max_text_score": 0.82, "saturation_p80": 0.0}
+        numbers_features = {
+            "max_text_score": 0.92,
+            "saturation_p80": 0.0,
+            "hline_density": 0.0,
+            "vline_density": 0.0,
+        }
+        classified = [
+            (
+                detect_page_layout.Block("008_text", "text", "horizontal", 0.87, left_box.to_list(), None, text_features),
+                left_box,
+            ),
+            (
+                detect_page_layout.Block("009_text", "text", "vertical", 0.85, numbers_box.to_list(), None, numbers_features),
+                numbers_box,
+            ),
+            (
+                detect_page_layout.Block("010_text", "text", "horizontal", 0.87, right_box.to_list(), None, text_features),
+                right_box,
+            ),
+        ]
+
+        merged = detect_page_layout.merge_contents_number_columns(
+            classified,
+            image,
+            mask,
+            edges,
+            ann,
+            scale=1.0,
+            width=1000,
+            height=1400,
+        )
+
+        merged_boxes = {block.ident: box.to_list() for block, box in merged}
+        self.assertEqual(len(merged), 2)
+        self.assertIn("008_text", merged_boxes)
+        self.assertIn("010_text", merged_boxes)
+        self.assertEqual(merged_boxes["008_text"], [80, 220, 454, 740])
+        self.assertEqual(merged_boxes["010_text"], right_box.to_list())
+
     def test_splits_annual_contents_heading_at_whitespace_corridor(self) -> None:
         cv2 = detect_page_layout.cv2
         np = detect_page_layout.np
@@ -658,6 +801,43 @@ class DetectPageLayoutTests(unittest.TestCase):
         )
 
         self.assertEqual([block.ident for block in filtered], ["012_schematic"])
+
+    def test_suppresses_annual_contents_footer_text_artifacts(self) -> None:
+        footer_page_text = detect_page_layout.Block(
+            ident="022_text",
+            label="text",
+            orientation="horizontal",
+            confidence=0.91,
+            bbox=[125, 2897, 379, 59],
+            outline=None,
+            features={"max_text_score": 0.92, "saturation_p80": 0.0},
+        )
+        footer_page_number = detect_page_layout.Block(
+            ident="021_text",
+            label="text",
+            orientation="vertical",
+            confidence=0.71,
+            bbox=[2178, 2881, 103, 73],
+            outline=None,
+            features={"max_text_score": 0.62, "saturation_p80": 0.0},
+        )
+        real_contents_row = detect_page_layout.Block(
+            ident="012_text",
+            label="text",
+            orientation="horizontal",
+            confidence=0.92,
+            bbox=[1236, 2746, 817, 191],
+            outline=None,
+            features={"max_text_score": 0.88, "saturation_p80": 0.0},
+        )
+
+        filtered = detect_page_layout.suppress_annual_contents_footer_artifacts(
+            [footer_page_text, footer_page_number, real_contents_row],
+            page_width=2500,
+            page_height=3200,
+        )
+
+        self.assertEqual([block.ident for block in filtered], ["012_text"])
 
     def test_feature_classifier_prefers_color_photo_over_schematic(self) -> None:
         ann = detect_page_layout.train_bootstrap_ann()
@@ -2204,6 +2384,38 @@ class DetectPageLayoutTests(unittest.TestCase):
 
         self.assertEqual([block.ident for block in filtered], ["002_text", "003_heading"])
 
+    def test_keeps_dense_multiline_contents_text_when_suppressing_tiny_fragments(self) -> None:
+        contents_block = detect_page_layout.Block(
+            ident="002_text",
+            label="text",
+            orientation="horizontal",
+            confidence=0.94,
+            bbox=[192, 276, 2163, 2583],
+            outline=None,
+            features={
+                "max_text_score": 0.29752,
+                "textline_density": 0.29752,
+                "ink_density": 0.17495,
+                "hline_density": 0.0,
+                "vline_density": 0.0,
+                "line_balance": 0.0,
+                "saturation_p80": 0.0,
+            },
+        )
+        tiny = detect_page_layout.Block(
+            ident="003_text",
+            label="text",
+            orientation="horizontal",
+            confidence=0.72,
+            bbox=[10, 10, 18, 20],
+            outline=None,
+            features={},
+        )
+
+        filtered = detect_page_layout.suppress_tiny_text_fragments([contents_block, tiny])
+
+        self.assertEqual([block.ident for block in filtered], ["002_text"])
+
     def test_suppresses_short_text_fragment_inside_visual_block(self) -> None:
         visual = detect_page_layout.Block(
             ident="010_image",
@@ -2281,6 +2493,140 @@ class DetectPageLayoutTests(unittest.TestCase):
 
         self.assertEqual(label, "text")
         self.assertGreater(confidence, 0.25)
+
+    def test_feature_classifier_recognizes_annual_contents_list_as_text(self) -> None:
+        ann = detect_page_layout.train_bootstrap_ann()
+        features = {
+            "width_ratio": 0.41963,
+            "height_ratio": 0.18222,
+            "area_ratio": 0.07647,
+            "wide_aspect": 0.69684,
+            "tall_aspect": 0.07997,
+            "ink_density": 0.15170,
+            "edge_density": 0.52766,
+            "gray_std": 0.70861,
+            "gray_levels": 1.0,
+            "component_density": 1.0,
+            "hline_density": 0.0,
+            "vline_density": 0.0,
+            "line_balance": 0.0,
+            "textline_density": 0.93293,
+            "horizontal_text_score": 0.93293,
+            "vertical_text_score": 0.15254,
+            "diagonal_text_score": 0.30508,
+            "max_text_score": 0.93293,
+            "line_art_score": 0.35382,
+            "saturation_p80": 0.0,
+            "component_signature_score": 1.0,
+        }
+
+        label, confidence = detect_page_layout.classify_features(ann, features)
+
+        self.assertEqual(label, "text")
+        self.assertGreater(confidence, 0.60)
+
+    def test_feature_classifier_keeps_lower_annual_contents_group_as_text(self) -> None:
+        ann = detect_page_layout.train_bootstrap_ann()
+        features = {
+            "width_ratio": 0.41952,
+            "height_ratio": 0.24,
+            "area_ratio": 0.10068,
+            "wide_aspect": 0.27269,
+            "tall_aspect": 0.14669,
+            "ink_density": 0.07278,
+            "edge_density": 0.31277,
+            "gray_std": 0.47910,
+            "gray_levels": 1.0,
+            "component_density": 1.0,
+            "hline_density": 0.0,
+            "vline_density": 0.0,
+            "line_art_score": 0.07301,
+            "line_balance": 0.0,
+            "saturation_mean": 0.00972,
+            "saturation_p80": 0.0,
+            "textline_density": 0.70833,
+            "horizontal_text_score": 0.70833,
+            "vertical_text_score": 0.64177,
+            "diagonal_text_score": 0.69903,
+            "max_text_score": 0.70833,
+            "component_signature_score": 1.0,
+            "pcb_trace_density": 0.00458,
+            "pcb_pad_density": 1.0,
+            "pcb_board_outline_score": 0.0,
+            "pcb_signature_score": 0.26330,
+        }
+
+        label, confidence = detect_page_layout.classify_features(ann, features)
+
+        self.assertEqual(label, "text")
+        self.assertGreater(confidence, 0.55)
+
+    def test_annual_contents_text_is_not_merged_as_illustration(self) -> None:
+        block = detect_page_layout.Block(
+            ident="012_text",
+            label="text",
+            orientation="horizontal",
+            confidence=0.95,
+            bbox=[1234, 2057, 1059, 794],
+            outline=None,
+            features={
+                "width_ratio": 0.4236,
+                "height_ratio": 0.2481,
+                "area_ratio": 0.1051,
+                "max_text_score": 0.92825,
+                "textline_density": 0.92825,
+                "component_density": 1.0,
+                "hline_density": 0.0,
+                "vline_density": 0.0,
+                "line_balance": 0.0,
+                "line_art_score": 0.09774,
+                "edge_density": 0.38,
+                "ink_density": 0.10,
+                "gray_std": 0.56,
+                "saturation_p80": 0.0,
+                "component_signature_score": 1.0,
+            },
+        )
+
+        self.assertFalse(
+            detect_page_layout.illustration_fragment_candidate(
+                block,
+                detect_page_layout.Box(1234, 2057, 1059, 794),
+                width=2500,
+                height=3200,
+            )
+        )
+
+    def test_feature_classifier_recognizes_wide_rule_heading(self) -> None:
+        ann = detect_page_layout.train_bootstrap_ann()
+        features = {
+            "width_ratio": 0.86192,
+            "height_ratio": 0.02278,
+            "area_ratio": 0.01963,
+            "wide_aspect": 1.0,
+            "tall_aspect": 0.006,
+            "ink_density": 0.10604,
+            "edge_density": 0.29429,
+            "gray_std": 0.44959,
+            "gray_levels": 0.65625,
+            "component_density": 0.62436,
+            "hline_density": 0.28658,
+            "vline_density": 0.27752,
+            "line_balance": 0.96837,
+            "textline_density": 0.43902,
+            "horizontal_text_score": 0.43902,
+            "vertical_text_score": 0.47564,
+            "diagonal_text_score": 0.0,
+            "max_text_score": 0.47564,
+            "line_art_score": 0.48990,
+            "saturation_p80": 0.01961,
+            "component_signature_score": 1.0,
+        }
+
+        label, confidence = detect_page_layout.classify_features(ann, features)
+
+        self.assertEqual(label, "heading")
+        self.assertGreater(confidence, 0.35)
 
 
 if __name__ == "__main__":
