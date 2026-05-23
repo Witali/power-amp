@@ -26,6 +26,8 @@ Run `.\init.ps1 -InstallHunspell` to install the optional local Hunspell backend
 
 `archive.radio.ru` page scans downloaded by project scripts are cached under `.tmp\archive_radio_ru\<year>\<month>\`, for example `.tmp\archive_radio_ru\2000\12\b.2000-12.001.jpg`. Treat this as a durable local cache and do not remove downloaded page images unless explicitly asked.
 
+Shared parallelism defaults live in `config\pipeline_parallelism.json`. By default both OpenCV layout report jobs and OCR jobs may run 8 tasks in parallel, while each Tesseract process keeps `OMP_THREAD_LIMIT=1`. Per-run CLI flags such as `--max-parallel-opencv` and `-MaxParallelOcr` override the config.
+
 ## Direct Python Commands
 
 ```powershell
@@ -80,6 +82,8 @@ npm run build
 Для установки локального Hunspell backend и словарей `ru_RU`/`en_US` в `local_tools/` запустите `.\init.ps1 -InstallHunspell`.
 
 Сканы страниц `archive.radio.ru`, скачанные проектными скриптами, кэшируются в `.tmp\archive_radio_ru\<year>\<month>\`, например `.tmp\archive_radio_ru\2000\12\b.2000-12.001.jpg`. Это долговременный локальный кэш: не удалять скачанные страницы без явной просьбы.
+
+Общие настройки параллельности лежат в `config\pipeline_parallelism.json`. По умолчанию OpenCV-отчет по разметке и OCR-очереди запускают до 8 задач параллельно, а каждый процесс Tesseract остается с `OMP_THREAD_LIMIT=1`. Разовые параметры командной строки, например `--max-parallel-opencv` и `-MaxParallelOcr`, переопределяют конфиг.
 
 ## Прямые Python-Команды
 

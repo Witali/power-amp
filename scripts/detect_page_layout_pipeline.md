@@ -39,4 +39,6 @@ python scripts\generate_opencv_layout_report.py
 - `scripts/layout_frequency.py` - частотный, гистограммный и кластерный hint layer.
 - `scripts/generate_opencv_layout_report.py` - HTML-отчет по набору регрессионных страниц.
 - `study/opencv_layout_regression_pages/manifest.json` - список страниц для регрессионного отчета.
+- `config/pipeline_parallelism.json` - общий лимит параллельных OpenCV/OCR задач; отчет использует
+  `max_parallel_opencv_tasks`, если не передан `--max-parallel-opencv`.
 - `tests/test_detect_page_layout.py` - модульные тесты классификации, геометрии, overlaps и постобработки.

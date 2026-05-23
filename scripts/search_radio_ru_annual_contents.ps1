@@ -4,7 +4,7 @@ param(
     [int]$TailPages = 16,
     [int]$OcrTimeoutSeconds = 300,
     [int]$MaxParallelOcr = 0,
-    [int]$TesseractThreadLimit = 1,
+    [int]$TesseractThreadLimit = 0,
     [int]$OcrPollMilliseconds = 250,
     [string]$OutDir = ".tmp\pre1971\annual_contents",
     [string]$PageImageCacheRoot = ".tmp\archive_radio_ru",
@@ -22,6 +22,7 @@ $TessData = Join-Path $Root "local_tools\Tesseract-extracted\tessdata"
 $OutputRoot = Join-Path $Root $OutDir
 $PageImageCache = Join-Path $Root $PageImageCacheRoot
 $UserWordsPath = Join-Path $Root "ocr_tools\radio_ru_user_words.txt"
+$PipelineParallelismScript = Join-Path $PSScriptRoot "pipeline_parallelism.ps1"
 
 if (!(Test-Path -LiteralPath $Tesseract)) {
     throw "Tesseract not found at $Tesseract"
@@ -32,10 +33,15 @@ if (!(Test-Path -LiteralPath $TessData)) {
 if (!(Test-Path -LiteralPath $UserWordsPath)) {
     throw "OCR user words file not found at $UserWordsPath"
 }
+if (!(Test-Path -LiteralPath $PipelineParallelismScript)) {
+    throw "Pipeline parallelism helper not found at $PipelineParallelismScript"
+}
+. $PipelineParallelismScript
 
 New-Item -ItemType Directory -Force -Path $OutputRoot | Out-Null
 New-Item -ItemType Directory -Force -Path $PageImageCache | Out-Null
 
+$PipelineParallelism = Get-PipelineParallelismConfig -ProjectRoot $Root
 $hitPattern = [regex]"(?i)(УМЗЧ|УНЧ|усилител|низк[а-яё]*\s+частот|звуков[а-яё]*\s+частот|мощност[а-яё]*\s+звуков|стереофоническ|электрофон)"
 $markerPattern = [regex]"(?i)(содержан|оглавлен|радио\s+за|перечень|алфавитн)"
 $hits = New-Object System.Collections.Generic.List[object]
@@ -46,9 +52,15 @@ $EffectiveMaxParallelOcr = if ($MaxParallelOcr -gt 0) {
     $MaxParallelOcr
 }
 else {
-    [Math]::Max(1, [int][Math]::Floor([Environment]::ProcessorCount / 2.0))
+    $PipelineParallelism.MaxParallelOcrTasks
 }
 $EffectiveMaxParallelOcr = [Math]::Max(1, $EffectiveMaxParallelOcr)
+$TesseractThreadLimit = if ($TesseractThreadLimit -gt 0) {
+    $TesseractThreadLimit
+}
+else {
+    $PipelineParallelism.TesseractThreadsPerProcess
+}
 $TesseractThreadLimit = [Math]::Max(1, $TesseractThreadLimit)
 $OcrPollMilliseconds = [Math]::Max(50, $OcrPollMilliseconds)
 $ProgressEnabled = !$NoProgress

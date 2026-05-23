@@ -25,7 +25,7 @@ param(
     [switch]$LayoutOnly,
     [string]$LayoutOutDir = ".tmp\page_layout",
     [int]$MaxParallelOcr = 0,
-    [int]$TesseractThreadLimit = 1,
+    [int]$TesseractThreadLimit = 0,
     [int]$OcrPollMilliseconds = 250,
     [switch]$Refresh,
     [switch]$NoProgress
@@ -39,6 +39,7 @@ $TessData = Join-Path $Root "local_tools\Tesseract-extracted\tessdata"
 $OutputRoot = Join-Path $Root $OutDir
 $CorrectionScript = Join-Path $PSScriptRoot "radio_ru_ocr_corrections.ps1"
 $UserWordsPath = Join-Path $Root "ocr_tools\radio_ru_user_words.txt"
+$PipelineParallelismScript = Join-Path $PSScriptRoot "pipeline_parallelism.ps1"
 
 if (!(Test-Path -LiteralPath $Tesseract)) {
     throw "Tesseract not found at $Tesseract"
@@ -52,9 +53,13 @@ if (!$NoTextCorrection -and !(Test-Path -LiteralPath $CorrectionScript)) {
 if (!(Test-Path -LiteralPath $UserWordsPath)) {
     throw "OCR user words file not found at $UserWordsPath"
 }
+if (!(Test-Path -LiteralPath $PipelineParallelismScript)) {
+    throw "Pipeline parallelism helper not found at $PipelineParallelismScript"
+}
 if (!$NoTextCorrection) {
     . $CorrectionScript
 }
+. $PipelineParallelismScript
 
 Add-Type -AssemblyName System.Drawing
 
@@ -330,13 +335,20 @@ function Convert-ToIntList {
 
 $ColumnCounts = Convert-ToIntList -Values $ColumnCounts -DefaultValues @(1, 2, 3)
 $PsmModes = Convert-ToIntList -Values $PsmModes -DefaultValues @(3, 4, 6)
+$PipelineParallelism = Get-PipelineParallelismConfig -ProjectRoot $Root
 $EffectiveMaxParallelOcr = if ($MaxParallelOcr -gt 0) {
     $MaxParallelOcr
 }
 else {
-    [Math]::Max(1, [int][Math]::Floor([Environment]::ProcessorCount / 2.0))
+    $PipelineParallelism.MaxParallelOcrTasks
 }
 $EffectiveMaxParallelOcr = [Math]::Max(1, $EffectiveMaxParallelOcr)
+$TesseractThreadLimit = if ($TesseractThreadLimit -gt 0) {
+    $TesseractThreadLimit
+}
+else {
+    $PipelineParallelism.TesseractThreadsPerProcess
+}
 $TesseractThreadLimit = [Math]::Max(1, $TesseractThreadLimit)
 $OcrPollMilliseconds = [Math]::Max(50, $OcrPollMilliseconds)
 $ProgressEnabled = !$NoProgress

@@ -10,6 +10,7 @@ import os
 import shutil
 import sys
 from collections import Counter
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Any
 
@@ -18,7 +19,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from scripts import detect_page_layout, layout_config  # noqa: E402
+from scripts import detect_page_layout, layout_config, pipeline_config  # noqa: E402
 
 
 DEFAULT_MANIFEST = PROJECT_ROOT / "study" / "opencv_layout_regression_pages" / "manifest.json"
@@ -41,6 +42,12 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         help="Override detector frequency hint mode.",
     )
     parser.add_argument("--max-pages", type=int, default=0, help="Process only the first N pages.")
+    parser.add_argument(
+        "--max-parallel-opencv",
+        type=int,
+        default=0,
+        help="Maximum parallel OpenCV detector jobs. Default comes from config/pipeline_parallelism.json.",
+    )
     return parser.parse_args(argv)
 
 
@@ -80,7 +87,60 @@ def load_manifest(path: Path) -> dict[str, Any]:
     return manifest
 
 
-def run_detector(manifest: dict[str, Any], out_dir: Path, max_pages: int) -> list[dict[str, Any]]:
+def effective_max_parallel_opencv(cli_value: int) -> int:
+    if cli_value > 0:
+        return cli_value
+    return max(1, pipeline_config.parallelism_value("max_parallel_opencv_tasks"))
+
+
+def detect_one_page(
+    index: int,
+    total: int,
+    page: dict[str, Any],
+    layout_dir: Path,
+    preview_width: int,
+    frequency_hints: str,
+) -> dict[str, Any]:
+    page_id = str(page["id"])
+    source = project_path(str(page["source"]))
+    print(f"[layout {index:02d}/{total}] start {page_id}: {source}", flush=True)
+    if not source.exists():
+        raise FileNotFoundError(f"Missing source page: {source}")
+
+    result = detect_page_layout.detect_page_layout(
+        source,
+        layout_dir,
+        preview_width=preview_width,
+        frequency_hints=frequency_hints,
+        save_crops=False,
+    )
+    page_dir = layout_dir / source.stem
+    layout_path = page_dir / "layout.json"
+    preview_path = page_dir / result["preview"]
+    layout = json.loads(layout_path.read_text(encoding="utf-8"))
+    blocks = list(layout.get("blocks", []))
+    counts = count_blocks(blocks)
+    warning_count = len(layout.get("frequency_warnings", [])) + len(layout.get("frequency_cluster_warnings", []))
+    entry = {
+        "id": page_id,
+        "reason": str(page.get("reason", "")),
+        "source": source,
+        "layout": layout_path,
+        "preview": preview_path,
+        "block_count": len(blocks),
+        "counts": dict(counts),
+        "counts_text": counts_text(counts),
+        "warning_count": warning_count,
+    }
+    print(
+        f"[layout {index:02d}/{total}] done {page_id}: "
+        f"{len(blocks)} block(s), {counts_text(counts)}, warnings={warning_count}",
+        flush=True,
+    )
+    return entry
+
+
+def run_detector(manifest: dict[str, Any], out_dir: Path, max_pages: int, max_parallel_opencv: int) -> list[dict[str, Any]]:
     log_progress("2/5", "checking OpenCV detector dependencies")
     detect_page_layout.require_dependencies()
     layout_dir = out_dir / "detected"
@@ -97,49 +157,19 @@ def run_detector(manifest: dict[str, Any], out_dir: Path, max_pages: int) -> lis
 
     entries: list[dict[str, Any]] = []
     total = len(pages)
+    max_workers = min(max(1, max_parallel_opencv), max(1, total))
     log_progress(
         "2/5",
-        f"detecting {total} page(s), preview_width={preview_width}, frequency_hints={frequency_hints}",
+        f"detecting {total} page(s), preview_width={preview_width}, "
+        f"frequency_hints={frequency_hints}, max_parallel_opencv={max_workers}",
     )
-    for index, page in enumerate(pages, start=1):
-        page_id = str(page["id"])
-        source = project_path(str(page["source"]))
-        print(f"[layout {index:02d}/{total}] start {page_id}: {source}", flush=True)
-        if not source.exists():
-            raise FileNotFoundError(f"Missing source page: {source}")
-
-        result = detect_page_layout.detect_page_layout(
-            source,
-            layout_dir,
-            preview_width=preview_width,
-            frequency_hints=frequency_hints,
-            save_crops=False,
-        )
-        page_dir = layout_dir / source.stem
-        layout_path = page_dir / "layout.json"
-        preview_path = page_dir / result["preview"]
-        layout = json.loads(layout_path.read_text(encoding="utf-8"))
-        blocks = list(layout.get("blocks", []))
-        counts = count_blocks(blocks)
-        warning_count = len(layout.get("frequency_warnings", [])) + len(layout.get("frequency_cluster_warnings", []))
-        entries.append(
-            {
-                "id": page_id,
-                "reason": str(page.get("reason", "")),
-                "source": source,
-                "layout": layout_path,
-                "preview": preview_path,
-                "block_count": len(blocks),
-                "counts": dict(counts),
-                "counts_text": counts_text(counts),
-                "warning_count": warning_count,
-            }
-        )
-        print(
-            f"[layout {index:02d}/{total}] done {page_id}: "
-            f"{len(blocks)} block(s), {counts_text(counts)}, warnings={warning_count}",
-            flush=True,
-        )
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        futures = [
+            executor.submit(detect_one_page, index, total, page, layout_dir, preview_width, frequency_hints)
+            for index, page in enumerate(pages, start=1)
+        ]
+        for future in futures:
+            entries.append(future.result())
     return entries
 
 
@@ -330,8 +360,9 @@ def main(argv: list[str]) -> int:
     if args.frequency_hints:
         manifest["frequency_hints"] = args.frequency_hints
 
+    max_parallel_opencv = effective_max_parallel_opencv(args.max_parallel_opencv)
     log_progress("2/5", f"building page layouts into: {out_dir}")
-    entries = run_detector(manifest, out_dir, args.max_pages)
+    entries = run_detector(manifest, out_dir, args.max_pages, max_parallel_opencv)
     log_progress("3/5", f"writing HTML report for {len(entries)} page(s)")
     index = write_html(out_dir, manifest, entries)
     log_progress("4/5", "writing JSON summary")

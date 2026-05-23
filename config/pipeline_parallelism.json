@@ -1,0 +1,5 @@
+{
+  "max_parallel_opencv_tasks": 8,
+  "max_parallel_ocr_tasks": 8,
+  "tesseract_threads_per_process": 1
+}
