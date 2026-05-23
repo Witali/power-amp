@@ -25,6 +25,10 @@ DEFAULT_MANIFEST = PROJECT_ROOT / "study" / "opencv_layout_regression_pages" / "
 DEFAULT_OUT_DIR = PROJECT_ROOT / "study" / "opencv_layout_reports" / "latest"
 
 
+def log_progress(stage: str, message: str) -> None:
+    print(f"[report {stage}] {message}", flush=True)
+
+
 def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST, help="Regression page manifest.")
@@ -77,9 +81,11 @@ def load_manifest(path: Path) -> dict[str, Any]:
 
 
 def run_detector(manifest: dict[str, Any], out_dir: Path, max_pages: int) -> list[dict[str, Any]]:
+    log_progress("2/5", "checking OpenCV detector dependencies")
     detect_page_layout.require_dependencies()
     layout_dir = out_dir / "detected"
     if layout_dir.exists():
+        log_progress("2/5", f"removing previous detected layouts: {layout_dir}")
         shutil.rmtree(layout_dir)
     layout_dir.mkdir(parents=True, exist_ok=True)
 
@@ -91,10 +97,14 @@ def run_detector(manifest: dict[str, Any], out_dir: Path, max_pages: int) -> lis
 
     entries: list[dict[str, Any]] = []
     total = len(pages)
+    log_progress(
+        "2/5",
+        f"detecting {total} page(s), preview_width={preview_width}, frequency_hints={frequency_hints}",
+    )
     for index, page in enumerate(pages, start=1):
         page_id = str(page["id"])
         source = project_path(str(page["source"]))
-        print(f"[layout {index:02d}/{total}] {page_id}: {source}", flush=True)
+        print(f"[layout {index:02d}/{total}] start {page_id}: {source}", flush=True)
         if not source.exists():
             raise FileNotFoundError(f"Missing source page: {source}")
 
@@ -124,6 +134,11 @@ def run_detector(manifest: dict[str, Any], out_dir: Path, max_pages: int) -> lis
                 "counts_text": counts_text(counts),
                 "warning_count": warning_count,
             }
+        )
+        print(
+            f"[layout {index:02d}/{total}] done {page_id}: "
+            f"{len(blocks)} block(s), {counts_text(counts)}, warnings={warning_count}",
+            flush=True,
         )
     return entries
 
@@ -308,15 +323,20 @@ def main(argv: list[str]) -> int:
     args = parse_args(argv)
     manifest_path = project_path(args.manifest)
     out_dir = project_path(args.out_dir)
+    log_progress("1/5", f"loading manifest: {manifest_path}")
     manifest = load_manifest(manifest_path)
     if args.preview_width > 0:
         manifest["preview_width"] = args.preview_width
     if args.frequency_hints:
         manifest["frequency_hints"] = args.frequency_hints
 
+    log_progress("2/5", f"building page layouts into: {out_dir}")
     entries = run_detector(manifest, out_dir, args.max_pages)
+    log_progress("3/5", f"writing HTML report for {len(entries)} page(s)")
     index = write_html(out_dir, manifest, entries)
+    log_progress("4/5", "writing JSON summary")
     summary = write_summary(out_dir, entries)
+    log_progress("5/5", "done")
     print(index)
     print(summary)
     return 0
