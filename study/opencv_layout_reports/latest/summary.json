@@ -104,13 +104,15 @@
     "source": "../../opencv_layout_regression_pages/sources/b.2000-02.036.jpg",
     "layout": "detected/b.2000-02.036/layout.json",
     "preview": "detected/b.2000-02.036/preview.png",
-    "block_count": 8,
+    "block_count": 12,
     "counts": {
+      "text": 7,
       "schematic": 1,
-      "text": 4,
-      "image": 3
+      "other": 1,
+      "image": 2,
+      "diagram": 1
     },
-    "warning_count": 11
+    "warning_count": 10
   },
   {
     "id": "b.2000-02.037",
@@ -118,13 +120,13 @@
     "source": "../../opencv_layout_regression_pages/sources/b.2000-02.037.jpg",
     "layout": "detected/b.2000-02.037/layout.json",
     "preview": "detected/b.2000-02.037/preview.png",
-    "block_count": 18,
+    "block_count": 13,
     "counts": {
-      "heading": 5,
-      "text": 11,
+      "heading": 1,
+      "text": 10,
       "schematic": 2
     },
-    "warning_count": 16
+    "warning_count": 6
   },
   {
     "id": "b.2000-09.011",
@@ -191,14 +193,14 @@
     "source": "../../opencv_layout_regression_pages/sources/b.2000-11.011.jpg",
     "layout": "detected/b.2000-11.011/layout.json",
     "preview": "detected/b.2000-11.011/preview.png",
-    "block_count": 11,
+    "block_count": 8,
     "counts": {
-      "heading": 2,
-      "text": 7,
+      "diagram": 1,
       "image": 1,
-      "schematic": 1
+      "schematic": 1,
+      "text": 5
     },
-    "warning_count": 13
+    "warning_count": 4
   },
   {
     "id": "b.2000-11.012",
@@ -220,13 +222,13 @@
     "source": "../../opencv_layout_regression_pages/sources/b.2000-11.013.jpg",
     "layout": "detected/b.2000-11.013/layout.json",
     "preview": "detected/b.2000-11.013/preview.png",
-    "block_count": 14,
+    "block_count": 13,
     "counts": {
       "image": 3,
-      "text": 10,
-      "schematic": 1
+      "schematic": 1,
+      "text": 9
     },
-    "warning_count": 18
+    "warning_count": 15
   },
   {
     "id": "b.2000-01.042",
@@ -266,13 +268,14 @@
     "source": "../../opencv_layout_regression_pages/sources/b.2000-11.043.jpg",
     "layout": "detected/b.2000-11.043/layout.json",
     "preview": "detected/b.2000-11.043/preview.png",
-    "block_count": 11,
+    "block_count": 8,
     "counts": {
       "image": 1,
-      "text": 9,
+      "heading": 1,
+      "text": 5,
       "schematic": 1
     },
-    "warning_count": 4
+    "warning_count": 5
   },
   {
     "id": "b.2000-11.044",

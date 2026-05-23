@@ -1,6 +1,6 @@
 # Layout Detection Test Pages
 
-This file lists useful `archive.radio.ru` pages for checking page-block detection on mixed magazine layouts. The current local preview overlays are generated under `.tmp/layout_candidate_layouts/`; the source scans can be re-downloaded with `scripts/download_radio_ru_pages.ps1`.
+This file lists useful `archive.radio.ru` pages for checking page-block detection on mixed magazine layouts. The current local preview overlays are generated under `.tmp/layout_candidate_layouts/`; the source scans can be re-downloaded with `scripts/download_radio_ru_pages.ps1` and are cached by issue under `.tmp/archive_radio_ru/<year>/<month>/` until they are explicitly removed.
 
 ## Best mixed pages
 
@@ -26,10 +26,16 @@ This file lists useful `archive.radio.ru` pages for checking page-block detectio
 
 ```powershell
 pwsh -File scripts/download_radio_ru_pages.ps1 `
-  -Pages 2000-11-013,2000-02-036,1999-10-017,2000-10-014,2000-11-011 `
-  -OutDir .tmp\layout_candidate_pages
+  -Pages 2000-11-013,2000-02-036,1999-10-017,2000-10-014,2000-11-011
 
-Get-ChildItem -LiteralPath .tmp\layout_candidate_pages -Filter *.jpg |
+Get-ChildItem -LiteralPath .tmp\archive_radio_ru -Recurse -Filter *.jpg |
+  Where-Object { $_.Name -in @(
+    "b.2000-11.013.jpg",
+    "b.2000-02.036.jpg",
+    "b.1999-10.017.jpg",
+    "b.2000-10.014.jpg",
+    "b.2000-11.011.jpg"
+  ) } |
   ForEach-Object {
     python scripts\detect_page_layout.py `
       --image $_.FullName `

@@ -17,7 +17,7 @@ scripts\ocr_radio_ru_page_columns.ps1
 Useful sample command:
 
 ```powershell
-& 'C:\Program Files\PowerShell\7\pwsh.exe' -NoProfile -ExecutionPolicy Bypass -File scripts\ocr_radio_ru_page_columns.ps1 -InputPath .tmp\pre1971\annual_contents\1970-12\f.1970-12.064.jpg -AutoColumns -AutoOnly -PsmModes 6 -OcrProfiles prose,technical,sauvola -Refresh
+& 'C:\Program Files\PowerShell\7\pwsh.exe' -NoProfile -ExecutionPolicy Bypass -File scripts\ocr_radio_ru_page_columns.ps1 -InputPath .tmp\archive_radio_ru\1970\12\b.1970-12.064.jpg -AutoColumns -AutoOnly -PsmModes 6 -OcrProfiles prose,technical,sauvola -Refresh
 ```
 
 The script crops margins, can try fixed 1, 2, and 3 column layouts, and can also find column breaks automatically with `-AutoColumns`. It runs Tesseract on each column and writes merged text variants under `.tmp\ocr_column_trials\...`.
@@ -45,6 +45,8 @@ The December contents search script uses the same `-MaxParallelOcr` and `-Tesser
 ```
 
 For `archive.radio.ru`, the search script follows the preview page to the full-size scan viewer and prefers `b.YYYY-MM.NNN.jpg` images. It falls back to `f.*` and then `p.*` scans when the high-quality page is not available.
+
+Downloaded page scans are kept in a shared archive cache instead of per-study scratch folders: `.tmp\archive_radio_ru\<year>\<month>\<kind>.<year>-<month>.<page>.jpg`, for example `.tmp\archive_radio_ru\2000\12\b.2000-12.064.jpg`. Keep these cached scans until they are explicitly deleted; OCR text, HTML pages, and experiment outputs may still live in separate `.tmp\...` study folders.
 
 By default the script now also writes corrected OCR text:
 

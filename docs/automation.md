@@ -24,6 +24,8 @@ npm run build
 
 Run `.\init.ps1 -InstallHunspell` to install the optional local Hunspell backend and `ru_RU`/`en_US` dictionaries under `local_tools/`.
 
+`archive.radio.ru` page scans downloaded by project scripts are cached under `.tmp\archive_radio_ru\<year>\<month>\`, for example `.tmp\archive_radio_ru\2000\12\b.2000-12.001.jpg`. Treat this as a durable local cache and do not remove downloaded page images unless explicitly asked.
+
 ## Direct Python Commands
 
 ```powershell
@@ -75,6 +77,8 @@ npm run build
 - `npm run build`: выполняет workflow символов и затем проверки проекта.
 
 Для установки локального Hunspell backend и словарей `ru_RU`/`en_US` в `local_tools/` запустите `.\init.ps1 -InstallHunspell`.
+
+Сканы страниц `archive.radio.ru`, скачанные проектными скриптами, кэшируются в `.tmp\archive_radio_ru\<year>\<month>\`, например `.tmp\archive_radio_ru\2000\12\b.2000-12.001.jpg`. Это долговременный локальный кэш: не удалять скачанные страницы без явной просьбы.
 
 ## Прямые Python-Команды
 

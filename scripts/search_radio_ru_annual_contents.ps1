@@ -7,6 +7,7 @@ param(
     [int]$TesseractThreadLimit = 1,
     [int]$OcrPollMilliseconds = 250,
     [string]$OutDir = ".tmp\pre1971\annual_contents",
+    [string]$PageImageCacheRoot = ".tmp\archive_radio_ru",
     [ValidateSet("prose", "technical", "sauvola")]
     [string]$OcrProfile = "prose",
     [switch]$Refresh,
@@ -19,6 +20,7 @@ $Root = Split-Path -Parent $PSScriptRoot
 $Tesseract = Join-Path $Root "local_tools\Tesseract-extracted\tesseract.exe"
 $TessData = Join-Path $Root "local_tools\Tesseract-extracted\tessdata"
 $OutputRoot = Join-Path $Root $OutDir
+$PageImageCache = Join-Path $Root $PageImageCacheRoot
 $UserWordsPath = Join-Path $Root "ocr_tools\radio_ru_user_words.txt"
 
 if (!(Test-Path -LiteralPath $Tesseract)) {
@@ -32,6 +34,7 @@ if (!(Test-Path -LiteralPath $UserWordsPath)) {
 }
 
 New-Item -ItemType Directory -Force -Path $OutputRoot | Out-Null
+New-Item -ItemType Directory -Force -Path $PageImageCache | Out-Null
 
 $hitPattern = [regex]"(?i)(УМЗЧ|УНЧ|усилител|низк[а-яё]*\s+частот|звуков[а-яё]*\s+частот|мощност[а-яё]*\s+звуков|стереофоническ|электрофон)"
 $markerPattern = [regex]"(?i)(содержан|оглавлен|радио\s+за|перечень|алфавитн)"
@@ -168,6 +171,20 @@ function Download-IfNeeded {
         New-Item -ItemType Directory -Force -Path (Split-Path -Parent $Path) | Out-Null
         Invoke-WebRequest -Uri $Uri -OutFile $Path -UseBasicParsing
     }
+}
+
+function Get-ArchiveRadioRuPageImagePath {
+    param(
+        [int]$Year,
+        [string]$Issue,
+        [string]$PageId,
+        [string]$Kind = "b"
+    )
+
+    $yearText = $Year.ToString()
+    $monthDir = Join-Path (Join-Path $PageImageCache $yearText) $Issue
+    New-Item -ItemType Directory -Force -Path $monthDir | Out-Null
+    return Join-Path $monthDir "$Kind.$yearText-$Issue.$PageId.jpg"
 }
 
 function ConvertTo-AbsoluteArchiveUrl {
@@ -477,7 +494,7 @@ foreach ($year in $yearsToScan) {
         $pageUrl = "https://archive.radio.ru/web/$year/12/$pageId"
         $pageHtmlPath = Join-Path $yearDir "page.$year-12.$pageId.html"
         $viewerHtmlPath = Join-Path $yearDir "viewer.$year-12.$pageId.html"
-        $imagePath = Join-Path $yearDir "b.$year-12.$pageId.jpg"
+        $imagePath = Get-ArchiveRadioRuPageImagePath -Year $year -Issue "12" -PageId $pageId -Kind "b"
         $imageUrl = $null
         $fullImageUrl = "https://archive.radio.ru/web/img/$year/f.$year-12.$pageId.jpg"
         $thumbImageUrl = "https://archive.radio.ru/web/img/$year/p.$year-12.$pageId.jpg"
@@ -491,14 +508,14 @@ foreach ($year in $yearsToScan) {
         }
         catch {
             Write-Warning "Large scan failed for $year/$pageId, trying regular scan: $($_.Exception.Message)"
-            $imagePath = Join-Path $yearDir "f.$year-12.$pageId.jpg"
+            $imagePath = Get-ArchiveRadioRuPageImagePath -Year $year -Issue "12" -PageId $pageId -Kind "f"
             $imageUrl = $fullImageUrl
             try {
                 Download-IfNeeded -Uri $fullImageUrl -Path $imagePath
             }
             catch {
                 Write-Warning "Regular page failed for $year/$pageId, trying thumbnail: $($_.Exception.Message)"
-                $imagePath = Join-Path $yearDir "p.$year-12.$pageId.jpg"
+                $imagePath = Get-ArchiveRadioRuPageImagePath -Year $year -Issue "12" -PageId $pageId -Kind "p"
                 $imageUrl = $thumbImageUrl
                 try {
                     Download-IfNeeded -Uri $thumbImageUrl -Path $imagePath
