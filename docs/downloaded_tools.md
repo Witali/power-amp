@@ -44,6 +44,9 @@ name, version, source URL, local path, purpose, and whether it is committed.
 
 ## Download Policy
 
+- On Windows, when a new software tool is needed, first look for a Microsoft
+  Store package and offer that installation path before downloading portable
+  archives or installers.
 - Prefer official project sources for compilers and runtimes, for example
   `go.dev` for Go and `nodejs.org` for Node.js.
 - Keep downloaded binary distributions and installers under ignored paths,

@@ -8,6 +8,7 @@
 - Automate repeated project actions in scripts instead of relying on chat context. Prefer `scripts/project_tasks.py` and the npm wrappers `npm run symbols`, `npm run check`, and `npm run build`.
 - Prefer Python for project scripts by default; use Go for complex calculations, heavy image processing, or performance-sensitive tools.
 - When adding or downloading local tools for project work, update `docs/downloaded_tools.md` with the tool name, version, source URL, local path, purpose, and Git policy.
+- When a new software tool is needed on Windows, first look for a Microsoft Store package and offer that installation path before downloading portable archives or installers.
 - Prefer installing newly downloaded local tools under `.tmp/tools/` or another project-local path covered by `.gitignore`; do not place tool payloads in tracked directories.
 - Store downloaded `archive.radio.ru` page scans under `.tmp/archive_radio_ru/<year>/<month>/` and keep them there until the user explicitly asks to delete them.
 - When the user sends a page layout mockup or screenshot with markup/corrections, regenerate the markup for that page with the current pipeline first, compare it with the reported issue, and only then decide whether the algorithm still needs improvement.
