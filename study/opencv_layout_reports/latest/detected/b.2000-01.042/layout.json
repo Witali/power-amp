@@ -192,46 +192,6 @@
   ],
   "frequency_warnings": [
     {
-      "block": "001_image",
-      "block_label": "image",
-      "hint_label": "schematic/circuit",
-      "hint_confidence": 0.90412,
-      "block_overlap": 1.0,
-      "hint_overlap": 0.19042,
-      "bbox": [
-        2329,
-        0,
-        171,
-        3338
-      ],
-      "hint_bbox": [
-        1602,
-        0,
-        898,
-        3338
-      ]
-    },
-    {
-      "block": "001_image",
-      "block_label": "image",
-      "hint_label": "text",
-      "hint_confidence": 0.79451,
-      "block_overlap": 0.595,
-      "hint_overlap": 0.04465,
-      "bbox": [
-        2329,
-        0,
-        171,
-        3338
-      ],
-      "hint_bbox": [
-        61,
-        61,
-        2374,
-        3204
-      ]
-    },
-    {
       "block": "002_text",
       "block_label": "text",
       "hint_label": "schematic/circuit",
@@ -414,26 +374,6 @@
   ],
   "frequency_cluster_warnings": [
     {
-      "block": "001_image",
-      "block_label": "image",
-      "hint_label": "schematic/circuit",
-      "hint_confidence": 0.90543,
-      "block_overlap": 1.0,
-      "hint_overlap": 0.19042,
-      "bbox": [
-        2329,
-        0,
-        171,
-        3338
-      ],
-      "hint_bbox": [
-        1602,
-        0,
-        898,
-        3338
-      ]
-    },
-    {
       "block": "002_text",
       "block_label": "text",
       "hint_label": "schematic/circuit",
@@ -536,106 +476,6 @@
   ],
   "preview": "preview.png",
   "blocks": [
-    {
-      "ident": "001_image",
-      "label": "image",
-      "orientation": "unknown",
-      "confidence": 0.7962,
-      "bbox": [
-        2329,
-        0,
-        171,
-        3338
-      ],
-      "outline": [
-        [
-          [
-            2329,
-            0
-          ],
-          [
-            2329,
-            62
-          ],
-          [
-            2341,
-            62
-          ],
-          [
-            2341,
-            2218
-          ],
-          [
-            2329,
-            2218
-          ],
-          [
-            2329,
-            2286
-          ],
-          [
-            2337,
-            2286
-          ],
-          [
-            2337,
-            2983
-          ],
-          [
-            2329,
-            2983
-          ],
-          [
-            2329,
-            3338
-          ],
-          [
-            2500,
-            3338
-          ],
-          [
-            2500,
-            0
-          ]
-        ]
-      ],
-      "features": {
-        "width_ratio": 0.06825,
-        "height_ratio": 1.0,
-        "area_ratio": 0.06825,
-        "wide_aspect": 0.01022,
-        "tall_aspect": 1.0,
-        "ink_density": 0.6256,
-        "edge_density": 0.20862,
-        "gray_std": 0.47188,
-        "gray_levels": 0.9375,
-        "component_density": 0.3744,
-        "hline_density": 1.0,
-        "vline_density": 1.0,
-        "line_art_score": 1.0,
-        "line_balance": 0.75128,
-        "saturation_mean": 0.33276,
-        "saturation_p80": 0.50588,
-        "textline_density": 0.01,
-        "horizontal_text_score": 0.01,
-        "vertical_text_score": 0.19565,
-        "diagonal_text_score": 0.14809,
-        "max_text_score": 0.19565,
-        "component_signature_score": 0.3,
-        "resistor_symbol_density": 0.0,
-        "capacitor_symbol_density": 1.0,
-        "diode_symbol_density": 0.0,
-        "transistor_symbol_density": 0.0,
-        "pcb_trace_density": 1.0,
-        "pcb_pad_density": 1.0,
-        "pcb_board_outline_score": 1.0,
-        "pcb_signature_score": 1.0,
-        "overlap_resolution": 1.0
-      },
-      "crop_path": null,
-      "figure_ref": null,
-      "caption_candidates": null
-    },
     {
       "ident": "002_text",
       "label": "text",
@@ -1421,16 +1261,16 @@
             3023
           ],
           [
+            2337,
+            3023
+          ],
+          [
+            2337,
+            3194
+          ],
+          [
             1595,
             3194
-          ],
-          [
-            2328,
-            3194
-          ],
-          [
-            2328,
-            3023
           ]
         ]
       ],
@@ -1464,8 +1304,7 @@
         "pcb_trace_density": 1.0,
         "pcb_pad_density": 1.0,
         "pcb_board_outline_score": 1.0,
-        "pcb_signature_score": 1.0,
-        "overlap_resolution": 1.0
+        "pcb_signature_score": 1.0
       },
       "crop_path": null,
       "figure_ref": null,

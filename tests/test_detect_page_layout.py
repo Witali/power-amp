@@ -436,6 +436,67 @@ class DetectPageLayoutTests(unittest.TestCase):
 
         self.assertEqual(pieces, [box])
 
+    def test_merges_fragmented_annual_contents_rows_then_splits_columns(self) -> None:
+        cv2 = detect_page_layout.cv2
+        np = detect_page_layout.np
+
+        image = np.full((1000, 1000, 3), 255, dtype=np.uint8)
+        mask = np.zeros((1000, 1000), dtype=np.uint8)
+        for row in range(5):
+            y = 100 + row * 60
+            cv2.rectangle(mask, (40, y + 4), (390, y + 22), 255, -1)
+            cv2.rectangle(mask, (540, y + 4), (900, y + 22), 255, -1)
+        edges = mask.copy()
+        ann = detect_page_layout.train_bootstrap_ann()
+        classified = []
+        features = {
+            "max_text_score": 0.72,
+            "line_art_score": 0.12,
+            "saturation_p80": 0.0,
+        }
+        for index, row in enumerate(range(5), start=1):
+            box = detect_page_layout.Box(30, 96 + row * 60, 900, 28)
+            classified.append(
+                (
+                    detect_page_layout.Block(
+                        ident=f"{index:03d}_text",
+                        label="text",
+                        orientation="horizontal",
+                        confidence=0.88,
+                        bbox=box.to_list(),
+                        outline=None,
+                        features=features,
+                    ),
+                    box,
+                )
+            )
+
+        merged = detect_page_layout.merge_fragmented_contents_text_rows(
+            classified,
+            image,
+            mask,
+            edges,
+            ann,
+            scale=1.0,
+            width=1000,
+            height=1000,
+        )
+        split = detect_page_layout.split_text_columns_in_classified_blocks(
+            merged,
+            image,
+            mask,
+            edges,
+            ann,
+            scale=1.0,
+            width=1000,
+            height=1000,
+        )
+
+        self.assertEqual(len(merged), 1)
+        self.assertEqual(merged[0][0].features["contents_row_merge"], 1.0)
+        self.assertEqual(len(split), 2)
+        self.assertLessEqual(split[0][1].x2, split[1][1].x)
+
     def test_suppresses_small_text_artifact_touching_pcb(self) -> None:
         pcb = detect_page_layout.Block(
             ident="004_pcb",
@@ -468,6 +529,40 @@ class DetectPageLayoutTests(unittest.TestCase):
         filtered = detect_page_layout.suppress_small_text_artifacts_near_visuals([pcb, artifact, prose])
 
         self.assertEqual([block.ident for block in filtered], ["004_pcb", "006_text"])
+
+    def test_suppresses_colored_margin_visual_artifact(self) -> None:
+        margin_artifact = detect_page_layout.Block(
+            ident="017_schematic",
+            label="schematic/circuit",
+            orientation="unknown",
+            confidence=0.38,
+            bbox=[0, 2759, 174, 579],
+            outline=None,
+            features={
+                "saturation_p80": 0.38,
+                "line_art_score": 1.0,
+            },
+        )
+        real_schematic = detect_page_layout.Block(
+            ident="012_schematic",
+            label="schematic/circuit",
+            orientation="unknown",
+            confidence=0.89,
+            bbox=[161, 2038, 745, 239],
+            outline=None,
+            features={
+                "saturation_p80": 0.0,
+                "line_art_score": 0.39,
+            },
+        )
+
+        filtered = detect_page_layout.suppress_page_margin_visual_artifacts(
+            [margin_artifact, real_schematic],
+            page_width=2500,
+            page_height=3339,
+        )
+
+        self.assertEqual([block.ident for block in filtered], ["012_schematic"])
 
     def test_feature_classifier_prefers_color_photo_over_schematic(self) -> None:
         ann = detect_page_layout.train_bootstrap_ann()

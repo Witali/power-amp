@@ -61,12 +61,24 @@
     "source": "../../opencv_layout_regression_pages/sources/b.1999-10.014.jpg",
     "layout": "detected/b.1999-10.014/layout.json",
     "preview": "detected/b.1999-10.014/preview.png",
-    "block_count": 6,
+    "block_count": 5,
     "counts": {
-      "text": 5,
-      "image": 1
+      "text": 5
     },
-    "warning_count": 2
+    "warning_count": 0
+  },
+  {
+    "id": "b.1999-12.064",
+    "reason": "annual contents page with cover-image strips, dense dot-leader rows, and two-column article lists",
+    "source": "../../opencv_layout_regression_pages/sources/b.1999-12.064.jpg",
+    "layout": "detected/b.1999-12.064/layout.json",
+    "preview": "detected/b.1999-12.064/preview.png",
+    "block_count": 4,
+    "counts": {
+      "image": 2,
+      "text": 2
+    },
+    "warning_count": 14
   },
   {
     "id": "b.1999-10.017",
@@ -74,14 +86,13 @@
     "source": "../../opencv_layout_regression_pages/sources/b.1999-10.017.jpg",
     "layout": "detected/b.1999-10.017/layout.json",
     "preview": "detected/b.1999-10.017/preview.png",
-    "block_count": 14,
+    "block_count": 13,
     "counts": {
-      "image": 1,
       "heading": 2,
       "text": 9,
       "schematic": 2
     },
-    "warning_count": 9
+    "warning_count": 7
   },
   {
     "id": "b.1999-10.018",
@@ -89,14 +100,14 @@
     "source": "../../opencv_layout_regression_pages/sources/b.1999-10.018.jpg",
     "layout": "detected/b.1999-10.018/layout.json",
     "preview": "detected/b.1999-10.018/preview.png",
-    "block_count": 14,
+    "block_count": 13,
     "counts": {
-      "image": 2,
       "heading": 2,
       "text": 9,
-      "schematic": 1
+      "schematic": 1,
+      "image": 1
     },
-    "warning_count": 10
+    "warning_count": 8
   },
   {
     "id": "b.2000-02.036",
@@ -120,13 +131,26 @@
     "source": "../../opencv_layout_regression_pages/sources/b.2000-02.037.jpg",
     "layout": "detected/b.2000-02.037/layout.json",
     "preview": "detected/b.2000-02.037/preview.png",
-    "block_count": 13,
+    "block_count": 12,
     "counts": {
       "heading": 1,
       "text": 10,
-      "schematic": 2
+      "schematic": 1
     },
-    "warning_count": 6
+    "warning_count": 5
+  },
+  {
+    "id": "b.2000-12.063",
+    "reason": "annual contents page with cover-image strips and multi-column dot-leader article lists",
+    "source": "../../opencv_layout_regression_pages/sources/b.2000-12.063.jpg",
+    "layout": "detected/b.2000-12.063/layout.json",
+    "preview": "detected/b.2000-12.063/preview.png",
+    "block_count": 6,
+    "counts": {
+      "image": 2,
+      "text": 4
+    },
+    "warning_count": 12
   },
   {
     "id": "b.2000-09.011",
@@ -134,14 +158,13 @@
     "source": "../../opencv_layout_regression_pages/sources/b.2000-09.011.jpg",
     "layout": "detected/b.2000-09.011/layout.json",
     "preview": "detected/b.2000-09.011/preview.png",
-    "block_count": 9,
+    "block_count": 8,
     "counts": {
-      "image": 1,
       "text": 6,
       "heading": 1,
       "schematic": 1
     },
-    "warning_count": 8
+    "warning_count": 6
   },
   {
     "id": "b.2000-09.012",
@@ -149,14 +172,13 @@
     "source": "../../opencv_layout_regression_pages/sources/b.2000-09.012.jpg",
     "layout": "detected/b.2000-09.012/layout.json",
     "preview": "detected/b.2000-09.012/preview.png",
-    "block_count": 13,
+    "block_count": 12,
     "counts": {
-      "image": 1,
       "text": 9,
       "heading": 2,
       "schematic": 1
     },
-    "warning_count": 14
+    "warning_count": 10
   },
   {
     "id": "b.2000-10.014",
@@ -164,13 +186,12 @@
     "source": "../../opencv_layout_regression_pages/sources/b.2000-10.014.jpg",
     "layout": "detected/b.2000-10.014/layout.json",
     "preview": "detected/b.2000-10.014/preview.png",
-    "block_count": 6,
+    "block_count": 5,
     "counts": {
       "text": 4,
-      "image": 1,
       "schematic": 1
     },
-    "warning_count": 3
+    "warning_count": 1
   },
   {
     "id": "b.2000-10.015",
@@ -208,13 +229,12 @@
     "source": "../../opencv_layout_regression_pages/sources/b.2000-11.012.jpg",
     "layout": "detected/b.2000-11.012/layout.json",
     "preview": "detected/b.2000-11.012/preview.png",
-    "block_count": 5,
+    "block_count": 4,
     "counts": {
-      "image": 1,
       "text": 3,
       "schematic": 1
     },
-    "warning_count": 7
+    "warning_count": 5
   },
   {
     "id": "b.2000-11.013",
@@ -222,13 +242,13 @@
     "source": "../../opencv_layout_regression_pages/sources/b.2000-11.013.jpg",
     "layout": "detected/b.2000-11.013/layout.json",
     "preview": "detected/b.2000-11.013/preview.png",
-    "block_count": 13,
+    "block_count": 12,
     "counts": {
-      "image": 3,
       "schematic": 1,
-      "text": 9
+      "text": 9,
+      "image": 2
     },
-    "warning_count": 15
+    "warning_count": 13
   },
   {
     "id": "b.2000-01.042",
@@ -236,15 +256,15 @@
     "source": "../../opencv_layout_regression_pages/sources/b.2000-01.042.jpg",
     "layout": "detected/b.2000-01.042/layout.json",
     "preview": "detected/b.2000-01.042/preview.png",
-    "block_count": 15,
+    "block_count": 14,
     "counts": {
-      "image": 3,
       "text": 8,
+      "image": 2,
       "pcb": 1,
       "schematic": 2,
       "heading": 1
     },
-    "warning_count": 17
+    "warning_count": 14
   },
   {
     "id": "b.2000-01.043",
@@ -268,14 +288,13 @@
     "source": "../../opencv_layout_regression_pages/sources/b.2000-11.043.jpg",
     "layout": "detected/b.2000-11.043/layout.json",
     "preview": "detected/b.2000-11.043/preview.png",
-    "block_count": 8,
+    "block_count": 7,
     "counts": {
-      "image": 1,
       "heading": 1,
       "text": 5,
       "schematic": 1
     },
-    "warning_count": 5
+    "warning_count": 3
   },
   {
     "id": "b.2000-11.044",
@@ -283,12 +302,11 @@
     "source": "../../opencv_layout_regression_pages/sources/b.2000-11.044.jpg",
     "layout": "detected/b.2000-11.044/layout.json",
     "preview": "detected/b.2000-11.044/preview.png",
-    "block_count": 12,
+    "block_count": 11,
     "counts": {
-      "image": 1,
       "text": 10,
       "schematic": 1
     },
-    "warning_count": 11
+    "warning_count": 7
   }
 ]

@@ -47,6 +47,7 @@ The layout detector also supports `--frequency-hints off|validate|hints`. The de
 
 - Add a script for any repeated action before relying on memory or chat instructions.
 - Prefer `scripts/project_tasks.py` subcommands for workflows that combine several steps.
+- Prefer Python for project scripts by default; use Go for complex calculations, heavy image processing, or performance-sensitive tools.
 - Keep single-purpose helpers small, like `scripts/lint_svg.py` and `scripts/render_svg_tree.py`.
 - Add or update unit tests in `tests/` when changing script behavior.
 - Make generated artifacts reproducible from files committed to the repository.
@@ -101,6 +102,7 @@ python scripts\benchmark_layout_detector.py .tmp\layout_candidate_pages\b.2000-0
 
 - Для любого повторяемого действия добавлять скрипт, прежде чем полагаться на память или инструкции из чата.
 - Для workflow из нескольких шагов предпочитать подкоманды `scripts/project_tasks.py`.
+- Для проектных скриптов по умолчанию предпочитать Python; Go использовать для сложных вычислений, тяжелой обработки изображений или инструментов, чувствительных к производительности.
 - Одноцелевые helper-скрипты держать маленькими, как `scripts/lint_svg.py` и `scripts/render_svg_tree.py`.
 - При изменении поведения скриптов добавлять или обновлять unit-тесты в `tests/`.
 - Сгенерированные артефакты должны воспроизводиться из файлов, сохраненных в репозитории.

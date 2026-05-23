@@ -122,6 +122,20 @@ OVERLAP_DIAGRAM_LINE_ART_BOOST = layout_config.OVERLAP_DIAGRAM_LINE_ART_BOOST
 OVERLAP_DIAGRAM_STACKED_MERGE_BOOST = layout_config.OVERLAP_DIAGRAM_STACKED_MERGE_BOOST
 OVERLAP_TEXT_LINE_ART_PENALTY = layout_config.OVERLAP_TEXT_LINE_ART_PENALTY
 STACKED_DIAGRAM_TEXT_CUTOUT_MIN_MERGE_SCORE = layout_config.STACKED_DIAGRAM_TEXT_CUTOUT_MIN_MERGE_SCORE
+CONTENTS_ROW_MERGE_MIN_RUN = layout_config.CONTENTS_ROW_MERGE_MIN_RUN
+CONTENTS_ROW_MERGE_MAX_HEIGHT_RATIO = layout_config.CONTENTS_ROW_MERGE_MAX_HEIGHT_RATIO
+CONTENTS_ROW_MERGE_MIN_WIDTH_RATIO = layout_config.CONTENTS_ROW_MERGE_MIN_WIDTH_RATIO
+CONTENTS_ROW_MERGE_MIN_WIDTH_SIMILARITY = layout_config.CONTENTS_ROW_MERGE_MIN_WIDTH_SIMILARITY
+CONTENTS_ROW_MERGE_MIN_HORIZONTAL_OVERLAP = layout_config.CONTENTS_ROW_MERGE_MIN_HORIZONTAL_OVERLAP
+CONTENTS_ROW_MERGE_MAX_VERTICAL_GAP_RATIO = layout_config.CONTENTS_ROW_MERGE_MAX_VERTICAL_GAP_RATIO
+CONTENTS_ROW_MERGE_MAX_VERTICAL_GAP_PX = layout_config.CONTENTS_ROW_MERGE_MAX_VERTICAL_GAP_PX
+CONTENTS_ROW_MERGE_MIN_TOTAL_HEIGHT_RATIO = layout_config.CONTENTS_ROW_MERGE_MIN_TOTAL_HEIGHT_RATIO
+CONTENTS_ROW_MERGE_MAX_TOTAL_HEIGHT_RATIO = layout_config.CONTENTS_ROW_MERGE_MAX_TOTAL_HEIGHT_RATIO
+PAGE_MARGIN_VISUAL_ARTIFACT_MAX_WIDTH_RATIO = layout_config.PAGE_MARGIN_VISUAL_ARTIFACT_MAX_WIDTH_RATIO
+PAGE_MARGIN_VISUAL_ARTIFACT_MIN_HEIGHT_RATIO = layout_config.PAGE_MARGIN_VISUAL_ARTIFACT_MIN_HEIGHT_RATIO
+PAGE_MARGIN_VISUAL_ARTIFACT_EDGE_RATIO = layout_config.PAGE_MARGIN_VISUAL_ARTIFACT_EDGE_RATIO
+PAGE_MARGIN_VISUAL_ARTIFACT_MAX_CONFIDENCE = layout_config.PAGE_MARGIN_VISUAL_ARTIFACT_MAX_CONFIDENCE
+PAGE_MARGIN_VISUAL_ARTIFACT_MIN_SATURATION = layout_config.PAGE_MARGIN_VISUAL_ARTIFACT_MIN_SATURATION
 
 
 @dataclass(frozen=True)
@@ -2395,6 +2409,126 @@ def split_text_columns_in_classified_blocks(
     return sorted(result, key=lambda item: (item[1].y, item[1].x))
 
 
+def contents_text_row_strip_candidate(block: Block, box: Box, width: int, height: int) -> bool:
+    if block.label not in TEXTUAL_LABELS:
+        return False
+    if block.orientation not in {"horizontal", "unknown"}:
+        return False
+    if box.w < width * CONTENTS_ROW_MERGE_MIN_WIDTH_RATIO:
+        return False
+    if box.h > height * CONTENTS_ROW_MERGE_MAX_HEIGHT_RATIO:
+        return False
+    if box.h < max(6, int(round(height * 0.006))):
+        return False
+
+    features = block.features
+    text_score = float(features.get("max_text_score", 0.0))
+    line_art = float(features.get("line_art_score", 0.0))
+    saturation = float(features.get("saturation_p80", 0.0))
+    if text_score < 0.20:
+        return False
+    if line_art > 0.62 and saturation > 0.18:
+        return False
+    return True
+
+
+def contents_text_rows_are_adjacent(first: Box, second: Box, width: int, height: int) -> bool:
+    if second.y < first.y:
+        first, second = second, first
+    vertical_gap = second.y - first.y2
+    max_gap = max(
+        CONTENTS_ROW_MERGE_MAX_VERTICAL_GAP_PX,
+        int(round(height * CONTENTS_ROW_MERGE_MAX_VERTICAL_GAP_RATIO)),
+    )
+    if vertical_gap < 0 or vertical_gap > max_gap:
+        return False
+
+    overlap = box_horizontal_overlap_width(first, second)
+    if overlap < min(first.w, second.w) * CONTENTS_ROW_MERGE_MIN_HORIZONTAL_OVERLAP:
+        return False
+
+    width_similarity = min(first.w, second.w) / max(1, max(first.w, second.w))
+    if width_similarity < CONTENTS_ROW_MERGE_MIN_WIDTH_SIMILARITY:
+        return False
+
+    x_drift = abs(first.x - second.x)
+    x2_drift = abs(first.x2 - second.x2)
+    drift_limit = max(24, int(round(width * 0.035)))
+    return x_drift <= drift_limit and x2_drift <= drift_limit
+
+
+def merge_fragmented_contents_text_rows(
+    classified: list[tuple[Block, Box]],
+    image,
+    mask,
+    edges,
+    ann,
+    scale: float,
+    width: int,
+    height: int,
+) -> list[tuple[Block, Box]]:
+    if len(classified) < CONTENTS_ROW_MERGE_MIN_RUN:
+        return classified
+
+    result: list[tuple[Block, Box]] = []
+    run: list[tuple[Block, Box]] = []
+
+    def flush_run() -> None:
+        nonlocal run
+        if len(run) < CONTENTS_ROW_MERGE_MIN_RUN:
+            result.extend(run)
+            run = []
+            return
+
+        merged_box = run[0][1]
+        for _, box in run[1:]:
+            merged_box = union_box(merged_box, box)
+        total_height_ratio = merged_box.h / max(1, height)
+        if not (
+            CONTENTS_ROW_MERGE_MIN_TOTAL_HEIGHT_RATIO
+            <= total_height_ratio
+            <= CONTENTS_ROW_MERGE_MAX_TOTAL_HEIGHT_RATIO
+        ):
+            result.extend(run)
+            run = []
+            return
+
+        first_number = run[0][0].ident.split("_", 1)[0]
+        merged = merged_classified_item(
+            run,
+            "text",
+            f"{first_number}_text",
+            image,
+            mask,
+            edges,
+            ann,
+            scale,
+            width,
+            height,
+            "contents_row_merge",
+        )
+        result.append(merged)
+        run = []
+
+    for item in sorted(classified, key=lambda entry: (entry[1].y, entry[1].x)):
+        block, box = item
+        if not contents_text_row_strip_candidate(block, box, width, height):
+            flush_run()
+            result.append(item)
+            continue
+        if not run:
+            run.append(item)
+            continue
+        if contents_text_rows_are_adjacent(run[-1][1], box, width, height):
+            run.append(item)
+        else:
+            flush_run()
+            run.append(item)
+    flush_run()
+
+    return sorted(result, key=lambda item: (item[1].y, item[1].x))
+
+
 def merge_connected_schematic_blocks(
     classified: list[tuple[Block, Box]],
     image,
@@ -3272,6 +3406,41 @@ def suppress_small_artifacts_near_schematics(blocks: list[Block]) -> list[Block]
     return [block for block in blocks if block.ident not in suppressed]
 
 
+def page_margin_visual_artifact(block: Block, page_width: int, page_height: int) -> bool:
+    if block.label not in FIGURE_LABELS and block.label != "other":
+        return False
+
+    box = box_from_list(block.bbox)
+    if box.area <= 0:
+        return False
+    if box.w > page_width * PAGE_MARGIN_VISUAL_ARTIFACT_MAX_WIDTH_RATIO:
+        return False
+    if box.h < page_height * PAGE_MARGIN_VISUAL_ARTIFACT_MIN_HEIGHT_RATIO:
+        return False
+    edge_margin = max(8, int(round(page_width * PAGE_MARGIN_VISUAL_ARTIFACT_EDGE_RATIO)))
+    touches_page_edge = box.x <= edge_margin or box.x2 >= page_width - edge_margin
+    if not touches_page_edge:
+        return False
+
+    saturation = float(block.features.get("saturation_p80", 0.0))
+    confidence = float(block.confidence)
+    line_art = float(block.features.get("line_art_score", 0.0))
+    if saturation < PAGE_MARGIN_VISUAL_ARTIFACT_MIN_SATURATION:
+        return False
+    return confidence <= PAGE_MARGIN_VISUAL_ARTIFACT_MAX_CONFIDENCE or line_art > 0.70
+
+
+def suppress_page_margin_visual_artifacts(blocks: list[Block], page_width: int, page_height: int) -> list[Block]:
+    suppressed = {
+        block.ident
+        for block in blocks
+        if page_margin_visual_artifact(block, page_width, page_height)
+    }
+    if not suppressed:
+        return blocks
+    return [block for block in blocks if block.ident not in suppressed]
+
+
 def caption_candidate_for_figure(figure_block: Block, text_block: Block) -> dict[str, object] | None:
     figure_box = box_from_list(figure_block.bbox)
     text_box = box_from_list(text_block.bbox)
@@ -3418,6 +3587,12 @@ def classify_blocks(
     classified = split_text_columns_in_classified_blocks(
         classified, image, mask, edges, ann, scale=scale, width=analysis_w, height=analysis_h
     )
+    classified = merge_fragmented_contents_text_rows(
+        classified, image, mask, edges, ann, scale=scale, width=analysis_w, height=analysis_h
+    )
+    classified = split_text_columns_in_classified_blocks(
+        classified, image, mask, edges, ann, scale=scale, width=analysis_w, height=analysis_h
+    )
     classified = merge_stacked_diagram_blocks(
         classified, image, mask, edges, ann, scale=scale, width=analysis_w, height=analysis_h
     )
@@ -3437,6 +3612,9 @@ def classify_blocks(
     blocks = suppress_text_inside_schematics(all_blocks)
     blocks = suppress_small_text_artifacts_near_visuals(blocks)
     blocks = suppress_small_artifacts_near_schematics(blocks)
+    page_width = int(round(analysis_w / max(scale, 1e-6)))
+    page_height = int(round(analysis_h / max(scale, 1e-6)))
+    blocks = suppress_page_margin_visual_artifacts(blocks, page_width, page_height)
     blocks = resolve_block_overlaps(blocks, image, mask, edges, ann, scale)
     attach_caption_candidates(blocks, [block for block in all_blocks if block.label == "text"])
     kept_idents = {block.ident for block in blocks}

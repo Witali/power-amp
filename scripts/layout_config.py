@@ -120,6 +120,28 @@ OVERLAP_DIAGRAM_STACKED_MERGE_BOOST = 1.10
 OVERLAP_TEXT_LINE_ART_PENALTY = 2.80
 STACKED_DIAGRAM_TEXT_CUTOUT_MIN_MERGE_SCORE = 0.50
 
+# Annual contents pages can fragment into one full-width text box per printed
+# row because dot leaders connect entries across both magazine columns. Merge
+# only longer runs of thin, similarly aligned text strips so normal article
+# prose blocks stay separate.
+CONTENTS_ROW_MERGE_MIN_RUN = 4
+CONTENTS_ROW_MERGE_MAX_HEIGHT_RATIO = 0.085
+CONTENTS_ROW_MERGE_MIN_WIDTH_RATIO = 0.50
+CONTENTS_ROW_MERGE_MIN_WIDTH_SIMILARITY = 0.74
+CONTENTS_ROW_MERGE_MIN_HORIZONTAL_OVERLAP = 0.72
+CONTENTS_ROW_MERGE_MAX_VERTICAL_GAP_RATIO = 0.026
+CONTENTS_ROW_MERGE_MAX_VERTICAL_GAP_PX = 42
+CONTENTS_ROW_MERGE_MIN_TOTAL_HEIGHT_RATIO = 0.10
+CONTENTS_ROW_MERGE_MAX_TOTAL_HEIGHT_RATIO = 0.72
+
+# Colored magazine side margins can be mistaken for schematic/PCB fragments
+# because they contain strong vertical edges and small repeated dots.
+PAGE_MARGIN_VISUAL_ARTIFACT_MAX_WIDTH_RATIO = 0.09
+PAGE_MARGIN_VISUAL_ARTIFACT_MIN_HEIGHT_RATIO = 0.10
+PAGE_MARGIN_VISUAL_ARTIFACT_EDGE_RATIO = 0.025
+PAGE_MARGIN_VISUAL_ARTIFACT_MAX_CONFIDENCE = 0.62
+PAGE_MARGIN_VISUAL_ARTIFACT_MIN_SATURATION = 0.14
+
 # Component and PCB signature detector thresholds.
 MIN_COMPONENT_PIXELS = 4
 MIN_SYMBOL_SIDE = 6

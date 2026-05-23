@@ -1,6 +1,6 @@
 {
   "name": "OpenCV layout regression pages",
-  "page_count": 20,
+  "page_count": 22,
   "detector": "scripts/detect_page_layout.py",
   "preview_width": 1100,
   "frequency_hints": "validate",
@@ -47,6 +47,14 @@
       "baseline_preview": "study/opencv_layout_regression_pages/baselines/b.1999-10.014/preview.png"
     },
     {
+      "id": "b.1999-12.064",
+      "reason": "annual contents page with cover-image strips, dense dot-leader rows, and two-column article lists",
+      "source": "study/opencv_layout_regression_pages/sources/b.1999-12.064.jpg",
+      "original_cached_source": ".tmp/archive_radio_ru/1999/12/b.1999-12.064.jpg",
+      "baseline_layout": "study/opencv_layout_regression_pages/baselines/b.1999-12.064/layout.json",
+      "baseline_preview": "study/opencv_layout_regression_pages/baselines/b.1999-12.064/preview.png"
+    },
+    {
       "id": "b.1999-10.017",
       "reason": "article start with title, normal prose columns, and schematic content",
       "source": "study/opencv_layout_regression_pages/sources/b.1999-10.017.jpg",
@@ -77,6 +85,14 @@
       "original_cached_source": ".tmp/layout_candidate_pages/b.2000-02.037.jpg",
       "baseline_layout": "study/opencv_layout_regression_pages/baselines/b.2000-02.037/layout.json",
       "baseline_preview": "study/opencv_layout_regression_pages/baselines/b.2000-02.037/preview.png"
+    },
+    {
+      "id": "b.2000-12.063",
+      "reason": "annual contents page with cover-image strips and multi-column dot-leader article lists",
+      "source": "study/opencv_layout_regression_pages/sources/b.2000-12.063.jpg",
+      "original_cached_source": ".tmp/archive_radio_ru/2000/12/b.2000-12.063.jpg",
+      "baseline_layout": "study/opencv_layout_regression_pages/baselines/b.2000-12.063/layout.json",
+      "baseline_preview": "study/opencv_layout_regression_pages/baselines/b.2000-12.063/preview.png"
     },
     {
       "id": "b.2000-09.011",

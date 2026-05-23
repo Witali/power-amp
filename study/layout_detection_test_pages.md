@@ -22,11 +22,18 @@ This file lists useful `archive.radio.ru` pages for checking page-block detectio
 | `2000-09-011` | https://archive.radio.ru/web/img/2000/b.2000-09.011.jpg | Bridge UMZCH with BSIT article start; mostly text, but contains a figure/table region. |
 | `2000-10-015` | https://archive.radio.ru/web/img/2000/b.2000-10.015.jpg | Continuation page with a large lower schematic and vertical margin labels. |
 
+## Contents pages
+
+| Page | Source scan | Why it is useful |
+| --- | --- | --- |
+| `1999-12-064` | https://archive.radio.ru/web/img/1999/b.1999-12.064.jpg | Annual contents page with top/bottom cover-image strips and dense dot-leader rows. Useful for preventing one text block per printed row. |
+| `2000-12-063` | https://archive.radio.ru/web/img/2000/b.2000-12.063.jpg | Annual contents page with a cleaner two-column contents body. Useful as the positive example for content-row grouping. |
+
 ## Local check command
 
 ```powershell
 pwsh -File scripts/download_radio_ru_pages.ps1 `
-  -Pages 2000-11-013,2000-02-036,1999-10-017,2000-10-014,2000-11-011
+  -Pages 2000-11-013,2000-02-036,1999-10-017,2000-10-014,2000-11-011,1999-12-064,2000-12-063
 
 Get-ChildItem -LiteralPath .tmp\archive_radio_ru -Recurse -Filter *.jpg |
   Where-Object { $_.Name -in @(
@@ -34,7 +41,9 @@ Get-ChildItem -LiteralPath .tmp\archive_radio_ru -Recurse -Filter *.jpg |
     "b.2000-02.036.jpg",
     "b.1999-10.017.jpg",
     "b.2000-10.014.jpg",
-    "b.2000-11.011.jpg"
+    "b.2000-11.011.jpg",
+    "b.1999-12.064.jpg",
+    "b.2000-12.063.jpg"
   ) } |
   ForEach-Object {
     python scripts\detect_page_layout.py `
