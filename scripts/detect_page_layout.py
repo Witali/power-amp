@@ -97,6 +97,13 @@ TEXT_ARTIFACT_MAX_HEIGHT_RATIO = layout_config.TEXT_ARTIFACT_MAX_HEIGHT_RATIO
 TEXT_ARTIFACT_MAX_WIDTH_RATIO = layout_config.TEXT_ARTIFACT_MAX_WIDTH_RATIO
 TEXT_ARTIFACT_TOUCH_MARGIN_RATIO = layout_config.TEXT_ARTIFACT_TOUCH_MARGIN_RATIO
 TEXT_ARTIFACT_MIN_OVERLAP_RATIO = layout_config.TEXT_ARTIFACT_MIN_OVERLAP_RATIO
+TEXT_MIN_GLYPH_WIDTHS = layout_config.TEXT_MIN_GLYPH_WIDTHS
+TEXT_AVERAGE_GLYPH_WIDTH_TO_HEIGHT = layout_config.TEXT_AVERAGE_GLYPH_WIDTH_TO_HEIGHT
+TEXT_MIN_ABSOLUTE_WIDTH_PX = layout_config.TEXT_MIN_ABSOLUTE_WIDTH_PX
+TEXT_MIN_ABSOLUTE_HEIGHT_PX = layout_config.TEXT_MIN_ABSOLUTE_HEIGHT_PX
+TEXT_FRAGMENT_SUPPRESS_INSIDE_VISUALS = layout_config.TEXT_FRAGMENT_SUPPRESS_INSIDE_VISUALS
+TEXT_FRAGMENT_INSIDE_VISUAL_MIN_OVERLAP_RATIO = layout_config.TEXT_FRAGMENT_INSIDE_VISUAL_MIN_OVERLAP_RATIO
+TEXT_FRAGMENT_INSIDE_VISUAL_MAX_GLYPH_WIDTHS = layout_config.TEXT_FRAGMENT_INSIDE_VISUAL_MAX_GLYPH_WIDTHS
 HEADING_MIN_WIDTH_RATIO = layout_config.HEADING_MIN_WIDTH_RATIO
 HEADING_MAX_HEIGHT_RATIO = layout_config.HEADING_MAX_HEIGHT_RATIO
 HEADING_MAX_AREA_RATIO = layout_config.HEADING_MAX_AREA_RATIO
@@ -2234,6 +2241,62 @@ def suppress_small_text_artifacts_near_visuals(blocks: list[Block]) -> list[Bloc
     return [block for block in blocks if block.ident not in suppressed]
 
 
+def text_fragment_axes(block: Block, box: Box) -> tuple[int, int]:
+    if block.orientation == "vertical":
+        return box.h, box.w
+    if block.orientation == "horizontal":
+        return box.w, box.h
+    return max(box.w, box.h), min(box.w, box.h)
+
+
+def minimum_text_reading_length(cross_axis: int, glyph_widths: float) -> int:
+    glyph_based = int(round(max(1, cross_axis) * TEXT_AVERAGE_GLYPH_WIDTH_TO_HEIGHT * glyph_widths))
+    return max(TEXT_MIN_ABSOLUTE_WIDTH_PX, glyph_based)
+
+
+def text_fragment_inside_visual(text_box: Box, visual_blocks: list[Block]) -> bool:
+    for visual in visual_blocks:
+        visual_box = box_from_list(visual.bbox)
+        if visual_box.area <= text_box.area:
+            continue
+        overlap_fraction = intersection_area(text_box, visual_box) / max(1, text_box.area)
+        if overlap_fraction >= TEXT_FRAGMENT_INSIDE_VISUAL_MIN_OVERLAP_RATIO:
+            return True
+    return False
+
+
+def tiny_text_fragment(block: Block, visual_blocks: list[Block]) -> bool:
+    if block.label != "text":
+        return False
+
+    box = box_from_list(block.bbox)
+    if box.area <= 0:
+        return True
+
+    reading_axis, cross_axis = text_fragment_axes(block, box)
+    if cross_axis < TEXT_MIN_ABSOLUTE_HEIGHT_PX:
+        return True
+
+    min_reading = minimum_text_reading_length(cross_axis, TEXT_MIN_GLYPH_WIDTHS)
+    if reading_axis < min_reading:
+        return True
+
+    if TEXT_FRAGMENT_SUPPRESS_INSIDE_VISUALS and visual_blocks and text_fragment_inside_visual(box, visual_blocks):
+        inside_visual_limit = minimum_text_reading_length(cross_axis, TEXT_FRAGMENT_INSIDE_VISUAL_MAX_GLYPH_WIDTHS)
+        if reading_axis < inside_visual_limit:
+            return True
+
+    return False
+
+
+def suppress_tiny_text_fragments(blocks: list[Block]) -> list[Block]:
+    visual_blocks = [block for block in blocks if block.label in FIGURE_LABELS]
+    suppressed = {block.ident for block in blocks if tiny_text_fragment(block, visual_blocks)}
+    if not suppressed:
+        return blocks
+    return [block for block in blocks if block.ident not in suppressed]
+
+
 def text_block_inside_text_block(inner_block: Block, outer_block: Block) -> bool:
     if inner_block.ident == outer_block.ident or inner_block.label not in TEXTUAL_LABELS or outer_block.label not in TEXTUAL_LABELS:
         return False
@@ -3836,6 +3899,7 @@ def classify_blocks(
     assign_visual_outlines(all_blocks)
     blocks = suppress_text_inside_schematics(all_blocks)
     blocks = suppress_small_text_artifacts_near_visuals(blocks)
+    blocks = suppress_tiny_text_fragments(blocks)
     blocks = suppress_small_artifacts_near_schematics(blocks)
     page_width = int(round(analysis_w / max(scale, 1e-6)))
     page_height = int(round(analysis_h / max(scale, 1e-6)))

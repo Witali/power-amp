@@ -2171,6 +2171,72 @@ class DetectPageLayoutTests(unittest.TestCase):
 
         self.assertEqual([block.ident for block in filtered], ["003_schematic_circuit", "010_image"])
 
+    def test_suppresses_tiny_text_fragment_by_configured_glyph_width(self) -> None:
+        tiny = detect_page_layout.Block(
+            ident="001_text",
+            label="text",
+            orientation="horizontal",
+            confidence=0.72,
+            bbox=[10, 10, 18, 20],
+            outline=None,
+            features={},
+        )
+        normal = detect_page_layout.Block(
+            ident="002_text",
+            label="text",
+            orientation="horizontal",
+            confidence=0.90,
+            bbox=[45, 10, 120, 20],
+            outline=None,
+            features={},
+        )
+        heading = detect_page_layout.Block(
+            ident="003_heading",
+            label="heading",
+            orientation="horizontal",
+            confidence=0.91,
+            bbox=[10, 45, 18, 20],
+            outline=None,
+            features={},
+        )
+
+        filtered = detect_page_layout.suppress_tiny_text_fragments([tiny, normal, heading])
+
+        self.assertEqual([block.ident for block in filtered], ["002_text", "003_heading"])
+
+    def test_suppresses_short_text_fragment_inside_visual_block(self) -> None:
+        visual = detect_page_layout.Block(
+            ident="010_image",
+            label="image",
+            orientation="unknown",
+            confidence=0.82,
+            bbox=[100, 100, 240, 140],
+            outline=None,
+            features={},
+        )
+        inner_label = detect_page_layout.Block(
+            ident="011_text",
+            label="text",
+            orientation="horizontal",
+            confidence=0.75,
+            bbox=[130, 145, 62, 18],
+            outline=None,
+            features={},
+        )
+        outside_text = detect_page_layout.Block(
+            ident="012_text",
+            label="text",
+            orientation="horizontal",
+            confidence=0.90,
+            bbox=[100, 265, 220, 42],
+            outline=None,
+            features={},
+        )
+
+        filtered = detect_page_layout.suppress_tiny_text_fragments([visual, inner_label, outside_text])
+
+        self.assertEqual([block.ident for block in filtered], ["010_image", "012_text"])
+
     def test_close_or_overlapping_keeps_large_layout_blocks_separate(self) -> None:
         upper_text = detect_page_layout.Box(50, 301, 850, 154)
         lower_column = detect_page_layout.Box(473, 454, 426, 327)

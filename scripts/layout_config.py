@@ -74,6 +74,18 @@ TEXT_ARTIFACT_MAX_WIDTH_RATIO = 0.280
 TEXT_ARTIFACT_TOUCH_MARGIN_RATIO = 0.018
 TEXT_ARTIFACT_MIN_OVERLAP_RATIO = 0.55
 
+# Very short text fragments are usually contour leftovers, page-number bits,
+# leader dots, or tiny labels that should be handled as figure captions instead
+# of standalone OCR prose blocks. The glyph-width threshold is evaluated along
+# the reading axis: width for horizontal text, height for vertical text.
+TEXT_MIN_GLYPH_WIDTHS = 3.5
+TEXT_AVERAGE_GLYPH_WIDTH_TO_HEIGHT = 0.55
+TEXT_MIN_ABSOLUTE_WIDTH_PX = 28
+TEXT_MIN_ABSOLUTE_HEIGHT_PX = 12
+TEXT_FRAGMENT_SUPPRESS_INSIDE_VISUALS = True
+TEXT_FRAGMENT_INSIDE_VISUAL_MIN_OVERLAP_RATIO = 0.40
+TEXT_FRAGMENT_INSIDE_VISUAL_MAX_GLYPH_WIDTHS = 7.0
+
 # Headings are text blocks with display-scale glyphs. They can be saturated
 # blue/red in magazine scans, so they must be separated from photo/image rules
 # before color-heavy features dominate the classifier.
