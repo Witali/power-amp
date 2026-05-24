@@ -147,6 +147,35 @@ class DetectPageLayoutTests(unittest.TestCase):
         self.assertNotEqual(label, "heading")
         self.assertEqual(detect_page_layout.suppress_horizontal_rule_artifacts([block]), [])
 
+    def test_suppresses_low_contrast_horizontal_rule_artifact(self) -> None:
+        features = {
+            "width_ratio": 0.85897,
+            "height_ratio": 0.01444,
+            "area_ratio": 0.01241,
+            "wide_aspect": 1.0,
+            "tall_aspect": 0.00289,
+            "ink_density": 0.13777,
+            "edge_density": 0.30157,
+            "gray_std": 0.84714,
+            "gray_levels": 1.0,
+            "component_density": 0.03189,
+            "hline_density": 1.0,
+            "vline_density": 0.0,
+            "line_balance": 0.0,
+            "textline_density": 0.69231,
+            "horizontal_text_score": 0.69231,
+            "vertical_text_score": 0.01493,
+            "diagonal_text_score": 0.0,
+            "max_text_score": 0.69231,
+            "line_art_score": 0.73766,
+            "saturation_p80": 0.0,
+            "component_signature_score": 0.0,
+        }
+        block = detect_page_layout.Block("001_diagram", "diagram", "unknown", 0.95, [114, 146, 2147, 46], None, features)
+
+        self.assertTrue(detect_page_layout.horizontal_rule_features(features))
+        self.assertEqual(detect_page_layout.suppress_horizontal_rule_artifacts([block]), [])
+
     def test_feature_classifier_recognizes_colored_line_art_as_schematic(self) -> None:
         ann = detect_page_layout.train_bootstrap_ann()
         features = {
@@ -2492,6 +2521,62 @@ class DetectPageLayoutTests(unittest.TestCase):
                 height=3200,
             )
         )
+
+    def test_schematic_attachment_rejects_waveform_diagram(self) -> None:
+        features = {
+            "area_ratio": 0.02535,
+            "height_ratio": 0.06688,
+            "ink_density": 0.10339,
+            "edge_density": 0.27820,
+            "saturation_p80": 0.0,
+            "hline_density": 0.28173,
+            "vline_density": 0.18524,
+            "line_art_score": 0.56530,
+            "max_text_score": 0.96117,
+            "component_signature_score": 0.97625,
+        }
+        block = detect_page_layout.Block(
+            ident="002_diagram",
+            label="diagram",
+            orientation="unknown",
+            confidence=0.98,
+            bbox=[118, 253, 826, 214],
+            outline=None,
+            features=features,
+        )
+
+        self.assertTrue(detect_page_layout.single_axis_waveform_diagram_features(features))
+        self.assertFalse(
+            detect_page_layout.schematic_attachment_candidate(
+                block,
+                detect_page_layout.Box(66, 142, 464, 120),
+                width=1404,
+                height=1800,
+            )
+        )
+
+    def test_suppresses_weak_heading_caption_band(self) -> None:
+        features = {
+            "width_ratio": 0.60185,
+            "height_ratio": 0.03611,
+            "area_ratio": 0.02173,
+            "ink_density": 0.00850,
+            "edge_density": 0.02119,
+            "line_art_score": 0.03791,
+            "max_text_score": 0.27692,
+        }
+        block = detect_page_layout.Block(
+            ident="009_heading",
+            label="heading",
+            orientation="horizontal",
+            confidence=0.4471,
+            bbox=[832, 1455, 1505, 116],
+            outline=None,
+            features=features,
+        )
+
+        self.assertTrue(detect_page_layout.weak_heading_artifact(block))
+        self.assertEqual(detect_page_layout.suppress_horizontal_rule_artifacts([block]), [])
 
     def test_illustration_fragment_rejects_confident_prose_with_false_component_signature(self) -> None:
         block = detect_page_layout.Block(

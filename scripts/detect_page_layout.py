@@ -3251,6 +3251,8 @@ def schematic_attachment_candidate(block: Block, box: Box, width: int, height: i
     ink = float(features.get("ink_density", 1.0))
     saturation = float(features.get("saturation_p80", 1.0))
     component_signature = float(features.get("component_signature_score", 0.0))
+    if single_axis_waveform_diagram_features(features):
+        return False
     technical_text_strip = (
         block.label == "text"
         and block.orientation == "horizontal"
@@ -4194,8 +4196,23 @@ def horizontal_rule_artifact(block: Block) -> bool:
     return horizontal_rule_features(block.features)
 
 
+def weak_heading_artifact(block: Block) -> bool:
+    if block.label != "heading":
+        return False
+    features = block.features
+    return (
+        block.confidence <= 0.56
+        and features.get("width_ratio", 0.0) >= 0.35
+        and features.get("height_ratio", 1.0) <= 0.055
+        and features.get("ink_density", 1.0) <= 0.026
+        and features.get("edge_density", 1.0) <= 0.055
+        and features.get("line_art_score", 1.0) <= 0.070
+        and features.get("max_text_score", 1.0) <= 0.35
+    )
+
+
 def suppress_horizontal_rule_artifacts(blocks: list[Block]) -> list[Block]:
-    suppressed = {block.ident for block in blocks if horizontal_rule_artifact(block)}
+    suppressed = {block.ident for block in blocks if horizontal_rule_artifact(block) or weak_heading_artifact(block)}
     if not suppressed:
         return blocks
     return [block for block in blocks if block.ident not in suppressed]
