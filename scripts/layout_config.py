@@ -52,6 +52,16 @@ TEXT_COLUMN_SPLIT_MIN_GAP_PX = 10
 TEXT_COLUMN_SPLIT_MIN_PIECE_WIDTH_RATIO = 0.080
 TEXT_COLUMN_SPLIT_MAX_PIECES = 4
 
+# Some magazine pages merge several tall columns plus a large display title or
+# table into one text block. The title/table can cross the true whitespace
+# corridor, so a strict all-height empty gutter is too brittle. For those large
+# blocks, allow a low-ink vertical valley to act as a fallback column gutter.
+TEXT_COLUMN_FALLBACK_MIN_WIDTH_RATIO = 0.35
+TEXT_COLUMN_FALLBACK_MIN_HEIGHT_RATIO = 0.30
+TEXT_COLUMN_FALLBACK_MAX_PROJECTION_DENSITY = 0.070
+TEXT_COLUMN_FALLBACK_MIN_GAP_RATIO = 0.008
+TEXT_COLUMN_FALLBACK_MIN_GAP_PX = 8
+
 # Split tall mixed page regions when a real horizontal whitespace corridor
 # separates a figure area from the prose below it. Paragraph gaps are shorter
 # and should remain inside one text column.

@@ -610,10 +610,10 @@
       "caption_candidates": null
     },
     {
-      "ident": "004_text",
+      "ident": "004a_text",
       "label": "text",
-      "orientation": "horizontal",
-      "confidence": 0.9517,
+      "orientation": "unknown",
+      "confidence": 0.9523,
       "bbox": [
         992,
         981,
@@ -651,7 +651,9 @@
         "pcb_trace_density": 0.0294,
         "pcb_pad_density": 1.0,
         "pcb_board_outline_score": 0.0,
-        "pcb_signature_score": 0.28117
+        "pcb_signature_score": 0.28117,
+        "merged_block_count": 2.0,
+        "contents_number_column_merge": 1.0
       },
       "crop_path": null,
       "figure_ref": null,

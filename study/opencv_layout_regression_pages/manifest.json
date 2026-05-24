@@ -1,6 +1,6 @@
 {
   "name": "OpenCV layout regression pages",
-  "page_count": 28,
+  "page_count": 29,
   "detector": "scripts/detect_page_layout.py",
   "preview_width": 1100,
   "frequency_hints": "validate",
@@ -53,6 +53,14 @@
       "original_cached_source": ".tmp/archive_radio_ru/1986/12/b.1986-12.055.jpg",
       "baseline_layout": "study/opencv_layout_regression_pages/baselines/b.1986-12.055/layout.json",
       "baseline_preview": "study/opencv_layout_regression_pages/baselines/b.1986-12.055/preview.png"
+    },
+    {
+      "id": "b.1986-12.057",
+      "reason": "manual feedback page: tall merged text area must split into three magazine columns",
+      "source": "study/opencv_layout_regression_pages/sources/b.1986-12.057.jpg",
+      "original_cached_source": ".tmp/archive_radio_ru/1986/12/b.1986-12.057.jpg",
+      "baseline_layout": "study/opencv_layout_regression_pages/baselines/b.1986-12.057/layout.json",
+      "baseline_preview": "study/opencv_layout_regression_pages/baselines/b.1986-12.057/preview.png"
     },
     {
       "id": "b.1997-04.018",

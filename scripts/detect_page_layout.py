@@ -83,6 +83,11 @@ TEXT_COLUMN_SPLIT_MIN_GAP_RATIO = layout_config.TEXT_COLUMN_SPLIT_MIN_GAP_RATIO
 TEXT_COLUMN_SPLIT_MIN_GAP_PX = layout_config.TEXT_COLUMN_SPLIT_MIN_GAP_PX
 TEXT_COLUMN_SPLIT_MIN_PIECE_WIDTH_RATIO = layout_config.TEXT_COLUMN_SPLIT_MIN_PIECE_WIDTH_RATIO
 TEXT_COLUMN_SPLIT_MAX_PIECES = layout_config.TEXT_COLUMN_SPLIT_MAX_PIECES
+TEXT_COLUMN_FALLBACK_MIN_WIDTH_RATIO = layout_config.TEXT_COLUMN_FALLBACK_MIN_WIDTH_RATIO
+TEXT_COLUMN_FALLBACK_MIN_HEIGHT_RATIO = layout_config.TEXT_COLUMN_FALLBACK_MIN_HEIGHT_RATIO
+TEXT_COLUMN_FALLBACK_MAX_PROJECTION_DENSITY = layout_config.TEXT_COLUMN_FALLBACK_MAX_PROJECTION_DENSITY
+TEXT_COLUMN_FALLBACK_MIN_GAP_RATIO = layout_config.TEXT_COLUMN_FALLBACK_MIN_GAP_RATIO
+TEXT_COLUMN_FALLBACK_MIN_GAP_PX = layout_config.TEXT_COLUMN_FALLBACK_MIN_GAP_PX
 HORIZONTAL_GAP_SPLIT_MIN_WIDTH_RATIO = layout_config.HORIZONTAL_GAP_SPLIT_MIN_WIDTH_RATIO
 HORIZONTAL_GAP_SPLIT_MIN_HEIGHT_RATIO = layout_config.HORIZONTAL_GAP_SPLIT_MIN_HEIGHT_RATIO
 HORIZONTAL_GAP_SPLIT_MIN_GAP_RATIO = layout_config.HORIZONTAL_GAP_SPLIT_MIN_GAP_RATIO
@@ -702,19 +707,20 @@ def split_multiline_text_box_by_column_gaps(mask, box: Box, page_width: int, pag
         return [box]
     if box.h < page_height * TEXT_COLUMN_SPLIT_MIN_HEIGHT_RATIO:
         return [box]
-    if text_row_run_count(mask, box) < TEXT_COLUMN_SPLIT_MIN_ROW_RUNS:
-        return [box]
 
     min_gap = max(TEXT_COLUMN_SPLIT_MIN_GAP_PX, int(round(box.w * TEXT_COLUMN_SPLIT_MIN_GAP_RATIO)))
     min_piece = max(40, int(round(page_width * TEXT_COLUMN_SPLIT_MIN_PIECE_WIDTH_RATIO)))
     candidates = []
-    for start, end, mean_density in vertical_whitespace_corridor_runs(mask, box, min_gap):
-        center = (start + end) // 2
-        if center < min_piece or box.w - center < min_piece:
-            continue
-        width = end - start + 1
-        center_balance = 1.0 - abs((center / float(box.w)) - 0.5)
-        candidates.append((width, center_balance, -mean_density, center))
+    if text_row_run_count(mask, box) >= TEXT_COLUMN_SPLIT_MIN_ROW_RUNS:
+        for start, end, mean_density in vertical_whitespace_corridor_runs(mask, box, min_gap):
+            center = (start + end) // 2
+            if center < min_piece or box.w - center < min_piece:
+                continue
+            width = end - start + 1
+            center_balance = 1.0 - abs((center / float(box.w)) - 0.5)
+            candidates.append((width, center_balance, -mean_density, center))
+    if not candidates:
+        candidates = low_density_column_gap_candidates(mask, box, page_width, page_height, min_piece)
     if not candidates:
         return [box]
 
@@ -722,6 +728,37 @@ def split_multiline_text_box_by_column_gaps(mask, box: Box, page_width: int, pag
     left = Box(box.x, box.y, center, box.h)
     right = Box(box.x + center, box.y, box.w - center, box.h)
     return [piece for piece in (left, right) if piece.area > 0]
+
+
+def low_density_column_gap_candidates(
+    mask,
+    box: Box,
+    page_width: int,
+    page_height: int,
+    min_piece: int,
+) -> list[tuple[int, float, float, int]]:
+    if box.w < page_width * TEXT_COLUMN_FALLBACK_MIN_WIDTH_RATIO:
+        return []
+    if box.h < page_height * TEXT_COLUMN_FALLBACK_MIN_HEIGHT_RATIO:
+        return []
+
+    roi = mask[box.y : box.y2, box.x : box.x2]
+    if roi.size == 0:
+        return []
+
+    column_projection = (roi > 0).sum(axis=0).astype(np.float32)
+    smoothed = smooth_projection(column_projection, max(1, box.w // 180))
+    low_limit = max(2.0, box.h * TEXT_COLUMN_FALLBACK_MAX_PROJECTION_DENSITY)
+    min_gap = max(TEXT_COLUMN_FALLBACK_MIN_GAP_PX, int(round(box.w * TEXT_COLUMN_FALLBACK_MIN_GAP_RATIO)))
+    candidates: list[tuple[int, float, float, int]] = []
+    for start, end, mean_density in low_projection_runs(smoothed, low_limit, min_gap):
+        center = (start + end) // 2
+        if center < min_piece or box.w - center < min_piece:
+            continue
+        width = end - start + 1
+        center_balance = 1.0 - abs((center / float(box.w)) - 0.5)
+        candidates.append((width, center_balance, -mean_density, center))
+    return candidates
 
 
 def split_multiline_text_box_recursive(mask, box: Box, page_width: int, page_height: int) -> list[Box]:

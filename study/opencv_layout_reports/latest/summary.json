@@ -87,6 +87,19 @@
     "warning_count": 26
   },
   {
+    "id": "b.1986-12.057",
+    "reason": "manual feedback page: tall merged text area must split into three magazine columns",
+    "source": "../../opencv_layout_regression_pages/sources/b.1986-12.057.jpg",
+    "layout": "detected/b.1986-12.057/layout.json",
+    "preview": "detected/b.1986-12.057/preview.png",
+    "block_count": 4,
+    "counts": {
+      "heading": 1,
+      "text": 3
+    },
+    "warning_count": 12
+  },
+  {
     "id": "b.1997-04.018",
     "reason": "compact amplifier article with mostly prose and a small technical figure-like area",
     "source": "../../opencv_layout_regression_pages/sources/b.1997-04.018.jpg",
@@ -161,11 +174,11 @@
     "source": "../../opencv_layout_regression_pages/sources/b.1999-12.064.jpg",
     "layout": "detected/b.1999-12.064/layout.json",
     "preview": "detected/b.1999-12.064/preview.png",
-    "block_count": 5,
+    "block_count": 6,
     "counts": {
       "image": 2,
       "heading": 1,
-      "text": 2
+      "text": 3
     },
     "warning_count": 15
   },

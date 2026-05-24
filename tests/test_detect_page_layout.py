@@ -732,6 +732,30 @@ class DetectPageLayoutTests(unittest.TestCase):
         self.assertGreaterEqual(pieces[0].w, 250)
         self.assertGreaterEqual(pieces[1].w, 250)
 
+    def test_splits_tall_dense_text_block_at_low_density_column_gutters(self) -> None:
+        cv2 = detect_page_layout.cv2
+        np = detect_page_layout.np
+
+        mask = np.zeros((1200, 1000), dtype=np.uint8)
+        # Dense connected columns can collapse row-run detection to one run,
+        # while still having clear vertical valleys between printed columns.
+        cv2.rectangle(mask, (70, 130), (300, 1050), 255, -1)
+        cv2.rectangle(mask, (360, 310), (600, 1050), 255, -1)
+        cv2.rectangle(mask, (660, 310), (920, 1050), 255, -1)
+        cv2.rectangle(mask, (360, 130), (590, 175), 255, -1)
+        cv2.rectangle(mask, (660, 130), (890, 175), 255, -1)
+        cv2.rectangle(mask, (360, 230), (590, 275), 255, -1)
+        box = detect_page_layout.Box(50, 100, 900, 1000)
+
+        pieces = detect_page_layout.split_multiline_text_box_recursive(mask, box, page_width=1000, page_height=1200)
+
+        self.assertEqual(len(pieces), 3)
+        self.assertLessEqual(pieces[0].x2, pieces[1].x)
+        self.assertLessEqual(pieces[1].x2, pieces[2].x)
+        self.assertGreaterEqual(pieces[0].w, 240)
+        self.assertGreaterEqual(pieces[1].w, 250)
+        self.assertGreaterEqual(pieces[2].w, 250)
+
     def test_does_not_split_single_line_heading_at_word_gap(self) -> None:
         cv2 = detect_page_layout.cv2
         np = detect_page_layout.np
