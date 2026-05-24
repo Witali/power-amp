@@ -129,6 +129,73 @@ WAVEFORM_DIAGRAM_MAX_VLINE_DENSITY = layout_config.WAVEFORM_DIAGRAM_MAX_VLINE_DE
 WAVEFORM_DIAGRAM_MIN_LINE_ART = layout_config.WAVEFORM_DIAGRAM_MIN_LINE_ART
 WAVEFORM_DIAGRAM_MIN_TEXT_SCORE = layout_config.WAVEFORM_DIAGRAM_MIN_TEXT_SCORE
 WAVEFORM_DIAGRAM_MAX_SATURATION = layout_config.WAVEFORM_DIAGRAM_MAX_SATURATION
+WAVEFORM_DIAGRAM_MAX_INK_DENSITY = layout_config.WAVEFORM_DIAGRAM_MAX_INK_DENSITY
+WIDE_RULE_HEADING_MIN_WIDTH_RATIO = layout_config.WIDE_RULE_HEADING_MIN_WIDTH_RATIO
+WIDE_RULE_HEADING_MAX_HEIGHT_RATIO = layout_config.WIDE_RULE_HEADING_MAX_HEIGHT_RATIO
+WIDE_RULE_HEADING_MAX_AREA_RATIO = layout_config.WIDE_RULE_HEADING_MAX_AREA_RATIO
+WIDE_RULE_HEADING_MIN_TEXT_SCORE = layout_config.WIDE_RULE_HEADING_MIN_TEXT_SCORE
+WIDE_RULE_HEADING_MIN_TEXTLINE_DENSITY = layout_config.WIDE_RULE_HEADING_MIN_TEXTLINE_DENSITY
+WIDE_RULE_HEADING_MIN_INK_DENSITY = layout_config.WIDE_RULE_HEADING_MIN_INK_DENSITY
+BOLD_DISPLAY_HEADING_MIN_WIDTH_RATIO = layout_config.BOLD_DISPLAY_HEADING_MIN_WIDTH_RATIO
+BOLD_DISPLAY_HEADING_MIN_HEIGHT_RATIO = layout_config.BOLD_DISPLAY_HEADING_MIN_HEIGHT_RATIO
+BOLD_DISPLAY_HEADING_MAX_HEIGHT_RATIO = layout_config.BOLD_DISPLAY_HEADING_MAX_HEIGHT_RATIO
+BOLD_DISPLAY_HEADING_MAX_AREA_RATIO = layout_config.BOLD_DISPLAY_HEADING_MAX_AREA_RATIO
+BOLD_DISPLAY_HEADING_MIN_INK_DENSITY = layout_config.BOLD_DISPLAY_HEADING_MIN_INK_DENSITY
+BOLD_DISPLAY_HEADING_MIN_GRAY_STD = layout_config.BOLD_DISPLAY_HEADING_MIN_GRAY_STD
+BOLD_DISPLAY_HEADING_MAX_TEXT_SCORE = layout_config.BOLD_DISPLAY_HEADING_MAX_TEXT_SCORE
+BOLD_DISPLAY_HEADING_MIN_COMPONENT_DENSITY = layout_config.BOLD_DISPLAY_HEADING_MIN_COMPONENT_DENSITY
+BOLD_DISPLAY_HEADING_MAX_HLINE_DENSITY = layout_config.BOLD_DISPLAY_HEADING_MAX_HLINE_DENSITY
+BOLD_DISPLAY_HEADING_MAX_LINE_BALANCE = layout_config.BOLD_DISPLAY_HEADING_MAX_LINE_BALANCE
+BOLD_DISPLAY_HEADING_MAX_SATURATION = layout_config.BOLD_DISPLAY_HEADING_MAX_SATURATION
+MONOCHROME_ICON_IMAGE_MIN_AREA_RATIO = layout_config.MONOCHROME_ICON_IMAGE_MIN_AREA_RATIO
+MONOCHROME_ICON_IMAGE_MIN_INK_DENSITY = layout_config.MONOCHROME_ICON_IMAGE_MIN_INK_DENSITY
+MONOCHROME_ICON_IMAGE_MIN_EDGE_DENSITY = layout_config.MONOCHROME_ICON_IMAGE_MIN_EDGE_DENSITY
+MONOCHROME_ICON_IMAGE_MIN_GRAY_STD = layout_config.MONOCHROME_ICON_IMAGE_MIN_GRAY_STD
+MONOCHROME_ICON_IMAGE_MAX_COMPONENT_DENSITY = layout_config.MONOCHROME_ICON_IMAGE_MAX_COMPONENT_DENSITY
+MONOCHROME_ICON_IMAGE_MAX_COMPONENT_SIGNATURE = layout_config.MONOCHROME_ICON_IMAGE_MAX_COMPONENT_SIGNATURE
+MONOCHROME_ICON_IMAGE_MAX_TEXT_SCORE = layout_config.MONOCHROME_ICON_IMAGE_MAX_TEXT_SCORE
+CAPTIONED_SCHEMATIC_MIN_AREA_RATIO = layout_config.CAPTIONED_SCHEMATIC_MIN_AREA_RATIO
+CAPTIONED_SCHEMATIC_MAX_AREA_RATIO = layout_config.CAPTIONED_SCHEMATIC_MAX_AREA_RATIO
+CAPTIONED_SCHEMATIC_MIN_HEIGHT_RATIO = layout_config.CAPTIONED_SCHEMATIC_MIN_HEIGHT_RATIO
+CAPTIONED_SCHEMATIC_MAX_INK_DENSITY = layout_config.CAPTIONED_SCHEMATIC_MAX_INK_DENSITY
+CAPTIONED_SCHEMATIC_MIN_EDGE_DENSITY = layout_config.CAPTIONED_SCHEMATIC_MIN_EDGE_DENSITY
+CAPTIONED_SCHEMATIC_MIN_LINE_ART = layout_config.CAPTIONED_SCHEMATIC_MIN_LINE_ART
+CAPTIONED_SCHEMATIC_MIN_VLINE_DENSITY = layout_config.CAPTIONED_SCHEMATIC_MIN_VLINE_DENSITY
+CAPTIONED_SCHEMATIC_MAX_TEXT_SCORE = layout_config.CAPTIONED_SCHEMATIC_MAX_TEXT_SCORE
+CAPTIONED_SCHEMATIC_MIN_COMPONENT_SIGNATURE = layout_config.CAPTIONED_SCHEMATIC_MIN_COMPONENT_SIGNATURE
+CAPTIONED_SCHEMATIC_MAX_SATURATION = layout_config.CAPTIONED_SCHEMATIC_MAX_SATURATION
+HEADING_FRAGMENT_MERGE_MAX_HEIGHT_RATIO = layout_config.HEADING_FRAGMENT_MERGE_MAX_HEIGHT_RATIO
+HEADING_FRAGMENT_MERGE_MAX_WIDTH_RATIO = layout_config.HEADING_FRAGMENT_MERGE_MAX_WIDTH_RATIO
+HEADING_FRAGMENT_MERGE_MIN_TOP_RATIO = layout_config.HEADING_FRAGMENT_MERGE_MIN_TOP_RATIO
+HEADING_FRAGMENT_STACKED_MAX_VERTICAL_GAP_PX = layout_config.HEADING_FRAGMENT_STACKED_MAX_VERTICAL_GAP_PX
+HEADING_FRAGMENT_STACKED_MAX_VERTICAL_GAP_RATIO = layout_config.HEADING_FRAGMENT_STACKED_MAX_VERTICAL_GAP_RATIO
+HEADING_FRAGMENT_STACKED_MIN_HORIZONTAL_OVERLAP = layout_config.HEADING_FRAGMENT_STACKED_MIN_HORIZONTAL_OVERLAP
+HEADING_FRAGMENT_STACKED_MAX_X_DRIFT_PX = layout_config.HEADING_FRAGMENT_STACKED_MAX_X_DRIFT_PX
+HEADING_FRAGMENT_STACKED_MAX_X_DRIFT_RATIO = layout_config.HEADING_FRAGMENT_STACKED_MAX_X_DRIFT_RATIO
+HEADING_FRAGMENT_INLINE_MIN_VERTICAL_OVERLAP = layout_config.HEADING_FRAGMENT_INLINE_MIN_VERTICAL_OVERLAP
+HEADING_FRAGMENT_INLINE_MAX_CENTER_DELTA_RATIO = layout_config.HEADING_FRAGMENT_INLINE_MAX_CENTER_DELTA_RATIO
+HEADING_FRAGMENT_INLINE_MAX_HORIZONTAL_GAP_PX = layout_config.HEADING_FRAGMENT_INLINE_MAX_HORIZONTAL_GAP_PX
+HEADING_FRAGMENT_INLINE_MAX_HORIZONTAL_GAP_RATIO = layout_config.HEADING_FRAGMENT_INLINE_MAX_HORIZONTAL_GAP_RATIO
+INTERNAL_DISPLAY_HEADING_MIN_WIDTH_RATIO = layout_config.INTERNAL_DISPLAY_HEADING_MIN_WIDTH_RATIO
+INTERNAL_DISPLAY_HEADING_MIN_HEIGHT_RATIO = layout_config.INTERNAL_DISPLAY_HEADING_MIN_HEIGHT_RATIO
+INTERNAL_DISPLAY_HEADING_MIN_AREA_RATIO = layout_config.INTERNAL_DISPLAY_HEADING_MIN_AREA_RATIO
+INTERNAL_DISPLAY_HEADING_PROJECTION_MIN_PX = layout_config.INTERNAL_DISPLAY_HEADING_PROJECTION_MIN_PX
+INTERNAL_DISPLAY_HEADING_PROJECTION_WIDTH_RATIO = layout_config.INTERNAL_DISPLAY_HEADING_PROJECTION_WIDTH_RATIO
+INTERNAL_DISPLAY_HEADING_MIN_RUN_PX = layout_config.INTERNAL_DISPLAY_HEADING_MIN_RUN_PX
+INTERNAL_DISPLAY_HEADING_MIN_RUN_HEIGHT_RATIO = layout_config.INTERNAL_DISPLAY_HEADING_MIN_RUN_HEIGHT_RATIO
+INTERNAL_DISPLAY_HEADING_TOP_SKIP_RATIO = layout_config.INTERNAL_DISPLAY_HEADING_TOP_SKIP_RATIO
+INTERNAL_DISPLAY_HEADING_TOP_TEXT_MIN_PX = layout_config.INTERNAL_DISPLAY_HEADING_TOP_TEXT_MIN_PX
+INTERNAL_DISPLAY_HEADING_TOP_TEXT_MIN_RATIO = layout_config.INTERNAL_DISPLAY_HEADING_TOP_TEXT_MIN_RATIO
+INTERNAL_DISPLAY_HEADING_MIN_TEXT_PX = layout_config.INTERNAL_DISPLAY_HEADING_MIN_TEXT_PX
+INTERNAL_DISPLAY_HEADING_MIN_TEXT_HEIGHT_RATIO = layout_config.INTERNAL_DISPLAY_HEADING_MIN_TEXT_HEIGHT_RATIO
+INTERNAL_DISPLAY_HEADING_SCORE_GRAY_STD_WEIGHT = layout_config.INTERNAL_DISPLAY_HEADING_SCORE_GRAY_STD_WEIGHT
+WEAK_HEADING_ARTIFACT_MAX_CONFIDENCE = layout_config.WEAK_HEADING_ARTIFACT_MAX_CONFIDENCE
+WEAK_HEADING_ARTIFACT_MIN_WIDTH_RATIO = layout_config.WEAK_HEADING_ARTIFACT_MIN_WIDTH_RATIO
+WEAK_HEADING_ARTIFACT_MAX_HEIGHT_RATIO = layout_config.WEAK_HEADING_ARTIFACT_MAX_HEIGHT_RATIO
+WEAK_HEADING_ARTIFACT_MAX_INK_DENSITY = layout_config.WEAK_HEADING_ARTIFACT_MAX_INK_DENSITY
+WEAK_HEADING_ARTIFACT_MAX_EDGE_DENSITY = layout_config.WEAK_HEADING_ARTIFACT_MAX_EDGE_DENSITY
+WEAK_HEADING_ARTIFACT_MAX_LINE_ART = layout_config.WEAK_HEADING_ARTIFACT_MAX_LINE_ART
+WEAK_HEADING_ARTIFACT_MAX_TEXT_SCORE = layout_config.WEAK_HEADING_ARTIFACT_MAX_TEXT_SCORE
 ILLUSTRATION_TEXT_REJECT_MIN_CONFIDENCE = layout_config.ILLUSTRATION_TEXT_REJECT_MIN_CONFIDENCE
 ILLUSTRATION_TEXT_REJECT_MIN_TEXT_SCORE = layout_config.ILLUSTRATION_TEXT_REJECT_MIN_TEXT_SCORE
 ILLUSTRATION_TEXT_REJECT_MIN_HEIGHT_RATIO = layout_config.ILLUSTRATION_TEXT_REJECT_MIN_HEIGHT_RATIO
@@ -1568,62 +1635,63 @@ def single_axis_waveform_diagram_features(features: dict[str, float]) -> bool:
         and features.get("line_art_score", 0.0) >= WAVEFORM_DIAGRAM_MIN_LINE_ART
         and features.get("max_text_score", 0.0) >= WAVEFORM_DIAGRAM_MIN_TEXT_SCORE
         and features.get("saturation_p80", 0.0) <= WAVEFORM_DIAGRAM_MAX_SATURATION
-        and features.get("ink_density", 1.0) <= 0.20
+        and features.get("ink_density", 1.0) <= WAVEFORM_DIAGRAM_MAX_INK_DENSITY
     )
 
 
 def wide_rule_heading_features(features: dict[str, float]) -> bool:
     return (
         not horizontal_rule_features(features)
-        and features["width_ratio"] >= 0.45
-        and features["height_ratio"] <= 0.040
-        and features["area_ratio"] <= 0.035
-        and features["max_text_score"] >= 0.30
-        and features["textline_density"] >= 0.25
-        and features["ink_density"] >= 0.06
+        and features["width_ratio"] >= WIDE_RULE_HEADING_MIN_WIDTH_RATIO
+        and features["height_ratio"] <= WIDE_RULE_HEADING_MAX_HEIGHT_RATIO
+        and features["area_ratio"] <= WIDE_RULE_HEADING_MAX_AREA_RATIO
+        and features["max_text_score"] >= WIDE_RULE_HEADING_MIN_TEXT_SCORE
+        and features["textline_density"] >= WIDE_RULE_HEADING_MIN_TEXTLINE_DENSITY
+        and features["ink_density"] >= WIDE_RULE_HEADING_MIN_INK_DENSITY
         and features["component_density"] >= HEADING_MIN_COMPONENT_DENSITY
     )
 
 
 def bold_display_heading_features(features: dict[str, float]) -> bool:
+    height_ratio = features["height_ratio"]
     return (
-        features["width_ratio"] >= 0.28
-        and 0.055 <= features["height_ratio"] <= 0.16
-        and features["area_ratio"] <= 0.080
-        and features["ink_density"] >= 0.22
-        and features["gray_std"] >= 0.75
-        and features["max_text_score"] <= 0.36
-        and features["component_density"] >= 0.10
-        and features["hline_density"] <= 0.12
-        and features["line_balance"] <= 0.12
-        and features.get("saturation_p80", 0.0) <= 0.12
+        features["width_ratio"] >= BOLD_DISPLAY_HEADING_MIN_WIDTH_RATIO
+        and BOLD_DISPLAY_HEADING_MIN_HEIGHT_RATIO <= height_ratio <= BOLD_DISPLAY_HEADING_MAX_HEIGHT_RATIO
+        and features["area_ratio"] <= BOLD_DISPLAY_HEADING_MAX_AREA_RATIO
+        and features["ink_density"] >= BOLD_DISPLAY_HEADING_MIN_INK_DENSITY
+        and features["gray_std"] >= BOLD_DISPLAY_HEADING_MIN_GRAY_STD
+        and features["max_text_score"] <= BOLD_DISPLAY_HEADING_MAX_TEXT_SCORE
+        and features["component_density"] >= BOLD_DISPLAY_HEADING_MIN_COMPONENT_DENSITY
+        and features["hline_density"] <= BOLD_DISPLAY_HEADING_MAX_HLINE_DENSITY
+        and features["line_balance"] <= BOLD_DISPLAY_HEADING_MAX_LINE_BALANCE
+        and features.get("saturation_p80", 0.0) <= BOLD_DISPLAY_HEADING_MAX_SATURATION
     )
 
 
 def monochrome_icon_image_features(features: dict[str, float]) -> bool:
     return (
-        features["area_ratio"] >= 0.010
-        and features["ink_density"] >= 0.30
-        and features["edge_density"] >= 0.25
-        and features["gray_std"] >= 0.55
-        and features["component_density"] <= 0.16
-        and features.get("component_signature_score", 0.0) <= 0.18
-        and features["max_text_score"] <= 0.22
+        features["area_ratio"] >= MONOCHROME_ICON_IMAGE_MIN_AREA_RATIO
+        and features["ink_density"] >= MONOCHROME_ICON_IMAGE_MIN_INK_DENSITY
+        and features["edge_density"] >= MONOCHROME_ICON_IMAGE_MIN_EDGE_DENSITY
+        and features["gray_std"] >= MONOCHROME_ICON_IMAGE_MIN_GRAY_STD
+        and features["component_density"] <= MONOCHROME_ICON_IMAGE_MAX_COMPONENT_DENSITY
+        and features.get("component_signature_score", 0.0) <= MONOCHROME_ICON_IMAGE_MAX_COMPONENT_SIGNATURE
+        and features["max_text_score"] <= MONOCHROME_ICON_IMAGE_MAX_TEXT_SCORE
     )
 
 
 def captioned_component_schematic_features(features: dict[str, float]) -> bool:
     return (
-        features.get("area_ratio", 0.0) >= 0.025
-        and features.get("area_ratio", 1.0) <= 0.075
-        and features.get("height_ratio", 0.0) >= 0.10
-        and features.get("ink_density", 1.0) <= 0.15
-        and features.get("edge_density", 0.0) >= 0.24
-        and features.get("line_art_score", 0.0) >= 0.20
-        and features.get("vline_density", 0.0) >= 0.040
-        and features.get("max_text_score", 1.0) <= 0.88
-        and features.get("component_signature_score", 0.0) >= 0.85
-        and features.get("saturation_p80", 0.0) <= 0.12
+        features.get("area_ratio", 0.0) >= CAPTIONED_SCHEMATIC_MIN_AREA_RATIO
+        and features.get("area_ratio", 1.0) <= CAPTIONED_SCHEMATIC_MAX_AREA_RATIO
+        and features.get("height_ratio", 0.0) >= CAPTIONED_SCHEMATIC_MIN_HEIGHT_RATIO
+        and features.get("ink_density", 1.0) <= CAPTIONED_SCHEMATIC_MAX_INK_DENSITY
+        and features.get("edge_density", 0.0) >= CAPTIONED_SCHEMATIC_MIN_EDGE_DENSITY
+        and features.get("line_art_score", 0.0) >= CAPTIONED_SCHEMATIC_MIN_LINE_ART
+        and features.get("vline_density", 0.0) >= CAPTIONED_SCHEMATIC_MIN_VLINE_DENSITY
+        and features.get("max_text_score", 1.0) <= CAPTIONED_SCHEMATIC_MAX_TEXT_SCORE
+        and features.get("component_signature_score", 0.0) >= CAPTIONED_SCHEMATIC_MIN_COMPONENT_SIGNATURE
+        and features.get("saturation_p80", 0.0) <= CAPTIONED_SCHEMATIC_MAX_SATURATION
     )
 
 
@@ -2990,9 +3058,11 @@ def adjacent_heading_fragments(first: tuple[Block, Box], second: tuple[Block, Bo
         first_box, second_box = second_box, first_box
 
     union = union_box(first_box, second_box)
-    if union.h > height * 0.16 or union.w > width * 0.75:
+    if union.h > height * HEADING_FRAGMENT_MERGE_MAX_HEIGHT_RATIO:
         return False
-    if union.y < height * 0.045:
+    if union.w > width * HEADING_FRAGMENT_MERGE_MAX_WIDTH_RATIO:
+        return False
+    if union.y < height * HEADING_FRAGMENT_MERGE_MIN_TOP_RATIO:
         return False
 
     vertical_overlap = box_vertical_overlap_height(first_box, second_box)
@@ -3000,17 +3070,29 @@ def adjacent_heading_fragments(first: tuple[Block, Box], second: tuple[Block, Bo
     horizontal_gap = max(0, max(first_box.x, second_box.x) - min(first_box.x2, second_box.x2))
     vertical_gap = max(0, max(first_box.y, second_box.y) - min(first_box.y2, second_box.y2))
     horizontal_overlap = box_horizontal_overlap_width(first_box, second_box)
+    stacked_gap_limit = max(
+        HEADING_FRAGMENT_STACKED_MAX_VERTICAL_GAP_PX,
+        int(round(height * HEADING_FRAGMENT_STACKED_MAX_VERTICAL_GAP_RATIO)),
+    )
+    stacked_drift_limit = max(
+        HEADING_FRAGMENT_STACKED_MAX_X_DRIFT_PX,
+        int(round(width * HEADING_FRAGMENT_STACKED_MAX_X_DRIFT_RATIO)),
+    )
+    inline_gap_limit = max(
+        HEADING_FRAGMENT_INLINE_MAX_HORIZONTAL_GAP_PX,
+        int(round(width * HEADING_FRAGMENT_INLINE_MAX_HORIZONTAL_GAP_RATIO)),
+    )
     stacked_title_lines = (
-        vertical_gap <= max(8, int(round(height * 0.008)))
-        and horizontal_overlap >= min(first_box.w, second_box.w) * 0.55
-        and abs(first_box.x - second_box.x) <= max(45, int(round(width * 0.050)))
+        vertical_gap <= stacked_gap_limit
+        and horizontal_overlap >= min(first_box.w, second_box.w) * HEADING_FRAGMENT_STACKED_MIN_HORIZONTAL_OVERLAP
+        and abs(first_box.x - second_box.x) <= stacked_drift_limit
     )
     if stacked_title_lines:
         return True
     return (
-        vertical_overlap >= min(first_box.h, second_box.h) * 0.42
-        and center_delta <= max(first_box.h, second_box.h) * 0.42
-        and horizontal_gap <= max(18, int(round(width * 0.025)))
+        vertical_overlap >= min(first_box.h, second_box.h) * HEADING_FRAGMENT_INLINE_MIN_VERTICAL_OVERLAP
+        and center_delta <= max(first_box.h, second_box.h) * HEADING_FRAGMENT_INLINE_MAX_CENTER_DELTA_RATIO
+        and horizontal_gap <= inline_gap_limit
     )
 
 
@@ -3072,9 +3154,11 @@ def internal_display_heading_band(
 ) -> Box | None:
     if block.label != "text":
         return None
-    if box.w < width * 0.34 or box.h < height * 0.16:
+    if box.w < width * INTERNAL_DISPLAY_HEADING_MIN_WIDTH_RATIO:
         return None
-    if box.area / max(1, width * height) < 0.055:
+    if box.h < height * INTERNAL_DISPLAY_HEADING_MIN_HEIGHT_RATIO:
+        return None
+    if box.area / max(1, width * height) < INTERNAL_DISPLAY_HEADING_MIN_AREA_RATIO:
         return None
 
     roi = mask[box.y : box.y2, box.x : box.x2]
@@ -3084,8 +3168,14 @@ def internal_display_heading_band(
     smoothed = smooth_projection(projection, max(3, box.h // 120))
     runs = projection_runs(
         smoothed,
-        max(24.0, box.w * 0.055),
-        max(18, int(round(box.h * 0.075))),
+        max(
+            INTERNAL_DISPLAY_HEADING_PROJECTION_MIN_PX,
+            box.w * INTERNAL_DISPLAY_HEADING_PROJECTION_WIDTH_RATIO,
+        ),
+        max(
+            INTERNAL_DISPLAY_HEADING_MIN_RUN_PX,
+            int(round(box.h * INTERNAL_DISPLAY_HEADING_MIN_RUN_HEIGHT_RATIO)),
+        ),
     )
     if not runs:
         return None
@@ -3093,18 +3183,23 @@ def internal_display_heading_band(
     candidates: list[tuple[float, Box]] = []
     pad = max(3, box.h // 80)
     for start, end in runs:
-        if start < box.h * 0.16:
+        if start < box.h * INTERNAL_DISPLAY_HEADING_TOP_SKIP_RATIO:
             continue
         band = Box(box.x, box.y + start, box.w, end - start + 1).inflate(pad, width, height)
         if band.y <= box.y:
             continue
         top_height = band.y - box.y
-        if top_height < max(45, int(round(height * 0.045))):
+        if top_height < max(
+            INTERNAL_DISPLAY_HEADING_TOP_TEXT_MIN_PX,
+            int(round(height * INTERNAL_DISPLAY_HEADING_TOP_TEXT_MIN_RATIO)),
+        ):
             continue
         features = feature_dict(image, mask, edges, band)
         if not bold_display_heading_features(features):
             continue
-        score = float(features.get("ink_density", 0.0)) + 0.35 * float(features.get("gray_std", 0.0))
+        score = float(features.get("ink_density", 0.0)) + INTERNAL_DISPLAY_HEADING_SCORE_GRAY_STD_WEIGHT * float(
+            features.get("gray_std", 0.0)
+        )
         candidates.append((score, band))
 
     if not candidates:
@@ -3124,7 +3219,10 @@ def split_internal_display_heading_blocks(
     height: int,
 ) -> list[tuple[Block, Box]]:
     result: list[tuple[Block, Box]] = []
-    min_text_height = max(28, int(round(height * 0.025)))
+    min_text_height = max(
+        INTERNAL_DISPLAY_HEADING_MIN_TEXT_PX,
+        int(round(height * INTERNAL_DISPLAY_HEADING_MIN_TEXT_HEIGHT_RATIO)),
+    )
 
     for block, box in classified:
         heading_box = internal_display_heading_band(block, box, image, mask, edges, width, height)
@@ -4481,13 +4579,13 @@ def weak_heading_artifact(block: Block) -> bool:
         return False
     features = block.features
     return (
-        block.confidence <= 0.56
-        and features.get("width_ratio", 0.0) >= 0.35
-        and features.get("height_ratio", 1.0) <= 0.055
-        and features.get("ink_density", 1.0) <= 0.026
-        and features.get("edge_density", 1.0) <= 0.055
-        and features.get("line_art_score", 1.0) <= 0.070
-        and features.get("max_text_score", 1.0) <= 0.35
+        block.confidence <= WEAK_HEADING_ARTIFACT_MAX_CONFIDENCE
+        and features.get("width_ratio", 0.0) >= WEAK_HEADING_ARTIFACT_MIN_WIDTH_RATIO
+        and features.get("height_ratio", 1.0) <= WEAK_HEADING_ARTIFACT_MAX_HEIGHT_RATIO
+        and features.get("ink_density", 1.0) <= WEAK_HEADING_ARTIFACT_MAX_INK_DENSITY
+        and features.get("edge_density", 1.0) <= WEAK_HEADING_ARTIFACT_MAX_EDGE_DENSITY
+        and features.get("line_art_score", 1.0) <= WEAK_HEADING_ARTIFACT_MAX_LINE_ART
+        and features.get("max_text_score", 1.0) <= WEAK_HEADING_ARTIFACT_MAX_TEXT_SCORE
     )
 
 

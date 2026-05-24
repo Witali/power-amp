@@ -34,7 +34,8 @@ python scripts\generate_opencv_layout_report.py
 
 ## Связанные файлы
 
-- `scripts/layout_config.py` - классы, цвета и основные пороги.
+- `scripts/layout_config.py` - классы, цвета и основные пороги; активные пороги OpenCV-эвристик имеют
+  осмысленные имена рядом с описанием соответствующего правила.
 - `scripts/layout_component_signatures.py` - признаки радиокомпонентов, PCB-дорожек и площадок.
 - `scripts/layout_frequency.py` - частотный, гистограммный и кластерный hint layer.
 - `scripts/generate_opencv_layout_report.py` - HTML-отчет по набору регрессионных страниц.
