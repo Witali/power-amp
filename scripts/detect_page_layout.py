@@ -1585,6 +1585,33 @@ def wide_rule_heading_features(features: dict[str, float]) -> bool:
     )
 
 
+def bold_display_heading_features(features: dict[str, float]) -> bool:
+    return (
+        features["width_ratio"] >= 0.28
+        and 0.055 <= features["height_ratio"] <= 0.16
+        and features["area_ratio"] <= 0.080
+        and features["ink_density"] >= 0.22
+        and features["gray_std"] >= 0.75
+        and features["max_text_score"] <= 0.36
+        and features["component_density"] >= 0.10
+        and features["hline_density"] <= 0.12
+        and features["line_balance"] <= 0.12
+        and features.get("saturation_p80", 0.0) <= 0.12
+    )
+
+
+def monochrome_icon_image_features(features: dict[str, float]) -> bool:
+    return (
+        features["area_ratio"] >= 0.010
+        and features["ink_density"] >= 0.30
+        and features["edge_density"] >= 0.25
+        and features["gray_std"] >= 0.55
+        and features["component_density"] <= 0.16
+        and features.get("component_signature_score", 0.0) <= 0.18
+        and features["max_text_score"] <= 0.22
+    )
+
+
 def rule_scores(features: dict[str, float]) -> np.ndarray:
     scores = np.zeros(len(CLASS_NAMES), dtype=np.float32)
     ink = features["ink_density"]
@@ -1665,6 +1692,8 @@ def classify_features(ann, features: dict[str, float]) -> tuple[str, float]:
     horizontal_rule_candidate = horizontal_rule_features(features)
     waveform_diagram_candidate = single_axis_waveform_diagram_features(features)
     wide_rule_heading_candidate = wide_rule_heading_features(features)
+    bold_display_heading_candidate = bold_display_heading_features(features)
+    monochrome_icon_image_candidate = monochrome_icon_image_features(features)
     pcb_candidate = (
         pcb_trace >= PCB_MIN_TRACE_DENSITY
         and pcb_signature >= PCB_MIN_SIGNATURE_SCORE
@@ -1701,6 +1730,13 @@ def classify_features(ann, features: dict[str, float]) -> tuple[str, float]:
         scores[CLASS_NAMES.index("heading")] *= 0.40
         scores[CLASS_NAMES.index("image")] *= 0.55
         scores[CLASS_NAMES.index("pcb")] *= 0.12
+    if monochrome_icon_image_candidate:
+        scores[CLASS_NAMES.index("image")] += 3.20 + 0.65 * features["gray_std"]
+        scores[CLASS_NAMES.index("schematic/circuit")] *= 0.06
+        scores[CLASS_NAMES.index("diagram")] *= 0.25
+        scores[CLASS_NAMES.index("table")] *= 0.18
+        scores[CLASS_NAMES.index("pcb")] *= 0.03
+        scores[CLASS_NAMES.index("text")] *= 0.25
     if wide_rule_heading_candidate:
         scores[CLASS_NAMES.index("heading")] += 1.85
         scores[CLASS_NAMES.index("text")] += 0.30
@@ -1777,6 +1813,14 @@ def classify_features(ann, features: dict[str, float]) -> tuple[str, float]:
         scores[CLASS_NAMES.index("text")] *= 0.18
         scores[CLASS_NAMES.index("image")] *= 0.42
         scores[CLASS_NAMES.index("table")] *= 0.55
+    if bold_display_heading_candidate:
+        scores[CLASS_NAMES.index("heading")] += 3.80 + 0.40 * features["ink_density"]
+        scores[CLASS_NAMES.index("text")] *= 0.35
+        scores[CLASS_NAMES.index("image")] *= 0.18
+        scores[CLASS_NAMES.index("schematic/circuit")] *= 0.08
+        scores[CLASS_NAMES.index("diagram")] *= 0.22
+        scores[CLASS_NAMES.index("table")] *= 0.30
+        scores[CLASS_NAMES.index("pcb")] *= 0.04
     if (
         0.004 < features["area_ratio"] < 0.040
         and line_art > 0.30
@@ -1949,6 +1993,13 @@ def classify_features(ann, features: dict[str, float]) -> tuple[str, float]:
         scores[CLASS_NAMES.index("diagram")] *= 0.55
     if not pcb_candidate or features["width_ratio"] < 0.12:
         scores[CLASS_NAMES.index("pcb")] *= 0.12
+    if monochrome_icon_image_candidate:
+        scores[CLASS_NAMES.index("image")] += 4.20 + 0.75 * features["gray_std"]
+        scores[CLASS_NAMES.index("schematic/circuit")] *= 0.04
+        scores[CLASS_NAMES.index("diagram")] *= 0.18
+        scores[CLASS_NAMES.index("table")] *= 0.15
+        scores[CLASS_NAMES.index("pcb")] *= 0.02
+        scores[CLASS_NAMES.index("text")] *= 0.18
     if waveform_diagram_candidate:
         scores[CLASS_NAMES.index("diagram")] += 4.60 + 0.60 * line_art
         scores[CLASS_NAMES.index("schematic/circuit")] *= 0.04
@@ -1965,6 +2016,14 @@ def classify_features(ann, features: dict[str, float]) -> tuple[str, float]:
         scores[CLASS_NAMES.index("diagram")] *= 0.38
         scores[CLASS_NAMES.index("table")] *= 0.48
         scores[CLASS_NAMES.index("pcb")] *= 0.06
+    if bold_display_heading_candidate:
+        scores[CLASS_NAMES.index("heading")] += 4.80 + 0.65 * features["ink_density"]
+        scores[CLASS_NAMES.index("text")] *= 0.25
+        scores[CLASS_NAMES.index("image")] *= 0.12
+        scores[CLASS_NAMES.index("schematic/circuit")] *= 0.04
+        scores[CLASS_NAMES.index("diagram")] *= 0.16
+        scores[CLASS_NAMES.index("table")] *= 0.22
+        scores[CLASS_NAMES.index("pcb")] *= 0.02
     if wide_rule_heading_candidate:
         scores[CLASS_NAMES.index("heading")] += 4.20
         scores[CLASS_NAMES.index("text")] += 0.40
@@ -2892,6 +2951,86 @@ def split_annual_contents_heading_blocks(
             )
 
     return sorted(result, key=lambda item: (item[1].y, item[1].x))
+
+
+def adjacent_heading_fragments(first: tuple[Block, Box], second: tuple[Block, Box], width: int, height: int) -> bool:
+    first_block, first_box = first
+    second_block, second_box = second
+    if first_block.label != "heading" or second_block.label != "heading":
+        return False
+    if first_box.y > second_box.y:
+        first_box, second_box = second_box, first_box
+
+    union = union_box(first_box, second_box)
+    if union.h > height * 0.16 or union.w > width * 0.75:
+        return False
+    if union.y < height * 0.045:
+        return False
+
+    vertical_overlap = box_vertical_overlap_height(first_box, second_box)
+    center_delta = abs((first_box.y + first_box.h / 2.0) - (second_box.y + second_box.h / 2.0))
+    horizontal_gap = max(0, max(first_box.x, second_box.x) - min(first_box.x2, second_box.x2))
+    vertical_gap = max(0, max(first_box.y, second_box.y) - min(first_box.y2, second_box.y2))
+    horizontal_overlap = box_horizontal_overlap_width(first_box, second_box)
+    stacked_title_lines = (
+        vertical_gap <= max(8, int(round(height * 0.008)))
+        and horizontal_overlap >= min(first_box.w, second_box.w) * 0.55
+        and abs(first_box.x - second_box.x) <= max(45, int(round(width * 0.050)))
+    )
+    if stacked_title_lines:
+        return True
+    return (
+        vertical_overlap >= min(first_box.h, second_box.h) * 0.42
+        and center_delta <= max(first_box.h, second_box.h) * 0.42
+        and horizontal_gap <= max(18, int(round(width * 0.025)))
+    )
+
+
+def merge_adjacent_heading_fragments(
+    classified: list[tuple[Block, Box]],
+    image,
+    mask,
+    edges,
+    ann,
+    scale: float,
+    width: int,
+    height: int,
+) -> list[tuple[Block, Box]]:
+    if len(classified) < 2:
+        return classified
+
+    items = classified[:]
+    changed = True
+    while changed:
+        changed = False
+        for first_index, first in enumerate(items):
+            for second_index in range(first_index + 1, len(items)):
+                second = items[second_index]
+                if not adjacent_heading_fragments(first, second, width, height):
+                    continue
+                first_number = first[0].ident.split("_", 1)[0]
+                merged_block, merged_box = merged_classified_item(
+                    [first, second],
+                    "heading",
+                    f"{first_number}_heading",
+                    image,
+                    mask,
+                    edges,
+                    ann,
+                    scale,
+                    width,
+                    height,
+                    "heading_fragment_merge",
+                )
+                merged_block.orientation = "horizontal"
+                items[first_index] = (merged_block, merged_box)
+                del items[second_index]
+                changed = True
+                break
+            if changed:
+                break
+
+    return sorted(items, key=lambda item: (item[1].y, item[1].x))
 
 
 def contents_column_fragment_candidate(block: Block, box: Box, width: int) -> bool:
@@ -4368,6 +4507,9 @@ def classify_blocks(
         classified, image, mask, edges, ann, scale=scale, width=analysis_w, height=analysis_h
     )
     classified = split_annual_contents_heading_blocks(
+        classified, image, mask, edges, ann, scale=scale, width=analysis_w, height=analysis_h
+    )
+    classified = merge_adjacent_heading_fragments(
         classified, image, mask, edges, ann, scale=scale, width=analysis_w, height=analysis_h
     )
     classified = split_text_columns_in_classified_blocks(

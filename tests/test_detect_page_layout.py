@@ -114,6 +114,40 @@ class DetectPageLayoutTests(unittest.TestCase):
         self.assertEqual(label, "heading")
         self.assertGreater(confidence, 0.25)
 
+    def test_feature_classifier_recognizes_bold_display_title_as_heading(self) -> None:
+        ann = detect_page_layout.train_bootstrap_ann()
+        features = {
+            "width_ratio": 0.46011,
+            "height_ratio": 0.10167,
+            "area_ratio": 0.04678,
+            "wide_aspect": 0.90514,
+            "tall_aspect": 0.04418,
+            "ink_density": 0.31518,
+            "edge_density": 0.22863,
+            "gray_std": 1.0,
+            "gray_levels": 0.96875,
+            "component_density": 0.24531,
+            "hline_density": 0.0,
+            "vline_density": 1.0,
+            "line_balance": 0.0,
+            "textline_density": 0.19672,
+            "horizontal_text_score": 0.19672,
+            "vertical_text_score": 0.13932,
+            "diagonal_text_score": 0.03000,
+            "max_text_score": 0.19672,
+            "line_art_score": 1.0,
+            "saturation_p80": 0.0,
+            "component_signature_score": 0.52,
+            "pcb_signature_score": 0.93695,
+            "pcb_trace_density": 1.0,
+        }
+
+        label, confidence = detect_page_layout.classify_features(ann, features)
+
+        self.assertTrue(detect_page_layout.bold_display_heading_features(features))
+        self.assertEqual(label, "heading")
+        self.assertGreater(confidence, 0.50)
+
     def test_feature_classifier_does_not_promote_horizontal_rule_to_heading(self) -> None:
         ann = detect_page_layout.train_bootstrap_ann()
         features = {
@@ -175,6 +209,40 @@ class DetectPageLayoutTests(unittest.TestCase):
 
         self.assertTrue(detect_page_layout.horizontal_rule_features(features))
         self.assertEqual(detect_page_layout.suppress_horizontal_rule_artifacts([block]), [])
+
+    def test_feature_classifier_recognizes_monochrome_icon_as_image(self) -> None:
+        ann = detect_page_layout.train_bootstrap_ann()
+        features = {
+            "width_ratio": 0.18447,
+            "height_ratio": 0.13500,
+            "area_ratio": 0.02490,
+            "wide_aspect": 0.27329,
+            "tall_aspect": 0.14636,
+            "ink_density": 0.50452,
+            "edge_density": 0.41337,
+            "gray_std": 0.72950,
+            "gray_levels": 0.71875,
+            "component_density": 0.06356,
+            "hline_density": 1.0,
+            "vline_density": 1.0,
+            "line_balance": 0.93390,
+            "textline_density": 0.07407,
+            "horizontal_text_score": 0.07407,
+            "vertical_text_score": 0.06950,
+            "diagonal_text_score": 0.01000,
+            "max_text_score": 0.07407,
+            "line_art_score": 1.0,
+            "saturation_p80": 0.0,
+            "component_signature_score": 0.0,
+            "pcb_signature_score": 1.0,
+            "pcb_trace_density": 1.0,
+        }
+
+        label, confidence = detect_page_layout.classify_features(ann, features)
+
+        self.assertTrue(detect_page_layout.monochrome_icon_image_features(features))
+        self.assertEqual(label, "image")
+        self.assertGreater(confidence, 0.65)
 
     def test_feature_classifier_recognizes_colored_line_art_as_schematic(self) -> None:
         ann = detect_page_layout.train_bootstrap_ann()
@@ -2465,6 +2533,23 @@ class DetectPageLayoutTests(unittest.TestCase):
         )
 
         self.assertTrue(detect_page_layout.stacked_diagram_seed(block, detect_page_layout.Box(20, 200, 500, 70), 900, 1000))
+
+    def test_adjacent_heading_fragments_accepts_stacked_title_lines(self) -> None:
+        first = (
+            detect_page_layout.Block("002_heading", "heading", "horizontal", 0.56, [634, 272, 1148, 162], None, {}),
+            detect_page_layout.Box(356, 153, 645, 91),
+        )
+        second = (
+            detect_page_layout.Block("004_heading", "heading", "horizontal", 0.70, [632, 433, 1652, 166], None, {}),
+            detect_page_layout.Box(355, 243, 928, 93),
+        )
+        category = (
+            detect_page_layout.Block("001_heading", "heading", "horizontal", 0.85, [130, 148, 2146, 71], None, {}),
+            detect_page_layout.Box(73, 83, 1206, 40),
+        )
+
+        self.assertTrue(detect_page_layout.adjacent_heading_fragments(first, second, width=1404, height=1800))
+        self.assertFalse(detect_page_layout.adjacent_heading_fragments(category, first, width=1404, height=1800))
 
     def test_schematic_side_caption_panel_can_merge_with_large_schematic(self) -> None:
         panel = detect_page_layout.Block(
