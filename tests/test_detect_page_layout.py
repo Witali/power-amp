@@ -114,6 +114,39 @@ class DetectPageLayoutTests(unittest.TestCase):
         self.assertEqual(label, "heading")
         self.assertGreater(confidence, 0.25)
 
+    def test_feature_classifier_does_not_promote_horizontal_rule_to_heading(self) -> None:
+        ann = detect_page_layout.train_bootstrap_ann()
+        features = {
+            "width_ratio": 0.86182,
+            "height_ratio": 0.01389,
+            "area_ratio": 0.01197,
+            "wide_aspect": 1.0,
+            "tall_aspect": 0.00278,
+            "ink_density": 0.17025,
+            "edge_density": 0.31591,
+            "gray_std": 0.70651,
+            "gray_levels": 1.0,
+            "component_density": 0.06612,
+            "hline_density": 1.0,
+            "vline_density": 0.0,
+            "line_balance": 0.0,
+            "textline_density": 0.72,
+            "horizontal_text_score": 0.72,
+            "vertical_text_score": 0.0,
+            "diagonal_text_score": 0.0,
+            "max_text_score": 0.72,
+            "line_art_score": 0.99332,
+            "saturation_p80": 0.0,
+            "component_signature_score": 0.0,
+        }
+
+        label, _ = detect_page_layout.classify_features(ann, features)
+        block = detect_page_layout.Block("001_heading", label, "horizontal", 0.70, [132, 150, 2154, 45], None, features)
+
+        self.assertTrue(detect_page_layout.horizontal_rule_features(features))
+        self.assertNotEqual(label, "heading")
+        self.assertEqual(detect_page_layout.suppress_horizontal_rule_artifacts([block]), [])
+
     def test_feature_classifier_recognizes_colored_line_art_as_schematic(self) -> None:
         ann = detect_page_layout.train_bootstrap_ann()
         features = {
@@ -235,6 +268,45 @@ class DetectPageLayoutTests(unittest.TestCase):
 
         self.assertEqual(label, "schematic/circuit")
         self.assertGreater(confidence, 0.35)
+
+    def test_feature_classifier_recovers_large_component_line_art_as_schematic(self) -> None:
+        ann = detect_page_layout.train_bootstrap_ann()
+        features = {
+            "width_ratio": 0.57550,
+            "height_ratio": 0.31111,
+            "area_ratio": 0.17904,
+            "wide_aspect": 0.28857,
+            "tall_aspect": 0.13861,
+            "ink_density": 0.10222,
+            "edge_density": 0.29231,
+            "gray_std": 0.68966,
+            "gray_levels": 1.0,
+            "component_density": 0.43980,
+            "hline_density": 0.03986,
+            "vline_density": 0.21871,
+            "line_balance": 0.18225,
+            "textline_density": 0.22500,
+            "horizontal_text_score": 0.22500,
+            "vertical_text_score": 0.69059,
+            "diagonal_text_score": 0.28378,
+            "max_text_score": 0.69059,
+            "line_art_score": 0.34894,
+            "saturation_p80": 0.0,
+            "component_signature_score": 0.97696,
+            "resistor_symbol_density": 1.0,
+            "capacitor_symbol_density": 1.0,
+            "diode_symbol_density": 1.0,
+            "transistor_symbol_density": 0.64975,
+            "pcb_trace_density": 0.14299,
+            "pcb_pad_density": 1.0,
+            "pcb_board_outline_score": 1.0,
+            "pcb_signature_score": 0.54296,
+        }
+
+        label, confidence = detect_page_layout.classify_features(ann, features)
+
+        self.assertEqual(label, "schematic/circuit")
+        self.assertGreater(confidence, 0.55)
 
     def test_feature_classifier_prefers_small_technical_line_art_as_schematic(self) -> None:
         ann = detect_page_layout.train_bootstrap_ann()

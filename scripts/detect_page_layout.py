@@ -114,6 +114,14 @@ HEADING_MIN_INK_DENSITY = layout_config.HEADING_MIN_INK_DENSITY
 HEADING_MIN_GRAY_STD = layout_config.HEADING_MIN_GRAY_STD
 HEADING_MAX_LINE_BALANCE = layout_config.HEADING_MAX_LINE_BALANCE
 HEADING_MIN_COMPONENT_DENSITY = layout_config.HEADING_MIN_COMPONENT_DENSITY
+HORIZONTAL_RULE_MIN_WIDTH_RATIO = layout_config.HORIZONTAL_RULE_MIN_WIDTH_RATIO
+HORIZONTAL_RULE_MAX_HEIGHT_RATIO = layout_config.HORIZONTAL_RULE_MAX_HEIGHT_RATIO
+HORIZONTAL_RULE_MAX_AREA_RATIO = layout_config.HORIZONTAL_RULE_MAX_AREA_RATIO
+HORIZONTAL_RULE_MIN_HLINE_DENSITY = layout_config.HORIZONTAL_RULE_MIN_HLINE_DENSITY
+HORIZONTAL_RULE_MAX_VLINE_DENSITY = layout_config.HORIZONTAL_RULE_MAX_VLINE_DENSITY
+HORIZONTAL_RULE_MIN_LINE_ART = layout_config.HORIZONTAL_RULE_MIN_LINE_ART
+HORIZONTAL_RULE_MAX_COMPONENT_DENSITY = layout_config.HORIZONTAL_RULE_MAX_COMPONENT_DENSITY
+HORIZONTAL_RULE_MAX_COMPONENT_SIGNATURE = layout_config.HORIZONTAL_RULE_MAX_COMPONENT_SIGNATURE
 ILLUSTRATION_TEXT_REJECT_MIN_CONFIDENCE = layout_config.ILLUSTRATION_TEXT_REJECT_MIN_CONFIDENCE
 ILLUSTRATION_TEXT_REJECT_MIN_TEXT_SCORE = layout_config.ILLUSTRATION_TEXT_REJECT_MIN_TEXT_SCORE
 ILLUSTRATION_TEXT_REJECT_MIN_HEIGHT_RATIO = layout_config.ILLUSTRATION_TEXT_REJECT_MIN_HEIGHT_RATIO
@@ -1531,14 +1539,29 @@ def annual_contents_text_features(features: dict[str, float]) -> bool:
     )
 
 
+def horizontal_rule_features(features: dict[str, float]) -> bool:
+    return (
+        features["width_ratio"] >= HORIZONTAL_RULE_MIN_WIDTH_RATIO
+        and features["height_ratio"] <= HORIZONTAL_RULE_MAX_HEIGHT_RATIO
+        and features["area_ratio"] <= HORIZONTAL_RULE_MAX_AREA_RATIO
+        and features["hline_density"] >= HORIZONTAL_RULE_MIN_HLINE_DENSITY
+        and features["vline_density"] <= HORIZONTAL_RULE_MAX_VLINE_DENSITY
+        and features.get("line_art_score", 0.0) >= HORIZONTAL_RULE_MIN_LINE_ART
+        and features["component_density"] <= HORIZONTAL_RULE_MAX_COMPONENT_DENSITY
+        and features.get("component_signature_score", 0.0) <= HORIZONTAL_RULE_MAX_COMPONENT_SIGNATURE
+    )
+
+
 def wide_rule_heading_features(features: dict[str, float]) -> bool:
     return (
-        features["width_ratio"] >= 0.45
+        not horizontal_rule_features(features)
+        and features["width_ratio"] >= 0.45
         and features["height_ratio"] <= 0.040
         and features["area_ratio"] <= 0.035
         and features["max_text_score"] >= 0.30
         and features["textline_density"] >= 0.25
         and features["ink_density"] >= 0.06
+        and features["component_density"] >= HEADING_MIN_COMPONENT_DENSITY
     )
 
 
@@ -1619,6 +1642,7 @@ def classify_features(ann, features: dict[str, float]) -> tuple[str, float]:
     pcb_size_ok = features["area_ratio"] >= PCB_MIN_AREA_RATIO and features["height_ratio"] >= PCB_MIN_HEIGHT_RATIO
     heading_candidate = heading_candidate_features(features)
     contents_text_candidate = annual_contents_text_features(features)
+    horizontal_rule_candidate = horizontal_rule_features(features)
     wide_rule_heading_candidate = wide_rule_heading_features(features)
     pcb_candidate = (
         pcb_trace >= PCB_MIN_TRACE_DENSITY
@@ -1639,6 +1663,15 @@ def classify_features(ann, features: dict[str, float]) -> tuple[str, float]:
         scores[CLASS_NAMES.index("diagram")] *= 0.45
         scores[CLASS_NAMES.index("table")] *= 0.55
         scores[CLASS_NAMES.index("pcb")] *= 0.10
+    if horizontal_rule_candidate:
+        scores[CLASS_NAMES.index("other")] += 2.80
+        scores[CLASS_NAMES.index("heading")] *= 0.04
+        scores[CLASS_NAMES.index("text")] *= 0.08
+        scores[CLASS_NAMES.index("schematic/circuit")] *= 0.08
+        scores[CLASS_NAMES.index("diagram")] *= 0.16
+        scores[CLASS_NAMES.index("table")] *= 0.16
+        scores[CLASS_NAMES.index("image")] *= 0.20
+        scores[CLASS_NAMES.index("pcb")] *= 0.04
     if wide_rule_heading_candidate:
         scores[CLASS_NAMES.index("heading")] += 1.85
         scores[CLASS_NAMES.index("text")] += 0.30
@@ -1683,6 +1716,23 @@ def classify_features(ann, features: dict[str, float]) -> tuple[str, float]:
         scores[CLASS_NAMES.index("text")] *= 0.32
         scores[CLASS_NAMES.index("image")] *= 0.35
         scores[CLASS_NAMES.index("diagram")] *= 0.70
+    if (
+        features["area_ratio"] > 0.045
+        and line_art > 0.24
+        and saturation_p80 < 0.12
+        and component_signature > 0.70
+        and features["component_density"] > 0.32
+        and features["ink_density"] < 0.24
+        and max_text < 0.74
+        and max(features["hline_density"], features["vline_density"]) > 0.18
+        and min(features["hline_density"], features["vline_density"]) > 0.030
+    ):
+        scores[CLASS_NAMES.index("schematic/circuit")] += 3.20 + 0.75 * component_signature + 0.45 * line_art
+        scores[CLASS_NAMES.index("text")] *= 0.12
+        scores[CLASS_NAMES.index("heading")] *= 0.45
+        scores[CLASS_NAMES.index("image")] *= 0.45
+        scores[CLASS_NAMES.index("diagram")] *= 0.72
+        scores[CLASS_NAMES.index("table")] *= 0.55
     if (
         0.004 < features["area_ratio"] < 0.040
         and line_art > 0.30
@@ -4052,6 +4102,17 @@ def suppress_annual_contents_footer_artifacts(
     return [block for block in blocks if block.ident not in suppressed]
 
 
+def horizontal_rule_artifact(block: Block) -> bool:
+    return horizontal_rule_features(block.features)
+
+
+def suppress_horizontal_rule_artifacts(blocks: list[Block]) -> list[Block]:
+    suppressed = {block.ident for block in blocks if horizontal_rule_artifact(block)}
+    if not suppressed:
+        return blocks
+    return [block for block in blocks if block.ident not in suppressed]
+
+
 def caption_candidate_for_figure(figure_block: Block, text_block: Block) -> dict[str, object] | None:
     figure_box = box_from_list(figure_block.bbox)
     text_box = box_from_list(text_block.bbox)
@@ -4240,6 +4301,7 @@ def classify_blocks(
     page_height = int(round(analysis_h / max(scale, 1e-6)))
     blocks = suppress_page_margin_visual_artifacts(blocks, page_width, page_height)
     blocks = suppress_annual_contents_footer_artifacts(blocks, page_width, page_height)
+    blocks = suppress_horizontal_rule_artifacts(blocks)
     blocks = resolve_block_overlaps(blocks, image, mask, edges, ann, scale)
     attach_caption_candidates(blocks, [block for block in all_blocks if block.label == "text"])
     kept_idents = {block.ident for block in blocks}

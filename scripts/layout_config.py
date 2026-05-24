@@ -100,6 +100,18 @@ HEADING_MIN_GRAY_STD = 0.36
 HEADING_MAX_LINE_BALANCE = 0.18
 HEADING_MIN_COMPONENT_DENSITY = 0.18
 
+# Separator rules are long, thin print artifacts. They can score as horizontal
+# text lines, but without component density or vertical line evidence they
+# should not become headings or OCR regions.
+HORIZONTAL_RULE_MIN_WIDTH_RATIO = 0.55
+HORIZONTAL_RULE_MAX_HEIGHT_RATIO = 0.030
+HORIZONTAL_RULE_MAX_AREA_RATIO = 0.018
+HORIZONTAL_RULE_MIN_HLINE_DENSITY = 0.72
+HORIZONTAL_RULE_MAX_VLINE_DENSITY = 0.035
+HORIZONTAL_RULE_MIN_LINE_ART = 0.82
+HORIZONTAL_RULE_MAX_COMPONENT_DENSITY = 0.12
+HORIZONTAL_RULE_MAX_COMPONENT_SIGNATURE = 0.08
+
 # Avoid merging confident prose columns into image/diagram groups when text
 # happens to trigger component-like signatures.
 ILLUSTRATION_TEXT_REJECT_MIN_CONFIDENCE = 0.84
