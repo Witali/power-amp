@@ -506,6 +506,45 @@ class DetectPageLayoutTests(unittest.TestCase):
         self.assertEqual(label, "schematic/circuit")
         self.assertGreater(confidence, 0.55)
 
+    def test_feature_classifier_recovers_captioned_component_schematic(self) -> None:
+        ann = detect_page_layout.train_bootstrap_ann()
+        features = {
+            "width_ratio": 0.27564,
+            "height_ratio": 0.16000,
+            "area_ratio": 0.04410,
+            "wide_aspect": 0.34455,
+            "tall_aspect": 0.11608,
+            "ink_density": 0.09608,
+            "edge_density": 0.32824,
+            "gray_std": 0.58599,
+            "gray_levels": 1.0,
+            "component_density": 1.0,
+            "hline_density": 0.0,
+            "vline_density": 0.06597,
+            "line_balance": 0.0,
+            "textline_density": 0.81250,
+            "horizontal_text_score": 0.81250,
+            "vertical_text_score": 0.46512,
+            "diagonal_text_score": 0.49057,
+            "max_text_score": 0.81250,
+            "line_art_score": 0.26507,
+            "saturation_p80": 0.0,
+            "component_signature_score": 1.0,
+            "resistor_symbol_density": 1.0,
+            "capacitor_symbol_density": 1.0,
+            "diode_symbol_density": 1.0,
+            "transistor_symbol_density": 1.0,
+            "pcb_signature_score": 0.44055,
+            "pcb_trace_density": 0.03810,
+            "pcb_pad_density": 1.0,
+        }
+
+        label, confidence = detect_page_layout.classify_features(ann, features)
+
+        self.assertTrue(detect_page_layout.captioned_component_schematic_features(features))
+        self.assertEqual(label, "schematic/circuit")
+        self.assertGreater(confidence, 0.55)
+
     def test_feature_classifier_prefers_small_technical_line_art_as_schematic(self) -> None:
         ann = detect_page_layout.train_bootstrap_ann()
         features = {
@@ -2720,6 +2759,38 @@ class DetectPageLayoutTests(unittest.TestCase):
 
         self.assertFalse(
             detect_page_layout.illustration_fragment_candidate(block, detect_page_layout.Box(420, 1200, 420, 250), 900, 1600)
+        )
+
+    def test_illustration_fragment_rejects_regular_text_column_next_to_schematic(self) -> None:
+        block = detect_page_layout.Block(
+            ident="005_text",
+            label="text",
+            orientation="horizontal",
+            confidence=0.87,
+            bbox=[1583, 1159, 693, 942],
+            outline=None,
+            features={
+                "area_ratio": 0.08143,
+                "height_ratio": 0.29389,
+                "ink_density": 0.19079,
+                "edge_density": 0.67402,
+                "gray_std": 0.76242,
+                "saturation_p80": 0.0,
+                "max_text_score": 0.85066,
+                "line_art_score": 0.08316,
+                "hline_density": 0.0,
+                "vline_density": 0.0,
+                "component_signature_score": 1.0,
+            },
+        )
+
+        self.assertFalse(
+            detect_page_layout.illustration_fragment_candidate(
+                block,
+                detect_page_layout.Box(889, 651, 389, 529),
+                width=1404,
+                height=1800,
+            )
         )
 
     def test_suppresses_weak_visual_wrapper_inside_stronger_visual(self) -> None:

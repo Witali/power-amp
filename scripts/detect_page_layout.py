@@ -1612,6 +1612,21 @@ def monochrome_icon_image_features(features: dict[str, float]) -> bool:
     )
 
 
+def captioned_component_schematic_features(features: dict[str, float]) -> bool:
+    return (
+        features.get("area_ratio", 0.0) >= 0.025
+        and features.get("area_ratio", 1.0) <= 0.075
+        and features.get("height_ratio", 0.0) >= 0.10
+        and features.get("ink_density", 1.0) <= 0.15
+        and features.get("edge_density", 0.0) >= 0.24
+        and features.get("line_art_score", 0.0) >= 0.20
+        and features.get("vline_density", 0.0) >= 0.040
+        and features.get("max_text_score", 1.0) <= 0.88
+        and features.get("component_signature_score", 0.0) >= 0.85
+        and features.get("saturation_p80", 0.0) <= 0.12
+    )
+
+
 def rule_scores(features: dict[str, float]) -> np.ndarray:
     scores = np.zeros(len(CLASS_NAMES), dtype=np.float32)
     ink = features["ink_density"]
@@ -1694,6 +1709,7 @@ def classify_features(ann, features: dict[str, float]) -> tuple[str, float]:
     wide_rule_heading_candidate = wide_rule_heading_features(features)
     bold_display_heading_candidate = bold_display_heading_features(features)
     monochrome_icon_image_candidate = monochrome_icon_image_features(features)
+    captioned_component_schematic_candidate = captioned_component_schematic_features(features)
     pcb_candidate = (
         pcb_trace >= PCB_MIN_TRACE_DENSITY
         and pcb_signature >= PCB_MIN_SIGNATURE_SCORE
@@ -1737,6 +1753,12 @@ def classify_features(ann, features: dict[str, float]) -> tuple[str, float]:
         scores[CLASS_NAMES.index("table")] *= 0.18
         scores[CLASS_NAMES.index("pcb")] *= 0.03
         scores[CLASS_NAMES.index("text")] *= 0.25
+    if captioned_component_schematic_candidate:
+        scores[CLASS_NAMES.index("schematic/circuit")] += 2.90 + 0.45 * component_signature + 0.35 * line_art
+        scores[CLASS_NAMES.index("text")] *= 0.18
+        scores[CLASS_NAMES.index("image")] *= 0.26
+        scores[CLASS_NAMES.index("diagram")] *= 0.42
+        scores[CLASS_NAMES.index("table")] *= 0.45
     if wide_rule_heading_candidate:
         scores[CLASS_NAMES.index("heading")] += 1.85
         scores[CLASS_NAMES.index("text")] += 0.30
@@ -2000,6 +2022,12 @@ def classify_features(ann, features: dict[str, float]) -> tuple[str, float]:
         scores[CLASS_NAMES.index("table")] *= 0.15
         scores[CLASS_NAMES.index("pcb")] *= 0.02
         scores[CLASS_NAMES.index("text")] *= 0.18
+    if captioned_component_schematic_candidate:
+        scores[CLASS_NAMES.index("schematic/circuit")] += 3.80 + 0.60 * component_signature + 0.45 * line_art
+        scores[CLASS_NAMES.index("text")] *= 0.12
+        scores[CLASS_NAMES.index("image")] *= 0.18
+        scores[CLASS_NAMES.index("diagram")] *= 0.32
+        scores[CLASS_NAMES.index("table")] *= 0.38
     if waveform_diagram_candidate:
         scores[CLASS_NAMES.index("diagram")] += 4.60 + 0.60 * line_art
         scores[CLASS_NAMES.index("schematic/circuit")] *= 0.04
