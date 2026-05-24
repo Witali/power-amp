@@ -112,6 +112,17 @@ HORIZONTAL_RULE_MIN_LINE_ART = 0.82
 HORIZONTAL_RULE_MAX_COMPONENT_DENSITY = 0.12
 HORIZONTAL_RULE_MAX_COMPONENT_SIGNATURE = 0.08
 
+# Timing diagrams in digital-logic articles are dominated by one-axis
+# horizontal waveform traces. OCR-like line scoring can otherwise promote them
+# to text, while component signatures can promote them to schematics.
+WAVEFORM_DIAGRAM_MIN_AREA_RATIO = 0.010
+WAVEFORM_DIAGRAM_MAX_HEIGHT_RATIO = 0.180
+WAVEFORM_DIAGRAM_MIN_HLINE_DENSITY = 0.18
+WAVEFORM_DIAGRAM_MAX_VLINE_DENSITY = 0.24
+WAVEFORM_DIAGRAM_MIN_LINE_ART = 0.34
+WAVEFORM_DIAGRAM_MIN_TEXT_SCORE = 0.55
+WAVEFORM_DIAGRAM_MAX_SATURATION = 0.12
+
 # Avoid merging confident prose columns into image/diagram groups when text
 # happens to trigger component-like signatures.
 ILLUSTRATION_TEXT_REJECT_MIN_CONFIDENCE = 0.84

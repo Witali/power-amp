@@ -122,6 +122,13 @@ HORIZONTAL_RULE_MAX_VLINE_DENSITY = layout_config.HORIZONTAL_RULE_MAX_VLINE_DENS
 HORIZONTAL_RULE_MIN_LINE_ART = layout_config.HORIZONTAL_RULE_MIN_LINE_ART
 HORIZONTAL_RULE_MAX_COMPONENT_DENSITY = layout_config.HORIZONTAL_RULE_MAX_COMPONENT_DENSITY
 HORIZONTAL_RULE_MAX_COMPONENT_SIGNATURE = layout_config.HORIZONTAL_RULE_MAX_COMPONENT_SIGNATURE
+WAVEFORM_DIAGRAM_MIN_AREA_RATIO = layout_config.WAVEFORM_DIAGRAM_MIN_AREA_RATIO
+WAVEFORM_DIAGRAM_MAX_HEIGHT_RATIO = layout_config.WAVEFORM_DIAGRAM_MAX_HEIGHT_RATIO
+WAVEFORM_DIAGRAM_MIN_HLINE_DENSITY = layout_config.WAVEFORM_DIAGRAM_MIN_HLINE_DENSITY
+WAVEFORM_DIAGRAM_MAX_VLINE_DENSITY = layout_config.WAVEFORM_DIAGRAM_MAX_VLINE_DENSITY
+WAVEFORM_DIAGRAM_MIN_LINE_ART = layout_config.WAVEFORM_DIAGRAM_MIN_LINE_ART
+WAVEFORM_DIAGRAM_MIN_TEXT_SCORE = layout_config.WAVEFORM_DIAGRAM_MIN_TEXT_SCORE
+WAVEFORM_DIAGRAM_MAX_SATURATION = layout_config.WAVEFORM_DIAGRAM_MAX_SATURATION
 ILLUSTRATION_TEXT_REJECT_MIN_CONFIDENCE = layout_config.ILLUSTRATION_TEXT_REJECT_MIN_CONFIDENCE
 ILLUSTRATION_TEXT_REJECT_MIN_TEXT_SCORE = layout_config.ILLUSTRATION_TEXT_REJECT_MIN_TEXT_SCORE
 ILLUSTRATION_TEXT_REJECT_MIN_HEIGHT_RATIO = layout_config.ILLUSTRATION_TEXT_REJECT_MIN_HEIGHT_RATIO
@@ -1552,6 +1559,19 @@ def horizontal_rule_features(features: dict[str, float]) -> bool:
     )
 
 
+def single_axis_waveform_diagram_features(features: dict[str, float]) -> bool:
+    return (
+        features.get("area_ratio", 0.0) >= WAVEFORM_DIAGRAM_MIN_AREA_RATIO
+        and features.get("height_ratio", 1.0) <= WAVEFORM_DIAGRAM_MAX_HEIGHT_RATIO
+        and features.get("hline_density", 0.0) >= WAVEFORM_DIAGRAM_MIN_HLINE_DENSITY
+        and features.get("vline_density", 1.0) <= WAVEFORM_DIAGRAM_MAX_VLINE_DENSITY
+        and features.get("line_art_score", 0.0) >= WAVEFORM_DIAGRAM_MIN_LINE_ART
+        and features.get("max_text_score", 0.0) >= WAVEFORM_DIAGRAM_MIN_TEXT_SCORE
+        and features.get("saturation_p80", 0.0) <= WAVEFORM_DIAGRAM_MAX_SATURATION
+        and features.get("ink_density", 1.0) <= 0.20
+    )
+
+
 def wide_rule_heading_features(features: dict[str, float]) -> bool:
     return (
         not horizontal_rule_features(features)
@@ -1643,6 +1663,7 @@ def classify_features(ann, features: dict[str, float]) -> tuple[str, float]:
     heading_candidate = heading_candidate_features(features)
     contents_text_candidate = annual_contents_text_features(features)
     horizontal_rule_candidate = horizontal_rule_features(features)
+    waveform_diagram_candidate = single_axis_waveform_diagram_features(features)
     wide_rule_heading_candidate = wide_rule_heading_features(features)
     pcb_candidate = (
         pcb_trace >= PCB_MIN_TRACE_DENSITY
@@ -1672,6 +1693,14 @@ def classify_features(ann, features: dict[str, float]) -> tuple[str, float]:
         scores[CLASS_NAMES.index("table")] *= 0.16
         scores[CLASS_NAMES.index("image")] *= 0.20
         scores[CLASS_NAMES.index("pcb")] *= 0.04
+    if waveform_diagram_candidate:
+        scores[CLASS_NAMES.index("diagram")] += 3.40 + 0.45 * line_art
+        scores[CLASS_NAMES.index("text")] *= 0.10
+        scores[CLASS_NAMES.index("schematic/circuit")] *= 0.10
+        scores[CLASS_NAMES.index("table")] *= 0.35
+        scores[CLASS_NAMES.index("heading")] *= 0.40
+        scores[CLASS_NAMES.index("image")] *= 0.55
+        scores[CLASS_NAMES.index("pcb")] *= 0.12
     if wide_rule_heading_candidate:
         scores[CLASS_NAMES.index("heading")] += 1.85
         scores[CLASS_NAMES.index("text")] += 0.30
@@ -1732,6 +1761,21 @@ def classify_features(ann, features: dict[str, float]) -> tuple[str, float]:
         scores[CLASS_NAMES.index("heading")] *= 0.45
         scores[CLASS_NAMES.index("image")] *= 0.45
         scores[CLASS_NAMES.index("diagram")] *= 0.72
+        scores[CLASS_NAMES.index("table")] *= 0.55
+    if (
+        features["area_ratio"] > 0.080
+        and line_art > 0.22
+        and saturation_p80 < 0.12
+        and component_signature > 0.72
+        and features["component_density"] > 0.18
+        and features["ink_density"] < 0.18
+        and features["vline_density"] > 0.10
+        and max_text < 0.86
+    ):
+        scores[CLASS_NAMES.index("schematic/circuit")] += 3.10 + 0.80 * component_signature + 0.35 * line_art
+        scores[CLASS_NAMES.index("diagram")] *= 0.24
+        scores[CLASS_NAMES.index("text")] *= 0.18
+        scores[CLASS_NAMES.index("image")] *= 0.42
         scores[CLASS_NAMES.index("table")] *= 0.55
     if (
         0.004 < features["area_ratio"] < 0.040
@@ -1905,6 +1949,14 @@ def classify_features(ann, features: dict[str, float]) -> tuple[str, float]:
         scores[CLASS_NAMES.index("diagram")] *= 0.55
     if not pcb_candidate or features["width_ratio"] < 0.12:
         scores[CLASS_NAMES.index("pcb")] *= 0.12
+    if waveform_diagram_candidate:
+        scores[CLASS_NAMES.index("diagram")] += 4.60 + 0.60 * line_art
+        scores[CLASS_NAMES.index("schematic/circuit")] *= 0.04
+        scores[CLASS_NAMES.index("text")] *= 0.10
+        scores[CLASS_NAMES.index("table")] *= 0.28
+        scores[CLASS_NAMES.index("heading")] *= 0.35
+        scores[CLASS_NAMES.index("image")] *= 0.45
+        scores[CLASS_NAMES.index("pcb")] *= 0.05
     if heading_candidate:
         scores[CLASS_NAMES.index("heading")] += 3.20
         scores[CLASS_NAMES.index("text")] += 0.35
@@ -3258,6 +3310,33 @@ def schematic_frame_strip_candidate(block: Block, box: Box, schematic: Box, widt
     return top_bottom_touch and horizontal_match and edge_aligned
 
 
+def schematic_side_caption_panel_candidate(block: Block, box: Box, schematic: Box, width: int, height: int) -> bool:
+    if block.label not in {"diagram", "image", "other"}:
+        return False
+    if schematic.h < height * 0.20:
+        return False
+    if box.w > max(70, int(round(schematic.w * 0.24))):
+        return False
+    if box.area > schematic.area * 0.28:
+        return False
+    if box.h < schematic.h * 0.64:
+        return False
+
+    features = block.features
+    if float(features.get("ink_density", 1.0)) > 0.08:
+        return False
+    if float(features.get("edge_density", 0.0)) > 0.14:
+        return False
+    if float(features.get("saturation_p80", 0.0)) > 0.12:
+        return False
+
+    margin = max(10, min(width, height) // 100)
+    horizontal_gap = max(0, max(box.x, schematic.x) - min(box.x2, schematic.x2))
+    vertical_overlap = box_vertical_overlap_height(box, schematic)
+    edge_aligned = abs(box.y - schematic.y) <= margin and abs(box.y2 - schematic.y2) <= margin
+    return horizontal_gap <= margin and vertical_overlap >= schematic.h * 0.64 and edge_aligned
+
+
 def schematic_attachment_touches(candidate: Box, schematic: Box, width: int, height: int, allow_side_touch: bool = True) -> bool:
     margin = max(8, min(width, height) // 120)
     vertical_gap = max(0, max(candidate.y, schematic.y) - min(candidate.y2, schematic.y2))
@@ -3305,13 +3384,20 @@ def merge_line_art_attachments_into_schematics(
                 if other_index == schematic_index:
                     continue
                 frame_strip = schematic_frame_strip_candidate(other_block, other_box, schematic_box, width, height)
-                if not frame_strip and not schematic_attachment_candidate(other_block, other_box, width, height):
+                side_caption_panel = schematic_side_caption_panel_candidate(
+                    other_block, other_box, schematic_box, width, height
+                )
+                if not frame_strip and not side_caption_panel and not schematic_attachment_candidate(other_block, other_box, width, height):
                     continue
                 high_confidence_text_attachment = other_block.label == "text" and other_block.confidence >= 0.45
                 if high_confidence_text_attachment and (schematic_box.w > width * 0.55 or schematic_box.h > height * 0.16):
                     continue
                 allow_side_touch = other_block.label != "text"
-                if not frame_strip and not schematic_attachment_touches(other_box, schematic_box, width, height, allow_side_touch=allow_side_touch):
+                if (
+                    not frame_strip
+                    and not side_caption_panel
+                    and not schematic_attachment_touches(other_box, schematic_box, width, height, allow_side_touch=allow_side_touch)
+                ):
                     continue
                 merged_block, merged_box = merged_classified_item(
                     [items[schematic_index], items[other_index]],
@@ -3357,6 +3443,8 @@ def illustration_fragment_candidate(block: Block, box: Box, width: int, height: 
     component_signature = float(features.get("component_signature_score", 0.0))
 
     if annual_contents_text_features(features):
+        return False
+    if single_axis_waveform_diagram_features(features):
         return False
 
     if block.label == "other":

@@ -308,6 +308,107 @@ class DetectPageLayoutTests(unittest.TestCase):
         self.assertEqual(label, "schematic/circuit")
         self.assertGreater(confidence, 0.55)
 
+    def test_feature_classifier_recognizes_single_axis_waveform_as_diagram(self) -> None:
+        ann = detect_page_layout.train_bootstrap_ann()
+        features = {
+            "width_ratio": 0.28977,
+            "height_ratio": 0.12500,
+            "area_ratio": 0.03622,
+            "wide_aspect": 0.46382,
+            "tall_aspect": 0.08627,
+            "ink_density": 0.09171,
+            "edge_density": 0.23686,
+            "gray_std": 0.68339,
+            "gray_levels": 1.0,
+            "component_density": 0.19608,
+            "hline_density": 0.42569,
+            "vline_density": 0.03686,
+            "line_balance": 0.08660,
+            "textline_density": 1.0,
+            "horizontal_text_score": 1.0,
+            "vertical_text_score": 0.17647,
+            "diagonal_text_score": 0.06977,
+            "max_text_score": 1.0,
+            "line_art_score": 0.48157,
+            "saturation_p80": 0.0,
+            "component_signature_score": 0.82301,
+            "pcb_signature_score": 0.44845,
+            "pcb_trace_density": 0.01174,
+        }
+
+        label, confidence = detect_page_layout.classify_features(ann, features)
+
+        self.assertTrue(detect_page_layout.single_axis_waveform_diagram_features(features))
+        self.assertEqual(label, "diagram")
+        self.assertGreater(confidence, 0.60)
+
+    def test_feature_classifier_keeps_short_labeled_waveform_as_diagram(self) -> None:
+        ann = detect_page_layout.train_bootstrap_ann()
+        features = {
+            "width_ratio": 0.28977,
+            "height_ratio": 0.06611,
+            "area_ratio": 0.01916,
+            "wide_aspect": 0.87664,
+            "tall_aspect": 0.04563,
+            "ink_density": 0.12228,
+            "edge_density": 0.30854,
+            "gray_std": 0.76661,
+            "gray_levels": 1.0,
+            "component_density": 0.32954,
+            "hline_density": 0.27305,
+            "vline_density": 0.16887,
+            "line_balance": 0.61847,
+            "textline_density": 0.75630,
+            "horizontal_text_score": 0.75630,
+            "vertical_text_score": 0.13235,
+            "diagonal_text_score": 0.18000,
+            "max_text_score": 0.75630,
+            "line_art_score": 0.62790,
+            "saturation_p80": 0.0,
+            "component_signature_score": 0.82000,
+            "pcb_signature_score": 0.30130,
+            "pcb_trace_density": 0.05302,
+        }
+
+        label, confidence = detect_page_layout.classify_features(ann, features)
+
+        self.assertTrue(detect_page_layout.single_axis_waveform_diagram_features(features))
+        self.assertEqual(label, "diagram")
+        self.assertGreater(confidence, 0.60)
+
+    def test_feature_classifier_recovers_large_vertical_label_schematic(self) -> None:
+        ann = detect_page_layout.train_bootstrap_ann()
+        features = {
+            "width_ratio": 0.48864,
+            "height_ratio": 0.43667,
+            "area_ratio": 0.21337,
+            "wide_aspect": 0.22375,
+            "tall_aspect": 0.17860,
+            "ink_density": 0.08665,
+            "edge_density": 0.24410,
+            "gray_std": 0.64827,
+            "gray_levels": 1.0,
+            "component_density": 0.25519,
+            "hline_density": 0.04482,
+            "vline_density": 0.18460,
+            "line_balance": 0.24279,
+            "textline_density": 0.29771,
+            "horizontal_text_score": 0.29771,
+            "vertical_text_score": 0.78488,
+            "diagonal_text_score": 0.09100,
+            "max_text_score": 0.78488,
+            "line_art_score": 0.30753,
+            "saturation_p80": 0.0,
+            "component_signature_score": 0.92271,
+            "pcb_signature_score": 0.46446,
+            "pcb_trace_density": 0.03397,
+        }
+
+        label, confidence = detect_page_layout.classify_features(ann, features)
+
+        self.assertEqual(label, "schematic/circuit")
+        self.assertGreater(confidence, 0.55)
+
     def test_feature_classifier_prefers_small_technical_line_art_as_schematic(self) -> None:
         ann = detect_page_layout.train_bootstrap_ann()
         features = {
@@ -2335,6 +2436,62 @@ class DetectPageLayoutTests(unittest.TestCase):
         )
 
         self.assertTrue(detect_page_layout.stacked_diagram_seed(block, detect_page_layout.Box(20, 200, 500, 70), 900, 1000))
+
+    def test_schematic_side_caption_panel_can_merge_with_large_schematic(self) -> None:
+        panel = detect_page_layout.Block(
+            ident="008_image",
+            label="image",
+            orientation="unknown",
+            confidence=0.21,
+            bbox=[178, 1413, 208, 1396],
+            outline=None,
+            features={
+                "ink_density": 0.01566,
+                "edge_density": 0.04184,
+                "saturation_p80": 0.0,
+                "line_art_score": 0.05004,
+            },
+        )
+
+        self.assertTrue(
+            detect_page_layout.schematic_side_caption_panel_candidate(
+                panel,
+                detect_page_layout.Box(178, 1413, 208, 1396),
+                detect_page_layout.Box(385, 1413, 1222, 1396),
+                width=2500,
+                height=3200,
+            )
+        )
+
+    def test_illustration_fragment_rejects_waveform_diagram(self) -> None:
+        block = detect_page_layout.Block(
+            ident="005_diagram",
+            label="diagram",
+            orientation="unknown",
+            confidence=0.97,
+            bbox=[181, 485, 724, 400],
+            outline=None,
+            features={
+                "area_ratio": 0.03622,
+                "height_ratio": 0.12500,
+                "ink_density": 0.09171,
+                "edge_density": 0.23686,
+                "saturation_p80": 0.0,
+                "hline_density": 0.42569,
+                "vline_density": 0.03686,
+                "line_art_score": 0.48157,
+                "max_text_score": 1.0,
+            },
+        )
+
+        self.assertFalse(
+            detect_page_layout.illustration_fragment_candidate(
+                block,
+                detect_page_layout.Box(181, 485, 724, 400),
+                width=2500,
+                height=3200,
+            )
+        )
 
     def test_illustration_fragment_rejects_confident_prose_with_false_component_signature(self) -> None:
         block = detect_page_layout.Block(
