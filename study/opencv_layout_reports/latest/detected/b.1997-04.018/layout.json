@@ -1,5 +1,5 @@
 {
-  "source": "C:\\Work\\DataAccessTool\\power-amp\\study\\opencv_layout_regression_pages\\sources\\b.1997-04.018.jpg",
+  "source": "C:\\Work\\power-amp\\study\\opencv_layout_regression_pages\\sources\\b.1997-04.018.jpg",
   "page": "b.1997-04.018",
   "width": 2500,
   "height": 3300,
@@ -350,8 +350,8 @@
   ],
   "frequency_warnings": [
     {
-      "block": "001_schematic_circuit",
-      "block_label": "schematic/circuit",
+      "block": "001_diagram",
+      "block_label": "diagram",
       "hint_label": "text",
       "hint_confidence": 0.79636,
       "block_overlap": 0.99401,
@@ -595,10 +595,10 @@
   "preview": "preview.png",
   "blocks": [
     {
-      "ident": "001_schematic_circuit",
-      "label": "schematic/circuit",
+      "ident": "001_diagram",
+      "label": "diagram",
       "orientation": "unknown",
-      "confidence": 0.8081,
+      "confidence": 0.9736,
       "bbox": [
         81,
         72,
@@ -677,7 +677,7 @@
       "ident": "002_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.8743,
+      "confidence": 0.9532,
       "bbox": [
         1645,
         189,

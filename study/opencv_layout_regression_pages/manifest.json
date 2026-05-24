@@ -1,11 +1,59 @@
 {
   "name": "OpenCV layout regression pages",
-  "page_count": 22,
+  "page_count": 28,
   "detector": "scripts/detect_page_layout.py",
   "preview_width": 1100,
   "frequency_hints": "validate",
   "save_crops": false,
   "pages": [
+    {
+      "id": "b.1986-12.047",
+      "reason": "manual feedback page: horizontal rule must not become a heading, while adjacent schematics stay visual",
+      "source": "study/opencv_layout_regression_pages/sources/b.1986-12.047.jpg",
+      "original_cached_source": ".tmp/archive_radio_ru/1986/12/b.1986-12.047.jpg",
+      "baseline_layout": "study/opencv_layout_regression_pages/baselines/b.1986-12.047/layout.json",
+      "baseline_preview": "study/opencv_layout_regression_pages/baselines/b.1986-12.047/preview.png"
+    },
+    {
+      "id": "b.1986-12.048",
+      "reason": "manual feedback page: waveform diagrams and the large captioned schematic must stay separated",
+      "source": "study/opencv_layout_regression_pages/sources/b.1986-12.048.jpg",
+      "original_cached_source": ".tmp/archive_radio_ru/1986/12/b.1986-12.048.jpg",
+      "baseline_layout": "study/opencv_layout_regression_pages/baselines/b.1986-12.048/layout.json",
+      "baseline_preview": "study/opencv_layout_regression_pages/baselines/b.1986-12.048/preview.png"
+    },
+    {
+      "id": "b.1986-12.049",
+      "reason": "manual feedback page: waveform diagrams should not merge into neighboring schematics or weak heading artifacts",
+      "source": "study/opencv_layout_regression_pages/sources/b.1986-12.049.jpg",
+      "original_cached_source": ".tmp/archive_radio_ru/1986/12/b.1986-12.049.jpg",
+      "baseline_layout": "study/opencv_layout_regression_pages/baselines/b.1986-12.049/layout.json",
+      "baseline_preview": "study/opencv_layout_regression_pages/baselines/b.1986-12.049/preview.png"
+    },
+    {
+      "id": "b.1986-12.051",
+      "reason": "manual feedback page: bold multi-line display heading and monochrome icon image classification",
+      "source": "study/opencv_layout_regression_pages/sources/b.1986-12.051.jpg",
+      "original_cached_source": ".tmp/archive_radio_ru/1986/12/b.1986-12.051.jpg",
+      "baseline_layout": "study/opencv_layout_regression_pages/baselines/b.1986-12.051/layout.json",
+      "baseline_preview": "study/opencv_layout_regression_pages/baselines/b.1986-12.051/preview.png"
+    },
+    {
+      "id": "b.1986-12.054",
+      "reason": "manual feedback page: internal display heading split from a large text block and photo strip image",
+      "source": "study/opencv_layout_regression_pages/sources/b.1986-12.054.jpg",
+      "original_cached_source": ".tmp/archive_radio_ru/1986/12/b.1986-12.054.jpg",
+      "baseline_layout": "study/opencv_layout_regression_pages/baselines/b.1986-12.054/layout.json",
+      "baseline_preview": "study/opencv_layout_regression_pages/baselines/b.1986-12.054/preview.png"
+    },
+    {
+      "id": "b.1986-12.055",
+      "reason": "manual feedback page: captioned component schematic and neighboring prose column protection",
+      "source": "study/opencv_layout_regression_pages/sources/b.1986-12.055.jpg",
+      "original_cached_source": ".tmp/archive_radio_ru/1986/12/b.1986-12.055.jpg",
+      "baseline_layout": "study/opencv_layout_regression_pages/baselines/b.1986-12.055/layout.json",
+      "baseline_preview": "study/opencv_layout_regression_pages/baselines/b.1986-12.055/preview.png"
+    },
     {
       "id": "b.1997-04.018",
       "reason": "compact amplifier article with mostly prose and a small technical figure-like area",

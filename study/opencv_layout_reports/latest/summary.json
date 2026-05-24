@@ -1,5 +1,92 @@
 [
   {
+    "id": "b.1986-12.047",
+    "reason": "manual feedback page: horizontal rule must not become a heading, while adjacent schematics stay visual",
+    "source": "../../opencv_layout_regression_pages/sources/b.1986-12.047.jpg",
+    "layout": "detected/b.1986-12.047/layout.json",
+    "preview": "detected/b.1986-12.047/preview.png",
+    "block_count": 17,
+    "counts": {
+      "schematic": 10,
+      "text": 7
+    },
+    "warning_count": 60
+  },
+  {
+    "id": "b.1986-12.048",
+    "reason": "manual feedback page: waveform diagrams and the large captioned schematic must stay separated",
+    "source": "../../opencv_layout_regression_pages/sources/b.1986-12.048.jpg",
+    "layout": "detected/b.1986-12.048/layout.json",
+    "preview": "detected/b.1986-12.048/preview.png",
+    "block_count": 8,
+    "counts": {
+      "heading": 1,
+      "diagram": 2,
+      "text": 2,
+      "schematic": 3
+    },
+    "warning_count": 19
+  },
+  {
+    "id": "b.1986-12.049",
+    "reason": "manual feedback page: waveform diagrams should not merge into neighboring schematics or weak heading artifacts",
+    "source": "../../opencv_layout_regression_pages/sources/b.1986-12.049.jpg",
+    "layout": "detected/b.1986-12.049/layout.json",
+    "preview": "detected/b.1986-12.049/preview.png",
+    "block_count": 9,
+    "counts": {
+      "diagram": 2,
+      "schematic": 4,
+      "text": 3
+    },
+    "warning_count": 30
+  },
+  {
+    "id": "b.1986-12.051",
+    "reason": "manual feedback page: bold multi-line display heading and monochrome icon image classification",
+    "source": "../../opencv_layout_regression_pages/sources/b.1986-12.051.jpg",
+    "layout": "detected/b.1986-12.051/layout.json",
+    "preview": "detected/b.1986-12.051/preview.png",
+    "block_count": 12,
+    "counts": {
+      "heading": 2,
+      "image": 1,
+      "text": 7,
+      "diagram": 1,
+      "schematic": 1
+    },
+    "warning_count": 25
+  },
+  {
+    "id": "b.1986-12.054",
+    "reason": "manual feedback page: internal display heading split from a large text block and photo strip image",
+    "source": "../../opencv_layout_regression_pages/sources/b.1986-12.054.jpg",
+    "layout": "detected/b.1986-12.054/layout.json",
+    "preview": "detected/b.1986-12.054/preview.png",
+    "block_count": 7,
+    "counts": {
+      "heading": 2,
+      "text": 4,
+      "image": 1
+    },
+    "warning_count": 23
+  },
+  {
+    "id": "b.1986-12.055",
+    "reason": "manual feedback page: captioned component schematic and neighboring prose column protection",
+    "source": "../../opencv_layout_regression_pages/sources/b.1986-12.055.jpg",
+    "layout": "detected/b.1986-12.055/layout.json",
+    "preview": "detected/b.1986-12.055/preview.png",
+    "block_count": 10,
+    "counts": {
+      "heading": 2,
+      "text": 4,
+      "schematic": 3,
+      "image": 1
+    },
+    "warning_count": 26
+  },
+  {
     "id": "b.1997-04.018",
     "reason": "compact amplifier article with mostly prose and a small technical figure-like area",
     "source": "../../opencv_layout_regression_pages/sources/b.1997-04.018.jpg",
@@ -7,9 +94,10 @@
     "preview": "detected/b.1997-04.018/preview.png",
     "block_count": 12,
     "counts": {
-      "schematic": 2,
+      "diagram": 1,
       "text": 9,
-      "heading": 1
+      "heading": 1,
+      "schematic": 1
     },
     "warning_count": 12
   },
@@ -19,12 +107,12 @@
     "source": "../../opencv_layout_regression_pages/sources/b.1997-12.015.jpg",
     "layout": "detected/b.1997-12.015/layout.json",
     "preview": "detected/b.1997-12.015/preview.png",
-    "block_count": 11,
+    "block_count": 6,
     "counts": {
       "heading": 2,
-      "text": 7,
       "image": 1,
-      "schematic": 1
+      "schematic": 1,
+      "text": 2
     },
     "warning_count": 12
   },
@@ -47,13 +135,13 @@
     "source": "../../opencv_layout_regression_pages/sources/b.1998-12.018.jpg",
     "layout": "detected/b.1998-12.018/layout.json",
     "preview": "detected/b.1998-12.018/preview.png",
-    "block_count": 16,
+    "block_count": 8,
     "counts": {
       "heading": 2,
-      "text": 13,
+      "text": 5,
       "schematic": 1
     },
-    "warning_count": 17
+    "warning_count": 14
   },
   {
     "id": "b.1999-10.014",
@@ -87,13 +175,13 @@
     "source": "../../opencv_layout_regression_pages/sources/b.1999-10.017.jpg",
     "layout": "detected/b.1999-10.017/layout.json",
     "preview": "detected/b.1999-10.017/preview.png",
-    "block_count": 13,
+    "block_count": 12,
     "counts": {
-      "heading": 2,
-      "text": 9,
+      "heading": 3,
+      "text": 7,
       "schematic": 2
     },
-    "warning_count": 7
+    "warning_count": 8
   },
   {
     "id": "b.1999-10.018",
@@ -103,12 +191,12 @@
     "preview": "detected/b.1999-10.018/preview.png",
     "block_count": 12,
     "counts": {
-      "heading": 2,
-      "text": 8,
+      "heading": 3,
+      "text": 7,
       "schematic": 1,
       "image": 1
     },
-    "warning_count": 8
+    "warning_count": 9
   },
   {
     "id": "b.2000-02.036",
@@ -116,12 +204,12 @@
     "source": "../../opencv_layout_regression_pages/sources/b.2000-02.036.jpg",
     "layout": "detected/b.2000-02.036/layout.json",
     "preview": "detected/b.2000-02.036/preview.png",
-    "block_count": 12,
+    "block_count": 11,
     "counts": {
-      "text": 7,
       "schematic": 1,
       "other": 1,
-      "image": 3
+      "image": 3,
+      "text": 6
     },
     "warning_count": 12
   },
@@ -131,13 +219,13 @@
     "source": "../../opencv_layout_regression_pages/sources/b.2000-02.037.jpg",
     "layout": "detected/b.2000-02.037/layout.json",
     "preview": "detected/b.2000-02.037/preview.png",
-    "block_count": 9,
+    "block_count": 11,
     "counts": {
-      "heading": 1,
+      "heading": 3,
       "text": 7,
       "schematic": 1
     },
-    "warning_count": 5
+    "warning_count": 7
   },
   {
     "id": "b.2000-12.063",
@@ -160,11 +248,11 @@
     "preview": "detected/b.2000-09.011/preview.png",
     "block_count": 8,
     "counts": {
-      "text": 6,
-      "heading": 1,
+      "heading": 2,
+      "text": 5,
       "schematic": 1
     },
-    "warning_count": 6
+    "warning_count": 7
   },
   {
     "id": "b.2000-09.012",
@@ -172,14 +260,13 @@
     "source": "../../opencv_layout_regression_pages/sources/b.2000-09.012.jpg",
     "layout": "detected/b.2000-09.012/layout.json",
     "preview": "detected/b.2000-09.012/preview.png",
-    "block_count": 9,
+    "block_count": 8,
     "counts": {
-      "text": 5,
-      "image": 1,
-      "heading": 2,
+      "text": 6,
+      "heading": 1,
       "schematic": 1
     },
-    "warning_count": 12
+    "warning_count": 8
   },
   {
     "id": "b.2000-10.014",
@@ -200,14 +287,14 @@
     "source": "../../opencv_layout_regression_pages/sources/b.2000-10.015.jpg",
     "layout": "detected/b.2000-10.015/layout.json",
     "preview": "detected/b.2000-10.015/preview.png",
-    "block_count": 15,
+    "block_count": 11,
     "counts": {
-      "text": 8,
-      "heading": 4,
+      "text": 6,
+      "heading": 1,
       "image": 2,
-      "schematic": 1
+      "schematic": 2
     },
-    "warning_count": 18
+    "warning_count": 15
   },
   {
     "id": "b.2000-11.011",
@@ -215,14 +302,14 @@
     "source": "../../opencv_layout_regression_pages/sources/b.2000-11.011.jpg",
     "layout": "detected/b.2000-11.011/layout.json",
     "preview": "detected/b.2000-11.011/preview.png",
-    "block_count": 8,
+    "block_count": 10,
     "counts": {
       "diagram": 1,
-      "image": 1,
-      "schematic": 1,
-      "text": 5
+      "schematic": 2,
+      "other": 1,
+      "text": 6
     },
-    "warning_count": 4
+    "warning_count": 5
   },
   {
     "id": "b.2000-11.012",
@@ -243,10 +330,10 @@
     "source": "../../opencv_layout_regression_pages/sources/b.2000-11.013.jpg",
     "layout": "detected/b.2000-11.013/layout.json",
     "preview": "detected/b.2000-11.013/preview.png",
-    "block_count": 12,
+    "block_count": 11,
     "counts": {
       "schematic": 1,
-      "text": 9,
+      "text": 8,
       "image": 2
     },
     "warning_count": 13
@@ -259,12 +346,13 @@
     "preview": "detected/b.2000-01.042/preview.png",
     "block_count": 13,
     "counts": {
-      "text": 8,
+      "text": 7,
       "image": 2,
       "pcb": 1,
-      "schematic": 2
+      "schematic": 2,
+      "heading": 1
     },
-    "warning_count": 13
+    "warning_count": 15
   },
   {
     "id": "b.2000-01.043",
@@ -272,15 +360,15 @@
     "source": "../../opencv_layout_regression_pages/sources/b.2000-01.043.jpg",
     "layout": "detected/b.2000-01.043/layout.json",
     "preview": "detected/b.2000-01.043/preview.png",
-    "block_count": 20,
+    "block_count": 22,
     "counts": {
-      "text": 11,
-      "diagram": 1,
+      "heading": 2,
+      "diagram": 4,
+      "text": 9,
       "other": 1,
-      "image": 1,
       "schematic": 6
     },
-    "warning_count": 26
+    "warning_count": 29
   },
   {
     "id": "b.2000-11.043",
@@ -304,9 +392,10 @@
     "preview": "detected/b.2000-11.044/preview.png",
     "block_count": 9,
     "counts": {
-      "text": 8,
+      "text": 7,
+      "heading": 1,
       "schematic": 1
     },
-    "warning_count": 7
+    "warning_count": 8
   }
 ]

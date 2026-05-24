@@ -5,6 +5,14 @@ from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 REGRESSION_ROOT = PROJECT_ROOT / "study" / "opencv_layout_regression_pages"
+MANUAL_FEEDBACK_PAGE_IDS = {
+    "b.1986-12.047",
+    "b.1986-12.048",
+    "b.1986-12.049",
+    "b.1986-12.051",
+    "b.1986-12.054",
+    "b.1986-12.055",
+}
 
 
 class LayoutRegressionPagesTests(unittest.TestCase):
@@ -14,9 +22,11 @@ class LayoutRegressionPagesTests(unittest.TestCase):
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
         pages = manifest["pages"]
 
-        self.assertEqual(manifest["page_count"], 22)
+        page_ids = {page["id"] for page in pages}
+
         self.assertEqual(len(pages), manifest["page_count"])
-        self.assertEqual(len({page["id"] for page in pages}), manifest["page_count"])
+        self.assertEqual(len(page_ids), manifest["page_count"])
+        self.assertTrue(MANUAL_FEEDBACK_PAGE_IDS.issubset(page_ids))
 
         for page in pages:
             self.assertTrue((PROJECT_ROOT / page["source"]).exists(), page["source"])

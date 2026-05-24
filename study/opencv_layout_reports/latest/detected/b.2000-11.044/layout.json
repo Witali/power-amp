@@ -1,5 +1,5 @@
 {
-  "source": "C:\\Work\\DataAccessTool\\power-amp\\study\\opencv_layout_regression_pages\\sources\\b.2000-11.044.jpg",
+  "source": "C:\\Work\\power-amp\\study\\opencv_layout_regression_pages\\sources\\b.2000-11.044.jpg",
   "page": "b.2000-11.044",
   "width": 2500,
   "height": 3338,
@@ -274,6 +274,26 @@
   ],
   "frequency_warnings": [
     {
+      "block": "005_heading",
+      "block_label": "heading",
+      "hint_label": "text",
+      "hint_confidence": 0.79773,
+      "block_overlap": 1.0,
+      "hint_overlap": 0.01871,
+      "bbox": [
+        195,
+        1148,
+        1302,
+        117
+      ],
+      "hint_bbox": [
+        61,
+        0,
+        2439,
+        3338
+      ]
+    },
+    {
       "block": "009_text",
       "block_label": "text",
       "hint_label": "schematic/circuit",
@@ -422,41 +442,14 @@
       "ident": "002_text",
       "label": "text",
       "orientation": "unknown",
-      "confidence": 0.8702,
+      "confidence": 0.9526,
       "bbox": [
         844,
         82,
         745,
         1181
       ],
-      "outline": [
-        [
-          [
-            844,
-            82
-          ],
-          [
-            844,
-            1147
-          ],
-          [
-            1497,
-            1147
-          ],
-          [
-            1497,
-            1263
-          ],
-          [
-            1589,
-            1263
-          ],
-          [
-            1589,
-            82
-          ]
-        ]
-      ],
+      "outline": null,
       "features": {
         "width_ratio": 0.29822,
         "height_ratio": 0.35389,
@@ -489,8 +482,7 @@
         "pcb_board_outline_score": 1.0,
         "pcb_signature_score": 0.54312,
         "merged_block_count": 2.0,
-        "contents_column_merge": 1.0,
-        "overlap_resolution": 1.0
+        "contents_column_merge": 1.0
       },
       "crop_path": null,
       "figure_ref": null,
@@ -500,41 +492,14 @@
       "ident": "003_text",
       "label": "text",
       "orientation": "unknown",
-      "confidence": 0.8744,
+      "confidence": 0.9526,
       "bbox": [
         76,
         83,
         747,
         1179
       ],
-      "outline": [
-        [
-          [
-            76,
-            83
-          ],
-          [
-            76,
-            1262
-          ],
-          [
-            195,
-            1262
-          ],
-          [
-            195,
-            1147
-          ],
-          [
-            823,
-            1147
-          ],
-          [
-            823,
-            83
-          ]
-        ]
-      ],
+      "outline": null,
       "features": {
         "width_ratio": 0.29896,
         "height_ratio": 0.35333,
@@ -567,8 +532,7 @@
         "pcb_board_outline_score": 1.0,
         "pcb_signature_score": 0.54704,
         "merged_block_count": 2.0,
-        "contents_column_merge": 1.0,
-        "overlap_resolution": 1.0
+        "contents_column_merge": 1.0
       },
       "crop_path": null,
       "figure_ref": null,
@@ -578,7 +542,7 @@
       "ident": "004_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.873,
+      "confidence": 0.9534,
       "bbox": [
         1612,
         83,
@@ -623,17 +587,44 @@
       "caption_candidates": null
     },
     {
-      "ident": "005_text",
-      "label": "text",
+      "ident": "005_heading",
+      "label": "heading",
       "orientation": "horizontal",
-      "confidence": 0.6575,
+      "confidence": 0.7663,
       "bbox": [
         195,
         1148,
         1302,
         117
       ],
-      "outline": null,
+      "outline": [
+        [
+          [
+            1497,
+            1262
+          ],
+          [
+            1497,
+            1265
+          ],
+          [
+            843,
+            1265
+          ],
+          [
+            843,
+            1148
+          ],
+          [
+            822,
+            1148
+          ],
+          [
+            822,
+            1262
+          ]
+        ]
+      ],
       "features": {
         "width_ratio": 0.52077,
         "height_ratio": 0.035,
@@ -664,7 +655,8 @@
         "pcb_trace_density": 0.53326,
         "pcb_pad_density": 0.0,
         "pcb_board_outline_score": 1.0,
-        "pcb_signature_score": 0.56395
+        "pcb_signature_score": 0.56395,
+        "overlap_resolution": 1.0
       },
       "crop_path": null,
       "figure_ref": null,
@@ -674,7 +666,7 @@
       "ident": "008_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.8677,
+      "confidence": 0.951,
       "bbox": [
         1612,
         1170,

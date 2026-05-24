@@ -1,5 +1,5 @@
 {
-  "source": "C:\\Work\\DataAccessTool\\power-amp\\study\\opencv_layout_regression_pages\\sources\\b.2000-11.011.jpg",
+  "source": "C:\\Work\\power-amp\\study\\opencv_layout_regression_pages\\sources\\b.2000-11.011.jpg",
   "page": "b.2000-11.011",
   "width": 2500,
   "height": 3338,
@@ -167,16 +167,36 @@
       ]
     },
     {
-      "block": "003_image",
-      "block_label": "image",
+      "block": "003_schematic_circuit",
+      "block_label": "schematic/circuit",
       "hint_label": "text",
       "hint_confidence": 0.81272,
       "block_overlap": 1.0,
-      "hint_overlap": 0.06715,
+      "hint_overlap": 0.05083,
       "bbox": [
         161,
         76,
-        757,
+        573,
+        721
+      ],
+      "hint_bbox": [
+        0,
+        0,
+        2435,
+        3338
+      ]
+    },
+    {
+      "block": "004_other",
+      "block_label": "other",
+      "hint_label": "text",
+      "hint_confidence": 0.81272,
+      "block_overlap": 1.0,
+      "hint_overlap": 0.01632,
+      "bbox": [
+        734,
+        76,
+        184,
         721
       ],
       "hint_bbox": [
@@ -235,7 +255,7 @@
       "ident": "001_diagram",
       "label": "diagram",
       "orientation": "unknown",
-      "confidence": 0.8556,
+      "confidence": 0.8218,
       "bbox": [
         961,
         45,
@@ -313,14 +333,14 @@
       ]
     },
     {
-      "ident": "003_image",
-      "label": "image",
+      "ident": "003_schematic_circuit",
+      "label": "schematic/circuit",
       "orientation": "unknown",
-      "confidence": 0.702,
+      "confidence": 0.9553,
       "bbox": [
         161,
         76,
-        757,
+        573,
         721
       ],
       "outline": [
@@ -330,52 +350,110 @@
             76
           ],
           [
-            918,
-            76
-          ],
-          [
-            918,
-            797
-          ],
-          [
             161,
-            797
+            603
+          ],
+          [
+            733,
+            603
+          ],
+          [
+            733,
+            76
           ]
         ]
       ],
       "features": {
-        "width_ratio": 0.30267,
+        "width_ratio": 0.22923,
         "height_ratio": 0.21611,
-        "area_ratio": 0.06541,
-        "wide_aspect": 0.20977,
-        "tall_aspect": 0.19069,
-        "ink_density": 0.07622,
-        "edge_density": 0.22675,
-        "gray_std": 0.47354,
+        "area_ratio": 0.04954,
+        "wide_aspect": 0.15887,
+        "tall_aspect": 0.25178,
+        "ink_density": 0.09637,
+        "edge_density": 0.28639,
+        "gray_std": 0.52414,
         "gray_levels": 0.96875,
-        "component_density": 0.37804,
+        "component_density": 0.49916,
         "hline_density": 0.0,
-        "vline_density": 0.05659,
-        "line_art_score": 0.13496,
+        "vline_density": 0.07472,
+        "line_art_score": 0.2096,
         "line_balance": 0.0,
-        "saturation_mean": 0.00169,
+        "saturation_mean": 0.002,
         "saturation_p80": 0.0,
-        "textline_density": 0.41645,
-        "horizontal_text_score": 0.41645,
-        "vertical_text_score": 0.26471,
-        "diagonal_text_score": 0.23333,
-        "max_text_score": 0.41645,
-        "component_signature_score": 0.89934,
+        "textline_density": 0.46272,
+        "horizontal_text_score": 0.46272,
+        "vertical_text_score": 0.34951,
+        "diagonal_text_score": 0.65988,
+        "max_text_score": 0.65988,
+        "component_signature_score": 0.97374,
         "resistor_symbol_density": 1.0,
         "capacitor_symbol_density": 1.0,
-        "diode_symbol_density": 0.52926,
-        "transistor_symbol_density": 0.79389,
-        "pcb_trace_density": 0.05364,
+        "diode_symbol_density": 0.69883,
+        "transistor_symbol_density": 1.0,
+        "pcb_trace_density": 0.06973,
         "pcb_pad_density": 1.0,
         "pcb_board_outline_score": 0.0,
-        "pcb_signature_score": 0.29862,
-        "merged_block_count": 3.0,
-        "illustration_fragment_merge": 1.0
+        "pcb_signature_score": 0.31021
+      },
+      "crop_path": null,
+      "figure_ref": null,
+      "caption_candidates": [
+        {
+          "block": "internal_caption_probe",
+          "bbox": [
+            170,
+            730,
+            183,
+            54
+          ],
+          "position": "inside-bottom-left-probe",
+          "score": 0.01
+        }
+      ]
+    },
+    {
+      "ident": "004_other",
+      "label": "other",
+      "orientation": "unknown",
+      "confidence": 0.3085,
+      "bbox": [
+        734,
+        76,
+        184,
+        721
+      ],
+      "outline": null,
+      "features": {
+        "width_ratio": 0.07344,
+        "height_ratio": 0.21611,
+        "area_ratio": 0.01587,
+        "wide_aspect": 0.0509,
+        "tall_aspect": 0.78586,
+        "ink_density": 0.01332,
+        "edge_density": 0.04061,
+        "gray_std": 0.21227,
+        "gray_levels": 0.875,
+        "component_density": 0.02597,
+        "hline_density": 0.00234,
+        "vline_density": 0.0,
+        "line_art_score": 0.0751,
+        "line_balance": 0.0,
+        "saturation_mean": 0.00074,
+        "saturation_p80": 0.0,
+        "textline_density": 0.04627,
+        "horizontal_text_score": 0.04627,
+        "vertical_text_score": 0.0,
+        "diagonal_text_score": 0.09326,
+        "max_text_score": 0.09326,
+        "component_signature_score": 0.0,
+        "resistor_symbol_density": 0.0,
+        "capacitor_symbol_density": 0.0,
+        "diode_symbol_density": 0.0,
+        "transistor_symbol_density": 0.0,
+        "pcb_trace_density": 0.00343,
+        "pcb_pad_density": 0.2,
+        "pcb_board_outline_score": 0.0,
+        "pcb_signature_score": 0.05447
       },
       "crop_path": null,
       "figure_ref": null,
@@ -452,7 +530,7 @@
       "ident": "008_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.8049,
+      "confidence": 0.9085,
       "bbox": [
         961,
         350,
@@ -497,10 +575,78 @@
       "caption_candidates": null
     },
     {
+      "ident": "009_text",
+      "label": "text",
+      "orientation": "horizontal",
+      "confidence": 0.6722,
+      "bbox": [
+        165,
+        618,
+        745,
+        171
+      ],
+      "outline": [
+        [
+          [
+            165,
+            618
+          ],
+          [
+            165,
+            789
+          ],
+          [
+            733,
+            789
+          ],
+          [
+            733,
+            618
+          ]
+        ]
+      ],
+      "features": {
+        "width_ratio": 0.29822,
+        "height_ratio": 0.05111,
+        "area_ratio": 0.01524,
+        "wide_aspect": 0.87391,
+        "tall_aspect": 0.04577,
+        "ink_density": 0.05911,
+        "edge_density": 0.16515,
+        "gray_std": 0.42821,
+        "gray_levels": 0.96875,
+        "component_density": 0.51374,
+        "hline_density": 0.0,
+        "vline_density": 0.18446,
+        "line_art_score": 0.2878,
+        "line_balance": 0.0,
+        "saturation_mean": 0.00143,
+        "saturation_p80": 0.0,
+        "textline_density": 0.58696,
+        "horizontal_text_score": 0.58696,
+        "vertical_text_score": 0.40299,
+        "diagonal_text_score": 0.64286,
+        "max_text_score": 0.64286,
+        "component_signature_score": 1.0,
+        "resistor_symbol_density": 1.0,
+        "capacitor_symbol_density": 1.0,
+        "diode_symbol_density": 1.0,
+        "transistor_symbol_density": 1.0,
+        "pcb_trace_density": 0.06722,
+        "pcb_pad_density": 0.8,
+        "pcb_board_outline_score": 0.91304,
+        "pcb_signature_score": 0.42074,
+        "overlap_resolution": 1.0
+      },
+      "crop_path": null,
+      "figure_ref": null,
+      "caption_candidates": null
+    },
+    {
       "ident": "010_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.8659,
+      "confidence": 0.951,
       "bbox": [
         1702,
         757,
@@ -548,7 +694,7 @@
       "ident": "011_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.8667,
+      "confidence": 0.951,
       "bbox": [
         961,
         764,
@@ -596,33 +742,14 @@
       "ident": "012_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.8669,
+      "confidence": 0.9516,
       "bbox": [
         165,
         847,
         745,
         2348
       ],
-      "outline": [
-        [
-          [
-            165,
-            847
-          ],
-          [
-            165,
-            3195
-          ],
-          [
-            910,
-            3195
-          ],
-          [
-            910,
-            847
-          ]
-        ]
-      ],
+      "outline": null,
       "features": {
         "width_ratio": 0.29822,
         "height_ratio": 0.70333,
@@ -653,8 +780,7 @@
         "pcb_trace_density": 0.11014,
         "pcb_pad_density": 1.0,
         "pcb_board_outline_score": 0.0,
-        "pcb_signature_score": 0.3393,
-        "overlap_resolution": 1.0
+        "pcb_signature_score": 0.3393
       },
       "crop_path": null,
       "figure_ref": null,
@@ -671,7 +797,26 @@
         747,
         85
       ],
-      "outline": null,
+      "outline": [
+        [
+          [
+            914,
+            3193
+          ],
+          [
+            167,
+            3193
+          ],
+          [
+            167,
+            3278
+          ],
+          [
+            914,
+            3278
+          ]
+        ]
+      ],
       "features": {
         "width_ratio": 0.29896,
         "height_ratio": 0.02556,
@@ -702,7 +847,8 @@
         "pcb_trace_density": 0.84734,
         "pcb_pad_density": 1.0,
         "pcb_board_outline_score": 0.0,
-        "pcb_signature_score": 0.87009
+        "pcb_signature_score": 0.87009,
+        "overlap_resolution": 1.0
       },
       "crop_path": null,
       "figure_ref": null,

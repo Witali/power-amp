@@ -1,5 +1,5 @@
 {
-  "source": "C:\\Work\\DataAccessTool\\power-amp\\study\\opencv_layout_regression_pages\\sources\\b.2000-02.036.jpg",
+  "source": "C:\\Work\\power-amp\\study\\opencv_layout_regression_pages\\sources\\b.2000-02.036.jpg",
   "page": "b.2000-02.036",
   "width": 2500,
   "height": 3338,
@@ -542,54 +542,6 @@
   "preview": "preview.png",
   "blocks": [
     {
-      "ident": "004_text",
-      "label": "text",
-      "orientation": "vertical",
-      "confidence": 0.6521,
-      "bbox": [
-        2340,
-        63,
-        121,
-        78
-      ],
-      "outline": null,
-      "features": {
-        "width_ratio": 0.04822,
-        "height_ratio": 0.02333,
-        "area_ratio": 0.00113,
-        "wide_aspect": 0.30952,
-        "tall_aspect": 0.12923,
-        "ink_density": 0.14432,
-        "edge_density": 0.31209,
-        "gray_std": 0.69029,
-        "gray_levels": 0.90625,
-        "component_density": 0.7326,
-        "hline_density": 0.49121,
-        "vline_density": 0.57033,
-        "line_art_score": 0.86593,
-        "line_balance": 0.86127,
-        "saturation_mean": 0.10935,
-        "saturation_p80": 0.24706,
-        "textline_density": 0.42857,
-        "horizontal_text_score": 0.42857,
-        "vertical_text_score": 0.55385,
-        "diagonal_text_score": 0.26471,
-        "max_text_score": 0.55385,
-        "component_signature_score": 0.0,
-        "resistor_symbol_density": 0.0,
-        "capacitor_symbol_density": 0.0,
-        "diode_symbol_density": 0.0,
-        "transistor_symbol_density": 0.0,
-        "pcb_trace_density": 0.61245,
-        "pcb_pad_density": 0.0,
-        "pcb_board_outline_score": 0.0,
-        "pcb_signature_score": 0.44097
-      },
-      "crop_path": null,
-      "figure_ref": null,
-      "caption_candidates": null
-    },
-    {
       "ident": "005_schematic_circuit",
       "label": "schematic/circuit",
       "orientation": "unknown",
@@ -881,7 +833,7 @@
       "ident": "012_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.8665,
+      "confidence": 0.9512,
       "bbox": [
         1576,
         1630,
@@ -981,7 +933,7 @@
       "ident": "014_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.869,
+      "confidence": 0.9511,
       "bbox": [
         43,
         1778,
@@ -1077,7 +1029,7 @@
       "ident": "016_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.8715,
+      "confidence": 0.9515,
       "bbox": [
         810,
         1780,
@@ -1153,7 +1105,7 @@
       "ident": "017_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.8718,
+      "confidence": 0.952,
       "bbox": [
         812,
         2390,
@@ -1201,7 +1153,7 @@
       "ident": "018_image",
       "label": "image",
       "orientation": "unknown",
-      "confidence": 0.8898,
+      "confidence": 0.9718,
       "bbox": [
         52,
         2585,

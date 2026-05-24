@@ -1,5 +1,5 @@
 {
-  "source": "C:\\Work\\DataAccessTool\\power-amp\\study\\opencv_layout_regression_pages\\sources\\b.2000-11.012.jpg",
+  "source": "C:\\Work\\power-amp\\study\\opencv_layout_regression_pages\\sources\\b.2000-11.012.jpg",
   "page": "b.2000-11.012",
   "width": 2500,
   "height": 3338,
@@ -480,7 +480,7 @@
       "ident": "002_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.8747,
+      "confidence": 0.9532,
       "bbox": [
         57,
         95,
@@ -528,7 +528,7 @@
       "ident": "003_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.8704,
+      "confidence": 0.951,
       "bbox": [
         820,
         96,
@@ -612,7 +612,7 @@
       "ident": "004_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.8705,
+      "confidence": 0.9519,
       "bbox": [
         1582,
         106,
@@ -660,7 +660,7 @@
       "ident": "005_schematic_circuit",
       "label": "schematic/circuit",
       "orientation": "unknown",
-      "confidence": 0.9666,
+      "confidence": 0.9827,
       "bbox": [
         65,
         846,
