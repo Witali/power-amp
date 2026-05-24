@@ -194,6 +194,18 @@ INTERNAL_DISPLAY_HEADING_TOP_TEXT_MIN_RATIO = layout_config.INTERNAL_DISPLAY_HEA
 INTERNAL_DISPLAY_HEADING_MIN_TEXT_PX = layout_config.INTERNAL_DISPLAY_HEADING_MIN_TEXT_PX
 INTERNAL_DISPLAY_HEADING_MIN_TEXT_HEIGHT_RATIO = layout_config.INTERNAL_DISPLAY_HEADING_MIN_TEXT_HEIGHT_RATIO
 INTERNAL_DISPLAY_HEADING_SCORE_GRAY_STD_WEIGHT = layout_config.INTERNAL_DISPLAY_HEADING_SCORE_GRAY_STD_WEIGHT
+TOP_DISPLAY_HEADING_MIN_CONTAINER_WIDTH_RATIO = layout_config.TOP_DISPLAY_HEADING_MIN_CONTAINER_WIDTH_RATIO
+TOP_DISPLAY_HEADING_MIN_CONTAINER_HEIGHT_RATIO = layout_config.TOP_DISPLAY_HEADING_MIN_CONTAINER_HEIGHT_RATIO
+TOP_DISPLAY_HEADING_SCAN_HEIGHT_RATIO = layout_config.TOP_DISPLAY_HEADING_SCAN_HEIGHT_RATIO
+TOP_DISPLAY_HEADING_MIN_RUN_PX = layout_config.TOP_DISPLAY_HEADING_MIN_RUN_PX
+TOP_DISPLAY_HEADING_MIN_RUN_HEIGHT_RATIO = layout_config.TOP_DISPLAY_HEADING_MIN_RUN_HEIGHT_RATIO
+TOP_DISPLAY_HEADING_MAX_TOP_OFFSET_PX = layout_config.TOP_DISPLAY_HEADING_MAX_TOP_OFFSET_PX
+TOP_DISPLAY_HEADING_MAX_TOP_OFFSET_RATIO = layout_config.TOP_DISPLAY_HEADING_MAX_TOP_OFFSET_RATIO
+TOP_DISPLAY_HEADING_MAX_RUN_GAP_PX = layout_config.TOP_DISPLAY_HEADING_MAX_RUN_GAP_PX
+TOP_DISPLAY_HEADING_MAX_RUN_GAP_RATIO = layout_config.TOP_DISPLAY_HEADING_MAX_RUN_GAP_RATIO
+TOP_DISPLAY_HEADING_MIN_HEIGHT_RATIO = layout_config.TOP_DISPLAY_HEADING_MIN_HEIGHT_RATIO
+TOP_DISPLAY_HEADING_MIN_AREA_RATIO = layout_config.TOP_DISPLAY_HEADING_MIN_AREA_RATIO
+TOP_DISPLAY_HEADING_MAX_HLINE_DENSITY = layout_config.TOP_DISPLAY_HEADING_MAX_HLINE_DENSITY
 WEAK_HEADING_ARTIFACT_MAX_CONFIDENCE = layout_config.WEAK_HEADING_ARTIFACT_MAX_CONFIDENCE
 WEAK_HEADING_ARTIFACT_MIN_WIDTH_RATIO = layout_config.WEAK_HEADING_ARTIFACT_MIN_WIDTH_RATIO
 WEAK_HEADING_ARTIFACT_MAX_HEIGHT_RATIO = layout_config.WEAK_HEADING_ARTIFACT_MAX_HEIGHT_RATIO
@@ -1632,6 +1644,22 @@ def heading_candidate_features(features: dict[str, float]) -> bool:
         and features["gray_std"] >= HEADING_MIN_GRAY_STD
         and features["line_balance"] <= HEADING_MAX_LINE_BALANCE
         and features["component_density"] >= HEADING_MIN_COMPONENT_DENSITY
+    )
+
+
+def top_display_heading_features(features: dict[str, float]) -> bool:
+    return (
+        features["width_ratio"] >= HEADING_MIN_WIDTH_RATIO
+        and features["height_ratio"] <= HEADING_MAX_HEIGHT_RATIO
+        and features["area_ratio"] <= HEADING_MAX_AREA_RATIO
+        and features["wide_aspect"] >= HEADING_MIN_WIDE_ASPECT
+        and features["max_text_score"] >= HEADING_MIN_TEXT_SCORE
+        and features["max_text_score"] <= HEADING_MAX_TEXT_SCORE
+        and features["ink_density"] >= HEADING_MIN_INK_DENSITY
+        and features["gray_std"] >= HEADING_MIN_GRAY_STD
+        and features["line_balance"] <= HEADING_MAX_LINE_BALANCE
+        and features["component_density"] >= BOLD_DISPLAY_HEADING_MIN_COMPONENT_DENSITY
+        and features["hline_density"] <= TOP_DISPLAY_HEADING_MAX_HLINE_DENSITY
     )
 
 
@@ -3180,6 +3208,83 @@ def merge_adjacent_heading_fragments(
     return sorted(items, key=lambda item: (item[1].y, item[1].x))
 
 
+def top_display_heading_band(
+    block: Block,
+    box: Box,
+    image,
+    mask,
+    edges,
+    width: int,
+    height: int,
+) -> Box | None:
+    if block.label != "text":
+        return None
+    if box.w < width * TOP_DISPLAY_HEADING_MIN_CONTAINER_WIDTH_RATIO:
+        return None
+    if box.h < height * TOP_DISPLAY_HEADING_MIN_CONTAINER_HEIGHT_RATIO:
+        return None
+
+    roi = mask[box.y : box.y2, box.x : box.x2]
+    if roi.size == 0:
+        return None
+
+    scan_height = min(box.h, max(1, int(round(box.h * TOP_DISPLAY_HEADING_SCAN_HEIGHT_RATIO))))
+    projection = (roi[:scan_height] > 0).sum(axis=1)
+    smoothed = smooth_projection(projection, max(3, box.h // 120))
+    runs = projection_runs(
+        smoothed,
+        max(
+            INTERNAL_DISPLAY_HEADING_PROJECTION_MIN_PX,
+            box.w * INTERNAL_DISPLAY_HEADING_PROJECTION_WIDTH_RATIO,
+        ),
+        max(
+            TOP_DISPLAY_HEADING_MIN_RUN_PX,
+            int(round(box.h * TOP_DISPLAY_HEADING_MIN_RUN_HEIGHT_RATIO)),
+        ),
+    )
+    if not runs:
+        return None
+
+    top_limit = max(
+        TOP_DISPLAY_HEADING_MAX_TOP_OFFSET_PX,
+        int(round(box.h * TOP_DISPLAY_HEADING_MAX_TOP_OFFSET_RATIO)),
+    )
+    first_start, band_end = runs[0]
+    if first_start > top_limit:
+        return None
+
+    gap_limit = max(
+        TOP_DISPLAY_HEADING_MAX_RUN_GAP_PX,
+        int(round(box.h * TOP_DISPLAY_HEADING_MAX_RUN_GAP_RATIO)),
+    )
+    for start, end in runs[1:]:
+        if start - band_end - 1 > gap_limit:
+            break
+        band_end = end
+
+    pad = max(3, box.h // 80)
+    band = Box(box.x, box.y + first_start, box.w, band_end - first_start + 1).inflate(pad, width, height)
+    if band.y <= box.y:
+        band = Box(band.x, box.y, band.w, band.y2 - box.y).clamp(width, height)
+
+    bottom_height = box.y2 - band.y2
+    min_text_height = max(
+        INTERNAL_DISPLAY_HEADING_MIN_TEXT_PX,
+        int(round(height * INTERNAL_DISPLAY_HEADING_MIN_TEXT_HEIGHT_RATIO)),
+    )
+    if bottom_height < min_text_height:
+        return None
+
+    features = feature_dict(image, mask, edges, band)
+    if not top_display_heading_features(features):
+        return None
+    if features["height_ratio"] < TOP_DISPLAY_HEADING_MIN_HEIGHT_RATIO:
+        return None
+    if features["area_ratio"] < TOP_DISPLAY_HEADING_MIN_AREA_RATIO:
+        return None
+    return band
+
+
 def internal_display_heading_band(
     block: Block,
     box: Box,
@@ -3262,7 +3367,11 @@ def split_internal_display_heading_blocks(
     )
 
     for block, box in classified:
-        heading_box = internal_display_heading_band(block, box, image, mask, edges, width, height)
+        heading_box = top_display_heading_band(block, box, image, mask, edges, width, height)
+        split_marker = "top_display_heading_split"
+        if heading_box is None:
+            heading_box = internal_display_heading_band(block, box, image, mask, edges, width, height)
+            split_marker = "internal_display_heading_split"
         if heading_box is None:
             result.append((block, box))
             continue
@@ -3289,7 +3398,7 @@ def split_internal_display_heading_blocks(
                 int(round(piece.h / scale)),
             )
             rounded_features = {key: round(float(value), 5) for key, value in features.items()}
-            rounded_features["internal_display_heading_split"] = 1.0
+            rounded_features[split_marker] = 1.0
             ident_number = f"{block_number}{suffix}"
             result.append(
                 (

@@ -2648,6 +2648,60 @@ class DetectPageLayoutTests(unittest.TestCase):
         self.assertEqual(split[1][0].ident, "002b_heading")
         self.assertEqual(split[1][0].features["internal_display_heading_split"], 1.0)
 
+    def test_splits_top_display_heading_fragments_from_text_columns(self) -> None:
+        cv2 = detect_page_layout.cv2
+        np = detect_page_layout.np
+
+        page = np.full((1200, 1000, 3), 255, dtype=np.uint8)
+        middle = detect_page_layout.Box(180, 120, 360, 780)
+        right = detect_page_layout.Box(550, 120, 360, 780)
+        for box, title_lines in ((middle, 2), (right, 1)):
+            for line_index in range(title_lines):
+                title_y = box.y + 18 + line_index * 96
+                for x in range(box.x + 30, box.x + 315, 58):
+                    cv2.rectangle(page, (x, title_y), (x + 38, title_y + 58), (0, 0, 0), -1)
+            for row_index in range(18):
+                text_y = box.y + 220 + row_index * 28
+                cv2.rectangle(page, (box.x + 24, text_y), (box.x + 330, text_y + 7), (0, 0, 0), -1)
+
+        gray = cv2.cvtColor(page, cv2.COLOR_BGR2GRAY)
+        mask, _, _ = detect_page_layout.foreground_mask(gray)
+        edges = detect_page_layout.canny_edges(gray)
+        ann = detect_page_layout.train_bootstrap_ann()
+        classified = [
+            (detect_page_layout.Block("002_text", "text", "horizontal", 0.90, middle.to_list(), None, {}), middle),
+            (detect_page_layout.Block("003_text", "text", "horizontal", 0.90, right.to_list(), None, {}), right),
+        ]
+
+        split = detect_page_layout.split_internal_display_heading_blocks(
+            classified,
+            page,
+            mask,
+            edges,
+            ann,
+            scale=1.0,
+            width=1000,
+            height=1200,
+        )
+        headings = [item for item in split if item[0].label == "heading"]
+
+        self.assertEqual(len(headings), 2)
+        self.assertTrue(all(item[0].features["top_display_heading_split"] == 1.0 for item in headings))
+
+        merged = detect_page_layout.merge_adjacent_heading_fragments(
+            split,
+            page,
+            mask,
+            edges,
+            ann,
+            scale=1.0,
+            width=1000,
+            height=1200,
+        )
+
+        self.assertEqual(sum(1 for block, _ in merged if block.label == "heading"), 1)
+        self.assertTrue(any(block.features.get("heading_fragment_merge") == 1.0 for block, _ in merged))
+
     def test_schematic_side_caption_panel_can_merge_with_large_schematic(self) -> None:
         panel = detect_page_layout.Block(
             ident="008_image",

@@ -56,7 +56,7 @@
     },
     {
       "id": "b.1986-12.057",
-      "reason": "manual feedback page: tall merged text area must split into three magazine columns",
+      "reason": "manual feedback page: tall merged text area must split into three magazine columns and keep the top display heading separate",
       "source": "study/opencv_layout_regression_pages/sources/b.1986-12.057.jpg",
       "original_cached_source": ".tmp/archive_radio_ru/1986/12/b.1986-12.057.jpg",
       "baseline_layout": "study/opencv_layout_regression_pages/baselines/b.1986-12.057/layout.json",

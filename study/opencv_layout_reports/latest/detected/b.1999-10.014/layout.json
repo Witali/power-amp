@@ -55,7 +55,28 @@
     }
   ],
   "frequency_cluster_hints": [],
-  "frequency_warnings": [],
+  "frequency_warnings": [
+    {
+      "block": "003_heading",
+      "block_label": "heading",
+      "hint_label": "text",
+      "hint_confidence": 0.80768,
+      "block_overlap": 1.0,
+      "hint_overlap": 0.03967,
+      "bbox": [
+        19,
+        52,
+        1550,
+        208
+      ],
+      "hint_bbox": [
+        0,
+        0,
+        2435,
+        3338
+      ]
+    }
+  ],
   "frequency_cluster_warnings": [],
   "preview": "preview.png",
   "blocks": [
@@ -75,6 +96,22 @@
           [
             1556,
             32
+          ],
+          [
+            1556,
+            51
+          ],
+          [
+            1569,
+            51
+          ],
+          [
+            1569,
+            259
+          ],
+          [
+            1556,
+            259
           ],
           [
             1556,
@@ -144,48 +181,98 @@
       "caption_candidates": null
     },
     {
-      "ident": "003_text",
+      "ident": "003_heading",
+      "label": "heading",
+      "orientation": "horizontal",
+      "confidence": 0.5883,
+      "bbox": [
+        19,
+        52,
+        1550,
+        208
+      ],
+      "outline": null,
+      "features": {
+        "width_ratio": 0.62018,
+        "height_ratio": 0.06222,
+        "area_ratio": 0.03859,
+        "wide_aspect": 1.0,
+        "tall_aspect": 0.02679,
+        "ink_density": 0.21045,
+        "edge_density": 0.24222,
+        "gray_std": 0.87673,
+        "gray_levels": 0.90625,
+        "component_density": 0.35244,
+        "hline_density": 0.0,
+        "vline_density": 1.0,
+        "line_art_score": 1.0,
+        "line_balance": 0.0,
+        "saturation_mean": 0.00539,
+        "saturation_p80": 0.0,
+        "textline_density": 0.48214,
+        "horizontal_text_score": 0.48214,
+        "vertical_text_score": 0.19378,
+        "diagonal_text_score": 0.31518,
+        "max_text_score": 0.48214,
+        "component_signature_score": 0.80148,
+        "resistor_symbol_density": 1.0,
+        "capacitor_symbol_density": 1.0,
+        "diode_symbol_density": 0.0,
+        "transistor_symbol_density": 0.89713,
+        "pcb_trace_density": 1.0,
+        "pcb_pad_density": 0.0,
+        "pcb_board_outline_score": 1.0,
+        "pcb_signature_score": 0.9,
+        "top_display_heading_split": 1.0
+      },
+      "crop_path": null,
+      "figure_ref": null,
+      "caption_candidates": null
+    },
+    {
+      "ident": "003b_text",
       "label": "text",
       "orientation": "horizontal",
-      "confidence": 0.8464,
+      "confidence": 0.9362,
       "bbox": [
         30,
-        37,
+        260,
         1528,
-        1022
+        799
       ],
       "outline": null,
       "features": {
         "width_ratio": 0.61128,
-        "height_ratio": 0.30611,
-        "area_ratio": 0.18712,
-        "wide_aspect": 0.29909,
-        "tall_aspect": 0.13374,
-        "ink_density": 0.22401,
-        "edge_density": 0.49563,
-        "gray_std": 0.84868,
+        "height_ratio": 0.23944,
+        "area_ratio": 0.14637,
+        "wide_aspect": 0.38237,
+        "tall_aspect": 0.10461,
+        "ink_density": 0.23089,
+        "edge_density": 0.56976,
+        "gray_std": 0.84501,
         "gray_levels": 0.96875,
         "component_density": 1.0,
         "hline_density": 0.0,
         "vline_density": 0.0,
-        "line_art_score": 0.25781,
+        "line_art_score": 0.38572,
         "line_balance": 0.0,
-        "saturation_mean": 0.00111,
+        "saturation_mean": 0.0,
         "saturation_p80": 0.0,
-        "textline_density": 0.68603,
-        "horizontal_text_score": 0.68603,
+        "textline_density": 0.75174,
+        "horizontal_text_score": 0.75174,
         "vertical_text_score": 0.02184,
-        "diagonal_text_score": 0.16198,
-        "max_text_score": 0.68603,
+        "diagonal_text_score": 0.18264,
+        "max_text_score": 0.75174,
         "component_signature_score": 1.0,
         "resistor_symbol_density": 1.0,
         "capacitor_symbol_density": 1.0,
         "diode_symbol_density": 1.0,
         "transistor_symbol_density": 1.0,
-        "pcb_trace_density": 0.81338,
+        "pcb_trace_density": 0.41356,
         "pcb_pad_density": 1.0,
         "pcb_board_outline_score": 0.0,
-        "pcb_signature_score": 0.84563
+        "pcb_signature_score": 0.55776,
+        "top_display_heading_split": 1.0
       },
       "crop_path": null,
       "figure_ref": null,

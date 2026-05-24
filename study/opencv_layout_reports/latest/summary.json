@@ -92,12 +92,12 @@
     "source": "../../opencv_layout_regression_pages/sources/b.1986-12.057.jpg",
     "layout": "detected/b.1986-12.057/layout.json",
     "preview": "detected/b.1986-12.057/preview.png",
-    "block_count": 4,
+    "block_count": 5,
     "counts": {
-      "heading": 1,
+      "heading": 2,
       "text": 3
     },
-    "warning_count": 12
+    "warning_count": 14
   },
   {
     "id": "b.1997-04.018",
@@ -162,11 +162,12 @@
     "source": "../../opencv_layout_regression_pages/sources/b.1999-10.014.jpg",
     "layout": "detected/b.1999-10.014/layout.json",
     "preview": "detected/b.1999-10.014/preview.png",
-    "block_count": 5,
+    "block_count": 6,
     "counts": {
-      "text": 5
+      "text": 5,
+      "heading": 1
     },
-    "warning_count": 0
+    "warning_count": 1
   },
   {
     "id": "b.1999-12.064",
