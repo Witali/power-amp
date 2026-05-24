@@ -2551,6 +2551,40 @@ class DetectPageLayoutTests(unittest.TestCase):
         self.assertTrue(detect_page_layout.adjacent_heading_fragments(first, second, width=1404, height=1800))
         self.assertFalse(detect_page_layout.adjacent_heading_fragments(category, first, width=1404, height=1800))
 
+    def test_splits_internal_display_heading_from_large_text_block(self) -> None:
+        cv2 = detect_page_layout.cv2
+        np = detect_page_layout.np
+
+        page = np.full((1600, 1200, 3), 255, dtype=np.uint8)
+        box = detect_page_layout.Box(100, 120, 760, 700)
+        for index in range(14):
+            y = box.y + 25 + index * 28
+            cv2.rectangle(page, (box.x + 30, y), (box.x + 650, y + 8), (0, 0, 0), -1)
+        title_y = box.y + 470
+        for x in range(box.x + 30, box.x + 700, 70):
+            cv2.rectangle(page, (x, title_y), (x + 50, title_y + 90), (0, 0, 0), -1)
+
+        gray = cv2.cvtColor(page, cv2.COLOR_BGR2GRAY)
+        mask, _, _ = detect_page_layout.foreground_mask(gray)
+        edges = detect_page_layout.canny_edges(gray)
+        ann = detect_page_layout.train_bootstrap_ann()
+        block = detect_page_layout.Block("002_text", "text", "horizontal", 0.90, box.to_list(), None, {})
+
+        split = detect_page_layout.split_internal_display_heading_blocks(
+            [(block, box)],
+            page,
+            mask,
+            edges,
+            ann,
+            scale=1.0,
+            width=1200,
+            height=1600,
+        )
+
+        self.assertEqual([item[0].label for item in split], ["text", "heading", "text"])
+        self.assertEqual(split[1][0].ident, "002b_heading")
+        self.assertEqual(split[1][0].features["internal_display_heading_split"], 1.0)
+
     def test_schematic_side_caption_panel_can_merge_with_large_schematic(self) -> None:
         panel = detect_page_layout.Block(
             ident="008_image",

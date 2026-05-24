@@ -3033,6 +3033,119 @@ def merge_adjacent_heading_fragments(
     return sorted(items, key=lambda item: (item[1].y, item[1].x))
 
 
+def internal_display_heading_band(
+    block: Block,
+    box: Box,
+    image,
+    mask,
+    edges,
+    width: int,
+    height: int,
+) -> Box | None:
+    if block.label != "text":
+        return None
+    if box.w < width * 0.34 or box.h < height * 0.16:
+        return None
+    if box.area / max(1, width * height) < 0.055:
+        return None
+
+    roi = mask[box.y : box.y2, box.x : box.x2]
+    if roi.size == 0:
+        return None
+    projection = (roi > 0).sum(axis=1)
+    smoothed = smooth_projection(projection, max(3, box.h // 120))
+    runs = projection_runs(
+        smoothed,
+        max(24.0, box.w * 0.055),
+        max(18, int(round(box.h * 0.075))),
+    )
+    if not runs:
+        return None
+
+    candidates: list[tuple[float, Box]] = []
+    pad = max(3, box.h // 80)
+    for start, end in runs:
+        if start < box.h * 0.16:
+            continue
+        band = Box(box.x, box.y + start, box.w, end - start + 1).inflate(pad, width, height)
+        if band.y <= box.y:
+            continue
+        top_height = band.y - box.y
+        if top_height < max(45, int(round(height * 0.045))):
+            continue
+        features = feature_dict(image, mask, edges, band)
+        if not bold_display_heading_features(features):
+            continue
+        score = float(features.get("ink_density", 0.0)) + 0.35 * float(features.get("gray_std", 0.0))
+        candidates.append((score, band))
+
+    if not candidates:
+        return None
+    _, best = max(candidates, key=lambda item: item[0])
+    return best
+
+
+def split_internal_display_heading_blocks(
+    classified: list[tuple[Block, Box]],
+    image,
+    mask,
+    edges,
+    ann,
+    scale: float,
+    width: int,
+    height: int,
+) -> list[tuple[Block, Box]]:
+    result: list[tuple[Block, Box]] = []
+    min_text_height = max(28, int(round(height * 0.025)))
+
+    for block, box in classified:
+        heading_box = internal_display_heading_band(block, box, image, mask, edges, width, height)
+        if heading_box is None:
+            result.append((block, box))
+            continue
+
+        pieces: list[tuple[str, Box, str]] = []
+        top_box = Box(box.x, box.y, box.w, max(0, heading_box.y - box.y)).clamp(width, height)
+        if top_box.h >= min_text_height:
+            pieces.append(("text", top_box, "a"))
+        pieces.append(("heading", heading_box, "b" if pieces else ""))
+
+        bottom_y = heading_box.y2
+        bottom_box = Box(box.x, bottom_y, box.w, max(0, box.y2 - bottom_y)).clamp(width, height)
+        if bottom_box.h >= min_text_height:
+            pieces.append(("text", bottom_box, chr(ord("a") + len(pieces))))
+
+        block_number = block.ident.split("_", 1)[0]
+        for label, piece, suffix in pieces:
+            features = feature_dict(image, mask, edges, piece)
+            _, confidence = classify_features(ann, features)
+            original_box = Box(
+                int(round(piece.x / scale)),
+                int(round(piece.y / scale)),
+                int(round(piece.w / scale)),
+                int(round(piece.h / scale)),
+            )
+            rounded_features = {key: round(float(value), 5) for key, value in features.items()}
+            rounded_features["internal_display_heading_split"] = 1.0
+            ident_number = f"{block_number}{suffix}"
+            result.append(
+                (
+                    Block(
+                        ident=f"{ident_number}_{label}",
+                        label=label,
+                        orientation="horizontal" if label == "heading" else infer_orientation(features),
+                        confidence=round(max(confidence, block.confidence if label == "text" else 0.0), 4),
+                        bbox=original_box.to_list(),
+                        outline=None,
+                        features=rounded_features,
+                    ),
+                    piece,
+                )
+            )
+
+    return sorted(result, key=lambda item: (item[1].y, item[1].x))
+
+
 def contents_column_fragment_candidate(block: Block, box: Box, width: int) -> bool:
     if block.label not in TEXTUAL_LABELS:
         return False
@@ -4501,6 +4614,9 @@ def classify_blocks(
         )
 
     classified = split_text_columns_in_classified_blocks(
+        classified, image, mask, edges, ann, scale=scale, width=analysis_w, height=analysis_h
+    )
+    classified = split_internal_display_heading_blocks(
         classified, image, mask, edges, ann, scale=scale, width=analysis_w, height=analysis_h
     )
     classified = merge_fragmented_contents_text_rows(
