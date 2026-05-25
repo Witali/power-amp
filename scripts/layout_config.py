@@ -303,6 +303,21 @@ OVERLAP_DIAGRAM_STACKED_MERGE_BOOST = 1.10
 OVERLAP_TEXT_LINE_ART_PENALTY = 2.80
 STACKED_DIAGRAM_TEXT_CUTOUT_MIN_MERGE_SCORE = 0.50
 
+# Some waveform diagrams are detected as one labeled monochrome image instead
+# of several stacked strips. Promote those wide low-saturation line-art blocks
+# to diagram so adjacent prose cannot cut the waveform area.
+WAVEFORM_IMAGE_PROMOTE_MIN_WIDTH_RATIO = 0.24
+WAVEFORM_IMAGE_PROMOTE_MAX_HEIGHT_RATIO = 0.28
+WAVEFORM_IMAGE_PROMOTE_MIN_AREA_RATIO = 0.025
+WAVEFORM_IMAGE_PROMOTE_MAX_AREA_RATIO = 0.16
+WAVEFORM_IMAGE_PROMOTE_MIN_WIDE_ASPECT = 1.35
+WAVEFORM_IMAGE_PROMOTE_MIN_LINE_ART = 0.32
+WAVEFORM_IMAGE_PROMOTE_MIN_AXIS_DENSITY = 0.055
+WAVEFORM_IMAGE_PROMOTE_MIN_EDGE_DENSITY = 0.12
+WAVEFORM_IMAGE_PROMOTE_MAX_INK_DENSITY = 0.18
+WAVEFORM_IMAGE_PROMOTE_MAX_SATURATION = 0.12
+WAVEFORM_IMAGE_PROMOTE_MIN_COMPONENT_SIGNATURE = 0.52
+
 # Annual contents pages can fragment into one full-width text box per printed
 # row because dot leaders connect entries across both magazine columns. Merge
 # only longer runs of thin, similarly aligned text strips so normal article

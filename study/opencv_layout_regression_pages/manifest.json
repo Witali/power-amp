@@ -128,7 +128,7 @@
     },
     {
       "id": "b.2000-02.036",
-      "reason": "large schematic, stacked waveform diagram, captions, and text columns",
+      "reason": "manual feedback page: waveform diagram must stay whole when overlapped by adjacent text columns",
       "source": "study/opencv_layout_regression_pages/sources/b.2000-02.036.jpg",
       "original_cached_source": ".tmp/layout_candidate_pages/b.2000-02.036.jpg",
       "baseline_layout": "study/opencv_layout_regression_pages/baselines/b.2000-02.036/layout.json",

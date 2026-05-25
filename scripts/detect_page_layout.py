@@ -261,6 +261,17 @@ OVERLAP_DIAGRAM_LINE_ART_BOOST = layout_config.OVERLAP_DIAGRAM_LINE_ART_BOOST
 OVERLAP_DIAGRAM_STACKED_MERGE_BOOST = layout_config.OVERLAP_DIAGRAM_STACKED_MERGE_BOOST
 OVERLAP_TEXT_LINE_ART_PENALTY = layout_config.OVERLAP_TEXT_LINE_ART_PENALTY
 STACKED_DIAGRAM_TEXT_CUTOUT_MIN_MERGE_SCORE = layout_config.STACKED_DIAGRAM_TEXT_CUTOUT_MIN_MERGE_SCORE
+WAVEFORM_IMAGE_PROMOTE_MIN_WIDTH_RATIO = layout_config.WAVEFORM_IMAGE_PROMOTE_MIN_WIDTH_RATIO
+WAVEFORM_IMAGE_PROMOTE_MAX_HEIGHT_RATIO = layout_config.WAVEFORM_IMAGE_PROMOTE_MAX_HEIGHT_RATIO
+WAVEFORM_IMAGE_PROMOTE_MIN_AREA_RATIO = layout_config.WAVEFORM_IMAGE_PROMOTE_MIN_AREA_RATIO
+WAVEFORM_IMAGE_PROMOTE_MAX_AREA_RATIO = layout_config.WAVEFORM_IMAGE_PROMOTE_MAX_AREA_RATIO
+WAVEFORM_IMAGE_PROMOTE_MIN_WIDE_ASPECT = layout_config.WAVEFORM_IMAGE_PROMOTE_MIN_WIDE_ASPECT
+WAVEFORM_IMAGE_PROMOTE_MIN_LINE_ART = layout_config.WAVEFORM_IMAGE_PROMOTE_MIN_LINE_ART
+WAVEFORM_IMAGE_PROMOTE_MIN_AXIS_DENSITY = layout_config.WAVEFORM_IMAGE_PROMOTE_MIN_AXIS_DENSITY
+WAVEFORM_IMAGE_PROMOTE_MIN_EDGE_DENSITY = layout_config.WAVEFORM_IMAGE_PROMOTE_MIN_EDGE_DENSITY
+WAVEFORM_IMAGE_PROMOTE_MAX_INK_DENSITY = layout_config.WAVEFORM_IMAGE_PROMOTE_MAX_INK_DENSITY
+WAVEFORM_IMAGE_PROMOTE_MAX_SATURATION = layout_config.WAVEFORM_IMAGE_PROMOTE_MAX_SATURATION
+WAVEFORM_IMAGE_PROMOTE_MIN_COMPONENT_SIGNATURE = layout_config.WAVEFORM_IMAGE_PROMOTE_MIN_COMPONENT_SIGNATURE
 CONTENTS_ROW_MERGE_MIN_RUN = layout_config.CONTENTS_ROW_MERGE_MIN_RUN
 CONTENTS_ROW_MERGE_MAX_HEIGHT_RATIO = layout_config.CONTENTS_ROW_MERGE_MAX_HEIGHT_RATIO
 CONTENTS_ROW_MERGE_MIN_WIDTH_RATIO = layout_config.CONTENTS_ROW_MERGE_MIN_WIDTH_RATIO
@@ -2376,7 +2387,10 @@ def text_block_should_cut_visual_outline(visual_block: Block, text_block: Block)
 
     if (
         visual_block.label == "diagram"
-        and float(visual_block.features.get("stacked_diagram_merge", 0.0)) >= STACKED_DIAGRAM_TEXT_CUTOUT_MIN_MERGE_SCORE
+        and (
+            float(visual_block.features.get("stacked_diagram_merge", 0.0)) >= STACKED_DIAGRAM_TEXT_CUTOUT_MIN_MERGE_SCORE
+            or float(visual_block.features.get("waveform_image_promote", 0.0)) >= 0.5
+        )
     ):
         return False
 
@@ -4411,6 +4425,52 @@ def merge_stacked_diagram_blocks(
     return sorted(result, key=lambda item: (item[1].y, item[1].x))
 
 
+def waveform_image_promote_candidate(block: Block, box: Box) -> bool:
+    if block.label != "image":
+        return False
+
+    features = block.features
+    width_ratio = float(features.get("width_ratio", 0.0))
+    height_ratio = float(features.get("height_ratio", 1.0))
+    area_ratio = float(features.get("area_ratio", 0.0))
+    geometric_aspect = box.w / max(1, box.h)
+    axis_density = max(float(features.get("hline_density", 0.0)), float(features.get("vline_density", 0.0)))
+    return (
+        width_ratio >= WAVEFORM_IMAGE_PROMOTE_MIN_WIDTH_RATIO
+        and height_ratio <= WAVEFORM_IMAGE_PROMOTE_MAX_HEIGHT_RATIO
+        and WAVEFORM_IMAGE_PROMOTE_MIN_AREA_RATIO <= area_ratio <= WAVEFORM_IMAGE_PROMOTE_MAX_AREA_RATIO
+        and geometric_aspect >= WAVEFORM_IMAGE_PROMOTE_MIN_WIDE_ASPECT
+        and float(features.get("line_art_score", 0.0)) >= WAVEFORM_IMAGE_PROMOTE_MIN_LINE_ART
+        and axis_density >= WAVEFORM_IMAGE_PROMOTE_MIN_AXIS_DENSITY
+        and float(features.get("edge_density", 0.0)) >= WAVEFORM_IMAGE_PROMOTE_MIN_EDGE_DENSITY
+        and float(features.get("ink_density", 1.0)) <= WAVEFORM_IMAGE_PROMOTE_MAX_INK_DENSITY
+        and float(features.get("saturation_p80", 1.0)) <= WAVEFORM_IMAGE_PROMOTE_MAX_SATURATION
+        and float(features.get("component_signature_score", 0.0)) >= WAVEFORM_IMAGE_PROMOTE_MIN_COMPONENT_SIGNATURE
+    )
+
+
+def promote_waveform_images_to_diagrams(classified: list[tuple[Block, Box]]) -> list[tuple[Block, Box]]:
+    promoted: list[tuple[Block, Box]] = []
+    for block, box in classified:
+        if waveform_image_promote_candidate(block, box):
+            features = dict(block.features)
+            features["waveform_image_promote"] = 1.0
+            block = Block(
+                ident=block.ident.replace("_image", "_diagram"),
+                label="diagram",
+                orientation="unknown",
+                confidence=block.confidence,
+                bbox=block.bbox,
+                outline=block.outline,
+                features=features,
+                crop_path=block.crop_path,
+                figure_ref=block.figure_ref,
+                caption_candidates=block.caption_candidates,
+            )
+        promoted.append((block, box))
+    return promoted
+
+
 def demote_textual_diagram_wrappers(classified: list[tuple[Block, Box]]) -> list[tuple[Block, Box]]:
     result: list[tuple[Block, Box]] = []
     for block, box in classified:
@@ -4624,6 +4684,8 @@ def overlap_owner_score(block: Block, block_box: Box, overlap: Box, overlap_labe
         if line_art >= OVERLAP_DIAGRAM_MIN_LINE_ART and max(hline, vline) >= OVERLAP_DIAGRAM_MIN_AXIS_DENSITY:
             score += OVERLAP_DIAGRAM_LINE_ART_BOOST
         if float(block.features.get("stacked_diagram_merge", 0.0)) >= 0.5:
+            score += OVERLAP_DIAGRAM_STACKED_MERGE_BOOST
+        if float(block.features.get("waveform_image_promote", 0.0)) >= 0.5:
             score += OVERLAP_DIAGRAM_STACKED_MERGE_BOOST
         if overlap_label == "diagram":
             score += 1.4
@@ -5067,6 +5129,7 @@ def classify_blocks(
     classified = merge_stacked_diagram_blocks(
         classified, image, mask, edges, ann, scale=scale, width=analysis_w, height=analysis_h
     )
+    classified = promote_waveform_images_to_diagrams(classified)
     classified = merge_connected_schematic_blocks(
         classified, image, mask, edges, ann, scale=scale, width=analysis_w, height=analysis_h
     )
@@ -5077,6 +5140,7 @@ def classify_blocks(
     classified = merge_illustration_fragments_into_images(
         classified, image, mask, edges, ann, scale=scale, width=analysis_w, height=analysis_h
     )
+    classified = promote_waveform_images_to_diagrams(classified)
     classified = suppress_weak_visual_wrappers(classified)
     all_blocks = suppress_nested_text_blocks([block for block, _ in classified])
     assign_visual_outlines(all_blocks)

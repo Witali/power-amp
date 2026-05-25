@@ -1568,6 +1568,48 @@ class DetectPageLayoutTests(unittest.TestCase):
 
         self.assertGreater(diagram_score, text_score)
 
+    def test_overlap_owner_score_prefers_promoted_waveform_image_for_line_art_overlap(self) -> None:
+        text = detect_page_layout.Block(
+            ident="017_text",
+            label="text",
+            orientation="horizontal",
+            confidence=0.95,
+            bbox=[812, 2390, 770, 868],
+            outline=None,
+            features={},
+        )
+        diagram = detect_page_layout.Block(
+            ident="018_diagram",
+            label="diagram",
+            orientation="unknown",
+            confidence=0.97,
+            bbox=[52, 2585, 1050, 666],
+            outline=None,
+            features={"waveform_image_promote": 1.0},
+        )
+        overlap = detect_page_layout.Box(812, 2585, 290, 666)
+        features = {
+            "max_text_score": 0.41,
+            "textline_density": 0.41,
+            "line_art_score": 0.38,
+            "hline_density": 0.32,
+            "vline_density": 0.0,
+            "saturation_p80": 0.0,
+            "gray_std": 0.45,
+            "component_signature_score": 0.64,
+        }
+
+        text_score = detect_page_layout.overlap_owner_score(text, detect_page_layout.box_from_list(text.bbox), overlap, "image", features)
+        diagram_score = detect_page_layout.overlap_owner_score(
+            diagram,
+            detect_page_layout.box_from_list(diagram.bbox),
+            overlap,
+            "image",
+            features,
+        )
+
+        self.assertGreater(diagram_score, text_score)
+
     def test_block_preview_label_includes_block_number(self) -> None:
         block = detect_page_layout.Block(
             ident="023_text",
@@ -2798,6 +2840,65 @@ class DetectPageLayoutTests(unittest.TestCase):
 
         self.assertEqual(demoted[0][0].label, "diagram")
         self.assertEqual(demoted[0][0].ident, "016_diagram")
+
+    def test_promotes_waveform_image_to_diagram(self) -> None:
+        block = detect_page_layout.Block(
+            ident="018_image",
+            label="image",
+            orientation="unknown",
+            confidence=0.97,
+            bbox=[52, 2585, 1050, 666],
+            outline=None,
+            features={
+                "width_ratio": 0.420,
+                "height_ratio": 0.199,
+                "area_ratio": 0.084,
+                "wide_aspect": 1.58,
+                "line_art_score": 0.404,
+                "hline_density": 0.078,
+                "vline_density": 0.0,
+                "edge_density": 0.278,
+                "ink_density": 0.089,
+                "saturation_p80": 0.0,
+                "component_signature_score": 0.865,
+            },
+        )
+        box = detect_page_layout.Box(52, 2585, 1050, 666)
+
+        promoted = detect_page_layout.promote_waveform_images_to_diagrams([(block, box)])
+
+        self.assertEqual(promoted[0][0].label, "diagram")
+        self.assertEqual(promoted[0][0].ident, "018_diagram")
+        self.assertEqual(promoted[0][0].features["waveform_image_promote"], 1.0)
+
+    def test_keeps_photographic_image_as_image(self) -> None:
+        block = detect_page_layout.Block(
+            ident="014_image",
+            label="image",
+            orientation="unknown",
+            confidence=0.98,
+            bbox=[905, 2973, 579, 330],
+            outline=None,
+            features={
+                "width_ratio": 0.23,
+                "height_ratio": 0.10,
+                "area_ratio": 0.023,
+                "wide_aspect": 1.75,
+                "line_art_score": 0.12,
+                "hline_density": 0.01,
+                "vline_density": 0.0,
+                "edge_density": 0.18,
+                "ink_density": 0.22,
+                "saturation_p80": 0.45,
+                "component_signature_score": 0.10,
+            },
+        )
+        box = detect_page_layout.Box(905, 2973, 579, 330)
+
+        promoted = detect_page_layout.promote_waveform_images_to_diagrams([(block, box)])
+
+        self.assertEqual(promoted[0][0].label, "image")
+        self.assertNotIn("waveform_image_promote", promoted[0][0].features)
 
     def test_stacked_diagram_seed_accepts_single_axis_waveform_strip(self) -> None:
         block = detect_page_layout.Block(
