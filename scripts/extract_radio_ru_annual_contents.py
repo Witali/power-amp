@@ -16,6 +16,12 @@ DEFAULT_PAGES = {
     2000: ["b.2000-12.063", "b.2000-12.064", "b.2000-12.065", "b.2000-12.066"],
 }
 DEFAULT_OCR_VARIANTS = ["layout_text_blocks", "columns2"]
+DEFAULT_OCR_FILENAMES = [
+    "merged.prose.psm6.corrected.txt",
+    "merged.prose.psm6.txt",
+    "merged.prose.psm4.corrected.txt",
+    "merged.prose.psm4.txt",
+]
 
 SECTION_WORDS = {
     "НАУКА",
@@ -59,6 +65,29 @@ TRAILING_ISSUE_PAGE_RE = re.compile(
 )
 PAIR_RE = re.compile(r"(?<!\d)(?P<issue>[1-9]|1[0-2])\s*[—-]\s*(?P<page>[1-9]\d{0,2})(?!\d)")
 ONLY_NUMBERS_RE = re.compile(r"^(?P<issue>[1-9]|1[0-2])\s+(?P<page>[1-9]\d{0,2})$")
+TAIL_TOKEN_RE = re.compile(r"(?P<prefix>.*?)(?P<tail>[0-9A-Za-zА-Яа-яЁё|$]{2,5})(?:\D*)$")
+NOISY_TAIL_RE = re.compile(
+    r"(?P<prefix>.*?)(?<!\d)(?P<issue>[1-9]|1[0-2])\D{0,12}(?P<page>[0-9OoОоЗзSБВBIl|$]{1,3})(?:\D*)$"
+)
+NUMERIC_TAIL_TRANSLATION = str.maketrans(
+    {
+        "O": "0",
+        "o": "0",
+        "О": "0",
+        "о": "0",
+        "З": "3",
+        "з": "3",
+        "S": "5",
+        "$": "5",
+        "Б": "6",
+        "б": "6",
+        "В": "8",
+        "B": "8",
+        "I": "1",
+        "l": "1",
+        "|": "1",
+    }
+)
 
 
 @dataclass
@@ -196,13 +225,42 @@ def clean_entry_text(text: str) -> str:
 def parse_issue_page(text: str) -> tuple[str, str, str]:
     candidate = re.sub(r"[.,;:|/\\_+=~`'\"<>()[\]{}]+$", "", text).strip()
     match = TRAILING_ISSUE_PAGE_RE.match(candidate)
-    if not match:
-        return text, "", ""
-    issue = int(match.group("issue"))
-    page = int(match.group("page"))
-    if not (1 <= issue <= 12 and 1 <= page <= 130):
-        return text, "", ""
-    return match.group("prefix").strip(), str(issue), str(page)
+    if match:
+        issue = int(match.group("issue"))
+        page = int(match.group("page"))
+        if 1 <= issue <= 12 and 1 <= page <= 130:
+            return match.group("prefix").strip(), str(issue), str(page)
+
+    match = TAIL_TOKEN_RE.match(candidate)
+    if match:
+        tail = match.group("tail").translate(NUMERIC_TAIL_TRANSLATION)
+        if tail.isdigit():
+            parsed = split_attached_issue_page(tail)
+            if parsed:
+                issue, page = parsed
+                return match.group("prefix").strip(), str(issue), str(page)
+
+    match = NOISY_TAIL_RE.match(candidate)
+    if match:
+        issue = int(match.group("issue"))
+        page_text = match.group("page").translate(NUMERIC_TAIL_TRANSLATION)
+        if page_text.isdigit():
+            page = int(page_text)
+            if 1 <= issue <= 12 and 1 <= page <= 130:
+                return match.group("prefix").strip(), str(issue), str(page)
+
+    return text, "", ""
+
+
+def split_attached_issue_page(token: str) -> tuple[int, int] | None:
+    for issue_length in (2, 1):
+        if len(token) <= issue_length:
+            continue
+        issue = int(token[:issue_length])
+        page = int(token[issue_length:])
+        if 1 <= issue <= 12 and 1 <= page <= 130:
+            return issue, page
+    return None
 
 
 def needs_review(text: str, issue: str, page: str) -> str:
@@ -376,11 +434,12 @@ def parse_text_file(year: int, page_name: str, source: Path, state: ParseState) 
     return state.records[start_count:]
 
 
-def find_ocr_file(ocr_root: Path, page_name: str, variants: list[str]) -> Path:
+def find_ocr_file(ocr_root: Path, page_name: str, variants: list[str], filenames: list[str] | None = None) -> Path:
+    filenames = filenames or DEFAULT_OCR_FILENAMES
     checked: list[Path] = []
     for variant in variants:
         base = ocr_root / page_name / variant
-        for filename in ("merged.prose.psm6.corrected.txt", "merged.prose.psm6.txt"):
+        for filename in filenames:
             candidate = base / filename
             checked.append(candidate)
             if candidate.exists():
@@ -491,12 +550,18 @@ def parse_args() -> argparse.Namespace:
         default=",".join(DEFAULT_OCR_VARIANTS),
         help="Comma-separated OCR variant directories to try under each page, in priority order.",
     )
+    parser.add_argument(
+        "--ocr-filenames",
+        default=",".join(DEFAULT_OCR_FILENAMES),
+        help="Comma-separated OCR filenames to try inside each variant, in priority order.",
+    )
     return parser.parse_args()
 
 
 def main() -> int:
     args = parse_args()
     variants = [part.strip() for part in args.ocr_variants.split(",") if part.strip()]
+    filenames = [part.strip() for part in args.ocr_filenames.split(",") if part.strip()]
     pages = parse_page_ranges(args.page_ranges) if args.page_ranges else DEFAULT_PAGES
     years_label = year_span_label(pages)
     output_prefix = args.output_prefix or default_output_prefix(pages)
@@ -504,7 +569,7 @@ def main() -> int:
     for year in sorted(pages):
         state = ParseState(year=year)
         for page_name in pages[year]:
-            source = find_ocr_file(args.ocr_root, page_name, variants)
+            source = find_ocr_file(args.ocr_root, page_name, variants, filenames)
             records.extend(parse_text_file(year, page_name, source, state))
 
     write_csv(records, args.out_dir / f"{output_prefix}.csv")

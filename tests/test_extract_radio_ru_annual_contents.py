@@ -52,6 +52,34 @@ class ExtractRadioRuAnnualContentsTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             annual_contents.parse_page_ranges("1995:061-059")
 
+    def test_parse_issue_page_accepts_attached_issue_and_page(self) -> None:
+        prefix, issue, page = annual_contents.parse_issue_page("Радиолокация ПРО Н. Айтхожин 401")
+
+        self.assertEqual(prefix, "Радиолокация ПРО Н. Айтхожин")
+        self.assertEqual(issue, "4")
+        self.assertEqual(page, "1")
+
+    def test_parse_issue_page_accepts_noisy_ocr_page_digits(self) -> None:
+        prefix, issue, page = annual_contents.parse_issue_page("Малогабаритные мультиметры. А. Афонский 2 ОЗ")
+
+        self.assertEqual(prefix, "Малогабаритные мультиметры. А. Афонский")
+        self.assertEqual(issue, "2")
+        self.assertEqual(page, "3")
+
+    def test_find_ocr_file_prefers_psm6_for_structured_extraction(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            layout = root / "b.2000-12.063" / "layout_text_blocks"
+            layout.mkdir(parents=True)
+            psm6 = layout / "merged.prose.psm6.corrected.txt"
+            psm4 = layout / "merged.prose.psm4.corrected.txt"
+            psm6.write_text("psm6", encoding="utf-8")
+            psm4.write_text("psm4", encoding="utf-8")
+
+            found = annual_contents.find_ocr_file(root, "b.2000-12.063", annual_contents.DEFAULT_OCR_VARIANTS)
+
+            self.assertEqual(found, psm6)
+
 
 if __name__ == "__main__":
     unittest.main()

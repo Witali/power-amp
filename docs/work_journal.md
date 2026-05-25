@@ -328,6 +328,7 @@
 - Страницы годовых оглавлений распознаны через основной OpenCV pipeline: `ocr_radio_ru_page_columns.ps1 -LayoutOnly` построил `layout.json`/`preview.png`, нарезал `layout_text_blocks` и распознал их локальным Tesseract.
 - `scripts/extract_radio_ru_annual_contents.py` теперь принимает `--page-ranges` и `--output-prefix`, поэтому один и тот же extractor можно применять не только к старому диапазону 1999-2000.
 - Результат сохранен в `study/radio_ru_annual_contents_1995_2000/`: CSV, Markdown-таблица, сырой OCR и README с командами воспроизведения. Всего получено 1507 OCR-derived записей, из них 735 article-строк с номером выпуска и страницей.
+- Страницы с `needs_review` перечитаны дополнительным Tesseract PSM 4; для структурированной таблицы оставлен PSM 6, а extractor научился разбирать склеенные/noisy хвосты номеров вроде `169`, `401` и `2 ОЗ`. После пересборки получено 1565 записей, 864 article-строки и 543 строки `needs_review`; подробная сводка лежит в `study/radio_ru_annual_contents_1995_2000/review_summary.md`.
 
 ## Что проверять после изменений
 
