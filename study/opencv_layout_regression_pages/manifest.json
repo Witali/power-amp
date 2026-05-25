@@ -104,7 +104,7 @@
     },
     {
       "id": "b.1999-12.064",
-      "reason": "annual contents page with cover-image strips, dense dot-leader rows, and two-column article lists",
+      "reason": "manual feedback page: annual contents page with cover-image strips, dense dot-leader rows, and two-column article lists",
       "source": "study/opencv_layout_regression_pages/sources/b.1999-12.064.jpg",
       "original_cached_source": ".tmp/archive_radio_ru/1999/12/b.1999-12.064.jpg",
       "baseline_layout": "study/opencv_layout_regression_pages/baselines/b.1999-12.064/layout.json",

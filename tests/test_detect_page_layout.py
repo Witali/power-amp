@@ -830,6 +830,52 @@ class DetectPageLayoutTests(unittest.TestCase):
         self.assertEqual(len(split), 2)
         self.assertLessEqual(split[0][1].x2, split[1][1].x)
 
+    def test_splits_short_annual_contents_row_merge_at_narrow_column_gap(self) -> None:
+        cv2 = detect_page_layout.cv2
+        np = detect_page_layout.np
+
+        image = np.full((1400, 1000, 3), 255, dtype=np.uint8)
+        mask = np.zeros((1400, 1000), dtype=np.uint8)
+        box = detect_page_layout.Box(40, 520, 900, 180)
+        for row in range(8):
+            y = box.y + 12 + row * 20
+            cv2.rectangle(mask, (box.x + 20, y), (box.x + 415, y + 8), 255, -1)
+            cv2.rectangle(mask, (box.x + 433, y), (box.x + 880, y + 8), 255, -1)
+        edges = mask.copy()
+        ann = detect_page_layout.train_bootstrap_ann()
+        block = detect_page_layout.Block(
+            "018_text",
+            "text",
+            "horizontal",
+            0.83,
+            box.to_list(),
+            None,
+            {
+                "contents_row_merge": 1.0,
+                "max_text_score": 0.93,
+                "textline_density": 0.93,
+                "line_art_score": 0.10,
+                "saturation_p80": 0.0,
+            },
+        )
+
+        regular_split = detect_page_layout.split_multiline_text_box_recursive(mask, box, 1000, 1400)
+        contents_split = detect_page_layout.split_text_columns_in_classified_blocks(
+            [(block, box)],
+            image,
+            mask,
+            edges,
+            ann,
+            scale=1.0,
+            width=1000,
+            height=1400,
+        )
+
+        self.assertEqual(regular_split, [box])
+        self.assertEqual(len(contents_split), 2)
+        self.assertTrue(all(item[0].features["contents_column_split"] == 1.0 for item in contents_split))
+        self.assertLessEqual(contents_split[0][1].x2, contents_split[1][1].x)
+
     def test_merges_adjacent_annual_contents_column_fragments(self) -> None:
         np = detect_page_layout.np
 

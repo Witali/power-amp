@@ -171,15 +171,15 @@
   },
   {
     "id": "b.1999-12.064",
-    "reason": "annual contents page with cover-image strips, dense dot-leader rows, and two-column article lists",
+    "reason": "manual feedback page: annual contents page with cover-image strips, dense dot-leader rows, and two-column article lists",
     "source": "../../opencv_layout_regression_pages/sources/b.1999-12.064.jpg",
     "layout": "detected/b.1999-12.064/layout.json",
     "preview": "detected/b.1999-12.064/preview.png",
-    "block_count": 6,
+    "block_count": 7,
     "counts": {
       "image": 2,
       "heading": 1,
-      "text": 3
+      "text": 4
     },
     "warning_count": 15
   },

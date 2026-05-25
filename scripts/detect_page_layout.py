@@ -259,6 +259,12 @@ CONTENTS_COLUMN_MERGE_MIN_WIDTH_SIMILARITY = layout_config.CONTENTS_COLUMN_MERGE
 CONTENTS_COLUMN_MERGE_MIN_HORIZONTAL_OVERLAP = layout_config.CONTENTS_COLUMN_MERGE_MIN_HORIZONTAL_OVERLAP
 CONTENTS_COLUMN_MERGE_MAX_VERTICAL_GAP_RATIO = layout_config.CONTENTS_COLUMN_MERGE_MAX_VERTICAL_GAP_RATIO
 CONTENTS_COLUMN_MERGE_MAX_VERTICAL_GAP_PX = layout_config.CONTENTS_COLUMN_MERGE_MAX_VERTICAL_GAP_PX
+CONTENTS_COLUMN_SPLIT_MIN_WIDTH_RATIO = layout_config.CONTENTS_COLUMN_SPLIT_MIN_WIDTH_RATIO
+CONTENTS_COLUMN_SPLIT_MIN_HEIGHT_RATIO = layout_config.CONTENTS_COLUMN_SPLIT_MIN_HEIGHT_RATIO
+CONTENTS_COLUMN_SPLIT_MIN_GAP_RATIO = layout_config.CONTENTS_COLUMN_SPLIT_MIN_GAP_RATIO
+CONTENTS_COLUMN_SPLIT_MIN_GAP_PX = layout_config.CONTENTS_COLUMN_SPLIT_MIN_GAP_PX
+CONTENTS_COLUMN_SPLIT_MAX_PROJECTION_DENSITY = layout_config.CONTENTS_COLUMN_SPLIT_MAX_PROJECTION_DENSITY
+CONTENTS_COLUMN_SPLIT_MIN_PIECE_WIDTH_RATIO = layout_config.CONTENTS_COLUMN_SPLIT_MIN_PIECE_WIDTH_RATIO
 CONTENTS_HEADING_SPLIT_MIN_WIDTH_RATIO = layout_config.CONTENTS_HEADING_SPLIT_MIN_WIDTH_RATIO
 CONTENTS_HEADING_SPLIT_MIN_HEIGHT_RATIO = layout_config.CONTENTS_HEADING_SPLIT_MIN_HEIGHT_RATIO
 CONTENTS_HEADING_SPLIT_MIN_RATIO = layout_config.CONTENTS_HEADING_SPLIT_MIN_RATIO
@@ -784,6 +790,38 @@ def low_density_column_gap_candidates(
         center_balance = 1.0 - abs((center / float(box.w)) - 0.5)
         candidates.append((width, center_balance, -mean_density, center))
     return candidates
+
+
+def split_contents_row_merged_text_box_by_column_gaps(mask, box: Box, page_width: int, page_height: int) -> list[Box]:
+    if box.w < page_width * CONTENTS_COLUMN_SPLIT_MIN_WIDTH_RATIO:
+        return [box]
+    if box.h < page_height * CONTENTS_COLUMN_SPLIT_MIN_HEIGHT_RATIO:
+        return [box]
+
+    roi = mask[box.y : box.y2, box.x : box.x2]
+    if roi.size == 0:
+        return [box]
+
+    min_piece = max(40, int(round(page_width * CONTENTS_COLUMN_SPLIT_MIN_PIECE_WIDTH_RATIO)))
+    min_gap = max(CONTENTS_COLUMN_SPLIT_MIN_GAP_PX, int(round(box.w * CONTENTS_COLUMN_SPLIT_MIN_GAP_RATIO)))
+    low_limit = max(2.0, box.h * CONTENTS_COLUMN_SPLIT_MAX_PROJECTION_DENSITY)
+    column_projection = (roi > 0).sum(axis=0).astype(np.float32)
+    smoothed = smooth_projection(column_projection, max(1, box.w // 180))
+    candidates: list[tuple[float, int, float, int]] = []
+    for start, end, mean_density in low_projection_runs(smoothed, low_limit, min_gap):
+        center = (start + end) // 2
+        if center < min_piece or box.w - center < min_piece:
+            continue
+        width = end - start + 1
+        center_balance = 1.0 - abs((center / float(box.w)) - 0.5)
+        candidates.append((center_balance, width, -mean_density, center))
+    if not candidates:
+        return [box]
+
+    _, _, _, center = max(candidates)
+    left = Box(box.x, box.y, center, box.h)
+    right = Box(box.x + center, box.y, box.w - center, box.h)
+    return [piece for piece in (left, right) if piece.area > 0]
 
 
 def split_multiline_text_box_recursive(mask, box: Box, page_width: int, page_height: int) -> list[Box]:
@@ -2886,7 +2924,11 @@ def split_text_columns_in_classified_blocks(
             result.append((block, box))
             continue
 
-        pieces = split_multiline_text_box_recursive(mask, box, width, height)
+        contents_column_split = float(block.features.get("contents_row_merge", 0.0)) >= 0.5
+        if contents_column_split:
+            pieces = split_contents_row_merged_text_box_by_column_gaps(mask, box, width, height)
+        else:
+            pieces = split_multiline_text_box_recursive(mask, box, width, height)
         if len(pieces) <= 1:
             result.append((block, box))
             continue
@@ -2906,6 +2948,9 @@ def split_text_columns_in_classified_blocks(
                 int(round(piece.h / scale)),
             )
             suffix = chr(ord("a") + index) if index < 26 else str(index + 1)
+            rounded_features = {key: round(float(value), 5) for key, value in features.items()}
+            if contents_column_split:
+                rounded_features["contents_column_split"] = 1.0
             result.append(
                 (
                     Block(
@@ -2915,7 +2960,7 @@ def split_text_columns_in_classified_blocks(
                         confidence=round(confidence, 4),
                         bbox=original_box.to_list(),
                         outline=None,
-                        features={key: round(float(value), 5) for key, value in features.items()},
+                        features=rounded_features,
                     ),
                     piece,
                 )
