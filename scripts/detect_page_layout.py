@@ -131,6 +131,14 @@ SCHEMATIC_TEXT_LABEL_INSIDE_OVERLAP_RATIO = layout_config.SCHEMATIC_TEXT_LABEL_I
 SCHEMATIC_TEXT_LABEL_MIN_VERTICAL_OVERLAP_RATIO = layout_config.SCHEMATIC_TEXT_LABEL_MIN_VERTICAL_OVERLAP_RATIO
 SCHEMATIC_TEXT_LABEL_MIN_TEXT_SCORE = layout_config.SCHEMATIC_TEXT_LABEL_MIN_TEXT_SCORE
 SCHEMATIC_TEXT_LABEL_MAX_SATURATION = layout_config.SCHEMATIC_TEXT_LABEL_MAX_SATURATION
+SCHEMATIC_HEADING_LABEL_MAX_AREA_RATIO = layout_config.SCHEMATIC_HEADING_LABEL_MAX_AREA_RATIO
+SCHEMATIC_HEADING_LABEL_MAX_HEIGHT_RATIO = layout_config.SCHEMATIC_HEADING_LABEL_MAX_HEIGHT_RATIO
+SCHEMATIC_HEADING_LABEL_MAX_WIDTH_RATIO = layout_config.SCHEMATIC_HEADING_LABEL_MAX_WIDTH_RATIO
+SCHEMATIC_HEADING_LABEL_MIN_TEXT_SCORE = layout_config.SCHEMATIC_HEADING_LABEL_MIN_TEXT_SCORE
+SCHEMATIC_HEADING_LABEL_MAX_INK_DENSITY = layout_config.SCHEMATIC_HEADING_LABEL_MAX_INK_DENSITY
+SCHEMATIC_HEADING_LABEL_MIN_HLINE_DENSITY = layout_config.SCHEMATIC_HEADING_LABEL_MIN_HLINE_DENSITY
+SCHEMATIC_HEADING_LABEL_MAX_SATURATION = layout_config.SCHEMATIC_HEADING_LABEL_MAX_SATURATION
+SCHEMATIC_HEADING_LABEL_INSIDE_OVERLAP_RATIO = layout_config.SCHEMATIC_HEADING_LABEL_INSIDE_OVERLAP_RATIO
 HEADING_MIN_WIDTH_RATIO = layout_config.HEADING_MIN_WIDTH_RATIO
 HEADING_MAX_HEIGHT_RATIO = layout_config.HEADING_MAX_HEIGHT_RATIO
 HEADING_MAX_AREA_RATIO = layout_config.HEADING_MAX_AREA_RATIO
@@ -3943,26 +3951,44 @@ def schematic_side_caption_panel_candidate(block: Block, box: Box, schematic: Bo
 
 
 def schematic_text_label_candidate(block: Block, box: Box, schematic: Box, width: int, height: int) -> bool:
-    if block.label != "text" or block.orientation not in {"horizontal", "unknown"}:
+    if block.label not in {"text", "heading"} or block.orientation not in {"horizontal", "unknown"}:
         return False
     if box.area <= 0 or schematic.area <= box.area:
         return False
-    if box.area > schematic.area * SCHEMATIC_TEXT_LABEL_MAX_AREA_RATIO:
-        return False
-    if box.h > max(28, int(round(schematic.h * SCHEMATIC_TEXT_LABEL_MAX_HEIGHT_RATIO))):
-        return False
-    if box.w > max(80, int(round(schematic.w * SCHEMATIC_TEXT_LABEL_MAX_WIDTH_RATIO))):
-        return False
 
     features = block.features
-    if float(features.get("max_text_score", 0.0)) < SCHEMATIC_TEXT_LABEL_MIN_TEXT_SCORE:
-        return False
-    if float(features.get("saturation_p80", 0.0)) > SCHEMATIC_TEXT_LABEL_MAX_SATURATION:
-        return False
+    if block.label == "heading":
+        if box.area > schematic.area * SCHEMATIC_HEADING_LABEL_MAX_AREA_RATIO:
+            return False
+        if box.h > max(36, int(round(schematic.h * SCHEMATIC_HEADING_LABEL_MAX_HEIGHT_RATIO))):
+            return False
+        if box.w > max(90, int(round(schematic.w * SCHEMATIC_HEADING_LABEL_MAX_WIDTH_RATIO))):
+            return False
+        if float(features.get("max_text_score", 0.0)) < SCHEMATIC_HEADING_LABEL_MIN_TEXT_SCORE:
+            return False
+        if float(features.get("ink_density", 1.0)) > SCHEMATIC_HEADING_LABEL_MAX_INK_DENSITY:
+            return False
+        if float(features.get("hline_density", 0.0)) < SCHEMATIC_HEADING_LABEL_MIN_HLINE_DENSITY:
+            return False
+        if float(features.get("saturation_p80", 0.0)) > SCHEMATIC_HEADING_LABEL_MAX_SATURATION:
+            return False
+        inside_overlap = SCHEMATIC_HEADING_LABEL_INSIDE_OVERLAP_RATIO
+    else:
+        if box.area > schematic.area * SCHEMATIC_TEXT_LABEL_MAX_AREA_RATIO:
+            return False
+        if box.h > max(28, int(round(schematic.h * SCHEMATIC_TEXT_LABEL_MAX_HEIGHT_RATIO))):
+            return False
+        if box.w > max(80, int(round(schematic.w * SCHEMATIC_TEXT_LABEL_MAX_WIDTH_RATIO))):
+            return False
+        if float(features.get("max_text_score", 0.0)) < SCHEMATIC_TEXT_LABEL_MIN_TEXT_SCORE:
+            return False
+        if float(features.get("saturation_p80", 0.0)) > SCHEMATIC_TEXT_LABEL_MAX_SATURATION:
+            return False
+        inside_overlap = SCHEMATIC_TEXT_LABEL_INSIDE_OVERLAP_RATIO
 
     margin = max(8, int(round(min(width, height) * SCHEMATIC_TEXT_LABEL_TOUCH_MARGIN_RATIO)))
     overlap = intersection_area(box, schematic)
-    if overlap / max(1, box.area) >= SCHEMATIC_TEXT_LABEL_INSIDE_OVERLAP_RATIO:
+    if overlap / max(1, box.area) >= inside_overlap:
         return True
 
     vertical_gap = max(0, max(box.y, schematic.y) - min(box.y2, schematic.y2))

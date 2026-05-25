@@ -120,7 +120,7 @@
     },
     {
       "id": "b.1999-10.018",
-      "reason": "mixed page with text, visual material, and side labels",
+      "reason": "manual feedback page: technical heading strip above schematic belongs to the schematic block",
       "source": "study/opencv_layout_regression_pages/sources/b.1999-10.018.jpg",
       "original_cached_source": ".tmp/layout_candidate_pages/b.1999-10.018.jpg",
       "baseline_layout": "study/opencv_layout_regression_pages/baselines/b.1999-10.018/layout.json",

@@ -199,18 +199,18 @@
   },
   {
     "id": "b.1999-10.018",
-    "reason": "mixed page with text, visual material, and side labels",
+    "reason": "manual feedback page: technical heading strip above schematic belongs to the schematic block",
     "source": "../../opencv_layout_regression_pages/sources/b.1999-10.018.jpg",
     "layout": "detected/b.1999-10.018/layout.json",
     "preview": "detected/b.1999-10.018/preview.png",
-    "block_count": 12,
+    "block_count": 10,
     "counts": {
-      "heading": 3,
-      "text": 7,
+      "heading": 2,
+      "text": 6,
       "schematic": 1,
       "image": 1
     },
-    "warning_count": 9
+    "warning_count": 8
   },
   {
     "id": "b.2000-02.036",

@@ -2321,6 +2321,115 @@ class DetectPageLayoutTests(unittest.TestCase):
         self.assertEqual(box.to_list(), expected.to_list())
         self.assertEqual(block.features["schematic_text_label_merge"], 1.0)
 
+    def test_merges_technical_heading_strip_into_schematic(self) -> None:
+        cv2 = detect_page_layout.cv2
+        np = detect_page_layout.np
+
+        page = np.full((900, 720, 3), 255, dtype=np.uint8)
+        schematic = detect_page_layout.Box(170, 260, 430, 280)
+        heading_strip = detect_page_layout.Box(150, 210, 460, 55)
+        cv2.rectangle(page, (schematic.x, schematic.y), (schematic.x2, schematic.y2), (0, 0, 0), 2)
+        cv2.line(page, (heading_strip.x + 15, heading_strip.y + 40), (heading_strip.x2 - 15, heading_strip.y + 40), (0, 0, 0), 2)
+        cv2.putText(page, "WA1  UKV", (heading_strip.x + 60, heading_strip.y + 34), cv2.FONT_HERSHEY_SIMPLEX, 0.65, (0, 0, 0), 2)
+
+        gray = cv2.cvtColor(page, cv2.COLOR_BGR2GRAY)
+        mask, _, _ = detect_page_layout.foreground_mask(gray)
+        edges = detect_page_layout.canny_edges(gray)
+        ann = detect_page_layout.train_bootstrap_ann()
+        schematic_block = detect_page_layout.Block(
+            ident="010_schematic_circuit",
+            label="schematic/circuit",
+            orientation="unknown",
+            confidence=0.92,
+            bbox=schematic.to_list(),
+            outline=None,
+            features={},
+        )
+        strip_block = detect_page_layout.Block(
+            ident="009_heading",
+            label="heading",
+            orientation="horizontal",
+            confidence=0.74,
+            bbox=heading_strip.to_list(),
+            outline=None,
+            features={
+                "max_text_score": 0.92,
+                "ink_density": 0.07,
+                "hline_density": 0.12,
+                "saturation_p80": 0.0,
+            },
+        )
+
+        merged = detect_page_layout.merge_line_art_attachments_into_schematics(
+            [(strip_block, heading_strip), (schematic_block, schematic)],
+            page,
+            mask,
+            edges,
+            ann,
+            scale=1.0,
+            width=720,
+            height=900,
+        )
+
+        self.assertEqual(len(merged), 1)
+        block, box = merged[0]
+        self.assertEqual(block.ident, "010_schematic_circuit")
+        self.assertEqual(block.label, "schematic/circuit")
+        self.assertEqual(box.to_list(), detect_page_layout.union_box(schematic, heading_strip).to_list())
+        self.assertEqual(block.features["schematic_text_label_merge"], 1.0)
+
+    def test_does_not_merge_bold_article_heading_into_schematic(self) -> None:
+        cv2 = detect_page_layout.cv2
+        np = detect_page_layout.np
+
+        page = np.full((900, 720, 3), 255, dtype=np.uint8)
+        schematic = detect_page_layout.Box(170, 270, 430, 280)
+        article_heading = detect_page_layout.Box(145, 220, 500, 70)
+        cv2.rectangle(page, (schematic.x, schematic.y), (schematic.x2, schematic.y2), (0, 0, 0), 2)
+        cv2.putText(page, "UKV PRISTAVKA", (article_heading.x + 8, article_heading.y + 48), cv2.FONT_HERSHEY_SIMPLEX, 1.1, (0, 0, 0), 4)
+
+        gray = cv2.cvtColor(page, cv2.COLOR_BGR2GRAY)
+        mask, _, _ = detect_page_layout.foreground_mask(gray)
+        edges = detect_page_layout.canny_edges(gray)
+        ann = detect_page_layout.train_bootstrap_ann()
+        schematic_block = detect_page_layout.Block(
+            ident="010_schematic_circuit",
+            label="schematic/circuit",
+            orientation="unknown",
+            confidence=0.92,
+            bbox=schematic.to_list(),
+            outline=None,
+            features={},
+        )
+        heading_block = detect_page_layout.Block(
+            ident="004_heading",
+            label="heading",
+            orientation="horizontal",
+            confidence=0.76,
+            bbox=article_heading.to_list(),
+            outline=None,
+            features={
+                "max_text_score": 0.34,
+                "ink_density": 0.20,
+                "hline_density": 0.0,
+                "saturation_p80": 0.0,
+            },
+        )
+
+        merged = detect_page_layout.merge_line_art_attachments_into_schematics(
+            [(heading_block, article_heading), (schematic_block, schematic)],
+            page,
+            mask,
+            edges,
+            ann,
+            scale=1.0,
+            width=720,
+            height=900,
+        )
+
+        self.assertEqual(len(merged), 2)
+        self.assertEqual([block.ident for block, _ in merged], ["004_heading", "010_schematic_circuit"])
+
     def test_merges_tall_frame_strip_into_schematic(self) -> None:
         cv2 = detect_page_layout.cv2
         np = detect_page_layout.np
