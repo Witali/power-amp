@@ -2998,6 +2998,38 @@ class DetectPageLayoutTests(unittest.TestCase):
 
         self.assertEqual([block.ident for block in filtered], ["002_text"])
 
+    def test_keeps_dense_multiline_text_on_colored_background(self) -> None:
+        colored_column = detect_page_layout.Block(
+            ident="002_text",
+            label="text",
+            orientation="horizontal",
+            confidence=0.87,
+            bbox=[83, 224, 779, 1692],
+            outline=None,
+            features={
+                "max_text_score": 0.9296,
+                "textline_density": 0.9296,
+                "ink_density": 0.2645,
+                "hline_density": 0.0,
+                "vline_density": 0.0,
+                "line_balance": 0.0,
+                "saturation_p80": 0.2549,
+            },
+        )
+        tiny = detect_page_layout.Block(
+            ident="003_text",
+            label="text",
+            orientation="horizontal",
+            confidence=0.72,
+            bbox=[10, 10, 18, 20],
+            outline=None,
+            features={},
+        )
+
+        filtered = detect_page_layout.suppress_tiny_text_fragments([colored_column, tiny])
+
+        self.assertEqual([block.ident for block in filtered], ["002_text"])
+
     def test_suppresses_short_text_fragment_inside_visual_block(self) -> None:
         visual = detect_page_layout.Block(
             ident="010_image",

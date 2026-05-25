@@ -88,7 +88,7 @@
     },
     {
       "id": "b.1998-12.018",
-      "reason": "known difficult negative/edge case for separating text from embedded figure regions",
+      "reason": "manual feedback page: dense text columns on tinted paper must not be suppressed as tiny fragments",
       "source": "study/opencv_layout_regression_pages/sources/b.1998-12.018.jpg",
       "original_cached_source": ".tmp/layout_candidate_pages/b.1998-12.018.jpg",
       "baseline_layout": "study/opencv_layout_regression_pages/baselines/b.1998-12.018/layout.json",

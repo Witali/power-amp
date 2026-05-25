@@ -88,7 +88,7 @@
   },
   {
     "id": "b.1986-12.057",
-    "reason": "manual feedback page: tall merged text area must split into three magazine columns",
+    "reason": "manual feedback page: tall merged text area must split into three magazine columns and keep the top display heading separate",
     "source": "../../opencv_layout_regression_pages/sources/b.1986-12.057.jpg",
     "layout": "detected/b.1986-12.057/layout.json",
     "preview": "detected/b.1986-12.057/preview.png",
@@ -120,12 +120,12 @@
     "source": "../../opencv_layout_regression_pages/sources/b.1997-12.015.jpg",
     "layout": "detected/b.1997-12.015/layout.json",
     "preview": "detected/b.1997-12.015/preview.png",
-    "block_count": 6,
+    "block_count": 11,
     "counts": {
       "heading": 2,
+      "text": 7,
       "image": 1,
-      "schematic": 1,
-      "text": 2
+      "schematic": 1
     },
     "warning_count": 12
   },
@@ -144,17 +144,17 @@
   },
   {
     "id": "b.1998-12.018",
-    "reason": "known difficult negative/edge case for separating text from embedded figure regions",
+    "reason": "manual feedback page: dense text columns on tinted paper must not be suppressed as tiny fragments",
     "source": "../../opencv_layout_regression_pages/sources/b.1998-12.018.jpg",
     "layout": "detected/b.1998-12.018/layout.json",
     "preview": "detected/b.1998-12.018/preview.png",
-    "block_count": 8,
+    "block_count": 14,
     "counts": {
       "heading": 2,
-      "text": 5,
+      "text": 11,
       "schematic": 1
     },
-    "warning_count": 14
+    "warning_count": 15
   },
   {
     "id": "b.1999-10.014",

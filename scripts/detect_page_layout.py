@@ -109,6 +109,19 @@ TEXT_MIN_ABSOLUTE_HEIGHT_PX = layout_config.TEXT_MIN_ABSOLUTE_HEIGHT_PX
 TEXT_FRAGMENT_SUPPRESS_INSIDE_VISUALS = layout_config.TEXT_FRAGMENT_SUPPRESS_INSIDE_VISUALS
 TEXT_FRAGMENT_INSIDE_VISUAL_MIN_OVERLAP_RATIO = layout_config.TEXT_FRAGMENT_INSIDE_VISUAL_MIN_OVERLAP_RATIO
 TEXT_FRAGMENT_INSIDE_VISUAL_MAX_GLYPH_WIDTHS = layout_config.TEXT_FRAGMENT_INSIDE_VISUAL_MAX_GLYPH_WIDTHS
+TEXT_DENSE_MULTILINE_MIN_WIDTH_MULTIPLIER = layout_config.TEXT_DENSE_MULTILINE_MIN_WIDTH_MULTIPLIER
+TEXT_DENSE_MULTILINE_MIN_HEIGHT_MULTIPLIER = layout_config.TEXT_DENSE_MULTILINE_MIN_HEIGHT_MULTIPLIER
+TEXT_DENSE_MULTILINE_LARGE_WIDTH_MULTIPLIER = layout_config.TEXT_DENSE_MULTILINE_LARGE_WIDTH_MULTIPLIER
+TEXT_DENSE_MULTILINE_LARGE_HEIGHT_MULTIPLIER = layout_config.TEXT_DENSE_MULTILINE_LARGE_HEIGHT_MULTIPLIER
+TEXT_DENSE_MULTILINE_MIN_INK_DENSITY = layout_config.TEXT_DENSE_MULTILINE_MIN_INK_DENSITY
+TEXT_DENSE_MULTILINE_MAX_AXIS_LINE_DENSITY = layout_config.TEXT_DENSE_MULTILINE_MAX_AXIS_LINE_DENSITY
+TEXT_DENSE_MULTILINE_MAX_LINE_BALANCE = layout_config.TEXT_DENSE_MULTILINE_MAX_LINE_BALANCE
+TEXT_DENSE_MULTILINE_MAX_SATURATION = layout_config.TEXT_DENSE_MULTILINE_MAX_SATURATION
+TEXT_DENSE_MULTILINE_MIN_TEXT_SCORE = layout_config.TEXT_DENSE_MULTILINE_MIN_TEXT_SCORE
+TEXT_DENSE_MULTILINE_MIN_TEXTLINE_DENSITY = layout_config.TEXT_DENSE_MULTILINE_MIN_TEXTLINE_DENSITY
+TEXT_DENSE_MULTILINE_COLOR_MIN_TEXT_SCORE = layout_config.TEXT_DENSE_MULTILINE_COLOR_MIN_TEXT_SCORE
+TEXT_DENSE_MULTILINE_COLOR_MIN_TEXTLINE_DENSITY = layout_config.TEXT_DENSE_MULTILINE_COLOR_MIN_TEXTLINE_DENSITY
+TEXT_DENSE_MULTILINE_COLOR_MAX_SATURATION = layout_config.TEXT_DENSE_MULTILINE_COLOR_MAX_SATURATION
 HEADING_MIN_WIDTH_RATIO = layout_config.HEADING_MIN_WIDTH_RATIO
 HEADING_MAX_HEIGHT_RATIO = layout_config.HEADING_MAX_HEIGHT_RATIO
 HEADING_MAX_AREA_RATIO = layout_config.HEADING_MAX_AREA_RATIO
@@ -2655,23 +2668,35 @@ def text_fragment_inside_visual(text_box: Box, visual_blocks: list[Block]) -> bo
 
 
 def dense_multiline_text_block(block: Block, box: Box) -> bool:
-    if box.w < TEXT_MIN_ABSOLUTE_WIDTH_PX * 4 or box.h < TEXT_MIN_ABSOLUTE_HEIGHT_PX * 4:
+    if (
+        box.w < TEXT_MIN_ABSOLUTE_WIDTH_PX * TEXT_DENSE_MULTILINE_MIN_WIDTH_MULTIPLIER
+        or box.h < TEXT_MIN_ABSOLUTE_HEIGHT_PX * TEXT_DENSE_MULTILINE_MIN_HEIGHT_MULTIPLIER
+    ):
         return False
     features = block.features
+    saturation = float(features.get("saturation_p80", 0.0))
+    max_text_score = float(features.get("max_text_score", 0.0))
+    textline_density = float(features.get("textline_density", 0.0))
     large_plain_text = (
-        box.w >= TEXT_MIN_ABSOLUTE_WIDTH_PX * 10
-        and box.h >= TEXT_MIN_ABSOLUTE_HEIGHT_PX * 20
-        and float(features.get("ink_density", 0.0)) >= 0.02
-        and max(float(features.get("hline_density", 0.0)), float(features.get("vline_density", 0.0))) <= 0.12
-        and float(features.get("line_balance", 0.0)) <= 0.18
-        and float(features.get("saturation_p80", 0.0)) <= 0.18
+        box.w >= TEXT_MIN_ABSOLUTE_WIDTH_PX * TEXT_DENSE_MULTILINE_LARGE_WIDTH_MULTIPLIER
+        and box.h >= TEXT_MIN_ABSOLUTE_HEIGHT_PX * TEXT_DENSE_MULTILINE_LARGE_HEIGHT_MULTIPLIER
+        and float(features.get("ink_density", 0.0)) >= TEXT_DENSE_MULTILINE_MIN_INK_DENSITY
+        and max(float(features.get("hline_density", 0.0)), float(features.get("vline_density", 0.0)))
+        <= TEXT_DENSE_MULTILINE_MAX_AXIS_LINE_DENSITY
+        and float(features.get("line_balance", 0.0)) <= TEXT_DENSE_MULTILINE_MAX_LINE_BALANCE
+        and saturation <= TEXT_DENSE_MULTILINE_MAX_SATURATION
     )
     if large_plain_text:
         return True
+    colored_background_text = (
+        saturation <= TEXT_DENSE_MULTILINE_COLOR_MAX_SATURATION
+        and max_text_score >= TEXT_DENSE_MULTILINE_COLOR_MIN_TEXT_SCORE
+        and textline_density >= TEXT_DENSE_MULTILINE_COLOR_MIN_TEXTLINE_DENSITY
+    )
     return (
-        float(features.get("max_text_score", 0.0)) >= 0.50
-        and float(features.get("textline_density", 0.0)) >= 0.35
-        and float(features.get("saturation_p80", 0.0)) <= 0.18
+        max_text_score >= TEXT_DENSE_MULTILINE_MIN_TEXT_SCORE
+        and textline_density >= TEXT_DENSE_MULTILINE_MIN_TEXTLINE_DENSITY
+        and (saturation <= TEXT_DENSE_MULTILINE_MAX_SATURATION or colored_background_text)
     )
 
 
