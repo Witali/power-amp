@@ -122,6 +122,15 @@ TEXT_DENSE_MULTILINE_MIN_TEXTLINE_DENSITY = layout_config.TEXT_DENSE_MULTILINE_M
 TEXT_DENSE_MULTILINE_COLOR_MIN_TEXT_SCORE = layout_config.TEXT_DENSE_MULTILINE_COLOR_MIN_TEXT_SCORE
 TEXT_DENSE_MULTILINE_COLOR_MIN_TEXTLINE_DENSITY = layout_config.TEXT_DENSE_MULTILINE_COLOR_MIN_TEXTLINE_DENSITY
 TEXT_DENSE_MULTILINE_COLOR_MAX_SATURATION = layout_config.TEXT_DENSE_MULTILINE_COLOR_MAX_SATURATION
+SCHEMATIC_TEXT_LABEL_MAX_AREA_RATIO = layout_config.SCHEMATIC_TEXT_LABEL_MAX_AREA_RATIO
+SCHEMATIC_TEXT_LABEL_MAX_HEIGHT_RATIO = layout_config.SCHEMATIC_TEXT_LABEL_MAX_HEIGHT_RATIO
+SCHEMATIC_TEXT_LABEL_MAX_WIDTH_RATIO = layout_config.SCHEMATIC_TEXT_LABEL_MAX_WIDTH_RATIO
+SCHEMATIC_TEXT_LABEL_TOUCH_MARGIN_RATIO = layout_config.SCHEMATIC_TEXT_LABEL_TOUCH_MARGIN_RATIO
+SCHEMATIC_TEXT_LABEL_TOUCH_OVERLAP_RATIO = layout_config.SCHEMATIC_TEXT_LABEL_TOUCH_OVERLAP_RATIO
+SCHEMATIC_TEXT_LABEL_INSIDE_OVERLAP_RATIO = layout_config.SCHEMATIC_TEXT_LABEL_INSIDE_OVERLAP_RATIO
+SCHEMATIC_TEXT_LABEL_MIN_VERTICAL_OVERLAP_RATIO = layout_config.SCHEMATIC_TEXT_LABEL_MIN_VERTICAL_OVERLAP_RATIO
+SCHEMATIC_TEXT_LABEL_MIN_TEXT_SCORE = layout_config.SCHEMATIC_TEXT_LABEL_MIN_TEXT_SCORE
+SCHEMATIC_TEXT_LABEL_MAX_SATURATION = layout_config.SCHEMATIC_TEXT_LABEL_MAX_SATURATION
 HEADING_MIN_WIDTH_RATIO = layout_config.HEADING_MIN_WIDTH_RATIO
 HEADING_MAX_HEIGHT_RATIO = layout_config.HEADING_MAX_HEIGHT_RATIO
 HEADING_MAX_AREA_RATIO = layout_config.HEADING_MAX_AREA_RATIO
@@ -3933,6 +3942,42 @@ def schematic_side_caption_panel_candidate(block: Block, box: Box, schematic: Bo
     return horizontal_gap <= margin and vertical_overlap >= schematic.h * 0.64 and edge_aligned
 
 
+def schematic_text_label_candidate(block: Block, box: Box, schematic: Box, width: int, height: int) -> bool:
+    if block.label != "text" or block.orientation not in {"horizontal", "unknown"}:
+        return False
+    if box.area <= 0 or schematic.area <= box.area:
+        return False
+    if box.area > schematic.area * SCHEMATIC_TEXT_LABEL_MAX_AREA_RATIO:
+        return False
+    if box.h > max(28, int(round(schematic.h * SCHEMATIC_TEXT_LABEL_MAX_HEIGHT_RATIO))):
+        return False
+    if box.w > max(80, int(round(schematic.w * SCHEMATIC_TEXT_LABEL_MAX_WIDTH_RATIO))):
+        return False
+
+    features = block.features
+    if float(features.get("max_text_score", 0.0)) < SCHEMATIC_TEXT_LABEL_MIN_TEXT_SCORE:
+        return False
+    if float(features.get("saturation_p80", 0.0)) > SCHEMATIC_TEXT_LABEL_MAX_SATURATION:
+        return False
+
+    margin = max(8, int(round(min(width, height) * SCHEMATIC_TEXT_LABEL_TOUCH_MARGIN_RATIO)))
+    overlap = intersection_area(box, schematic)
+    if overlap / max(1, box.area) >= SCHEMATIC_TEXT_LABEL_INSIDE_OVERLAP_RATIO:
+        return True
+
+    vertical_gap = max(0, max(box.y, schematic.y) - min(box.y2, schematic.y2))
+    horizontal_overlap = box_horizontal_overlap_width(box, schematic)
+    if vertical_gap <= margin and horizontal_overlap >= min(box.w, schematic.w) * SCHEMATIC_TEXT_LABEL_TOUCH_OVERLAP_RATIO:
+        return True
+
+    horizontal_gap = max(0, max(box.x, schematic.x) - min(box.x2, schematic.x2))
+    vertical_overlap = box_vertical_overlap_height(box, schematic)
+    return (
+        horizontal_gap <= margin
+        and vertical_overlap >= box.h * SCHEMATIC_TEXT_LABEL_MIN_VERTICAL_OVERLAP_RATIO
+    )
+
+
 def schematic_attachment_touches(candidate: Box, schematic: Box, width: int, height: int, allow_side_touch: bool = True) -> bool:
     margin = max(8, min(width, height) // 120)
     vertical_gap = max(0, max(candidate.y, schematic.y) - min(candidate.y2, schematic.y2))
@@ -3983,15 +4028,26 @@ def merge_line_art_attachments_into_schematics(
                 side_caption_panel = schematic_side_caption_panel_candidate(
                     other_block, other_box, schematic_box, width, height
                 )
-                if not frame_strip and not side_caption_panel and not schematic_attachment_candidate(other_block, other_box, width, height):
-                    continue
-                high_confidence_text_attachment = other_block.label == "text" and other_block.confidence >= 0.45
-                if high_confidence_text_attachment and (schematic_box.w > width * 0.55 or schematic_box.h > height * 0.16):
-                    continue
-                allow_side_touch = other_block.label != "text"
+                text_label = schematic_text_label_candidate(other_block, other_box, schematic_box, width, height)
                 if (
                     not frame_strip
                     and not side_caption_panel
+                    and not text_label
+                    and not schematic_attachment_candidate(other_block, other_box, width, height)
+                ):
+                    continue
+                high_confidence_text_attachment = other_block.label == "text" and other_block.confidence >= 0.45
+                if (
+                    high_confidence_text_attachment
+                    and not text_label
+                    and (schematic_box.w > width * 0.55 or schematic_box.h > height * 0.16)
+                ):
+                    continue
+                allow_side_touch = other_block.label != "text" or text_label
+                if (
+                    not frame_strip
+                    and not side_caption_panel
+                    and not text_label
                     and not schematic_attachment_touches(other_box, schematic_box, width, height, allow_side_touch=allow_side_touch)
                 ):
                     continue
@@ -4006,7 +4062,7 @@ def merge_line_art_attachments_into_schematics(
                     scale,
                     width,
                     height,
-                    "line_art_attachment_merge",
+                    "schematic_text_label_merge" if text_label else "line_art_attachment_merge",
                 )
                 items[schematic_index] = (merged_block, merged_box)
                 del items[other_index]

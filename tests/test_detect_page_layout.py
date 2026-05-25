@@ -2255,6 +2255,72 @@ class DetectPageLayoutTests(unittest.TestCase):
         self.assertEqual(len(merged), 2)
         self.assertEqual([block.ident for block, _ in merged], ["001_schematic_circuit", "020_text"])
 
+    def test_merges_thin_schematic_labels_into_large_schematic(self) -> None:
+        cv2 = detect_page_layout.cv2
+        np = detect_page_layout.np
+
+        page = np.full((900, 720, 3), 255, dtype=np.uint8)
+        schematic = detect_page_layout.Box(160, 170, 330, 420)
+        bottom_label = detect_page_layout.Box(70, 594, 520, 24)
+        inner_label = detect_page_layout.Box(80, 520, 260, 30)
+        side_label = detect_page_layout.Box(494, 552, 128, 30)
+        cv2.rectangle(page, (schematic.x, schematic.y), (schematic.x2, schematic.y2), (0, 0, 0), 2)
+        cv2.line(page, (schematic.x + 20, schematic.y + 210), (schematic.x2 - 20, schematic.y + 210), (0, 0, 0), 2)
+        for label_box, text in (
+            (bottom_label, "VD2 VD6 VD8"),
+            (inner_label, "DA1 KR574UD1A"),
+            (side_label, "30V"),
+        ):
+            cv2.putText(page, text, (label_box.x + 4, label_box.y + label_box.h - 8), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (0, 0, 0), 2)
+
+        gray = cv2.cvtColor(page, cv2.COLOR_BGR2GRAY)
+        mask, _, _ = detect_page_layout.foreground_mask(gray)
+        edges = detect_page_layout.canny_edges(gray)
+        ann = detect_page_layout.train_bootstrap_ann()
+        schematic_block = detect_page_layout.Block(
+            ident="010_schematic_circuit",
+            label="schematic/circuit",
+            orientation="unknown",
+            confidence=0.95,
+            bbox=schematic.to_list(),
+            outline=None,
+            features={},
+        )
+        label_features = {
+            "max_text_score": 0.82,
+            "textline_density": 0.70,
+            "saturation_p80": 0.0,
+        }
+        items = [(schematic_block, schematic)]
+        for ident, label_box in (("011_text", bottom_label), ("012_text", inner_label), ("013_text", side_label)):
+            items.append(
+                (
+                    detect_page_layout.Block(ident, "text", "horizontal", 0.80, label_box.to_list(), None, label_features),
+                    label_box,
+                )
+            )
+
+        merged = detect_page_layout.merge_line_art_attachments_into_schematics(
+            items,
+            page,
+            mask,
+            edges,
+            ann,
+            scale=1.0,
+            width=720,
+            height=900,
+        )
+
+        self.assertEqual(len(merged), 1)
+        block, box = merged[0]
+        expected = schematic
+        for label_box in (bottom_label, inner_label, side_label):
+            expected = detect_page_layout.union_box(expected, label_box)
+        self.assertEqual(block.ident, "010_schematic_circuit")
+        self.assertEqual(block.label, "schematic/circuit")
+        self.assertEqual(box.to_list(), expected.to_list())
+        self.assertEqual(block.features["schematic_text_label_merge"], 1.0)
+
     def test_merges_tall_frame_strip_into_schematic(self) -> None:
         cv2 = detect_page_layout.cv2
         np = detect_page_layout.np

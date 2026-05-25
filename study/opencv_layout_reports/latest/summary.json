@@ -5,12 +5,12 @@
     "source": "../../opencv_layout_regression_pages/sources/b.1986-12.047.jpg",
     "layout": "detected/b.1986-12.047/layout.json",
     "preview": "detected/b.1986-12.047/preview.png",
-    "block_count": 17,
+    "block_count": 14,
     "counts": {
       "schematic": 10,
-      "text": 7
+      "text": 4
     },
-    "warning_count": 60
+    "warning_count": 66
   },
   {
     "id": "b.1986-12.048",
@@ -185,17 +185,17 @@
   },
   {
     "id": "b.1999-10.017",
-    "reason": "article start with title, normal prose columns, and schematic content",
+    "reason": "manual feedback page: article start where schematic labels and captions belong to schematic blocks",
     "source": "../../opencv_layout_regression_pages/sources/b.1999-10.017.jpg",
     "layout": "detected/b.1999-10.017/layout.json",
     "preview": "detected/b.1999-10.017/preview.png",
-    "block_count": 12,
+    "block_count": 8,
     "counts": {
       "heading": 3,
-      "text": 7,
+      "text": 3,
       "schematic": 2
     },
-    "warning_count": 8
+    "warning_count": 9
   },
   {
     "id": "b.1999-10.018",
@@ -344,13 +344,13 @@
     "source": "../../opencv_layout_regression_pages/sources/b.2000-11.013.jpg",
     "layout": "detected/b.2000-11.013/layout.json",
     "preview": "detected/b.2000-11.013/preview.png",
-    "block_count": 11,
+    "block_count": 10,
     "counts": {
       "schematic": 1,
-      "text": 8,
+      "text": 7,
       "image": 2
     },
-    "warning_count": 13
+    "warning_count": 12
   },
   {
     "id": "b.2000-01.042",

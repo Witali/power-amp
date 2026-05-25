@@ -109,6 +109,19 @@ TEXT_DENSE_MULTILINE_COLOR_MIN_TEXT_SCORE = 0.78
 TEXT_DENSE_MULTILINE_COLOR_MIN_TEXTLINE_DENSITY = 0.70
 TEXT_DENSE_MULTILINE_COLOR_MAX_SATURATION = 0.42
 
+# Thin technical labels and captions that touch a schematic are part of the
+# schematic drawing, not standalone OCR prose. Keep this rule narrow so regular
+# adjacent paragraphs are not swallowed by large schematic blocks.
+SCHEMATIC_TEXT_LABEL_MAX_AREA_RATIO = 0.060
+SCHEMATIC_TEXT_LABEL_MAX_HEIGHT_RATIO = 0.075
+SCHEMATIC_TEXT_LABEL_MAX_WIDTH_RATIO = 1.55
+SCHEMATIC_TEXT_LABEL_TOUCH_MARGIN_RATIO = 0.018
+SCHEMATIC_TEXT_LABEL_TOUCH_OVERLAP_RATIO = 0.34
+SCHEMATIC_TEXT_LABEL_INSIDE_OVERLAP_RATIO = 0.28
+SCHEMATIC_TEXT_LABEL_MIN_VERTICAL_OVERLAP_RATIO = 0.40
+SCHEMATIC_TEXT_LABEL_MIN_TEXT_SCORE = 0.55
+SCHEMATIC_TEXT_LABEL_MAX_SATURATION = 0.12
+
 # Headings are text blocks with display-scale glyphs. They can be saturated
 # blue/red in magazine scans, so they must be separated from photo/image rules
 # before color-heavy features dominate the classifier.

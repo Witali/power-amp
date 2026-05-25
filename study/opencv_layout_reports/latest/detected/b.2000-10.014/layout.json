@@ -546,7 +546,9 @@
         "pcb_trace_density": 0.08558,
         "pcb_pad_density": 1.0,
         "pcb_board_outline_score": 1.0,
-        "pcb_signature_score": 0.50162
+        "pcb_signature_score": 0.50162,
+        "merged_block_count": 2.0,
+        "schematic_text_label_merge": 1.0
       },
       "crop_path": null,
       "figure_ref": null,

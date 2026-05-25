@@ -112,7 +112,7 @@
     },
     {
       "id": "b.1999-10.017",
-      "reason": "article start with title, normal prose columns, and schematic content",
+      "reason": "manual feedback page: article start where schematic labels and captions belong to schematic blocks",
       "source": "study/opencv_layout_regression_pages/sources/b.1999-10.017.jpg",
       "original_cached_source": ".tmp/layout_candidate_pages/b.1999-10.017.jpg",
       "baseline_layout": "study/opencv_layout_regression_pages/baselines/b.1999-10.017/layout.json",
