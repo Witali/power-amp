@@ -147,6 +147,13 @@ python scripts/build_layout_regression_set.py
 
 The baseline intentionally stores no block crops to keep the set compact; crops
 can be regenerated from the source scans when needed.
+
+`tests/test_layout_regression_pages.py` runs the current detector against each
+manifest source page and compares the generated layout with the saved baseline.
+It checks page size, block count, block identity, label, orientation, and
+bounding-box coordinates. Bounding boxes are expected to match exactly; a drift
+up to 3 px is reported as a warning, and a larger drift fails the regression
+test.
 """
 
 
@@ -154,12 +161,31 @@ def project_path(relative: str) -> Path:
     return (PROJECT_ROOT / relative).resolve()
 
 
-def copy_sources() -> list[dict[str, object]]:
+def load_regression_pages() -> list[dict[str, object]]:
+    manifest_path = OUTPUT_ROOT / "manifest.json"
+    if not manifest_path.exists():
+        return REGRESSION_PAGES
+
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    pages: list[dict[str, object]] = []
+    for page in manifest["pages"]:
+        pages.append(
+            {
+                "id": page["id"],
+                "source": page["source"],
+                "original_cached_source": page.get("original_cached_source", page["source"]),
+                "reason": page["reason"],
+            }
+        )
+    return pages
+
+
+def copy_sources(regression_pages: list[dict[str, object]]) -> list[dict[str, object]]:
     SOURCES_DIR.mkdir(parents=True, exist_ok=True)
     manifest_pages: list[dict[str, object]] = []
     seen: set[str] = set()
-    total = len(REGRESSION_PAGES)
-    for index, page in enumerate(REGRESSION_PAGES, start=1):
+    total = len(regression_pages)
+    for index, page in enumerate(regression_pages, start=1):
         page_id = str(page["id"])
         if page_id in seen:
             raise ValueError(f"Duplicate regression page id: {page_id}")
@@ -169,13 +195,14 @@ def copy_sources() -> list[dict[str, object]]:
             raise FileNotFoundError(f"Missing regression source: {source}")
         target = SOURCES_DIR / f"{page_id}{source.suffix.lower()}"
         print(f"[copy {index:02d}/{total}] {page_id}: {source}", flush=True)
-        shutil.copy2(source, target)
+        if source.resolve() != target.resolve():
+            shutil.copy2(source, target)
         manifest_pages.append(
             {
                 "id": page_id,
                 "reason": page["reason"],
                 "source": target.relative_to(PROJECT_ROOT).as_posix(),
-                "original_cached_source": str(page["source"]),
+                "original_cached_source": str(page.get("original_cached_source", page["source"])),
                 "baseline_layout": (BASELINES_DIR / page_id / "layout.json").relative_to(PROJECT_ROOT).as_posix(),
                 "baseline_preview": (BASELINES_DIR / page_id / "preview.png").relative_to(PROJECT_ROOT).as_posix(),
             }
@@ -216,8 +243,9 @@ def write_manifest(pages: list[dict[str, object]]) -> None:
 
 
 def main() -> int:
-    print(f"Building OpenCV layout regression set: {len(REGRESSION_PAGES)} page(s)", flush=True)
-    pages = copy_sources()
+    regression_pages = load_regression_pages()
+    print(f"Building OpenCV layout regression set: {len(regression_pages)} page(s)", flush=True)
+    pages = copy_sources(regression_pages)
     build_baselines(pages)
     write_manifest(pages)
     print(OUTPUT_ROOT / "manifest.json")
