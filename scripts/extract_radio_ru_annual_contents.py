@@ -91,6 +91,51 @@ def rel(path: Path) -> str:
         return str(path)
 
 
+def pages_from_ranges(ranges: dict[int, tuple[int, int]]) -> dict[int, list[str]]:
+    pages: dict[int, list[str]] = {}
+    for year in sorted(ranges):
+        first, last = ranges[year]
+        if first > last:
+            raise ValueError(f"Invalid page range for {year}: {first:03d}-{last:03d}")
+        pages[year] = [f"b.{year}-12.{page:03d}" for page in range(first, last + 1)]
+    return pages
+
+
+def parse_page_ranges(text: str) -> dict[int, list[str]]:
+    ranges: dict[int, tuple[int, int]] = {}
+    for raw_part in text.split(","):
+        part = raw_part.strip()
+        if not part:
+            continue
+        try:
+            year_text, range_text = part.split(":", 1)
+            first_text, last_text = range_text.split("-", 1)
+            year = int(year_text)
+            first = int(first_text)
+            last = int(last_text)
+        except ValueError as exc:
+            raise ValueError(
+                "Page ranges must look like '1999:064-067,2000:063-066'"
+            ) from exc
+        ranges[year] = (first, last)
+    if not ranges:
+        raise ValueError("No page ranges were provided.")
+    return pages_from_ranges(ranges)
+
+
+def year_span_label(pages: dict[int, list[str]]) -> str:
+    years = sorted(pages)
+    if not years:
+        return "unknown"
+    if years[0] == years[-1]:
+        return str(years[0])
+    return f"{years[0]}-{years[-1]}"
+
+
+def default_output_prefix(pages: dict[int, list[str]]) -> str:
+    return "radio_annual_contents_" + year_span_label(pages).replace("-", "_")
+
+
 def normalize_line(line: str) -> str:
     line = line.replace("\u00a0", " ")
     line = line.replace("—", "-").replace("–", "-")
@@ -372,12 +417,12 @@ def markdown_escape(text: str) -> str:
     return text.replace("|", "\\|").replace("\n", " ").strip()
 
 
-def write_markdown(records: list[Record], path: Path) -> None:
+def write_markdown(records: list[Record], path: Path, years_label: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     article_count = sum(1 for record in records if record.kind == "article")
     review_count = sum(1 for record in records if record.needs_review)
     lines = [
-        "# Годовые оглавления журнала Радио, 1999-2000",
+        f"# Годовые оглавления журнала Радио, {years_label}",
         "",
         "Таблица получена OCR-обработкой декабрьских страниц годовых оглавлений с `archive.radio.ru`.",
         "В CSV сохранены нормализованный текст и сырой OCR-фрагмент, чтобы сомнительные строки можно было сверить со сканом.",
@@ -432,6 +477,16 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--ocr-root", type=Path, default=Path(".tmp/annual_contents_1999_2000/column_ocr_wide"))
     parser.add_argument("--out-dir", type=Path, default=Path("study/radio_ru_annual_contents"))
     parser.add_argument(
+        "--page-ranges",
+        default="",
+        help="Comma-separated annual contents ranges, for example: 1999:064-067,2000:063-066.",
+    )
+    parser.add_argument(
+        "--output-prefix",
+        default="",
+        help="Output filename prefix. Defaults to radio_annual_contents_<first_year>_<last_year>.",
+    )
+    parser.add_argument(
         "--ocr-variants",
         default=",".join(DEFAULT_OCR_VARIANTS),
         help="Comma-separated OCR variant directories to try under each page, in priority order.",
@@ -442,16 +497,19 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
     variants = [part.strip() for part in args.ocr_variants.split(",") if part.strip()]
+    pages = parse_page_ranges(args.page_ranges) if args.page_ranges else DEFAULT_PAGES
+    years_label = year_span_label(pages)
+    output_prefix = args.output_prefix or default_output_prefix(pages)
     records: list[Record] = []
-    for year in sorted(DEFAULT_PAGES):
+    for year in sorted(pages):
         state = ParseState(year=year)
-        for page_name in DEFAULT_PAGES[year]:
+        for page_name in pages[year]:
             source = find_ocr_file(args.ocr_root, page_name, variants)
             records.extend(parse_text_file(year, page_name, source, state))
 
-    write_csv(records, args.out_dir / "radio_annual_contents_1999_2000.csv")
-    write_markdown(records, args.out_dir / "radio_annual_contents_1999_2000.md")
-    write_raw_markdown(records, args.out_dir / "radio_annual_contents_1999_2000_raw_ocr.md")
+    write_csv(records, args.out_dir / f"{output_prefix}.csv")
+    write_markdown(records, args.out_dir / f"{output_prefix}.md", years_label)
+    write_raw_markdown(records, args.out_dir / f"{output_prefix}_raw_ocr.md")
     print(f"Wrote {len(records)} records to {args.out_dir}")
     return 0
 

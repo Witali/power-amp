@@ -322,6 +322,13 @@
 - Координаты `bbox` должны совпадать с эталоном; расхождение до 3 px допускается как warning, а больше 3 px считается ошибкой регрессии.
 - `scripts/build_layout_regression_set.py` теперь переиспользует текущий manifest при пересборке, чтобы не терять добавленные вручную страницы; baselines синхронизированы с текущим детектором.
 
+### 2026-05-25 - Годовые оглавления Радио за 1995-2000 годы
+
+- Через `scripts/search_radio_ru_annual_contents.ps1` скачаны недостающие декабрьские страницы `archive.radio.ru` за 1996-2000 годы в общий кеш `.tmp/archive_radio_ru/<year>/12/`; 1995 год переиспользован из кеша.
+- Страницы годовых оглавлений распознаны через основной OpenCV pipeline: `ocr_radio_ru_page_columns.ps1 -LayoutOnly` построил `layout.json`/`preview.png`, нарезал `layout_text_blocks` и распознал их локальным Tesseract.
+- `scripts/extract_radio_ru_annual_contents.py` теперь принимает `--page-ranges` и `--output-prefix`, поэтому один и тот же extractor можно применять не только к старому диапазону 1999-2000.
+- Результат сохранен в `study/radio_ru_annual_contents_1995_2000/`: CSV, Markdown-таблица, сырой OCR и README с командами воспроизведения. Всего получено 1507 OCR-derived записей, из них 735 article-строк с номером выпуска и страницей.
+
 ## Что проверять после изменений
 
 - `python -m unittest discover -s tests`

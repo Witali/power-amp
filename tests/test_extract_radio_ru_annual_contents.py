@@ -35,6 +35,23 @@ class ExtractRadioRuAnnualContentsTests(unittest.TestCase):
 
             self.assertEqual(found, columns_file)
 
+    def test_parse_page_ranges_builds_page_names(self) -> None:
+        pages = annual_contents.parse_page_ranges("1995:059-061,2000:063-064")
+
+        self.assertEqual(
+            pages,
+            {
+                1995: ["b.1995-12.059", "b.1995-12.060", "b.1995-12.061"],
+                2000: ["b.2000-12.063", "b.2000-12.064"],
+            },
+        )
+        self.assertEqual(annual_contents.year_span_label(pages), "1995-2000")
+        self.assertEqual(annual_contents.default_output_prefix(pages), "radio_annual_contents_1995_2000")
+
+    def test_parse_page_ranges_rejects_reversed_range(self) -> None:
+        with self.assertRaises(ValueError):
+            annual_contents.parse_page_ranges("1995:061-059")
+
 
 if __name__ == "__main__":
     unittest.main()
