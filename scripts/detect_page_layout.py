@@ -293,6 +293,13 @@ CONTENTS_COLUMN_SPLIT_MIN_GAP_RATIO = layout_config.CONTENTS_COLUMN_SPLIT_MIN_GA
 CONTENTS_COLUMN_SPLIT_MIN_GAP_PX = layout_config.CONTENTS_COLUMN_SPLIT_MIN_GAP_PX
 CONTENTS_COLUMN_SPLIT_MAX_PROJECTION_DENSITY = layout_config.CONTENTS_COLUMN_SPLIT_MAX_PROJECTION_DENSITY
 CONTENTS_COLUMN_SPLIT_MIN_PIECE_WIDTH_RATIO = layout_config.CONTENTS_COLUMN_SPLIT_MIN_PIECE_WIDTH_RATIO
+CONTENTS_COLUMN_GRID_SNAP_MIN_TOTAL_WIDTH_RATIO = layout_config.CONTENTS_COLUMN_GRID_SNAP_MIN_TOTAL_WIDTH_RATIO
+CONTENTS_COLUMN_GRID_SNAP_MIN_HEIGHT_RATIO = layout_config.CONTENTS_COLUMN_GRID_SNAP_MIN_HEIGHT_RATIO
+CONTENTS_COLUMN_GRID_SNAP_MAX_COLUMNS = layout_config.CONTENTS_COLUMN_GRID_SNAP_MAX_COLUMNS
+CONTENTS_COLUMN_GRID_SNAP_EDGE_TOLERANCE_RATIO = layout_config.CONTENTS_COLUMN_GRID_SNAP_EDGE_TOLERANCE_RATIO
+CONTENTS_COLUMN_GRID_SNAP_MAX_WIDTH_DEVIATION_RATIO = layout_config.CONTENTS_COLUMN_GRID_SNAP_MAX_WIDTH_DEVIATION_RATIO
+CONTENTS_COLUMN_GRID_SNAP_WIDE_BOUNDS_MIN_WIDTH_RATIO = layout_config.CONTENTS_COLUMN_GRID_SNAP_WIDE_BOUNDS_MIN_WIDTH_RATIO
+CONTENTS_COLUMN_GRID_SNAP_MIN_PIECE_WIDTH_RATIO = layout_config.CONTENTS_COLUMN_GRID_SNAP_MIN_PIECE_WIDTH_RATIO
 CONTENTS_HEADING_SPLIT_MIN_WIDTH_RATIO = layout_config.CONTENTS_HEADING_SPLIT_MIN_WIDTH_RATIO
 CONTENTS_HEADING_SPLIT_MIN_HEIGHT_RATIO = layout_config.CONTENTS_HEADING_SPLIT_MIN_HEIGHT_RATIO
 CONTENTS_HEADING_SPLIT_MIN_RATIO = layout_config.CONTENTS_HEADING_SPLIT_MIN_RATIO
@@ -3815,6 +3822,135 @@ def merge_contents_number_columns(
     return result
 
 
+CONTENTS_COLUMN_GRID_MARKERS = (
+    "contents_column_split",
+    "contents_column_merge",
+    "contents_number_column_merge",
+)
+
+
+def contents_column_grid_snap_candidate(block: Block, box: Box, width: int, height: int) -> bool:
+    if block.label != "text":
+        return False
+    if not any(float(block.features.get(marker, 0.0)) >= 0.5 for marker in CONTENTS_COLUMN_GRID_MARKERS):
+        return False
+    if box.h < height * CONTENTS_COLUMN_GRID_SNAP_MIN_HEIGHT_RATIO:
+        return False
+    if box.w < width * CONTENTS_COLUMN_GRID_SNAP_MIN_PIECE_WIDTH_RATIO:
+        return False
+    return True
+
+
+def contents_column_grid_bounds(
+    group: list[tuple[Block, Box]],
+    classified: list[tuple[Block, Box]],
+    width: int,
+) -> tuple[int, int] | None:
+    group_x1 = min(box.x for _, box in group)
+    group_x2 = max(box.x2 for _, box in group)
+    wide_bounds = [
+        box
+        for block, box in classified
+        if block.label == "image"
+        and box.w >= width * CONTENTS_COLUMN_GRID_SNAP_WIDE_BOUNDS_MIN_WIDTH_RATIO
+    ]
+    if not wide_bounds:
+        return None
+    return min(group_x1, *(box.x for box in wide_bounds)), max(group_x2, *(box.x2 for box in wide_bounds))
+
+
+def snap_contents_columns_to_page_grid(
+    classified: list[tuple[Block, Box]],
+    image,
+    mask,
+    edges,
+    ann,
+    scale: float,
+    width: int,
+    height: int,
+) -> list[tuple[Block, Box]]:
+    candidates = [
+        item
+        for item in classified
+        if contents_column_grid_snap_candidate(item[0], item[1], width, height)
+    ]
+    if len(candidates) < 2:
+        return classified
+
+    edge_tolerance = max(8, int(round(height * CONTENTS_COLUMN_GRID_SNAP_EDGE_TOLERANCE_RATIO)))
+    consumed: set[str] = set()
+    replacements: dict[str, tuple[Block, Box]] = {}
+    for seed_block, seed_box in sorted(candidates, key=lambda item: (item[1].y, item[1].x)):
+        if seed_block.ident in consumed:
+            continue
+        group = [
+            (block, box)
+            for block, box in candidates
+            if block.ident not in consumed
+            and abs(box.y - seed_box.y) <= edge_tolerance
+            and abs(box.y2 - seed_box.y2) <= edge_tolerance
+        ]
+        group = sorted(group, key=lambda item: item[1].x)
+        if not (2 <= len(group) <= CONTENTS_COLUMN_GRID_SNAP_MAX_COLUMNS):
+            continue
+
+        bounds = contents_column_grid_bounds(group, classified, width)
+        if bounds is None:
+            continue
+        usable_x1, usable_x2 = bounds
+        usable_width = usable_x2 - usable_x1
+        if usable_width < width * CONTENTS_COLUMN_GRID_SNAP_MIN_TOTAL_WIDTH_RATIO:
+            continue
+
+        expected_width = usable_width / float(len(group))
+        if expected_width < width * CONTENTS_COLUMN_GRID_SNAP_MIN_PIECE_WIDTH_RATIO:
+            continue
+        max_deviation = expected_width * CONTENTS_COLUMN_GRID_SNAP_MAX_WIDTH_DEVIATION_RATIO
+        if any(abs(box.w - expected_width) > max_deviation for _, box in group):
+            continue
+
+        for index, (block, box) in enumerate(group):
+            snapped_x1 = int(round(usable_x1 + usable_width * index / len(group)))
+            snapped_x2 = int(round(usable_x1 + usable_width * (index + 1) / len(group)))
+            snapped = Box(snapped_x1, box.y, max(0, snapped_x2 - snapped_x1), box.h).clamp(width, height)
+            if snapped.area <= 0:
+                continue
+
+            features = feature_dict(image, mask, edges, snapped)
+            label, confidence = classify_features(ann, features)
+            if label != "text":
+                label = "text"
+                confidence = max(confidence, block.confidence)
+            rounded_features = {key: round(float(value), 5) for key, value in features.items()}
+            for marker in CONTENTS_COLUMN_GRID_MARKERS:
+                if float(block.features.get(marker, 0.0)) >= 0.5:
+                    rounded_features[marker] = float(block.features[marker])
+            rounded_features["contents_column_grid_snap"] = 1.0
+            original_box = Box(
+                int(round(snapped.x / scale)),
+                int(round(snapped.y / scale)),
+                int(round(snapped.w / scale)),
+                int(round(snapped.h / scale)),
+            )
+            replacements[block.ident] = (
+                Block(
+                    ident=block.ident,
+                    label="text",
+                    orientation=infer_orientation(features),
+                    confidence=round(max(confidence, block.confidence), 4),
+                    bbox=original_box.to_list(),
+                    outline=None,
+                    features=rounded_features,
+                ),
+                snapped,
+            )
+            consumed.add(block.ident)
+
+    if not replacements:
+        return classified
+    return sorted((replacements.get(block.ident, (block, box)) for block, box in classified), key=lambda item: (item[1].y, item[1].x))
+
+
 def merge_connected_schematic_blocks(
     classified: list[tuple[Block, Box]],
     image,
@@ -5124,6 +5260,9 @@ def classify_blocks(
         classified, image, mask, edges, ann, scale=scale, width=analysis_w, height=analysis_h
     )
     classified = merge_contents_number_columns(
+        classified, image, mask, edges, ann, scale=scale, width=analysis_w, height=analysis_h
+    )
+    classified = snap_contents_columns_to_page_grid(
         classified, image, mask, edges, ann, scale=scale, width=analysis_w, height=analysis_h
     )
     classified = merge_stacked_diagram_blocks(

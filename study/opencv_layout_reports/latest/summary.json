@@ -244,7 +244,7 @@
   },
   {
     "id": "b.2000-12.063",
-    "reason": "annual contents page with cover-image strips and multi-column dot-leader article lists",
+    "reason": "manual feedback page: annual contents columns should snap to half-page print grid",
     "source": "../../opencv_layout_regression_pages/sources/b.2000-12.063.jpg",
     "layout": "detected/b.2000-12.063/layout.json",
     "preview": "detected/b.2000-12.063/preview.png",

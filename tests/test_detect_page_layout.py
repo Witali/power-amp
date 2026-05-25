@@ -967,6 +967,128 @@ class DetectPageLayoutTests(unittest.TestCase):
         self.assertEqual(box.to_list(), [80, 220, 454, 740])
         self.assertEqual(block.features["contents_number_column_merge"], 1.0)
 
+    def test_snaps_annual_contents_columns_to_print_grid(self) -> None:
+        np = detect_page_layout.np
+
+        image = np.full((1400, 1000, 3), 255, dtype=np.uint8)
+        mask = np.zeros((1400, 1000), dtype=np.uint8)
+        edges = mask.copy()
+        ann = detect_page_layout.train_bootstrap_ann()
+        wide_box = detect_page_layout.Box(60, 80, 880, 180)
+        left_box = detect_page_layout.Box(60, 360, 360, 760)
+        right_box = detect_page_layout.Box(420, 360, 520, 760)
+        features = {
+            "contents_column_merge": 1.0,
+            "max_text_score": 0.82,
+            "saturation_p80": 0.0,
+        }
+        classified = [
+            (
+                detect_page_layout.Block("001_image", "image", "unknown", 0.80, wide_box.to_list(), None, {}),
+                wide_box,
+            ),
+            (
+                detect_page_layout.Block("003_text", "text", "horizontal", 0.88, left_box.to_list(), None, features),
+                left_box,
+            ),
+            (
+                detect_page_layout.Block("004_text", "text", "horizontal", 0.89, right_box.to_list(), None, features),
+                right_box,
+            ),
+        ]
+
+        snapped = detect_page_layout.snap_contents_columns_to_page_grid(
+            classified,
+            image,
+            mask,
+            edges,
+            ann,
+            scale=1.0,
+            width=1000,
+            height=1400,
+        )
+
+        boxes = {block.ident: box.to_list() for block, box in snapped}
+        self.assertEqual(boxes["003_text"], [60, 360, 440, 760])
+        self.assertEqual(boxes["004_text"], [500, 360, 440, 760])
+        self.assertEqual(boxes["001_image"], wide_box.to_list())
+        text_blocks = {block.ident: block for block, _ in snapped}
+        self.assertEqual(text_blocks["003_text"].features["contents_column_grid_snap"], 1.0)
+        self.assertEqual(text_blocks["004_text"].features["contents_column_grid_snap"], 1.0)
+
+    def test_does_not_snap_plain_article_columns_to_print_grid(self) -> None:
+        np = detect_page_layout.np
+
+        image = np.full((1400, 1000, 3), 255, dtype=np.uint8)
+        mask = np.zeros((1400, 1000), dtype=np.uint8)
+        edges = mask.copy()
+        ann = detect_page_layout.train_bootstrap_ann()
+        left_box = detect_page_layout.Box(80, 220, 330, 820)
+        right_box = detect_page_layout.Box(500, 220, 400, 820)
+        classified = [
+            (
+                detect_page_layout.Block("008_text", "text", "horizontal", 0.87, left_box.to_list(), None, {"max_text_score": 0.82}),
+                left_box,
+            ),
+            (
+                detect_page_layout.Block("010_text", "text", "horizontal", 0.87, right_box.to_list(), None, {"max_text_score": 0.82}),
+                right_box,
+            ),
+        ]
+
+        snapped = detect_page_layout.snap_contents_columns_to_page_grid(
+            classified,
+            image,
+            mask,
+            edges,
+            ann,
+            scale=1.0,
+            width=1000,
+            height=1400,
+        )
+
+        self.assertEqual([box.to_list() for _, box in snapped], [left_box.to_list(), right_box.to_list()])
+        self.assertTrue(all("contents_column_grid_snap" not in block.features for block, _ in snapped))
+
+    def test_does_not_snap_contents_markers_without_cover_image_strip(self) -> None:
+        np = detect_page_layout.np
+
+        image = np.full((1400, 1000, 3), 255, dtype=np.uint8)
+        mask = np.zeros((1400, 1000), dtype=np.uint8)
+        edges = mask.copy()
+        ann = detect_page_layout.train_bootstrap_ann()
+        left_box = detect_page_layout.Box(70, 220, 390, 820)
+        right_box = detect_page_layout.Box(500, 220, 410, 820)
+        features = {
+            "contents_column_merge": 1.0,
+            "max_text_score": 0.82,
+            "saturation_p80": 0.0,
+        }
+        classified = [
+            (
+                detect_page_layout.Block("002_text", "text", "horizontal", 0.87, left_box.to_list(), None, features),
+                left_box,
+            ),
+            (
+                detect_page_layout.Block("003_text", "text", "horizontal", 0.87, right_box.to_list(), None, features),
+                right_box,
+            ),
+        ]
+
+        snapped = detect_page_layout.snap_contents_columns_to_page_grid(
+            classified,
+            image,
+            mask,
+            edges,
+            ann,
+            scale=1.0,
+            width=1000,
+            height=1400,
+        )
+
+        self.assertEqual([box.to_list() for _, box in snapped], [left_box.to_list(), right_box.to_list()])
+        self.assertTrue(all("contents_column_grid_snap" not in block.features for block, _ in snapped))
+
     def test_repeats_annual_contents_number_column_merge_for_shared_targets(self) -> None:
         np = detect_page_layout.np
 
