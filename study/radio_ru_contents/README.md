@@ -19,6 +19,8 @@
 
 Текущие файлы:
 
+- `radio_contents_1990_1995.csv` - статьи из распознанных годовых оглавлений
+  за 1990-1995 годы.
 - `radio_contents_1995_2000.csv` - статьи из распознанных годовых оглавлений
   за 1995-2000 годы.
 - `radio_contents_all.csv` - объединенная таблица всех доступных
@@ -44,6 +46,6 @@ python scripts\export_radio_ru_contents_index.py
 
 ```powershell
 python scripts\export_radio_ru_contents_index.py `
-  --input study\radio_ru_annual_contents_1986_1995\radio_annual_contents_1986_1995.csv `
+  --input study\radio_ru_annual_contents_1990_1995\radio_annual_contents_1990_1995.csv `
   --input study\radio_ru_annual_contents_1995_2000\radio_annual_contents_1995_2000.csv
 ```

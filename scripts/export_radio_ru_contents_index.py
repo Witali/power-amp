@@ -16,6 +16,7 @@ DEFAULT_OUTPUT_DIR = PROJECT_ROOT / "study" / "radio_ru_contents"
 DEFAULT_CACHE_ROOT = PROJECT_ROOT / ".tmp" / "archive_radio_ru"
 PRIMARY_SOURCES = [
     PROJECT_ROOT / "study" / "radio_ru_annual_contents_1986_1995" / "radio_annual_contents_1986_1995.csv",
+    PROJECT_ROOT / "study" / "radio_ru_annual_contents_1990_1995" / "radio_annual_contents_1990_1995.csv",
     PROJECT_ROOT / "study" / "radio_ru_annual_contents_1995_2000" / "radio_annual_contents_1995_2000.csv",
 ]
 LEGACY_FALLBACK_SOURCE = (

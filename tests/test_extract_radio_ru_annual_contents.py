@@ -80,6 +80,11 @@ class ExtractRadioRuAnnualContentsTests(unittest.TestCase):
         self.assertEqual(issue, "2")
         self.assertEqual(page, "3")
 
+    def test_is_section_accepts_early_nineties_contents_headings(self) -> None:
+        self.assertTrue(annual_contents.is_section("СТАТЬИ, ОЧЕРКИ"))
+        self.assertTrue(annual_contents.is_section("ПУТЕШЕСТВИЯ. ЭКСПЕДИЦИИ"))
+        self.assertTrue(annual_contents.is_section("РАДИОЛЮБИТЕЛЬСТВО И СПОРТ"))
+
     def test_find_ocr_file_prefers_psm6_for_structured_extraction_when_no_tsv(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

@@ -957,7 +957,11 @@ function Invoke-OcrVariant {
                 $outBase = Join-Path $VariantDir ("column{0}.{1}.psm{2}" -f ($column + 1), $profile.Name, $psm)
                 $txtPath = "$outBase.txt"
                 if (Test-Path -LiteralPath $txtPath) {
-                    $parts.Add((Get-Content -LiteralPath $txtPath -Raw -Encoding UTF8).Trim())
+                    $text = Get-Content -LiteralPath $txtPath -Raw -Encoding UTF8
+                    if ($null -eq $text) {
+                        $text = ""
+                    }
+                    $parts.Add($text.Trim())
                 }
             }
 
