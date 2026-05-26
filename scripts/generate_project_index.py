@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import html
+import csv
 from pathlib import Path
 
 
@@ -86,6 +87,13 @@ def result_cards() -> str:
     return "\n".join(cards)
 
 
+def count_csv_rows(path: Path) -> int:
+    if not path.exists():
+        return 0
+    with path.open("r", encoding="utf-8-sig", newline="") as handle:
+        return sum(1 for _ in csv.DictReader(handle))
+
+
 def write_symbols_index() -> Path:
     symbols_dir = PROJECT_ROOT / "part_symbols"
     symbols_preview = symbols_dir / "part_symbols.png"
@@ -163,6 +171,9 @@ def write_symbols_index() -> Path:
 def write_index() -> Path:
     opencv_preview = PROJECT_ROOT / "study" / "opencv_layout_reports" / "latest" / "detected" / "b.2000-02.037" / "preview.png"
     opencv_report = PROJECT_ROOT / "study" / "opencv_layout_reports" / "latest" / "index.html"
+    radio_contents_index = PROJECT_ROOT / "study" / "radio_ru_contents" / "index.html"
+    radio_contents_csv = PROJECT_ROOT / "study" / "radio_ru_contents" / "radio_contents_all.csv"
+    radio_contents_count = count_csv_rows(radio_contents_csv)
     symbols_preview = PROJECT_ROOT / "part_symbols" / "part_symbols.png"
     symbols_index = write_symbols_index()
     symbols_readme = PROJECT_ROOT / "part_symbols" / "README.md"
@@ -332,6 +343,7 @@ def write_index() -> Path:
       <nav class="quick-links" aria-label="Quick links">
         <a href="#results">Схемы</a>
         <a href="#recognition">Распознавание</a>
+        <a href="#radio-contents">Оглавления</a>
         <a href="#symbols">УГО</a>
         <a href="README.md">README</a>
       </nav>
@@ -367,6 +379,23 @@ def write_index() -> Path:
         <a class="thumb-link" href="{html.escape(rel(opencv_report))}">
           <img src="{html.escape(rel(opencv_preview))}" alt="OpenCV page layout preview">
         </a>
+      </div>
+      <div class="feature" id="radio-contents" style="margin-top: 16px;">
+        <div>
+          <h3>Оглавления журнала Радио</h3>
+          <p>CSV-индекс статей из годовых оглавлений преобразован в HTML-таблицу с поиском, фильтрами по году и номеру журнала, ссылками на сканы <code>archive.radio.ru</code> и отметками <code>needs_review</code>.</p>
+          <div class="links">
+            <a href="{html.escape(rel(radio_contents_index))}">Открыть HTML-таблицу</a>
+            <a href="{html.escape(rel(radio_contents_csv))}">CSV-источник</a>
+            <a href="study/radio_ru_contents/README.md">Описание формата</a>
+          </div>
+          <div class="tag-row">
+            <span class="tag">Radio contents</span>
+            <span class="tag">{radio_contents_count} article rows</span>
+            <span class="tag">archive.radio.ru links</span>
+          </div>
+        </div>
+        <a class="thumb-placeholder" href="{html.escape(rel(radio_contents_index))}">Оглавления Радио</a>
       </div>
     </section>
 

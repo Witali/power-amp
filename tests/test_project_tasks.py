@@ -73,6 +73,27 @@ class ProjectTasksTests(unittest.TestCase):
             ],
         )
 
+    def test_radio_contents_html_task_builds_generator_command(self) -> None:
+        calls: list[list[str]] = []
+
+        with mock.patch("project_tasks.run", side_effect=lambda command: calls.append(command)):
+            project_tasks.generate_radio_contents_html(
+                PROJECT_ROOT / "study" / "radio_ru_contents" / "radio_contents_all.csv",
+                PROJECT_ROOT / "study" / "radio_ru_contents" / "index.html",
+            )
+
+        self.assertEqual(
+            calls[0],
+            [
+                sys.executable,
+                "scripts/generate_radio_ru_contents_html.py",
+                "--input",
+                "study/radio_ru_contents/radio_contents_all.csv",
+                "--output",
+                "study/radio_ru_contents/index.html",
+            ],
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

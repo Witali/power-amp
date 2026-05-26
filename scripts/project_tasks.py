@@ -69,6 +69,19 @@ def spellcheck_text(paths: list[Path], backend: str, out: Path | None, fail_on_i
     run(command)
 
 
+def generate_radio_contents_html(input_csv: Path, output: Path) -> None:
+    run(
+        [
+            sys.executable,
+            "scripts/generate_radio_ru_contents_html.py",
+            "--input",
+            rel(input_csv),
+            "--output",
+            rel(output),
+        ]
+    )
+
+
 def calibrate_layout_frequency(images_dir: Path, layouts_dir: Path, out_md: Path, out_json: Path) -> None:
     run(
         [
@@ -119,6 +132,10 @@ def parse_args() -> argparse.Namespace:
     spellcheck.add_argument("--out", type=Path, help="Optional TSV report path.")
     spellcheck.add_argument("--fail-on-issues", action="store_true", help="Exit non-zero if issues are found.")
 
+    radio_contents = subparsers.add_parser("radio-contents-html", help="Generate the Radio contents HTML table from CSV.")
+    radio_contents.add_argument("--input", type=Path, default=Path("study/radio_ru_contents/radio_contents_all.csv"))
+    radio_contents.add_argument("--output", type=Path, default=Path("study/radio_ru_contents/index.html"))
+
     layout_calibrate = subparsers.add_parser("layout-calibrate", help="Measure frequency features on reviewed layout blocks.")
     layout_calibrate.add_argument("--images-dir", type=Path, default=Path(".tmp/layout_candidate_pages"))
     layout_calibrate.add_argument("--layouts-dir", type=Path, default=Path(".tmp/layout_frequency_calibration_layouts"))
@@ -148,6 +165,8 @@ def main() -> int:
             run_result(args.variant, args.scale, args.no_png, args.no_html)
         elif args.task == "spellcheck":
             spellcheck_text(args.paths, args.backend, args.out, args.fail_on_issues)
+        elif args.task == "radio-contents-html":
+            generate_radio_contents_html(args.input, args.output)
         elif args.task == "layout-calibrate":
             calibrate_layout_frequency(args.images_dir, args.layouts_dir, args.out_md, args.out_json)
         else:

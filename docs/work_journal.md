@@ -357,6 +357,12 @@
 - Для диагностики оставлены явные override-переменные: `POWER_AMP_PYTHON_PACKAGES` и opt-in `POWER_AMP_ALLOW_LEGACY_PYTHON_PACKAGES=1` для старого общего root.
 - `docs/setup_local_tools.md` обновлен: после смены Python нужно повторно запускать `.\init.ps1`, который ставит OpenCV/numpy/pillow в папку текущего Python minor version.
 
+### 2026-05-26 - HTML-страница оглавлений Радио
+
+- Добавлен `scripts/generate_radio_ru_contents_html.py`: он строит статическую страницу из `study/radio_ru_contents/radio_contents_all.csv` с поиском, фильтрами по году/номеру журнала, ссылками на сканы `archive.radio.ru` и бейджами `needs_review`.
+- В `scripts/project_tasks.py` и `package.json` добавлен воспроизводимый запуск `radio-contents-html` / `npm run radio:contents-html`.
+- Главный `index.html` теперь генерируется со ссылкой на `study/radio_ru_contents/index.html` в секции распознавания.
+
 ## Что проверять после изменений
 
 - `python -m unittest discover -s tests`
