@@ -568,14 +568,22 @@ function Test-PythonLayoutDependencies {
     }
 
     $oldPackagePath = $env:POWER_AMP_PYTHON_PACKAGES
+    $oldProjectRoot = $env:POWER_AMP_PROJECT_ROOT
     try {
         $env:POWER_AMP_PYTHON_PACKAGES = $PackageTarget
+        $env:POWER_AMP_PROJECT_ROOT = $Root
         $code = @'
 import os
 import sys
+from pathlib import Path
 
-target = os.environ['POWER_AMP_PYTHON_PACKAGES']
-sys.path.insert(0, target)
+project_root = Path(os.environ['POWER_AMP_PROJECT_ROOT'])
+sys.path.insert(0, str(project_root))
+
+from scripts.local_python_packages import add_local_python_packages, candidate_package_dirs
+
+add_local_python_packages(project_root)
+loaded_dirs = [str(path) for path in candidate_package_dirs(project_root)]
 
 try:
     import cv2
@@ -591,12 +599,14 @@ if missing:
     sys.exit(1)
 
 print('cv2 {}; numpy {}; pillow {}'.format(getattr(cv2, '__version__', 'unknown'), numpy.__version__, PIL.__version__))
+print('package dirs: {}'.format('; '.join(loaded_dirs)))
 '@
         & $PythonExe -c $code
         return ($LASTEXITCODE -eq 0)
     }
     finally {
         $env:POWER_AMP_PYTHON_PACKAGES = $oldPackagePath
+        $env:POWER_AMP_PROJECT_ROOT = $oldProjectRoot
     }
 }
 

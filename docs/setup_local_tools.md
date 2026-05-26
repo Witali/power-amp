@@ -32,6 +32,17 @@ For Python layout dependencies it uses `-PythonPath`, the `PYTHON` environment
 variable, or the first runnable `python.exe`/`python`/`py.exe` on `PATH`.
 Compiled wheels are installed per Python minor version, so Python 3.12 and 3.14
 do not overwrite each other's local packages.
+Project Python scripts load only the matching versioned package directory
+(`local_tools/python_packages/pyXY`) for the interpreter that is currently
+running. After changing or upgrading Python, rerun `.\init.ps1` so the matching
+OpenCV/numpy/pillow wheels are installed for that interpreter.
+
+For diagnostics, `POWER_AMP_PYTHON_PACKAGES` can point at one or more explicit
+package directories separated by the platform path separator. The old unversioned
+`local_tools/python_packages` root is ignored by default because it can contain
+compiled wheels for another Python minor version; set
+`POWER_AMP_ALLOW_LEGACY_PYTHON_PACKAGES=1` only when intentionally using that
+legacy layout.
 
 If you want to force a specific 7-Zip binary, pass it explicitly:
 

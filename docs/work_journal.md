@@ -350,6 +350,13 @@
 - Через OpenCV+Tesseract перечитаны 29 страниц годовых оглавлений 1990-1995 годов из кеша `.tmp/archive_radio_ru/`; результат сохранен в `study/radio_ru_annual_contents_1990_1995/`.
 - После пересборки получено 2133 записи, 1661 article-строка, 115 section-строк и 294 строки `needs_review`; новый источник подключен к `scripts/export_radio_ru_contents_index.py` для общей CSV-выгрузки `study/radio_ru_contents/`.
 
+### 2026-05-26 - Python-зависимости init под текущую версию
+
+- `scripts/local_python_packages.py` теперь подгружает только версионную папку `local_tools/python_packages/pyXY`, соответствующую запущенному Python, чтобы Python 3.14 не видел бинарные `numpy/cv2` wheels от Python 3.12.
+- `scripts/setup_local_tools.ps1` валидирует OpenCV/numpy/pillow через этот же loader, выставляя `POWER_AMP_PYTHON_PACKAGES` на target текущего Python, поэтому `.\init.ps1` проверяет ровно тот путь, который будут использовать проектные скрипты.
+- Для диагностики оставлены явные override-переменные: `POWER_AMP_PYTHON_PACKAGES` и opt-in `POWER_AMP_ALLOW_LEGACY_PYTHON_PACKAGES=1` для старого общего root.
+- `docs/setup_local_tools.md` обновлен: после смены Python нужно повторно запускать `.\init.ps1`, который ставит OpenCV/numpy/pillow в папку текущего Python minor version.
+
 ## Что проверять после изменений
 
 - `python -m unittest discover -s tests`
