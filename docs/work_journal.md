@@ -335,6 +335,13 @@
 
 - В `AGENTS.md` закреплено правило документировать проектную работу по ходу дела: обновлять подходящий README, workflow note, TODO, журнал экспериментов или `docs/work_journal.md` с описанием попытки, результата, метрик, решения оставить/отклонить изменение, проверок и ссылок на коммиты, когда они есть.
 
+### 2026-05-26 - CSV-выгрузка оглавлений Радио
+
+- Добавлен экспортный слой `scripts/export_radio_ru_contents_index.py`, который берет структурированные CSV годовых оглавлений и пишет article-level CSV в `study/radio_ru_contents/`.
+- Новый формат фиксирует `year`, `article_title`, `issue`, `journal_page`, `archive_image_url`, `archive_image_page`, `section`, `source_contents_page` и `needs_review`.
+- Ссылки на JPG-сканы строятся как best-effort: если соседний scan id уже есть в `.tmp/archive_radio_ru/`, экспортер использует его, иначе берет печатную страницу как воспроизводимый guess. Для строгой точности позже нужен отдельный map печатных страниц в scan id.
+- Добавлены unit-тесты на формат URL, выбор cached scan id рядом с печатной страницей и фильтрацию article-строк.
+
 ## Что проверять после изменений
 
 - `python -m unittest discover -s tests`
