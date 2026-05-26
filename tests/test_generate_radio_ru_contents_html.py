@@ -35,13 +35,50 @@ class GenerateRadioRuContentsHtmlTests(unittest.TestCase):
             }
         ]
 
-        html = contents_html.build_html(rows, Path("study/radio_ru_contents/radio_contents_all.csv"), Path("study/radio_ru_contents/index.html"))
+        html = contents_html.build_html(
+            rows,
+            Path("study/radio_ru_contents/radio_contents_all.csv"),
+            Path("study/radio_ru_contents/years/2000.html"),
+            all_output=Path("study/radio_ru_contents/index.html"),
+            current_year="2000",
+        )
 
         self.assertIn("searchInput", html)
         self.assertIn("Импульсный блок питания мощного УМЗЧ", html)
         self.assertIn("https://archive.radio.ru/web/img/2000/b.2000-02.036.jpg", html)
         self.assertIn("https://archive.radio.ru/web/img/2000/b.2000-12.063.jpg", html)
         self.assertIn("ocr_noise", html)
+
+    def test_main_html_has_year_navigation_without_article_table(self) -> None:
+        rows = [
+            {
+                "year": "1990",
+                "article_title": "Антенна для частот 11",
+                "issue": "1",
+                "journal_page": "2",
+                "archive_image_url": "https://archive.radio.ru/web/img/1990/b.1990-01.002.jpg",
+                "archive_image_page": "2",
+                "section": "МИКРОПРОЦЕССОРНАЯ ТЕХНИКА",
+                "source_contents_page": "b.1990-12.087",
+                "needs_review": "",
+            }
+        ]
+        output = Path("study/radio_ru_contents/index.html")
+        year_pages = {"1990": Path("study/radio_ru_contents/years/1990.html")}
+
+        html = contents_html.build_html(
+            rows,
+            Path("study/radio_ru_contents/radio_contents_all.csv"),
+            output,
+            year_pages=year_pages,
+            all_output=output,
+        )
+
+        self.assertIn('href="years/1990.html"', html)
+        self.assertIn("https://archive.radio.ru/web/img/1990/b.1990-12.087.jpg", html)
+        self.assertNotIn("contentsRows", html)
+        self.assertNotIn("searchInput", html)
+        self.assertNotIn("Антенна для частот 11", html)
 
     def test_build_html_links_year_page_and_source_jpeg(self) -> None:
         rows = [

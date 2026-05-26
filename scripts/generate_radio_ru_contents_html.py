@@ -204,7 +204,7 @@ def build_html(
     page_intro = (
         f"Статьи за {esc(current_year)} год из общей CSV-выгрузки. "
         if current_year
-        else "Статическая HTML-таблица с машинно распознанными строками годовых оглавлений. "
+        else "Навигационная страница машинно распознанных годовых оглавлений. "
     )
     source_links = source_contents_links_html(rows)
     source_block = (
@@ -226,6 +226,86 @@ def build_html(
 {year_nav_html(grouped, year_pages, output)}
       </ul>
     </section>"""
+    table_block = ""
+    script_block = ""
+    if current_year:
+        table_block = f"""
+    <section class="toolbar" aria-label="Фильтры">
+      <label>Поиск
+        <input id="searchInput" type="search" placeholder="Название, раздел, страница">
+      </label>
+      <label>Год
+        <select id="yearFilter">
+          <option value="">Все годы</option>
+{option_html(years)}
+        </select>
+      </label>
+      <label>Номер
+        <select id="issueFilter">
+          <option value="">Все номера</option>
+{option_html(issues)}
+        </select>
+      </label>
+      <label class="check-label">
+        <input id="reviewFilter" type="checkbox">
+        Только needs_review
+      </label>
+    </section>
+
+    <p class="count-line"><span id="visibleCount">{len(rows)}</span> из {len(rows)} строк</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Год</th>
+            <th>Номер</th>
+            <th>Стр.</th>
+            <th>Название статьи</th>
+            <th>Раздел</th>
+            <th>Скан</th>
+            <th>Оглавление</th>
+            <th>Проверка</th>
+          </tr>
+        </thead>
+        <tbody id="contentsRows">
+{table_rows_html(rows)}
+        </tbody>
+      </table>
+    </div>"""
+        script_block = """
+  <script>
+    const searchInput = document.getElementById('searchInput');
+    const yearFilter = document.getElementById('yearFilter');
+    const issueFilter = document.getElementById('issueFilter');
+    const reviewFilter = document.getElementById('reviewFilter');
+    const visibleCount = document.getElementById('visibleCount');
+    const rows = Array.from(document.querySelectorAll('#contentsRows tr'));
+
+    function applyFilters() {
+      const query = searchInput.value.trim().toLowerCase();
+      const year = yearFilter.value;
+      const issue = issueFilter.value;
+      const onlyReview = reviewFilter.checked;
+      let visible = 0;
+
+      for (const row of rows) {
+        const matchesQuery = !query || row.dataset.search.includes(query);
+        const matchesYear = !year || row.dataset.year === year;
+        const matchesIssue = !issue || row.dataset.issue === issue;
+        const matchesReview = !onlyReview || row.dataset.review === '1';
+        const show = matchesQuery && matchesYear && matchesIssue && matchesReview;
+        row.hidden = !show;
+        if (show) visible += 1;
+      }
+
+      visibleCount.textContent = String(visible);
+    }
+
+    searchInput.addEventListener('input', applyFilters);
+    yearFilter.addEventListener('change', applyFilters);
+    issueFilter.addEventListener('change', applyFilters);
+    reviewFilter.addEventListener('change', applyFilters);
+  </script>"""
 
     return f"""<!doctype html>
 <html lang="ru">
@@ -450,84 +530,9 @@ def build_html(
     <p class="subtle">Распределение по годам: {esc(year_summary)}.</p>
 {year_nav}
 {source_block}
-
-    <section class="toolbar" aria-label="Фильтры">
-      <label>Поиск
-        <input id="searchInput" type="search" placeholder="Название, раздел, страница">
-      </label>
-      <label>Год
-        <select id="yearFilter">
-          <option value="">Все годы</option>
-{option_html(years)}
-        </select>
-      </label>
-      <label>Номер
-        <select id="issueFilter">
-          <option value="">Все номера</option>
-{option_html(issues)}
-        </select>
-      </label>
-      <label class="check-label">
-        <input id="reviewFilter" type="checkbox">
-        Только needs_review
-      </label>
-    </section>
-
-    <p class="count-line"><span id="visibleCount">{len(rows)}</span> из {len(rows)} строк</p>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Год</th>
-            <th>Номер</th>
-            <th>Стр.</th>
-            <th>Название статьи</th>
-            <th>Раздел</th>
-            <th>Скан</th>
-            <th>Оглавление</th>
-            <th>Проверка</th>
-          </tr>
-        </thead>
-        <tbody id="contentsRows">
-{table_rows_html(rows)}
-        </tbody>
-      </table>
-    </div>
+{table_block}
   </main>
-
-  <script>
-    const searchInput = document.getElementById('searchInput');
-    const yearFilter = document.getElementById('yearFilter');
-    const issueFilter = document.getElementById('issueFilter');
-    const reviewFilter = document.getElementById('reviewFilter');
-    const visibleCount = document.getElementById('visibleCount');
-    const rows = Array.from(document.querySelectorAll('#contentsRows tr'));
-
-    function applyFilters() {{
-      const query = searchInput.value.trim().toLowerCase();
-      const year = yearFilter.value;
-      const issue = issueFilter.value;
-      const onlyReview = reviewFilter.checked;
-      let visible = 0;
-
-      for (const row of rows) {{
-        const matchesQuery = !query || row.dataset.search.includes(query);
-        const matchesYear = !year || row.dataset.year === year;
-        const matchesIssue = !issue || row.dataset.issue === issue;
-        const matchesReview = !onlyReview || row.dataset.review === '1';
-        const show = matchesQuery && matchesYear && matchesIssue && matchesReview;
-        row.hidden = !show;
-        if (show) visible += 1;
-      }}
-
-      visibleCount.textContent = String(visible);
-    }}
-
-    searchInput.addEventListener('input', applyFilters);
-    yearFilter.addEventListener('change', applyFilters);
-    issueFilter.addEventListener('change', applyFilters);
-    reviewFilter.addEventListener('change', applyFilters);
-  </script>
+{script_block}
 </body>
 </html>
 """
