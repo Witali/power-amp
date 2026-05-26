@@ -14,3 +14,4 @@
 - When the user sends a page layout mockup or screenshot with markup/corrections, regenerate the markup for that page with the current pipeline first, compare it with the reported issue, and only then decide whether the algorithm still needs improvement.
 - Keep any image containing manual layout corrections until all related regression tests pass.
 - When changing an algorithm in a script, update the matching description or pipeline documentation in the same turn, especially docs stored next to that script.
+- Document project work as it happens: update the relevant README, workflow note, TODO, experiment log, or `docs/work_journal.md` with what was tried, what changed, measured results, whether the change was kept or rejected, verification commands, and commit references when available.
