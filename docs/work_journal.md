@@ -363,6 +363,13 @@
 - В `scripts/project_tasks.py` и `package.json` добавлен воспроизводимый запуск `radio-contents-html` / `npm run radio:contents-html`.
 - Главный `index.html` теперь генерируется со ссылкой на `study/radio_ru_contents/index.html` в секции распознавания.
 
+### 2026-05-26 - Уточнение ссылок по оглавлениям номеров Радио
+
+- Добавлен `scripts/refine_radio_ru_contents_with_issue_toc.py`: после экспорта годового оглавления он ищет статью в OCR оглавления первых страниц соответствующего номера и при уверенном fuzzy-совпадении уточняет `journal_page`, `archive_image_page` и `archive_image_url`.
+- Скрипт умеет готовить недостающий OCR через существующие `scripts/download_radio_ru_pages.ps1` и `scripts/ocr_radio_ru_page_columns.ps1`, сохраняя сканы в `.tmp/archive_radio_ru/` и OCR в `.tmp/radio_ru_issue_contents_ocr/`.
+- В `scripts/project_tasks.py` и `package.json` добавлен воспроизводимый запуск `radio-contents-refine` / `npm run radio:contents-refine`; решения сопоставления пишутся в `study/radio_ru_contents/issue_toc_refinement_report.csv`.
+- `study/radio_ru_contents/README.md` обновлен командами для обычного и ограниченного (`--prepare-limit`) прогона уточнения.
+
 ## Что проверять после изменений
 
 - `python -m unittest discover -s tests`

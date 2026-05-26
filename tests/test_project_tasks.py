@@ -94,6 +94,41 @@ class ProjectTasksTests(unittest.TestCase):
             ],
         )
 
+    def test_radio_contents_refine_task_builds_issue_toc_command(self) -> None:
+        calls: list[list[str]] = []
+
+        with mock.patch("project_tasks.run", side_effect=lambda command: calls.append(command)):
+            project_tasks.refine_radio_contents_with_issue_toc(
+                PROJECT_ROOT / "study" / "radio_ru_contents" / "radio_contents_all.csv",
+                PROJECT_ROOT / "study" / "radio_ru_contents" / "radio_contents_all.csv",
+                PROJECT_ROOT / ".tmp" / "radio_ru_issue_contents_ocr",
+                PROJECT_ROOT / "study" / "radio_ru_contents" / "issue_toc_refinement_report.csv",
+                first_scan_pages=4,
+                prepare_ocr=True,
+                prepare_limit=12,
+            )
+
+        self.assertEqual(
+            calls[0],
+            [
+                sys.executable,
+                "scripts/refine_radio_ru_contents_with_issue_toc.py",
+                "--input",
+                "study/radio_ru_contents/radio_contents_all.csv",
+                "--output",
+                "study/radio_ru_contents/radio_contents_all.csv",
+                "--issue-ocr-root",
+                ".tmp/radio_ru_issue_contents_ocr",
+                "--report",
+                "study/radio_ru_contents/issue_toc_refinement_report.csv",
+                "--first-scan-pages",
+                "4",
+                "--prepare-ocr",
+                "--prepare-limit",
+                "12",
+            ],
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

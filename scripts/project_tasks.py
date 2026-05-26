@@ -82,6 +82,36 @@ def generate_radio_contents_html(input_csv: Path, output: Path) -> None:
     )
 
 
+def refine_radio_contents_with_issue_toc(
+    input_csv: Path,
+    output_csv: Path,
+    issue_ocr_root: Path,
+    report: Path,
+    first_scan_pages: int,
+    prepare_ocr: bool,
+    prepare_limit: int,
+) -> None:
+    command = [
+        sys.executable,
+        "scripts/refine_radio_ru_contents_with_issue_toc.py",
+        "--input",
+        rel(input_csv),
+        "--output",
+        rel(output_csv),
+        "--issue-ocr-root",
+        rel(issue_ocr_root),
+        "--report",
+        rel(report),
+        "--first-scan-pages",
+        str(first_scan_pages),
+    ]
+    if prepare_ocr:
+        command.append("--prepare-ocr")
+    if prepare_limit:
+        command.extend(["--prepare-limit", str(prepare_limit)])
+    run(command)
+
+
 def calibrate_layout_frequency(images_dir: Path, layouts_dir: Path, out_md: Path, out_json: Path) -> None:
     run(
         [
@@ -136,6 +166,18 @@ def parse_args() -> argparse.Namespace:
     radio_contents.add_argument("--input", type=Path, default=Path("study/radio_ru_contents/radio_contents_all.csv"))
     radio_contents.add_argument("--output", type=Path, default=Path("study/radio_ru_contents/index.html"))
 
+    radio_refine = subparsers.add_parser(
+        "radio-contents-refine",
+        help="Refine Radio contents links by matching entries against issue-level contents pages.",
+    )
+    radio_refine.add_argument("--input", type=Path, default=Path("study/radio_ru_contents/radio_contents_all.csv"))
+    radio_refine.add_argument("--output", type=Path, default=Path("study/radio_ru_contents/radio_contents_all.csv"))
+    radio_refine.add_argument("--issue-ocr-root", type=Path, default=Path(".tmp/radio_ru_issue_contents_ocr"))
+    radio_refine.add_argument("--report", type=Path, default=Path("study/radio_ru_contents/issue_toc_refinement_report.csv"))
+    radio_refine.add_argument("--first-scan-pages", type=int, default=4)
+    radio_refine.add_argument("--prepare-ocr", action="store_true")
+    radio_refine.add_argument("--prepare-limit", type=int, default=0)
+
     layout_calibrate = subparsers.add_parser("layout-calibrate", help="Measure frequency features on reviewed layout blocks.")
     layout_calibrate.add_argument("--images-dir", type=Path, default=Path(".tmp/layout_candidate_pages"))
     layout_calibrate.add_argument("--layouts-dir", type=Path, default=Path(".tmp/layout_frequency_calibration_layouts"))
@@ -167,6 +209,16 @@ def main() -> int:
             spellcheck_text(args.paths, args.backend, args.out, args.fail_on_issues)
         elif args.task == "radio-contents-html":
             generate_radio_contents_html(args.input, args.output)
+        elif args.task == "radio-contents-refine":
+            refine_radio_contents_with_issue_toc(
+                args.input,
+                args.output,
+                args.issue_ocr_root,
+                args.report,
+                args.first_scan_pages,
+                args.prepare_ocr,
+                args.prepare_limit,
+            )
         elif args.task == "layout-calibrate":
             calibrate_layout_frequency(args.images_dir, args.layouts_dir, args.out_md, args.out_json)
         else:

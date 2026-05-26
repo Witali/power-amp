@@ -15,6 +15,7 @@
     "lint:svg": "python scripts/lint_svg.py",
     "project:index": "python scripts/generate_project_index.py",
     "radio:contents-html": "python scripts/project_tasks.py radio-contents-html",
+    "radio:contents-refine": "python scripts/project_tasks.py radio-contents-refine",
     "render:svg": "python scripts/project_tasks.py render",
     "spellcheck": "python scripts/project_tasks.py spellcheck",
     "symbols": "python scripts/project_tasks.py symbols",
