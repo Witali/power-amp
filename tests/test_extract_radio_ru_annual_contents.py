@@ -35,6 +35,20 @@ class ExtractRadioRuAnnualContentsTests(unittest.TestCase):
 
             self.assertEqual(found, columns_file)
 
+    def test_find_ocr_file_prefers_tsv_lines_when_available(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            layout = root / "b.2000-12.063" / "layout_text_blocks"
+            layout.mkdir(parents=True)
+            psm6 = layout / "merged.prose.psm6.corrected.txt"
+            tsv_lines = layout / "merged.prose.psm6.tsv_lines.txt"
+            psm6.write_text("psm6", encoding="utf-8")
+            tsv_lines.write_text("tsv", encoding="utf-8")
+
+            found = annual_contents.find_ocr_file(root, "b.2000-12.063", annual_contents.DEFAULT_OCR_VARIANTS)
+
+            self.assertEqual(found, tsv_lines)
+
     def test_parse_page_ranges_builds_page_names(self) -> None:
         pages = annual_contents.parse_page_ranges("1995:059-061,2000:063-064")
 
@@ -66,7 +80,7 @@ class ExtractRadioRuAnnualContentsTests(unittest.TestCase):
         self.assertEqual(issue, "2")
         self.assertEqual(page, "3")
 
-    def test_find_ocr_file_prefers_psm6_for_structured_extraction(self) -> None:
+    def test_find_ocr_file_prefers_psm6_for_structured_extraction_when_no_tsv(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             layout = root / "b.2000-12.063" / "layout_text_blocks"

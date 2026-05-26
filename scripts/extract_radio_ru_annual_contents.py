@@ -17,6 +17,7 @@ DEFAULT_PAGES = {
 }
 DEFAULT_OCR_VARIANTS = ["layout_text_blocks", "columns2"]
 DEFAULT_OCR_FILENAMES = [
+    "merged.prose.psm6.tsv_lines.txt",
     "merged.prose.psm6.corrected.txt",
     "merged.prose.psm6.txt",
     "merged.prose.psm4.corrected.txt",
