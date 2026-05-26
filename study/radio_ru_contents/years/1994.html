@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Оглавление журнала Радио за 1994 год</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #172033;
+      --muted: #647083;
+      --line: #d8dee8;
+      --panel: #f6f8fb;
+      --accent: #1769aa;
+      --ok: #287d5b;
+      --warn: #9a6a00;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font: 15px/1.5 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: #fff;
+    }
+    main {
+      width: min(1380px, calc(100% - 32px));
+      margin: 28px auto 54px;
+    }
+    header {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 16px;
+      align-items: end;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--line);
+    }
+    h1 { margin: 0 0 8px; font-size: 32px; line-height: 1.15; }
+    h2 { margin: 0 0 10px; font-size: 18px; line-height: 1.25; }
+    p { margin: 0 0 10px; }
+    a { color: var(--accent); text-decoration-thickness: 1px; }
+    .subtle { color: var(--muted); max-width: 920px; }
+    .links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+    .links a {
+      display: inline-flex;
+      align-items: center;
+      min-height: 34px;
+      padding: 6px 10px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      color: var(--ink);
+      text-decoration: none;
+      background: #fff;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin: 18px 0;
+    }
+    .stat {
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+    }
+    .stat strong {
+      display: block;
+      font-size: 22px;
+      line-height: 1.1;
+    }
+    .year-nav,
+    .source-scans {
+      margin: 18px 0;
+    }
+    .year-nav ul {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .year-card {
+      display: grid;
+      gap: 5px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+    }
+    .year-link {
+      font-size: 18px;
+      font-weight: 650;
+      text-decoration-thickness: 1px;
+    }
+    .year-count,
+    .source-label {
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .source-links {
+      display: inline-flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .source-label + .source-links {
+      margin-left: 6px;
+    }
+    .toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) 140px 140px auto;
+      gap: 10px;
+      align-items: end;
+      padding: 12px 0;
+      background: #fff;
+      border-bottom: 1px solid var(--line);
+    }
+    label {
+      display: grid;
+      gap: 4px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    input, select {
+      width: 100%;
+      min-height: 36px;
+      padding: 6px 8px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      color: var(--ink);
+      background: #fff;
+      font: inherit;
+    }
+    .check-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 36px;
+      padding: 6px 0;
+    }
+    .check-label input { width: auto; min-height: 0; }
+    .count-line {
+      margin: 12px 0;
+      color: var(--muted);
+    }
+    .table-wrap {
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+    table {
+      width: 100%;
+      min-width: 1040px;
+      border-collapse: collapse;
+      background: #fff;
+    }
+    th, td {
+      padding: 7px 9px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+      text-align: left;
+    }
+    th {
+      color: #fff;
+      background: #273447;
+      font-weight: 600;
+    }
+    tbody tr:nth-child(even) { background: #fbfcfe; }
+    .title-cell { min-width: 360px; }
+    .flag {
+      display: inline-block;
+      max-width: 240px;
+      padding: 2px 7px;
+      border-radius: 999px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-size: 12px;
+    }
+    .flag.ok { color: var(--ok); background: #e9f5ef; }
+    .flag.review { color: var(--warn); background: #fff5da; }
+    @media (max-width: 900px) {
+      header,
+      .toolbar,
+      .stats {
+        grid-template-columns: 1fr;
+      }
+      .links { justify-content: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <h1>Оглавление журнала Радио за 1994 год</h1>
+        <p class="subtle">Статьи за 1994 год из общей CSV-выгрузки. Источник: <code>../radio_contents_all.csv</code>. Ссылки на сканы ведут на <code>archive.radio.ru</code>.</p>
+      </div>
+      <nav class="links" aria-label="Навигация">
+        <a href="../../../index.html#recognition">Индекс проекта</a>
+        <a href="../index.html">Все годы</a>
+        <a href="../radio_contents_all.csv">CSV</a>
+        <a href="../README.md">README</a>
+      </nav>
+    </header>
+
+    <section class="stats" aria-label="Сводка">
+      <div class="stat"><strong>116</strong><span>строк статей</span></div>
+      <div class="stat"><strong>1994-1994</strong><span>годы</span></div>
+      <div class="stat"><strong>1</strong><span>годовых оглавлений</span></div>
+      <div class="stat"><strong>1</strong><span>строк needs_review</span></div>
+    </section>
+    <p class="subtle">Распределение по годам: 1994: 116.</p>
+
+
+    <section class="source-scans" aria-label="Сканы исходного оглавления">
+      <h2>Сканы годового оглавления</h2>
+      <p><span class="source-links"><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a><a href="https://archive.radio.ru/web/img/1994/b.1994-12.048.jpg" target="_blank" rel="noopener">b.1994-12.048</a></span></p>
+    </section>
+
+    <section class="toolbar" aria-label="Фильтры">
+      <label>Поиск
+        <input id="searchInput" type="search" placeholder="Название, раздел, страница">
+      </label>
+      <label>Год
+        <select id="yearFilter">
+          <option value="">Все годы</option>
+            <option value="1994">1994</option>
+        </select>
+      </label>
+      <label>Номер
+        <select id="issueFilter">
+          <option value="">Все номера</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option value="10">10</option>
+            <option value="11">11</option>
+            <option value="12">12</option>
+        </select>
+      </label>
+      <label class="check-label">
+        <input id="reviewFilter" type="checkbox">
+        Только needs_review
+      </label>
+    </section>
+
+    <p class="count-line"><span id="visibleCount">116</span> из 116 строк</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Год</th>
+            <th>Номер</th>
+            <th>Стр.</th>
+            <th>Название статьи</th>
+            <th>Раздел</th>
+            <th>Скан</th>
+            <th>Оглавление</th>
+            <th>Проверка</th>
+          </tr>
+        </thead>
+        <tbody id="contentsRows">
+          <tr data-year="1994" data-issue="1" data-review="0" data-search="1994 1 1 ` ответ на вопрос по статье александрова и. «регу- лируемый аналог стабилитрона» (радио, 1993, № техника наших дней b.1994-12.047 "><td>1994</td><td>1</td><td>1</td><td class="title-cell">` Ответ на вопрос по статье Александрова И. «Регу- лируемый аналог стабилитрона» (Радио, 1993, №</td><td>ТЕХНИКА НАШИХ ДНЕЙ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-01.001.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="1" data-review="0" data-search="1994 1 1 доработка октан-корректора. э. адигамов 10 «голос» моей машины. в. банников чееенининнинии электроника за рулем b.1994-12.048 "><td>1994</td><td>1</td><td>1</td><td class="title-cell">Доработка октан-корректора. Э. Адигамов 10 «Голос» моей машины. В. Банников чееенининнинии</td><td>ЭЛЕКТРОНИКА ЗА РУЛЕМ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-01.001.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.048.jpg" target="_blank" rel="noopener">b.1994-12.048</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="1" data-review="0" data-search="1994 1 1 кодовый замок с сенсорным управлением. с. сергеенко чи изниининаниии ниц инте нонинининениниее электроника в быту b.1994-12.048 "><td>1994</td><td>1</td><td>1</td><td class="title-cell">Кодовый замок с сенсорным управлением. С. Сергеенко чи изниининаниии ниц инте нонинининениниее</td><td>ЭЛЕКТРОНИКА В БЫТУ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-01.001.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.048.jpg" target="_blank" rel="noopener">b.1994-12.048</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="1" data-review="0" data-search="1994 1 1 металлоискатель повышенной чувствительности. и. александров иене наи н ити наниннинннннн а: то автомат «вечерний свет». io. виноградов электроника в быту b.1994-12.048 "><td>1994</td><td>1</td><td>1</td><td class="title-cell">Металлоискатель повышенной чувствительности. И. Александров иене наи н ити наниннинннннн а: ТО Автомат «вечерний свет». IO. Виноградов</td><td>ЭЛЕКТРОНИКА В БЫТУ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-01.001.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.048.jpg" target="_blank" rel="noopener">b.1994-12.048</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="1" data-review="0" data-search="1994 1 1 применение магниторезисторов. м.бараночников техника наших дней b.1994-12.047 "><td>1994</td><td>1</td><td>1</td><td class="title-cell">Применение магниторезисторов. М.Бараночников</td><td>ТЕХНИКА НАШИХ ДНЕЙ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-01.001.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="1" data-review="0" data-search="1994 1 1 способ включения реверсивного счетчика к561ne радиолюбителю-конструктору b.1994-12.047 "><td>1994</td><td>1</td><td>1</td><td class="title-cell">Способ включения реверсивного счетчика К561NE</td><td>РАДИОЛЮБИТЕЛЮ-КОНСТРУКТОРУ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-01.001.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="1" data-review="0" data-search="1994 1 2 а: ряснянский с.0&lt;000.5 00.00scode0scscerdbwcnorevestevexserevereewsvesso 6 47 квазипараллельный канал звука. а. порохнюк 6 т ремонт видеомагнитофона «электроника вм 29 видеотехника b.1994-12.048 "><td>1994</td><td>1</td><td>2</td><td class="title-cell">А: РЯСНЯНСКИЙ с.0&lt;000.5 00.00scode0scscerdbwcnorevestevexserevereewsvessO 6 47 Квазипараллельный канал звука. А. Порохнюк 6 Т Ремонт видеомагнитофона «Электроника ВМ</td><td>29 ВИДЕОТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-01.002.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.048.jpg" target="_blank" rel="noopener">b.1994-12.048</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="1" data-review="0" data-search="1994 1 2 датчик вибрации для охранного устройства. ю. виноградов» - ее ие ое ока коапоанеавесаниие электроника за рулем b.1994-12.048 "><td>1994</td><td>1</td><td>2</td><td class="title-cell">Датчик вибрации для охранного устройства. Ю. Виноградов» - ее ие ое ока коапоанеавесаниие</td><td>ЭЛЕКТРОНИКА ЗА РУЛЕМ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-01.002.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.048.jpg" target="_blank" rel="noopener">b.1994-12.048</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="1" data-review="0" data-search="1994 1 2 не спешите выбрасывать лампу. в. милкин электроника за рулем b.1994-12.048 "><td>1994</td><td>1</td><td>2</td><td class="title-cell">Не спешите выбрасывать лампу. В. Милкин</td><td>ЭЛЕКТРОНИКА ЗА РУЛЕМ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-01.002.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.048.jpg" target="_blank" rel="noopener">b.1994-12.048</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="1" data-review="0" data-search="1994 1 2 неоновая лампа в информационном табло. с. коротков чи иннин ини ии ини нии ини иене нньннннньи тт электронный термометр. ю. власов электроника в быту b.1994-12.048 "><td>1994</td><td>1</td><td>2</td><td class="title-cell">Неоновая лампа в информационном табло. С. Коротков чи иннин ини ии ини нии ини иене нньннннньи ТТ Электронный термометр. Ю. Власов</td><td>ЭЛЕКТРОНИКА В БЫТУ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-01.002.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.048.jpg" target="_blank" rel="noopener">b.1994-12.048</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="1" data-review="0" data-search="1994 1 3 «смартранк» - радиотелефон почти для всех. б.степанов - + линии нии наити нони таниннининнь техника наших дней b.1994-12.047 "><td>1994</td><td>1</td><td>3</td><td class="title-cell">«СмарТранк» - радиотелефон почти для всех. Б.Степанов - + линии нии наити нони таниннининнь</td><td>ТЕХНИКА НАШИХ ДНЕЙ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-01.003.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="1" data-review="0" data-search="1994 1 4 декодер-автомат на к174xa8 и к174xa9. п. куратов 8 yy неисправности телевизоров «рубин 51/54 тц-4310». а. пескин „ини ини ини нение ини ни нии о 29 видеотехника b.1994-12.048 "><td>1994</td><td>1</td><td>4</td><td class="title-cell">Декодер-автомат на К174XA8 и К174XA9. П. Куратов 8 yy Неисправности телевизоров «Рубин 51/54 ТЦ-4310». А. Пескин „ини ини ини нение ини ни нии О</td><td>29 ВИДЕОТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-01.004.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.048.jpg" target="_blank" rel="noopener">b.1994-12.048</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="1" data-review="0" data-search="1994 1 6 5 селекторы каналов современных телевизоров. 30 к. быструшкин, л. степаненко ини иииниижьньниниее 29 видеотехника b.1994-12.048 "><td>1994</td><td>1</td><td>6</td><td class="title-cell">5 Селекторы каналов современных телевизоров. 30 К. Быструшкин, Л. Степаненко ини иииниижьньниниее</td><td>29 ВИДЕОТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-01.006.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.048.jpg" target="_blank" rel="noopener">b.1994-12.048</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="1" data-review="0" data-search="1994 1 8 вольтметр автолюбителя. н. хухтиков ччннниньь нь. 4 выходной узел автосторожа. м. чистяков 4 электронный блок экономайзера на к548ун электроника за рулем b.1994-12.048 "><td>1994</td><td>1</td><td>8</td><td class="title-cell">Вольтметр автолюбителя. Н. Хухтиков ччннниньь нь. 4 Выходной узел автосторожа. М. Чистяков 4 Электронный блок экономайзера на К548УН</td><td>ЭЛЕКТРОНИКА ЗА РУЛЕМ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-01.008.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.048.jpg" target="_blank" rel="noopener">b.1994-12.048</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="1" data-review="0" data-search="1994 1 8 тест: аудиокассеты иена з советы покупателям b.1994-12.047 "><td>1994</td><td>1</td><td>8</td><td class="title-cell">Тест: аудиокассеты иена З</td><td>СОВЕТЫ ПОКУПАТЕЛЯМ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-01.008.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="1" data-review="0" data-search="1994 1 9 видеотехника формата vhs. ю. петропавловский 29 видеотехника b.1994-12.048 "><td>1994</td><td>1</td><td>9</td><td class="title-cell">Видеотехника формата VHS. Ю. Петропавловский</td><td>29 ВИДЕОТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-01.009.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.048.jpg" target="_blank" rel="noopener">b.1994-12.048</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="1" data-review="0" data-search="1994 1 12 радиационный индикатор «сторож-р». ю. виноградов электроника в быту b.1994-12.047 "><td>1994</td><td>1</td><td>12</td><td class="title-cell">Радиационный индикатор «Сторож-Р». Ю. Виноградов</td><td>ЭЛЕКТРОНИКА В БЫТУ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-01.012.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="1" data-review="0" data-search="1994 1 21 антивирусная система spider’s web. ю. крылов микропроцессорная техника b.1994-12.047 "><td>1994</td><td>1</td><td>21</td><td class="title-cell">Антивирусная система SPIDER’S WEB. Ю. Крылов</td><td>МИКРОПРОЦЕССОРНАЯ ТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-01.021.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="1" data-review="0" data-search="1994 1 25 25 см. также 2-4, 3-5, 4-5, 6-8, 7-6, 10-8 29 видеотехника b.1994-12.048 "><td>1994</td><td>1</td><td>25</td><td class="title-cell">25 см. также 2-4, 3-5, 4-5, 6-8, 7-6, 10-8</td><td>29 ВИДЕОТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-01.025.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.048.jpg" target="_blank" rel="noopener">b.1994-12.048</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="1" data-review="0" data-search="1994 1 25 в. чернышев ааа микропроцессорная техника b.1994-12.047 "><td>1994</td><td>1</td><td>25</td><td class="title-cell">В. Чернышев ааа</td><td>МИКРОПРОЦЕССОРНАЯ ТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-01.025.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="1" data-review="0" data-search="1994 1 25 усовершенствование программатора ппзу. / дизассемблер для «радио-86рк» и. самарин микропроцессорная техника b.1994-12.047 "><td>1994</td><td>1</td><td>25</td><td class="title-cell">Усовершенствование программатора ППЗУ. / Дизассемблер для «Радио-86РК» И. Самарин</td><td>МИКРОПРОЦЕССОРНАЯ ТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-01.025.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="1" data-review="0" data-search="1994 1 28 «орион микропроцессорная техника b.1994-12.047 "><td>1994</td><td>1</td><td>28</td><td class="title-cell">«Орион</td><td>МИКРОПРОЦЕССОРНАЯ ТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-01.028.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="1" data-review="0" data-search="1994 1 28 обеспечение для прк «орион микропроцессорная техника b.1994-12.047 "><td>1994</td><td>1</td><td>28</td><td class="title-cell">обеспечение для ПРК «Орион</td><td>МИКРОПРОЦЕССОРНАЯ ТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-01.028.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="2" data-review="0" data-search="1994 2 1 доработка basic «orion». в. пушков лььньньн нь. d микропроцессорная техника b.1994-12.047 "><td>1994</td><td>2</td><td>1</td><td class="title-cell">Доработка BASIC «ORION». В. Пушков лььньньн нь. D</td><td>МИКРОПРОЦЕССОРНАЯ ТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-02.001.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="2" data-review="0" data-search="1994 2 1 усовершенствование «сигнала электроника в быту b.1994-12.047 "><td>1994</td><td>2</td><td>1</td><td class="title-cell">Усовершенствование «Сигнала</td><td>ЭЛЕКТРОНИКА В БЫТУ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-02.001.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="2" data-review="0" data-search="1994 2 2 бирюков с. охранные устройства. сторожевое устройст- во - электронный звонок, разработанный а. москвиным. - радио, 1992, № 9, с. 20 электроника в быту b.1994-12.048 "><td>1994</td><td>2</td><td>2</td><td class="title-cell">Бирюков С. Охранные устройства. Сторожевое устройст- во - электронный звонок, разработанный А. Москвиным. - Радио, 1992, № 9, с. 20</td><td>ЭЛЕКТРОНИКА В БЫТУ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-02.002.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.048.jpg" target="_blank" rel="noopener">b.1994-12.048</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="2" data-review="0" data-search="1994 2 2 оптическая связь в космосе. н.чуковский техника наших дней b.1994-12.047 "><td>1994</td><td>2</td><td>2</td><td class="title-cell">Оптическая связь в космосе. Н.Чуковский</td><td>ТЕХНИКА НАШИХ ДНЕЙ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-02.002.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="2" data-review="0" data-search="1994 2 2 опять dumpcor ини нии ининининининии: е микропроцессорная техника b.1994-12.047 "><td>1994</td><td>2</td><td>2</td><td class="title-cell">Опять DUMPCOR ини нии ининининининии: Е</td><td>МИКРОПРОЦЕССОРНАЯ ТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-02.002.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="2" data-review="0" data-search="1994 2 6 сторожевое устройство с телефонным вызовом. ‘ д. алексеев иене иииининьин я ленин нение г электроника в быту b.1994-12.047 "><td>1994</td><td>2</td><td>6</td><td class="title-cell">Сторожевое устройство с телефонным вызовом. ‘ Д. Алексеев иене иииининьин я Ленин нение Г</td><td>ЭЛЕКТРОНИКА В БЫТУ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-02.006.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="2" data-review="0" data-search="1994 2 7 опыт приема твч в москве. п. гисич, к. васильев 29 видеотехника b.1994-12.048 "><td>1994</td><td>2</td><td>7</td><td class="title-cell">Опыт приема ТВЧ в Москве. П. Гисич, К. Васильев</td><td>29 ВИДЕОТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-02.007.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.048.jpg" target="_blank" rel="noopener">b.1994-12.048</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="2" data-review="0" data-search="1994 2 9 28 тци-ац. к. быструшкин, с. кубрак , чьинньннниин з 8 телевизионный антенный разветвитель. и. нечаев 3з 29 видеотехника b.1994-12.048 "><td>1994</td><td>2</td><td>9</td><td class="title-cell">28 ТЦИ-АЦ. К. Быструшкин, С. Кубрак , чьинньннниин З 8 Телевизионный антенный разветвитель. И. Нечаев 3З</td><td>29 ВИДЕОТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-02.009.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.048.jpg" target="_blank" rel="noopener">b.1994-12.048</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="2" data-review="0" data-search="1994 2 15 однокристальные микро-эвм. а. фрунзе, с. хоркин. km1816be35, km1816be48, км1816ве49 микропроцессорная техника b.1994-12.047 "><td>1994</td><td>2</td><td>15</td><td class="title-cell">Однокристальные микро-ЭВМ. А. Фрунзе, С. Хоркин. KM1816BE35, KM1816BE48, КМ1816ВЕ49</td><td>МИКРОПРОЦЕССОРНАЯ ТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-02.015.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="2" data-review="0" data-search="1994 2 30 мелодический звонок из доступных деталей. г. ремизов ии ии ш и ннни нии электроника в быту b.1994-12.047 "><td>1994</td><td>2</td><td>30</td><td class="title-cell">Мелодический звонок из доступных деталей. Г. Ремизов ии ии ш и ннни нии</td><td>ЭЛЕКТРОНИКА В БЫТУ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-02.030.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="2" data-review="0" data-search="1994 2 32 абонентский громкоговоритель-будильник. и. нечаев электроника в быту b.1994-12.047 "><td>1994</td><td>2</td><td>32</td><td class="title-cell">Абонентский громкоговоритель-будильник. И. Нечаев</td><td>ЭЛЕКТРОНИКА В БЫТУ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-02.032.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="2" data-review="0" data-search="1994 2 33 сторожевое устройство с «магнитным ключом». с. карелин шине иинннинниние электроника в быту b.1994-12.047 "><td>1994</td><td>2</td><td>33</td><td class="title-cell">Сторожевое устройство с «магнитным ключом». С. Карелин шине иинннинниние</td><td>ЭЛЕКТРОНИКА В БЫТУ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-02.033.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="2" data-review="0" data-search="1994 2 37 перестраиваемый синусоидальный генератор цифровой синтез аналогового сигнала. в.псурцев, м.федоров ели ци радиолюбителю-конструктору b.1994-12.047 "><td>1994</td><td>2</td><td>37</td><td class="title-cell">Перестраиваемый синусоидальный генератор Цифровой синтез аналогового сигнала. В.Псурцев, М.Федоров ели ци</td><td>РАДИОЛЮБИТЕЛЮ-КОНСТРУКТОРУ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-02.037.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="2" data-review="0" data-search="1994 2 41 38 1992, № 10, 38 лилии 29 видеотехника b.1994-12.048 "><td>1994</td><td>2</td><td>41</td><td class="title-cell">38 1992, № 10, 38 лилии</td><td>29 ВИДЕОТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-02.041.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.048.jpg" target="_blank" rel="noopener">b.1994-12.048</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="3" data-review="0" data-search="1994 3 1 pioneer на российском рынке а ининииининннни: г советы покупателям b.1994-12.047 "><td>1994</td><td>3</td><td>1</td><td class="title-cell">PIONEER на российском рынке а ининииининннни: Г</td><td>СОВЕТЫ ПОКУПАТЕЛЯМ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-03.001.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="3" data-review="0" data-search="1994 3 1 ответы на вопросы по статьям 29 видеотехника b.1994-12.048 "><td>1994</td><td>3</td><td>1</td><td class="title-cell">Ответы на вопросы по статьям</td><td>29 ВИДЕОТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-03.001.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.048.jpg" target="_blank" rel="noopener">b.1994-12.048</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="3" data-review="0" data-search="1994 3 1 цифровой таймер для электробытовых машин и приборов. в. шамис лишние нининннянинининнние:. d 30 мелодичный звонок. н. семакин и. неинениннинни., d электроника в быту b.1994-12.047 "><td>1994</td><td>3</td><td>1</td><td class="title-cell">Цифровой таймер для электробытовых машин и приборов. В. Шамис лишние нининннянинининнние:. D 30 Мелодичный звонок. Н. Семакин и. неинениннинни., D</td><td>ЭЛЕКТРОНИКА В БЫТУ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-03.001.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="3" data-review="0" data-search="1994 3 2 «мезсо»: не проходите мимо! ини нинененининииие г советы покупателям b.1994-12.047 "><td>1994</td><td>3</td><td>2</td><td class="title-cell">«МЕЗСО»: не проходите мимо! ини нинененининииие Г</td><td>СОВЕТЫ ПОКУПАТЕЛЯМ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-03.002.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="3" data-review="0" data-search="1994 3 2 антенный усилитель (bp) ии ииииииньлнининитититьнининии. з 40 29 видеотехника b.1994-12.048 "><td>1994</td><td>3</td><td>2</td><td class="title-cell">Антенный усилитель (BP) ии ииииииньлнининитититьнининии. З 40</td><td>29 ВИДЕОТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-03.002.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.048.jpg" target="_blank" rel="noopener">b.1994-12.048</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="3" data-review="0" data-search="1994 3 2 многофункциональный телефон «phone master». е. белевцов, и. коршун ии нии ииаиииннинининияе г электроника в быту b.1994-12.047 "><td>1994</td><td>3</td><td>2</td><td class="title-cell">Многофункциональный телефон «Phone master». Е. Белевцов, И. Коршун ии нии ииаиииннинининияе Г</td><td>ЭЛЕКТРОНИКА В БЫТУ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-03.002.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="3" data-review="0" data-search="1994 3 2 рейтинг автомагнитол ин иииниииининннии: г советы покупателям b.1994-12.047 "><td>1994</td><td>3</td><td>2</td><td class="title-cell">Рейтинг автомагнитол ин иииниииининннии: Г</td><td>СОВЕТЫ ПОКУПАТЕЛЯМ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-03.002.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="3" data-review="0" data-search="1994 3 3 27 чуднов в. квазианалоговый тахометр. - радио, 1992, р электроника за рулем b.1994-12.048 "><td>1994</td><td>3</td><td>3</td><td class="title-cell">27 Чуднов В. Квазианалоговый тахометр. - Радио, 1992, р</td><td>ЭЛЕКТРОНИКА ЗА РУЛЕМ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-03.003.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.048.jpg" target="_blank" rel="noopener">b.1994-12.048</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="3" data-review="0" data-search="1994 3 5 электронные часы включают радиоприемник. и. нечаев нина низине ниц анициннинин на з электроника в быту b.1994-12.047 "><td>1994</td><td>3</td><td>5</td><td class="title-cell">Электронные часы включают радиоприемник. И. Нечаев нина низине ниц анициннинин на З</td><td>ЭЛЕКТРОНИКА В БЫТУ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-03.005.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="3" data-review="0" data-search="1994 3 6 «застава» всегда начеку 4 ини з электроника в быту b.1994-12.047 "><td>1994</td><td>3</td><td>6</td><td class="title-cell">«Застава» всегда начеку 4 ини З</td><td>ЭЛЕКТРОНИКА В БЫТУ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-03.006.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="3" data-review="0" data-search="1994 3 6 индикаторы здоровья. (итоги конкурса «пульс») з электроника в быту b.1994-12.047 "><td>1994</td><td>3</td><td>6</td><td class="title-cell">Индикаторы здоровья. (Итоги конкурса «Пульс») З</td><td>ЭЛЕКТРОНИКА В БЫТУ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-03.006.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="3" data-review="0" data-search="1994 3 6 российские супертелефоны еиииинииининьнииии lo советы покупателям b.1994-12.047 "><td>1994</td><td>3</td><td>6</td><td class="title-cell">Российские супертелефоны еиииинииининьнииии LO</td><td>СОВЕТЫ ПОКУПАТЕЛЯМ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-03.006.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="3" data-review="0" data-search="1994 3 9 активные вс-фильтры: схемы и расчет. и.романов селективные фильтры иене. № радиолюбителю-конструктору b.1994-12.047 "><td>1994</td><td>3</td><td>9</td><td class="title-cell">Активные ВС-фильтры: схемы и расчет. И.Романов Селективные фильтры иене. №</td><td>РАДИОЛЮБИТЕЛЮ-КОНСТРУКТОРУ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-03.009.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="3" data-review="0" data-search="1994 3 33 электронно-механический «рыболов». ю. виноградов электроника в быту b.1994-12.047 "><td>1994</td><td>3</td><td>33</td><td class="title-cell">Электронно-механический «рыболов». Ю. Виноградов</td><td>ЭЛЕКТРОНИКА В БЫТУ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-03.033.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="4" data-review="0" data-search="1994 4 2 пакетная система связи «радиопак». с.бунин з 2 «гонец» в космосе, на земле и в эфире. а.зайцев, л.невдяев, в.тамаркин чении инининнинниннннин техника наших дней b.1994-12.047 "><td>1994</td><td>4</td><td>2</td><td class="title-cell">Пакетная система связи «Радиопак». С.Бунин З 2 «Гонец» в космосе, на земле и в эфире. А.Зайцев, Л.Невдяев, В.Тамаркин чении инининнинниннннин</td><td>ТЕХНИКА НАШИХ ДНЕЙ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-04.002.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="4" data-review="0" data-search="1994 4 3 маслов а. модернизация квазианалогового тахометра 22 - радио, 1993, № 9, с. 36, 37 елена. з электроника за рулем b.1994-12.048 "><td>1994</td><td>4</td><td>3</td><td class="title-cell">Маслов А. Модернизация квазианалогового тахометра 22 - Радио, 1993, № 9, с. 36, 37 елена. З</td><td>ЭЛЕКТРОНИКА ЗА РУЛЕМ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-04.003.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.048.jpg" target="_blank" rel="noopener">b.1994-12.048</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="4" data-review="0" data-search="1994 4 3 радио, 1992, № 4, с. 20-25 лнининьлилилянинниниии: з 29 видеотехника b.1994-12.048 "><td>1994</td><td>4</td><td>3</td><td class="title-cell">Радио, 1992, № 4, с. 20-25 лнининьлилилянинниниии: З</td><td>29 ВИДЕОТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-04.003.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.048.jpg" target="_blank" rel="noopener">b.1994-12.048</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="4" data-review="0" data-search="1994 4 4 р смотров в. еще раз о замене птк селектором каналов 32 скв-1с. - радио, 1989, № 7, с. 44, 45 нн.: з 29 видеотехника b.1994-12.048 "><td>1994</td><td>4</td><td>4</td><td class="title-cell">р Смотров В. Еще раз о замене ПТК селектором каналов 32 СКВ-1С. - Радио, 1989, № 7, с. 44, 45 нн.: З</td><td>29 ВИДЕОТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-04.004.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.048.jpg" target="_blank" rel="noopener">b.1994-12.048</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="4" data-review="0" data-search="1994 4 8 фотоприемник для сду телевизора. л. гаврилов 29 видеотехника b.1994-12.048 "><td>1994</td><td>4</td><td>8</td><td class="title-cell">Фотоприемник для СДУ телевизора. Л. Гаврилов</td><td>29 ВИДЕОТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-04.008.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.048.jpg" target="_blank" rel="noopener">b.1994-12.048</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="4" data-review="0" data-search="1994 4 10 40 автовыключатель телевизора. в. cypo 0 csecesseneee 29 видеотехника b.1994-12.048 "><td>1994</td><td>4</td><td>10</td><td class="title-cell">40 Автовыключатель телевизора. В. Cypo 0 csecesseneee</td><td>29 ВИДЕОТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-04.010.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.048.jpg" target="_blank" rel="noopener">b.1994-12.048</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="4" data-review="0" data-search="1994 4 10 использование неисправного резистора. и. макаров 29 видеотехника b.1994-12.048 "><td>1994</td><td>4</td><td>10</td><td class="title-cell">Использование неисправного резистора. И. Макаров</td><td>29 ВИДЕОТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-04.010.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.048.jpg" target="_blank" rel="noopener">b.1994-12.048</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="4" data-review="0" data-search="1994 4 20 г.рогов, с. бутылкин, м. бриджиди и нннньнннии» микропроцессорная техника b.1994-12.047 "><td>1994</td><td>4</td><td>20</td><td class="title-cell">Г.Рогов, С. Бутылкин, М. БрИДЖИДИ и нннньнннии»</td><td>МИКРОПРОЦЕССОРНАЯ ТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-04.020.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="4" data-review="0" data-search="1994 4 33 быстродействующий измеритель температуры. и. шелестов ини ниин ини нити линии нинннннннин электроника в быту b.1994-12.047 "><td>1994</td><td>4</td><td>33</td><td class="title-cell">Быстродействующий измеритель температуры. И. Шелестов ини ниин ини нити линии нинннннннин</td><td>ЭЛЕКТРОНИКА В БЫТУ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-04.033.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="4" data-review="0" data-search="1994 4 38 регулятор мощности паяльника. л. ломакин электроника в быту b.1994-12.047 "><td>1994</td><td>4</td><td>38</td><td class="title-cell">Регулятор мощности паяльника. Л. Ломакин</td><td>ЭЛЕКТРОНИКА В БЫТУ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-04.038.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="4" data-review="0" data-search="1994 4 40 широтноимпульсный дискриминатор. а.руднев радиолюбителю-конструктору b.1994-12.047 "><td>1994</td><td>4</td><td>40</td><td class="title-cell">Широтноимпульсный дискриминатор. А.Руднев</td><td>РАДИОЛЮБИТЕЛЮ-КОНСТРУКТОРУ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-04.040.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="4" data-review="0" data-search="1994 4 47 30 1991, № 3, с. 33 -36 и иииилиииниинииииинньниние 29 видеотехника b.1994-12.048 "><td>1994</td><td>4</td><td>47</td><td class="title-cell">30 1991, № 3, с. 33 -36 и иииилиииниинииииинньниние</td><td>29 ВИДЕОТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-04.047.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.048.jpg" target="_blank" rel="noopener">b.1994-12.048</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="5" data-review="0" data-search="1994 5 2 транссибирская магистраль. ю.маримонт техника наших дней b.1994-12.047 "><td>1994</td><td>5</td><td>2</td><td class="title-cell">Транссибирская магистраль. Ю.Маримонт</td><td>ТЕХНИКА НАШИХ ДНЕЙ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-05.002.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="5" data-review="0" data-search="1994 5 10 монитор-телевизор. с. желудков «че нннннинининиие г 5 50 неисправности телевизоров «горизонт 51ctv 29 видеотехника b.1994-12.048 "><td>1994</td><td>5</td><td>10</td><td class="title-cell">Монитор-телевизор. С. Желудков «че нннннинининиие Г 5 50 Неисправности телевизоров «Горизонт 51CTV</td><td>29 ВИДЕОТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-05.010.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.048.jpg" target="_blank" rel="noopener">b.1994-12.048</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="5" data-review="0" data-search="1994 5 20 «орион-128»: копировщик экрана. ю.федоренко микропроцессорная техника b.1994-12.047 "><td>1994</td><td>5</td><td>20</td><td class="title-cell">«Орион-128»: копировщик экрана. Ю.Федоренко</td><td>МИКРОПРОЦЕССОРНАЯ ТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-05.020.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="5" data-review="0" data-search="1994 5 24 блок увеличения числа переключаемых телепрограмм. ю. корсаков --.- и линии нии ниинннииннинннннии d 10 доработка кодера пал в генераторе «электроника ремонт модулей питания телевизоров. в. федоров 29 видеотехника b.1994-12.048 "><td>1994</td><td>5</td><td>24</td><td class="title-cell">Блок увеличения числа переключаемых телепрограмм. Ю. Корсаков --.- и линии нии ниинннииннинннннии D 10 Доработка кодера ПАЛ в генераторе «Электроника Ремонт модулей питания телевизоров. В. Федоров</td><td>29 ВИДЕОТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-05.024.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.048.jpg" target="_blank" rel="noopener">b.1994-12.048</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="5" data-review="0" data-search="1994 5 32 индикатор телефонных звонков. и. александров электроника в быту b.1994-12.047 "><td>1994</td><td>5</td><td>32</td><td class="title-cell">Индикатор телефонных звонков. И. Александров</td><td>ЭЛЕКТРОНИКА В БЫТУ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-05.032.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="5" data-review="0" data-search="1994 5 32 электронная «спичка» для газовой плиты. в. харьяков электроника в быту b.1994-12.047 "><td>1994</td><td>5</td><td>32</td><td class="title-cell">Электронная «спичка» для газовой плиты. В. Харьяков</td><td>ЭЛЕКТРОНИКА В БЫТУ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-05.032.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="5" data-review="0" data-search="1994 5 36 делитель частоты импульсов на три. в.банников радиолюбителю-конструктору b.1994-12.047 "><td>1994</td><td>5</td><td>36</td><td class="title-cell">Делитель частоты импульсов на три. В.Банников</td><td>РАДИОЛЮБИТЕЛЮ-КОНСТРУКТОРУ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-05.036.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="6" data-review="0" data-search="1994 6 1 30 неисправности телевизоров «электрон 51/54/ 29 видеотехника b.1994-12.048 "><td>1994</td><td>6</td><td>1</td><td class="title-cell">30 Неисправности телевизоров «Электрон 51/54/</td><td>29 ВИДЕОТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-06.001.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.048.jpg" target="_blank" rel="noopener">b.1994-12.048</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="6" data-review="0" data-search="1994 6 2 тенденция развития мощных свч транзис- торов. в.accecopos, в.кожевников, а.косой техника наших дней b.1994-12.047 "><td>1994</td><td>6</td><td>2</td><td class="title-cell">Тенденция развития мощных СВЧ транзис- торов. В.Accecopos, В.Кожевников, А.Косой</td><td>ТЕХНИКА НАШИХ ДНЕЙ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-06.002.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="6" data-review="0" data-search="1994 6 3 ю. виноградов. атс о ааа не ть электроника в быту b.1994-12.048 "><td>1994</td><td>6</td><td>3</td><td class="title-cell">Ю. Виноградов. атс о ааа не ТЬ</td><td>ЭЛЕКТРОНИКА В БЫТУ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-06.003.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.048.jpg" target="_blank" rel="noopener">b.1994-12.048</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="6" data-review="0" data-search="1994 6 4 втту вести. м.парамонов нее иинииниининьньнинь f 5 новости эфира. а.орлоов неее нинениииининининьне i 5 прием факсимильной радиосвязи. м.парамонов з 4 адреса русскоязычных радиостанций. м.парамонов смотрим. слушаем b.1994-12.047 "><td>1994</td><td>6</td><td>4</td><td class="title-cell">ВТТУ вести. М.Парамонов нее иинииниининьньнинь f 5 Новости эфира. А.ОрлОов неее нинениииининининьне I 5 Прием факсимильной радиосвязи. М.Парамонов З 4 Адреса русскоязычных радиостанций. М.Парамонов</td><td>СМОТРИМ. СЛУШАЕМ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-06.004.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="6" data-review="0" data-search="1994 6 5 модуль цветности мц-502. л. кевеш, а. пескин 29 видеотехника b.1994-12.048 "><td>1994</td><td>6</td><td>5</td><td class="title-cell">Модуль цветности МЦ-502. Л. Кевеш, А. Пескин</td><td>29 ВИДЕОТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-06.005.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.048.jpg" target="_blank" rel="noopener">b.1994-12.048</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="6" data-review="0" data-search="1994 6 16 в. кожухов орион 29 видеотехника b.1994-12.048 "><td>1994</td><td>6</td><td>16</td><td class="title-cell">В. Кожухов орион</td><td>29 ВИДЕОТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-06.016.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.048.jpg" target="_blank" rel="noopener">b.1994-12.048</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="6" data-review="0" data-search="1994 6 20 расширитель интерфейса рс. н.васильев микропроцессорная техника b.1994-12.047 "><td>1994</td><td>6</td><td>20</td><td class="title-cell">Расширитель интерфейса РС. Н.Васильев</td><td>МИКРОПРОЦЕССОРНАЯ ТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-06.020.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="6" data-review="0" data-search="1994 6 28 доработка автомата кормления аквариумных рыб. сигнальная двутональная «сирена». ю.виноградов электроника в быту b.1994-12.047 "><td>1994</td><td>6</td><td>28</td><td class="title-cell">Доработка автомата кормления аквариумных рыб. Сигнальная двутональная «сирена». Ю.Виноградов</td><td>ЭЛЕКТРОНИКА В БЫТУ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-06.028.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="6" data-review="0" data-search="1994 6 29 двуканальная термометрическая приставка к мульти- метру вр-11. л. никольский ини ининининнньниие электроника в быту b.1994-12.047 "><td>1994</td><td>6</td><td>29</td><td class="title-cell">Двуканальная термометрическая приставка к мульти- метру ВР-11. Л. НИКОЛЬСКИЙ ини ининининнньниие</td><td>ЭЛЕКТРОНИКА В БЫТУ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-06.029.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="6" data-review="0" data-search="1994 6 30 вариант термостабилизатора. с. третьяков электроника в быту b.1994-12.047 "><td>1994</td><td>6</td><td>30</td><td class="title-cell">Вариант термостабилизатора. С. Третьяков</td><td>ЭЛЕКТРОНИКА В БЫТУ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-06.030.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="6" data-review="0" data-search="1994 6 34 гаммамет - новый материал магнитопровода. ю.стародубцев, в.кейлин ии иннинииининининниеи радиолюбителю-конструктору b.1994-12.047 "><td>1994</td><td>6</td><td>34</td><td class="title-cell">Гаммамет - новый материал магнитопровода. Ю.Стародубцев, В.КейлИН ии иннинииининининниеи</td><td>РАДИОЛЮБИТЕЛЮ-КОНСТРУКТОРУ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-06.034.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="6" data-review="1" data-search="1994 6 36 п. куратов, а. игнатьев 2.205scsceccesees sececeeesscccescecsexecesves электроника в быту b.1994-12.047 latin_noise"><td>1994</td><td>6</td><td>36</td><td class="title-cell">П. Куратов, А. Игнатьев 2.205scsceccesees sececeeesscccescecsexecesves</td><td>ЭЛЕКТРОНИКА В БЫТУ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-06.036.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag review">latin_noise</span></td></tr>
+          <tr data-year="1994" data-issue="6" data-review="0" data-search="1994 6 38 47 телевизионная антенна дмв (sp) лилии 29 видеотехника b.1994-12.048 "><td>1994</td><td>6</td><td>38</td><td class="title-cell">47 Телевизионная антенна ДМВ (SP) лилии</td><td>29 ВИДЕОТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-06.038.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.048.jpg" target="_blank" rel="noopener">b.1994-12.048</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="7" data-review="0" data-search="1994 7 2 сверхбольшие плис открывают новые возможности. оптическая обработка информации. в.парыгин техника наших дней b.1994-12.047 "><td>1994</td><td>7</td><td>2</td><td class="title-cell">Сверхбольшие ПЛИС открывают новые возможности. Оптическая обработка информации. В.Парыгин</td><td>ТЕХНИКА НАШИХ ДНЕЙ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-07.002.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="7" data-review="0" data-search="1994 7 17 усовершенствование устройства управления насосом. усовершенствование регулятора яркости. е. мишаков электроника в быту b.1994-12.047 "><td>1994</td><td>7</td><td>17</td><td class="title-cell">Усовершенствование устройства управления насосом. Усовершенствование регулятора яркости. Е. Мишаков</td><td>ЭЛЕКТРОНИКА В БЫТУ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-07.017.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="7" data-review="0" data-search="1994 7 22 часы-таймер с будильником. с. глибин и еннньнниь электроника в быту b.1994-12.047 "><td>1994</td><td>7</td><td>22</td><td class="title-cell">Часы-таймер с будильником. С. Глибин и еннньнниь</td><td>ЭЛЕКТРОНИКА В БЫТУ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-07.022.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="7" data-review="0" data-search="1994 7 25 так боятся ли комары ультразвука? ю. виноградов электроника в быту b.1994-12.047 "><td>1994</td><td>7</td><td>25</td><td class="title-cell">Так боятся ли комары ультразвука? Ю. Виноградов</td><td>ЭЛЕКТРОНИКА В БЫТУ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-07.025.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="7" data-review="0" data-search="1994 7 37 о перестройке частоты lc-renepatopa. г.багдасарян радиолюбителю-конструктору b.1994-12.047 "><td>1994</td><td>7</td><td>37</td><td class="title-cell">О перестройке частоты LC-renepatopa. Г.Багдасарян</td><td>РАДИОЛЮБИТЕЛЮ-КОНСТРУКТОРУ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-07.037.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="8" data-review="0" data-search="1994 8 2 «галс» - российская система нтв. и.цирлин,. л.кантор, а.козлов, э.кумыш, а.соколов техника наших дней b.1994-12.047 "><td>1994</td><td>8</td><td>2</td><td class="title-cell">«Галс» - российская система НТВ. И.Цирлин,. Л.Кантор, А.Козлов, Э.Кумыш, А.Соколов</td><td>ТЕХНИКА НАШИХ ДНЕЙ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-08.002.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="8" data-review="0" data-search="1994 8 6 «радио микропроцессорная техника b.1994-12.047 "><td>1994</td><td>8</td><td>6</td><td class="title-cell">«Радио</td><td>МИКРОПРОЦЕССОРНАЯ ТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-08.006.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="8" data-review="0" data-search="1994 8 6 еще раз о самозапуске программ на «радио микропроцессорная техника b.1994-12.047 "><td>1994</td><td>8</td><td>6</td><td class="title-cell">Еще раз о самозапуске программ на «Радио</td><td>МИКРОПРОЦЕССОРНАЯ ТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-08.006.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="8" data-review="0" data-search="1994 8 9 43 переключение каналов в блоке свп-4-5. и. нечаев 29 видеотехника b.1994-12.048 "><td>1994</td><td>8</td><td>9</td><td class="title-cell">43 Переключение каналов в блоке СВП-4-5. И. Нечаев</td><td>29 ВИДЕОТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-08.009.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.048.jpg" target="_blank" rel="noopener">b.1994-12.048</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="8" data-review="0" data-search="1994 8 40 простая радиостанция 1. eeeteeeeeeeeeeee личная радиосвязь b.1994-12.047 "><td>1994</td><td>8</td><td>40</td><td class="title-cell">Простая радиостанция 1. eeeteeeeeeeeeeee</td><td>ЛИЧНАЯ РАДИОСВЯЗЬ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-08.040.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="8" data-review="0" data-search="1994 8 42 модифицированный мультивибратор. а.соколов, а строганов. 22:5: еаиньио ака аорие радиолюбителю-конструктору b.1994-12.047 "><td>1994</td><td>8</td><td>42</td><td class="title-cell">Модифицированный мультивибратор. А.Соколов, А Строганов. 22:5: еаиньио ака аорие</td><td>РАДИОЛЮБИТЕЛЮ-КОНСТРУКТОРУ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-08.042.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="8" data-review="0" data-search="1994 8 42 транзисторный коммутатор. о.сидорович радиолюбителю-конструктору b.1994-12.047 "><td>1994</td><td>8</td><td>42</td><td class="title-cell">транзисторный коммутатор. О.Сидорович</td><td>РАДИОЛЮБИТЕЛЮ-КОНСТРУКТОРУ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-08.042.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="8" data-review="0" data-search="1994 8 49 35 «сюрприз». - радио, 1993, № 8, с. 34 -36 электроника за рулем b.1994-12.048 "><td>1994</td><td>8</td><td>49</td><td class="title-cell">35 «Сюрприз». - Радио, 1993, № 8, с. 34 -36</td><td>ЭЛЕКТРОНИКА ЗА РУЛЕМ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-08.049.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.048.jpg" target="_blank" rel="noopener">b.1994-12.048</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="8" data-review="0" data-search="1994 8 50 51 автосторожа. - радио, 1993, № 12, с. 31 -33 электроника за рулем b.1994-12.048 "><td>1994</td><td>8</td><td>50</td><td class="title-cell">51 автосторожа. - Радио, 1993, № 12, с. 31 -33</td><td>ЭЛЕКТРОНИКА ЗА РУЛЕМ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-08.050.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.048.jpg" target="_blank" rel="noopener">b.1994-12.048</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="9" data-review="0" data-search="1994 9 4 видеотест. в. суетин ини ни нинниннинннинн 29 видеотехника b.1994-12.048 "><td>1994</td><td>9</td><td>4</td><td class="title-cell">Видеотест. В. Суетин ини ни нинниннинннинн</td><td>29 ВИДЕОТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-09.004.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.048.jpg" target="_blank" rel="noopener">b.1994-12.048</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="9" data-review="0" data-search="1994 9 7 43 п. ветошкин ини иинииииииниияннининиь 29 видеотехника b.1994-12.048 "><td>1994</td><td>9</td><td>7</td><td class="title-cell">43 П. Ветошкин ини иинииииииниияннининиь</td><td>29 ВИДЕОТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-09.007.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.048.jpg" target="_blank" rel="noopener">b.1994-12.048</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="9" data-review="0" data-search="1994 9 19 импортная радиоаппаратура. плейеры. в.васильев советы покупателям b.1994-12.047 "><td>1994</td><td>9</td><td>19</td><td class="title-cell">Импортная радиоаппаратура. Плейеры. В.Васильев</td><td>СОВЕТЫ ПОКУПАТЕЛЯМ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-09.019.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="9" data-review="0" data-search="1994 9 21 а. сергеев :.-;:. осетров ноаненин 29 видеотехника b.1994-12.048 "><td>1994</td><td>9</td><td>21</td><td class="title-cell">А. Сергеев :.-;:. осетров ноаненин</td><td>29 ВИДЕОТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-09.021.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.048.jpg" target="_blank" rel="noopener">b.1994-12.048</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="9" data-review="0" data-search="1994 9 34 восьмикомандный пульт управления. а. романенко радиолюбителю-конструктору b.1994-12.047 "><td>1994</td><td>9</td><td>34</td><td class="title-cell">Восьмикомандный пульт управления. А. Романенко</td><td>РАДИОЛЮБИТЕЛЮ-КОНСТРУКТОРУ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-09.034.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="9" data-review="0" data-search="1994 9 35 усовершенствование кодирующего устройства. кнопочный электронный переключатель. а.гнусин радиолюбителю-конструктору b.1994-12.047 "><td>1994</td><td>9</td><td>35</td><td class="title-cell">Усовершенствование кодирующего устройства. Кнопочный электронный переключатель. А.Гнусин</td><td>РАДИОЛЮБИТЕЛЮ-КОНСТРУКТОРУ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-09.035.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="9" data-review="0" data-search="1994 9 37 еще раз о тринисторном регуляторе мощности. а. маслов ини ини ини нии инте шт анни ани радиолюбителю-конструктору b.1994-12.047 "><td>1994</td><td>9</td><td>37</td><td class="title-cell">Еще раз о тринисторном регуляторе мощности. А. Маслов ини ини ини нии инте шт анни ани</td><td>РАДИОЛЮБИТЕЛЮ-КОНСТРУКТОРУ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-09.037.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="10" data-review="0" data-search="1994 10 10 23 tu-502» и «электрон 61 тц-500». а. пескин 29 видеотехника b.1994-12.048 "><td>1994</td><td>10</td><td>10</td><td class="title-cell">23 TU-502» и «Электрон 61 ТЦ-500». А. Пескин</td><td>29 ВИДЕОТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-10.010.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.048.jpg" target="_blank" rel="noopener">b.1994-12.048</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="10" data-review="0" data-search="1994 10 32 режекторные фильтры иене радиолюбителю-конструктору b.1994-12.047 "><td>1994</td><td>10</td><td>32</td><td class="title-cell">Режекторные фильтры иене</td><td>РАДИОЛЮБИТЕЛЮ-КОНСТРУКТОРУ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-10.030.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="10" data-review="0" data-search="1994 10 34 цифровой генератор аналоговых сигналов. а.межлумян ;. д. есеаеьт и инь анечь аа и ооннсинноннньни радиолюбителю-конструктору b.1994-12.047 "><td>1994</td><td>10</td><td>34</td><td class="title-cell">Цифровой генератор аналоговых сигналов. А.Межлумян ;. д. есеаеьт и инь анечь аа и ооннсинноннньни</td><td>РАДИОЛЮБИТЕЛЮ-КОНСТРУКТОРУ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-10.034.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="10" data-review="0" data-search="1994 10 40 24 видеоусилитель для перезаписи (зр) ьььнниин и 29 видеотехника b.1994-12.048 "><td>1994</td><td>10</td><td>40</td><td class="title-cell">24 Видеоусилитель для перезаписи (ЗР) ьььнниин и</td><td>29 ВИДЕОТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-10.040.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.048.jpg" target="_blank" rel="noopener">b.1994-12.048</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="11" data-review="0" data-search="1994 11 8 40 широкополосный антенный усилитель. и. нечаев 29 видеотехника b.1994-12.048 "><td>1994</td><td>11</td><td>8</td><td class="title-cell">40 Широкополосный антенный усилитель. И. Нечаев</td><td>29 ВИДЕОТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-11.008.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.048.jpg" target="_blank" rel="noopener">b.1994-12.048</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="11" data-review="0" data-search="1994 11 21 «зрес\гит»-совместимый компьютер. м. бун микропроцессорная техника b.1994-12.047 "><td>1994</td><td>11</td><td>21</td><td class="title-cell">«Зрес\гит»-совместимый компьютер. М. Бун</td><td>МИКРОПРОЦЕССОРНАЯ ТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-11.021.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="11" data-review="0" data-search="1994 11 34 л.гаврилов екон око анеснаниикоки радиолюбителю-конструктору b.1994-12.047 "><td>1994</td><td>11</td><td>34</td><td class="title-cell">Л.Гаврилов екон око анеснаниикоки</td><td>РАДИОЛЮБИТЕЛЮ-КОНСТРУКТОРУ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-11.034.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="12" data-review="0" data-search="1994 12 2 лицензирование в области связи. в.дудкин, н.попов смотрим. слушаем b.1994-12.047 "><td>1994</td><td>12</td><td>2</td><td class="title-cell">Лицензирование в области связи. В.Дудкин, Н.Попов</td><td>СМОТРИМ. СЛУШАЕМ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.002.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="12" data-review="0" data-search="1994 12 2 радиовещание россии и его проблемы. н.григорьева смотрим. слушаем b.1994-12.047 "><td>1994</td><td>12</td><td>2</td><td class="title-cell">Радиовещание России и его проблемы. Н.Григорьева</td><td>СМОТРИМ. СЛУШАЕМ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.002.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="12" data-review="0" data-search="1994 12 8 корректирующий антенный усилитель. и. нечаев 29 видеотехника b.1994-12.048 "><td>1994</td><td>12</td><td>8</td><td class="title-cell">Корректирующий антенный усилитель. И. Нечаев</td><td>29 ВИДЕОТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.008.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.048.jpg" target="_blank" rel="noopener">b.1994-12.048</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="12" data-review="0" data-search="1994 12 10 35 система ду в телевизорах упимцт. с. поспелов 29 видеотехника b.1994-12.048 "><td>1994</td><td>12</td><td>10</td><td class="title-cell">35 Система ДУ в телевизорах УПИМЦТ. С. Поспелов</td><td>29 ВИДЕОТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.010.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.048.jpg" target="_blank" rel="noopener">b.1994-12.048</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1994" data-issue="12" data-review="0" data-search="1994 12 46 автономные накопители энергии. в.антипенко, мсс: сотовый телефон в офисе, машине и портфеле. новое в создании индикаторных устройств (3р)** техника наших дней b.1994-12.047 "><td>1994</td><td>12</td><td>46</td><td class="title-cell">Автономные накопители энергии. В.Антипенко, МСС: сотовый телефон в офисе, машине и портфеле. Новое в создании индикаторных устройств (3Р)**</td><td>ТЕХНИКА НАШИХ ДНЕЙ</td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.046.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1994/b.1994-12.047.jpg" target="_blank" rel="noopener">b.1994-12.047</a></td><td><span class="flag ok">ok</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <script>
+    const searchInput = document.getElementById('searchInput');
+    const yearFilter = document.getElementById('yearFilter');
+    const issueFilter = document.getElementById('issueFilter');
+    const reviewFilter = document.getElementById('reviewFilter');
+    const visibleCount = document.getElementById('visibleCount');
+    const rows = Array.from(document.querySelectorAll('#contentsRows tr'));
+
+    function applyFilters() {
+      const query = searchInput.value.trim().toLowerCase();
+      const year = yearFilter.value;
+      const issue = issueFilter.value;
+      const onlyReview = reviewFilter.checked;
+      let visible = 0;
+
+      for (const row of rows) {
+        const matchesQuery = !query || row.dataset.search.includes(query);
+        const matchesYear = !year || row.dataset.year === year;
+        const matchesIssue = !issue || row.dataset.issue === issue;
+        const matchesReview = !onlyReview || row.dataset.review === '1';
+        const show = matchesQuery && matchesYear && matchesIssue && matchesReview;
+        row.hidden = !show;
+        if (show) visible += 1;
+      }
+
+      visibleCount.textContent = String(visible);
+    }
+
+    searchInput.addEventListener('input', applyFilters);
+    yearFilter.addEventListener('change', applyFilters);
+    issueFilter.addEventListener('change', applyFilters);
+    reviewFilter.addEventListener('change', applyFilters);
+  </script>
+</body>
+</html>

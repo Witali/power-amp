@@ -28,7 +28,9 @@
 - `issue_toc_refinement_report.csv` - отчет уточняющего сопоставления с
   оглавлениями на первых страницах отдельных номеров, если этот шаг запускался.
 - `index.html` - статическая таблица из `radio_contents_all.csv` с поиском,
-  фильтрами и ссылками на сканы.
+  фильтрами, ссылками на годовые подстраницы и исходные JPEG-сканы годовых
+  оглавлений.
+- `years/<год>.html` - подстраницы оглавления по отдельным годам.
 
 Ссылки `archive_image_url` строятся по шаблону прямых JPG-сканов
 `https://archive.radio.ru/web/img/<year>/b.<year>-<issue>.<page>.jpg`.
@@ -76,7 +78,7 @@ npm run radio:contents-refine
 python scripts\export_radio_ru_contents_index.py
 ```
 
-Пересобрать HTML-страницу:
+Пересобрать HTML-страницу и годовые подстраницы:
 
 ```powershell
 python scripts\generate_radio_ru_contents_html.py

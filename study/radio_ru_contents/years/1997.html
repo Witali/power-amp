@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Оглавление журнала Радио за 1997 год</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #172033;
+      --muted: #647083;
+      --line: #d8dee8;
+      --panel: #f6f8fb;
+      --accent: #1769aa;
+      --ok: #287d5b;
+      --warn: #9a6a00;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font: 15px/1.5 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: #fff;
+    }
+    main {
+      width: min(1380px, calc(100% - 32px));
+      margin: 28px auto 54px;
+    }
+    header {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 16px;
+      align-items: end;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--line);
+    }
+    h1 { margin: 0 0 8px; font-size: 32px; line-height: 1.15; }
+    h2 { margin: 0 0 10px; font-size: 18px; line-height: 1.25; }
+    p { margin: 0 0 10px; }
+    a { color: var(--accent); text-decoration-thickness: 1px; }
+    .subtle { color: var(--muted); max-width: 920px; }
+    .links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+    .links a {
+      display: inline-flex;
+      align-items: center;
+      min-height: 34px;
+      padding: 6px 10px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      color: var(--ink);
+      text-decoration: none;
+      background: #fff;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin: 18px 0;
+    }
+    .stat {
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+    }
+    .stat strong {
+      display: block;
+      font-size: 22px;
+      line-height: 1.1;
+    }
+    .year-nav,
+    .source-scans {
+      margin: 18px 0;
+    }
+    .year-nav ul {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .year-card {
+      display: grid;
+      gap: 5px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+    }
+    .year-link {
+      font-size: 18px;
+      font-weight: 650;
+      text-decoration-thickness: 1px;
+    }
+    .year-count,
+    .source-label {
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .source-links {
+      display: inline-flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .source-label + .source-links {
+      margin-left: 6px;
+    }
+    .toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) 140px 140px auto;
+      gap: 10px;
+      align-items: end;
+      padding: 12px 0;
+      background: #fff;
+      border-bottom: 1px solid var(--line);
+    }
+    label {
+      display: grid;
+      gap: 4px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    input, select {
+      width: 100%;
+      min-height: 36px;
+      padding: 6px 8px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      color: var(--ink);
+      background: #fff;
+      font: inherit;
+    }
+    .check-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 36px;
+      padding: 6px 0;
+    }
+    .check-label input { width: auto; min-height: 0; }
+    .count-line {
+      margin: 12px 0;
+      color: var(--muted);
+    }
+    .table-wrap {
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+    table {
+      width: 100%;
+      min-width: 1040px;
+      border-collapse: collapse;
+      background: #fff;
+    }
+    th, td {
+      padding: 7px 9px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+      text-align: left;
+    }
+    th {
+      color: #fff;
+      background: #273447;
+      font-weight: 600;
+    }
+    tbody tr:nth-child(even) { background: #fbfcfe; }
+    .title-cell { min-width: 360px; }
+    .flag {
+      display: inline-block;
+      max-width: 240px;
+      padding: 2px 7px;
+      border-radius: 999px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-size: 12px;
+    }
+    .flag.ok { color: var(--ok); background: #e9f5ef; }
+    .flag.review { color: var(--warn); background: #fff5da; }
+    @media (max-width: 900px) {
+      header,
+      .toolbar,
+      .stats {
+        grid-template-columns: 1fr;
+      }
+      .links { justify-content: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <h1>Оглавление журнала Радио за 1997 год</h1>
+        <p class="subtle">Статьи за 1997 год из общей CSV-выгрузки. Источник: <code>../radio_contents_all.csv</code>. Ссылки на сканы ведут на <code>archive.radio.ru</code>.</p>
+      </div>
+      <nav class="links" aria-label="Навигация">
+        <a href="../../../index.html#recognition">Индекс проекта</a>
+        <a href="../index.html">Все годы</a>
+        <a href="../radio_contents_all.csv">CSV</a>
+        <a href="../README.md">README</a>
+      </nav>
+    </header>
+
+    <section class="stats" aria-label="Сводка">
+      <div class="stat"><strong>120</strong><span>строк статей</span></div>
+      <div class="stat"><strong>1997-1997</strong><span>годы</span></div>
+      <div class="stat"><strong>1</strong><span>годовых оглавлений</span></div>
+      <div class="stat"><strong>8</strong><span>строк needs_review</span></div>
+    </section>
+    <p class="subtle">Распределение по годам: 1997: 120.</p>
+
+
+    <section class="source-scans" aria-label="Сканы исходного оглавления">
+      <h2>Сканы годового оглавления</h2>
+      <p><span class="source-links"><a href="https://archive.radio.ru/web/img/1997/b.1997-12.063.jpg" target="_blank" rel="noopener">b.1997-12.063</a><a href="https://archive.radio.ru/web/img/1997/b.1997-12.064.jpg" target="_blank" rel="noopener">b.1997-12.064</a><a href="https://archive.radio.ru/web/img/1997/b.1997-12.065.jpg" target="_blank" rel="noopener">b.1997-12.065</a><a href="https://archive.radio.ru/web/img/1997/b.1997-12.066.jpg" target="_blank" rel="noopener">b.1997-12.066</a></span></p>
+    </section>
+
+    <section class="toolbar" aria-label="Фильтры">
+      <label>Поиск
+        <input id="searchInput" type="search" placeholder="Название, раздел, страница">
+      </label>
+      <label>Год
+        <select id="yearFilter">
+          <option value="">Все годы</option>
+            <option value="1997">1997</option>
+        </select>
+      </label>
+      <label>Номер
+        <select id="issueFilter">
+          <option value="">Все номера</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option value="10">10</option>
+            <option value="11">11</option>
+            <option value="12">12</option>
+        </select>
+      </label>
+      <label class="check-label">
+        <input id="reviewFilter" type="checkbox">
+        Только needs_review
+      </label>
+    </section>
+
+    <p class="count-line"><span id="visibleCount">120</span> из 120 строк</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Год</th>
+            <th>Номер</th>
+            <th>Стр.</th>
+            <th>Название статьи</th>
+            <th>Раздел</th>
+            <th>Скан</th>
+            <th>Оглавление</th>
+            <th>Проверка</th>
+          </tr>
+        </thead>
+        <tbody id="contentsRows">
+          <tr data-year="1997" data-issue="1" data-review="0" data-search="1997 1 1 ayahockol (gp) е ist cmc peede еее то экспоненциальный электронный регулятор громкости. юзежков оный с точки зрения любителя р. кунафин звукотехника b.1997-12.063 "><td>1997</td><td>1</td><td>1</td><td class="title-cell">AYAHOCKOL (GP) е ist cmc Peede еее ТО Экспоненциальный электронный регулятор громкости. ЮЗЕЖКОВ оный С точки зрения любителя Р. Кунафин</td><td>ЗВУКОТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-01.001.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.063.jpg" target="_blank" rel="noopener">b.1997-12.063</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="1" data-review="0" data-search="1997 1 1 автосторож с управлением по ик каналу. о. долгов 9 индикатор температуры двигателя мотоцикла. юпушкаревт ое. о цифровой тахометр. а электроника за рулем b.1997-12.066 "><td>1997</td><td>1</td><td>1</td><td class="title-cell">Автосторож с управлением по ИК каналу. О. Долгов 9 Индикатор температуры двигателя мотоцикла. Юпушкаревт ое. О Цифровой тахометр. А</td><td>ЭЛЕКТРОНИКА ЗА РУЛЕМ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-01.001.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.066.jpg" target="_blank" rel="noopener">b.1997-12.066</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="1" data-review="0" data-search="1997 1 1 еще раз о программе &quot;сжатие&quot;. в. черкасов 3 “радио-86рк” испытатель микросхем. с. рычихин 4 одна программа вместо двух. в. черкасов. 7 программатор рпзу для “радио-86рк“&quot;. а микропроцессорная техника b.1997-12.064 "><td>1997</td><td>1</td><td>1</td><td class="title-cell">Еще раз о программе &quot;Сжатие&quot;. В. Черкасов 3 “Радио-86РК” испытатель микросхем. С. Рычихин 4 Одна программа вместо двух. В. Черкасов. 7 Программатор РПЗУ для “Радио-86РК“&quot;. А</td><td>МИКРОПРОЦЕССОРНАЯ ТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-01.001.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.064.jpg" target="_blank" rel="noopener">b.1997-12.064</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="1" data-review="0" data-search="1997 1 1 местная атс на десять номоров. a, евсеев 10 телефон с аон &quot;пульсар-201&quot;. с. шеемов, в. перепелица измерения b.1997-12.066 "><td>1997</td><td>1</td><td>1</td><td class="title-cell">Местная АТС на десять номоров. A, Евсеев 10 Телефон с АОН &quot;Пульсар-201&quot;. С. Шеемов, В. Перепелица</td><td>ИЗМЕРЕНИЯ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-01.001.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.066.jpg" target="_blank" rel="noopener">b.1997-12.066</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="1" data-review="1" data-search="1997 1 1 напряжения. о. ховайкко. зе eee eee eee источники питания b.1997-12.066 ocr_filler"><td>1997</td><td>1</td><td>1</td><td class="title-cell">напряжения. О. ХовайкКо. зе eee eee eee</td><td>ИСТОЧНИКИ ПИТАНИЯ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-01.001.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.066.jpg" target="_blank" rel="noopener">b.1997-12.066</a></td><td><span class="flag review">ocr_filler</span></td></tr>
+          <tr data-year="1997" data-issue="1" data-review="0" data-search="1997 1 1 о приеме кв радиостанций на св приемник. юпроколцевя о а akc звукотехника b.1997-12.064 "><td>1997</td><td>1</td><td>1</td><td class="title-cell">О приеме КВ радиостанций на СВ приемник. ЮПроколцевя о а akc</td><td>ЗВУКОТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-01.001.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.064.jpg" target="_blank" rel="noopener">b.1997-12.064</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="1" data-review="0" data-search="1997 1 1 пруггер а. управление лампами люстры по двум проводам. радио, 1995, № 11, с. 32 нь измерения b.1997-12.066 "><td>1997</td><td>1</td><td>1</td><td class="title-cell">Пруггер А. Управление лампами люстры по двум проводам. Радио, 1995, № 11, с. 32 нь</td><td>ИЗМЕРЕНИЯ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-01.001.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.066.jpg" target="_blank" rel="noopener">b.1997-12.066</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="1" data-review="0" data-search="1997 1 1 способ перезапуска процессора 280. г измерения b.1997-12.066 "><td>1997</td><td>1</td><td>1</td><td class="title-cell">Способ перезапуска процессора 280. Г</td><td>ИЗМЕРЕНИЯ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-01.001.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.066.jpg" target="_blank" rel="noopener">b.1997-12.066</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="1" data-review="0" data-search="1997 1 1 три фазы на садовом участке. с. бирюков электроника 8 6 b.1997-12.066 "><td>1997</td><td>1</td><td>1</td><td class="title-cell">Три фазы на садовом участке. С. Бирюков</td><td>ЭЛЕКТРОНИКА 8 6</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-01.001.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.066.jpg" target="_blank" rel="noopener">b.1997-12.066</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="1" data-review="0" data-search="1997 1 1 электронная система управления поливкой растений в теплице. to. егоров, в. галицкий у. ъьне электроника 8 6 b.1997-12.066 "><td>1997</td><td>1</td><td>1</td><td class="title-cell">Электронная система управления поливкой растений в теплице. tO. Егоров, В. Галицкий у. ъьне</td><td>ЭЛЕКТРОНИКА 8 6</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-01.001.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.066.jpg" target="_blank" rel="noopener">b.1997-12.066</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="1" data-review="0" data-search="1997 1 1 электронный пароль, ю электроника 8 6 b.1997-12.066 "><td>1997</td><td>1</td><td>1</td><td class="title-cell">Электронный пароль, Ю</td><td>ЭЛЕКТРОНИКА 8 6</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-01.001.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.066.jpg" target="_blank" rel="noopener">b.1997-12.066</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="1" data-review="1" data-search="1997 1 2 азвасильев i, е о ео приставка для приема трех программ проводного вещания. и. нечаев ое cee eee eee звукотехника b.1997-12.064 ocr_filler"><td>1997</td><td>1</td><td>2</td><td class="title-cell">Азвасильев i, Е о ЕО Приставка для приема трех программ проводного вещания. И. Нечаев ое cee eee eee</td><td>ЗВУКОТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-01.002.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.064.jpg" target="_blank" rel="noopener">b.1997-12.064</a></td><td><span class="flag review">ocr_filler</span></td></tr>
+          <tr data-year="1997" data-issue="1" data-review="0" data-search="1997 1 2 источники питания усилителей мощности звуковой частоты высокой верности. м. корзинин источники питания b.1997-12.066 "><td>1997</td><td>1</td><td>2</td><td class="title-cell">Источники питания усилителей мощности звуковой частоты высокой верности. М. Корзинин</td><td>ИСТОЧНИКИ ПИТАНИЯ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-01.002.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.066.jpg" target="_blank" rel="noopener">b.1997-12.066</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="1" data-review="0" data-search="1997 1 2 приемник с питанием от энергии поля. ю звукотехника b.1997-12.064 "><td>1997</td><td>1</td><td>2</td><td class="title-cell">Приемник с питанием от энергии поля. Ю</td><td>ЗВУКОТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-01.002.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.064.jpg" target="_blank" rel="noopener">b.1997-12.064</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="1" data-review="0" data-search="1997 1 2 термостабилизатор, а электроника 8 6 b.1997-12.066 "><td>1997</td><td>1</td><td>2</td><td class="title-cell">Термостабилизатор, А</td><td>ЭЛЕКТРОНИКА 8 6</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-01.002.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.066.jpg" target="_blank" rel="noopener">b.1997-12.066</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="1" data-review="0" data-search="1997 1 2 умзч с однокаскадным усилением напряжения. а звукотехника b.1997-12.063 "><td>1997</td><td>1</td><td>2</td><td class="title-cell">УМЗЧ с однокаскадным усилением напряжения. А</td><td>ЗВУКОТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-01.002.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.063.jpg" target="_blank" rel="noopener">b.1997-12.063</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="1" data-review="0" data-search="1997 1 10 логический ттл-пробник с расширенными возможностями. поляки е ре. функциональный генератор с диапазоном частот 0 измерения b.1997-12.065 "><td>1997</td><td>1</td><td>10</td><td class="title-cell">Логический ТТЛ-пробник с расширенными возможностями. ПОЛЯКИ Е ре. Функциональный генератор с диапазоном частот 0</td><td>ИЗМЕРЕНИЯ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-01.010.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.065.jpg" target="_blank" rel="noopener">b.1997-12.065</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="1" data-review="0" data-search="1997 1 10 новые телефоны с аон. и. коршун не. 7 доработка аон на 280. a. enucachenko 7 автоответчик, сообщающий время. а. харченко 9 аон.-приставка &quot;эксперт&quot;, и измерения b.1997-12.066 "><td>1997</td><td>1</td><td>10</td><td class="title-cell">Новые телефоны с АОН. И. Коршун не. 7 Доработка АОН на 280. A. Enucachenko 7 Автоответчик, сообщающий время. А. Харченко 9 АОН.-приставка &quot;Эксперт&quot;, И</td><td>ИЗМЕРЕНИЯ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-01.010.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.066.jpg" target="_blank" rel="noopener">b.1997-12.066</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="1" data-review="0" data-search="1997 1 20 “ленинград-010-стерео“. д. сологуб - 10 прием радиостанций в диапазонах 90 и м звукотехника b.1997-12.064 "><td>1997</td><td>1</td><td>20</td><td class="title-cell">“Ленинград-010-стерео“. Д. Сологуб - 10 Прием радиостанций в диапазонах 90 и м</td><td>ЗВУКОТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-01.020.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.064.jpg" target="_blank" rel="noopener">b.1997-12.064</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="1" data-review="0" data-search="1997 1 36 “люстра чижевского&quot; своими руками. б радиоприем b.1997-12.065 "><td>1997</td><td>1</td><td>36</td><td class="title-cell">“Люстра Чижевского&quot; своими руками. Б</td><td>РАДИОПРИЕМ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-01.036.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.065.jpg" target="_blank" rel="noopener">b.1997-12.065</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="1" data-review="0" data-search="1997 1 39 проверка номеронабирателя микрокалькулятором. н радиоприем b.1997-12.065 "><td>1997</td><td>1</td><td>39</td><td class="title-cell">Проверка номеронабирателя микрокалькулятором. Н</td><td>РАДИОПРИЕМ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-01.039.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.065.jpg" target="_blank" rel="noopener">b.1997-12.065</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="2" data-review="0" data-search="1997 2 1 электронные музыкальные инструменты компрессор для электрогитары:соло. м. южаков радиолюбителю-конструктору b.1997-12.066 "><td>1997</td><td>2</td><td>1</td><td class="title-cell">ЭЛЕКТРОННЫЕ МУЗЫКАЛЬНЫЕ ИНСТРУМЕНТЫ Компрессор для электрогитары:соло. М. Южаков</td><td>РАДИОЛЮБИТЕЛЮ-КОНСТРУКТОРУ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-02.001.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.066.jpg" target="_blank" rel="noopener">b.1997-12.066</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="2" data-review="0" data-search="1997 2 2 лампы или транзисторы? о звукотехника b.1997-12.063 "><td>1997</td><td>2</td><td>2</td><td class="title-cell">Лампы или транзисторы? О</td><td>ЗВУКОТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-02.002.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.063.jpg" target="_blank" rel="noopener">b.1997-12.063</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="2" data-review="1" data-search="1997 2 3 активная антенна (bp) ee cc ccc ee ee eee reece scene 1 однокристальные чм приемники, в. monvakop радиоприем b.1997-12.064 ocr_filler"><td>1997</td><td>2</td><td>3</td><td class="title-cell">Активная антенна (BP) ee cc ccc ee ee eee reece scene 1 Однокристальные ЧМ приемники, В. MonvAkop</td><td>РАДИОПРИЕМ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-02.003.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.064.jpg" target="_blank" rel="noopener">b.1997-12.064</a></td><td><span class="flag review">ocr_filler</span></td></tr>
+          <tr data-year="1997" data-issue="2" data-review="0" data-search="1997 2 3 радиолюбительские конструкции на микросхеме kp174yh радиоприем b.1997-12.065 "><td>1997</td><td>2</td><td>3</td><td class="title-cell">Радиолюбительские конструкции на микросхеме KP174YH</td><td>РАДИОПРИЕМ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-02.003.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.065.jpg" target="_blank" rel="noopener">b.1997-12.065</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="2" data-review="0" data-search="1997 2 3 укв приставка к приемнику прямого усиления. радиолюбительские конструкции на микросхеме kp174yh радиоприем b.1997-12.065 "><td>1997</td><td>2</td><td>3</td><td class="title-cell">УКВ приставка к приемнику прямого усиления. Радиолюбительские конструкции на микросхеме KP174YH</td><td>РАДИОПРИЕМ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-02.003.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.065.jpg" target="_blank" rel="noopener">b.1997-12.065</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="2" data-review="0" data-search="1997 2 34 “люстра чижевского” своуми руками. с радиоприем b.1997-12.065 "><td>1997</td><td>2</td><td>34</td><td class="title-cell">“Люстра Чижевского” своуми руками. С</td><td>РАДИОПРИЕМ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-02.034.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.065.jpg" target="_blank" rel="noopener">b.1997-12.065</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="2" data-review="0" data-search="1997 2 36 радиоприемник прямого усиления. и радиоприем b.1997-12.065 "><td>1997</td><td>2</td><td>36</td><td class="title-cell">Радиоприемник прямого усиления. И</td><td>РАДИОПРИЕМ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-02.036.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.065.jpg" target="_blank" rel="noopener">b.1997-12.065</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="2" data-review="0" data-search="1997 2 36 чувствительный усилитель компрессор радиоприем b.1997-12.065 "><td>1997</td><td>2</td><td>36</td><td class="title-cell">Чувствительный усилитель компрессор</td><td>РАДИОПРИЕМ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-02.036.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.065.jpg" target="_blank" rel="noopener">b.1997-12.065</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="2" data-review="0" data-search="1997 2 37 мелодический звонок &quot;чижик&quot;. ю радиоприем b.1997-12.065 "><td>1997</td><td>2</td><td>37</td><td class="title-cell">Мелодический звонок &quot;Чижик&quot;. Ю</td><td>РАДИОПРИЕМ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-02.037.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.065.jpg" target="_blank" rel="noopener">b.1997-12.065</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="3" data-review="0" data-search="1997 3 1 pentium: до и после а радиоприем b.1997-12.065 "><td>1997</td><td>3</td><td>1</td><td class="title-cell">PENTIUM: до и после А</td><td>РАДИОПРИЕМ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-03.001.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.065.jpg" target="_blank" rel="noopener">b.1997-12.065</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="3" data-review="0" data-search="1997 3 1 конфигурирование программных средств пэвм. а микропроцессорная техника b.1997-12.064 "><td>1997</td><td>3</td><td>1</td><td class="title-cell">Конфигурирование программных средств ПЭВМ. А</td><td>МИКРОПРОЦЕССОРНАЯ ТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-03.001.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.064.jpg" target="_blank" rel="noopener">b.1997-12.064</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="3" data-review="0" data-search="1997 3 2 повышение экономичности радиоприемника “kbapy звукотехника b.1997-12.064 "><td>1997</td><td>3</td><td>2</td><td class="title-cell">Повышение экономичности радиоприемника “KBapy</td><td>ЗВУКОТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-03.002.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.064.jpg" target="_blank" rel="noopener">b.1997-12.064</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="3" data-review="0" data-search="1997 3 2 эми с низковольтным питанием. в радиоприем b.1997-12.065 "><td>1997</td><td>3</td><td>2</td><td class="title-cell">ЭМИ с низковольтным питанием. В</td><td>РАДИОПРИЕМ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-03.002.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.065.jpg" target="_blank" rel="noopener">b.1997-12.065</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="3" data-review="0" data-search="1997 3 3 напряжения. радио, 1996, № 2, с. 52-55 источники питания b.1997-12.066 "><td>1997</td><td>3</td><td>3</td><td class="title-cell">напряжения. Радио, 1996, № 2, с. 52-55</td><td>ИСТОЧНИКИ ПИТАНИЯ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-03.003.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.066.jpg" target="_blank" rel="noopener">b.1997-12.066</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="3" data-review="0" data-search="1997 3 3 схемотехника усилителей мощности звуковой частоты высокой верности. мостовые умзч. м звукотехника b.1997-12.063 "><td>1997</td><td>3</td><td>3</td><td class="title-cell">Схемотехника усилителей мощности звуковой частоты высокой верности. Мостовые УМЗЧ. М</td><td>ЗВУКОТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-03.003.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.063.jpg" target="_blank" rel="noopener">b.1997-12.063</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="3" data-review="0" data-search="1997 3 3 электромеханический стабилизатор напряжения питания. &quot;ali ebcogb oi iiore lo nee ра уз автоматическое зарядное устройство источники питания b.1997-12.066 "><td>1997</td><td>3</td><td>3</td><td class="title-cell">Электромеханический стабилизатор напряжения питания. &quot;Ali EBCOGB oi iiore lo nee ра УЗ Автоматическое зарядное устройство</td><td>ИСТОЧНИКИ ПИТАНИЯ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-03.003.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.066.jpg" target="_blank" rel="noopener">b.1997-12.066</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="3" data-review="0" data-search="1997 3 4 импульсный сетевой блок питания. в. дорожинский 4 источник отрицательной полярности радиолюбителю-конструктору b.1997-12.066 "><td>1997</td><td>3</td><td>4</td><td class="title-cell">Импульсный сетевой блок питания. В. Дорожинский 4 Источник отрицательной полярности</td><td>РАДИОЛЮБИТЕЛЮ-КОНСТРУКТОРУ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-03.004.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.066.jpg" target="_blank" rel="noopener">b.1997-12.066</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="3" data-review="0" data-search="1997 3 4 часы-будильник на бис кр1016вит. с электроника 8 6 b.1997-12.066 "><td>1997</td><td>3</td><td>4</td><td class="title-cell">Часы-будильник на БИС КР1016ВИТ. С</td><td>ЭЛЕКТРОНИКА 8 6</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-03.004.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.066.jpg" target="_blank" rel="noopener">b.1997-12.066</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="3" data-review="0" data-search="1997 3 6 блокиратор телефонного набора измерения b.1997-12.066 "><td>1997</td><td>3</td><td>6</td><td class="title-cell">Блокиратор телефонного набора</td><td>ИЗМЕРЕНИЯ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-03.006.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.066.jpg" target="_blank" rel="noopener">b.1997-12.066</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="3" data-review="0" data-search="1997 3 6 две приставки к телефонному аппарату. ноз-приставка. сигнализатор для спаренного телефона. ю:прокопцев ал радиоприем b.1997-12.065 "><td>1997</td><td>3</td><td>6</td><td class="title-cell">Две приставки к телефонному аппарату. НоЗ-приставка. Сигнализатор для спаренного телефона. Ю:Прокопцев Ал</td><td>РАДИОПРИЕМ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-03.006.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.065.jpg" target="_blank" rel="noopener">b.1997-12.065</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="3" data-review="0" data-search="1997 3 7 звукотехника &quot;домашнего театра&quot;. н. соколова 5 устранение дефекта компакт-диска. о. алексеев 6 пассивная система защиты громкоговорителя, м звукотехника b.1997-12.063 "><td>1997</td><td>3</td><td>7</td><td class="title-cell">Звукотехника &quot;домашнего театра&quot;. Н. Соколова 5 Устранение дефекта компакт-диска. О. Алексеев 6 Пассивная система защиты громкоговорителя, М</td><td>ЗВУКОТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-03.007.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.063.jpg" target="_blank" rel="noopener">b.1997-12.063</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="3" data-review="0" data-search="1997 3 7 устранение фона в приемниках при питании от сети. bs lohucob е те ет радиоприем b.1997-12.065 "><td>1997</td><td>3</td><td>7</td><td class="title-cell">Устранение фона в приемниках при питании от сети. BS lOHUCOB Е те ет</td><td>РАДИОПРИЕМ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-03.007.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.065.jpg" target="_blank" rel="noopener">b.1997-12.065</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="3" data-review="0" data-search="1997 3 8 приставка для измерения емкости измерения b.1997-12.065 "><td>1997</td><td>3</td><td>8</td><td class="title-cell">Приставка для измерения емкости</td><td>ИЗМЕРЕНИЯ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-03.008.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.065.jpg" target="_blank" rel="noopener">b.1997-12.065</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="3" data-review="0" data-search="1997 3 10 осторожно: головные телефоны р. кунафин 8 умзч автомобильного радиокомплекса. м. сапожников 10 радиомикрофон. п. серебряков 0.00 унес» 10 лампово-полупроводниковый умзч звукотехника b.1997-12.063 "><td>1997</td><td>3</td><td>10</td><td class="title-cell">Осторожно: головные телефоны Р. Кунафин 8 УМЗЧ автомобильного радиокомплекса. М. Сапожников 10 Радиомикрофон. П. Серебряков 0.00 унес» 10 Лампово-полупроводниковый УМЗЧ</td><td>ЗВУКОТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-03.010.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.063.jpg" target="_blank" rel="noopener">b.1997-12.063</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="3" data-review="0" data-search="1997 3 11 “сторож” вашего телефона. к измерения b.1997-12.066 "><td>1997</td><td>3</td><td>11</td><td class="title-cell">“Сторож” вашего телефона. К</td><td>ИЗМЕРЕНИЯ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-03.011.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.066.jpg" target="_blank" rel="noopener">b.1997-12.066</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="3" data-review="0" data-search="1997 3 15 шамис в. цифровой таймер для электробытовых машин и приборов, радио, 1994, № 5, с электроника 8 6 b.1997-12.066 "><td>1997</td><td>3</td><td>15</td><td class="title-cell">Шамис В. Цифровой таймер для электробытовых машин и приборов, Радио, 1994, № 5, с</td><td>ЭЛЕКТРОНИКА 8 6</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-03.015.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.066.jpg" target="_blank" rel="noopener">b.1997-12.066</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="3" data-review="0" data-search="1997 3 33 беспроводные головные радиоприем b.1997-12.065 "><td>1997</td><td>3</td><td>33</td><td class="title-cell">Беспроводные головные</td><td>РАДИОПРИЕМ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-03.033.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.065.jpg" target="_blank" rel="noopener">b.1997-12.065</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="3" data-review="0" data-search="1997 3 34 какая антенна у вашего приемника? а радиоприем b.1997-12.065 "><td>1997</td><td>3</td><td>34</td><td class="title-cell">Какая антенна у вашего приемника? А</td><td>РАДИОПРИЕМ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-03.034.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.065.jpg" target="_blank" rel="noopener">b.1997-12.065</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="3" data-review="0" data-search="1997 3 38 контроль исправности лампы заднего фонаря. таймер со светодиодной индикацией. с радиоприем b.1997-12.065 "><td>1997</td><td>3</td><td>38</td><td class="title-cell">Контроль исправности лампы заднего фонаря. Таймер со светодиодной индикацией. С</td><td>РАДИОПРИЕМ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-03.038.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.065.jpg" target="_blank" rel="noopener">b.1997-12.065</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="3" data-review="0" data-search="1997 3 38 по следам наших публикаций. “конденсаторная“ приставка к частотомеру” ( радиолюбителю-конструктору b.1997-12.066 "><td>1997</td><td>3</td><td>38</td><td class="title-cell">По следам наших публикаций. “Конденсаторная“ приставка к частотомеру” (</td><td>РАДИОЛЮБИТЕЛЮ-КОНСТРУКТОРУ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-03.038.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.066.jpg" target="_blank" rel="noopener">b.1997-12.066</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="4" data-review="0" data-search="1997 4 2 переключатель гирлянд малогабаритной елки. и нечаев еее аа радиоприем b.1997-12.065 "><td>1997</td><td>4</td><td>2</td><td class="title-cell">Переключатель гирлянд малогабаритной елки. И Нечаев Еее аа</td><td>РАДИОПРИЕМ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-04.002.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.065.jpg" target="_blank" rel="noopener">b.1997-12.065</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="4" data-review="0" data-search="1997 4 2 радиоприемные устройства на микросхеме k174xa звукотехника b.1997-12.064 "><td>1997</td><td>4</td><td>2</td><td class="title-cell">Радиоприемные устройства на микросхеме K174XA</td><td>ЗВУКОТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-04.002.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.064.jpg" target="_blank" rel="noopener">b.1997-12.064</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="4" data-review="0" data-search="1997 4 4 путь в эфир а ла м радиоприем b.1997-12.065 "><td>1997</td><td>4</td><td>4</td><td class="title-cell">Путь в эфир А ла м</td><td>РАДИОПРИЕМ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-04.004.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.065.jpg" target="_blank" rel="noopener">b.1997-12.065</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="4" data-review="0" data-search="1997 4 8 ремонт переключателя диапазонов &quot;эстонии радиоприем b.1997-12.064 "><td>1997</td><td>4</td><td>8</td><td class="title-cell">Ремонт переключателя диапазонов &quot;Эстонии</td><td>РАДИОПРИЕМ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-04.008.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.064.jpg" target="_blank" rel="noopener">b.1997-12.064</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="4" data-review="0" data-search="1997 4 14 цибин в. цифровой термометр. радио, 1996, № электроника 8 6 b.1997-12.066 "><td>1997</td><td>4</td><td>14</td><td class="title-cell">Цибин В. Цифровой термометр. Радио, 1996, №</td><td>ЭЛЕКТРОНИКА 8 6</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-04.014.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.066.jpg" target="_blank" rel="noopener">b.1997-12.066</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="4" data-review="0" data-search="1997 4 36 нечаев и. коротковолновая приставка к радио- приемнику. радио, 1996, №2. с. 42 звукотехника b.1997-12.064 "><td>1997</td><td>4</td><td>36</td><td class="title-cell">Нечаев И. Коротковолновая приставка к радио- приемнику. Радио, 1996, №2. с. 42</td><td>ЗВУКОТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-04.036.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.064.jpg" target="_blank" rel="noopener">b.1997-12.064</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="4" data-review="0" data-search="1997 4 37 способ записи на магнитофон. и радиоприем b.1997-12.065 "><td>1997</td><td>4</td><td>37</td><td class="title-cell">Способ записи на магнитофон. И</td><td>РАДИОПРИЕМ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-04.037.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.065.jpg" target="_blank" rel="noopener">b.1997-12.065</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="4" data-review="0" data-search="1997 4 38 простые переговорные устройства. о радиоприем b.1997-12.065 "><td>1997</td><td>4</td><td>38</td><td class="title-cell">Простые переговорные устройства. О</td><td>РАДИОПРИЕМ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-04.038.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.065.jpg" target="_blank" rel="noopener">b.1997-12.065</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="4" data-review="0" data-search="1997 4 59 темброблок для электрогитары. м. южаков 8 ответы на вопросы по статье фатыхова т. &quot;гитарная приставка “дистошн” (“радио“, 1396, № радиолюбителю-конструктору b.1997-12.066 "><td>1997</td><td>4</td><td>59</td><td class="title-cell">Темброблок для электрогитары. М. Южаков 8 Ответы на вопросы по статье Фатыхова Т. &quot;Гитарная приставка “Дистошн” (“Радио“, 1396, №</td><td>РАДИОЛЮБИТЕЛЮ-КОНСТРУКТОРУ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-04.059.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.066.jpg" target="_blank" rel="noopener">b.1997-12.066</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="4" data-review="0" data-search="1997 4 89 шангареев в. преобразователь напряжения 12/220 в 50 гц. радио, 1996, № 12. с источники питания b.1997-12.066 "><td>1997</td><td>4</td><td>89</td><td class="title-cell">Шангареев В. Преобразователь напряжения 12/220 В 50 Гц. Радио, 1996, № 12. с</td><td>ИСТОЧНИКИ ПИТАНИЯ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-04.089.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.066.jpg" target="_blank" rel="noopener">b.1997-12.066</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="5" data-review="0" data-search="1997 5 1 микроконтроллеры 8xc51fx, 8xl радиоприем b.1997-12.065 "><td>1997</td><td>5</td><td>1</td><td class="title-cell">Микроконтроллеры 8xC51Fx, 8xL</td><td>РАДИОПРИЕМ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-05.001.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.065.jpg" target="_blank" rel="noopener">b.1997-12.065</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="5" data-review="0" data-search="1997 5 3 конденсатором. с. бирюков ее ъьньнь источники питания b.1997-12.066 "><td>1997</td><td>5</td><td>3</td><td class="title-cell">конденсатором. С. Бирюков ее ъьньнь</td><td>ИСТОЧНИКИ ПИТАНИЯ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-05.003.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.066.jpg" target="_blank" rel="noopener">b.1997-12.066</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="5" data-review="0" data-search="1997 5 33 приемник-радиоточка. а. низовцев радиоприем b.1997-12.065 "><td>1997</td><td>5</td><td>33</td><td class="title-cell">Приемник-радиоточка. А. Низовцев</td><td>РАДИОПРИЕМ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-05.033.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.065.jpg" target="_blank" rel="noopener">b.1997-12.065</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="5" data-review="0" data-search="1997 5 35 блок питания для “люстры чижевского&quot;. б радиоприем b.1997-12.065 "><td>1997</td><td>5</td><td>35</td><td class="title-cell">Блок питания для “люстры Чижевского&quot;. Б</td><td>РАДИОПРИЕМ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-05.035.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.065.jpg" target="_blank" rel="noopener">b.1997-12.065</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="5" data-review="0" data-search="1997 5 36 питание лампы дневного света постоянным током, акв о анны радиоприем b.1997-12.065 "><td>1997</td><td>5</td><td>36</td><td class="title-cell">Питание лампы дневного света постоянным током, АКВ О анны</td><td>РАДИОПРИЕМ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-05.036.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.065.jpg" target="_blank" rel="noopener">b.1997-12.065</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="5" data-review="0" data-search="1997 5 54 данюк д., пилько г. сетевой блок питания переносной аппаратуры. радио, 1996, № 1, с. 54 источники питания b.1997-12.066 "><td>1997</td><td>5</td><td>54</td><td class="title-cell">Данюк Д., Пилько Г. Сетевой блок питания переносной аппаратуры. Радио, 1996, № 1, с. 54</td><td>ИСТОЧНИКИ ПИТАНИЯ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-05.054.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.066.jpg" target="_blank" rel="noopener">b.1997-12.066</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="6" data-review="0" data-search="1997 6 3 модулятор “денди” в “paqno-86pk™. ю. осоцкий 3 расширение возможностей программатора. е микропроцессорная техника b.1997-12.064 "><td>1997</td><td>6</td><td>3</td><td class="title-cell">Модулятор “Денди” в “Paqno-86PK™. Ю. Осоцкий 3 Расширение возможностей программатора. Е</td><td>МИКРОПРОЦЕССОРНАЯ ТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-06.003.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.064.jpg" target="_blank" rel="noopener">b.1997-12.064</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="6" data-review="1" data-search="1997 6 3 сетевого напряжения ee eee eee ee ee eevee ee источники питания b.1997-12.066 ocr_filler"><td>1997</td><td>6</td><td>3</td><td class="title-cell">сетевого напряжения ee eee eee ee ee eevee ee</td><td>ИСТОЧНИКИ ПИТАНИЯ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-06.003.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.066.jpg" target="_blank" rel="noopener">b.1997-12.066</a></td><td><span class="flag review">ocr_filler</span></td></tr>
+          <tr data-year="1997" data-issue="6" data-review="0" data-search="1997 6 5 мелодичный звонок в телефонном аппарате измерения b.1997-12.066 "><td>1997</td><td>6</td><td>5</td><td class="title-cell">Мелодичный звонок в телефонном аппарате</td><td>ИЗМЕРЕНИЯ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-06.005.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.066.jpg" target="_blank" rel="noopener">b.1997-12.066</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="6" data-review="0" data-search="1997 6 8 автомат защиты кинескопа. а. червяков 1 доработка устройства “мягкого” эключения кинескопа. pan aholukmm) и и бе далее з щадящее включение кинескопа. ю видеотехника b.1997-12.063 "><td>1997</td><td>6</td><td>8</td><td class="title-cell">Автомат защиты кинескопа. А. Червяков 1 Доработка устройства “мягкого” эключения кинескопа. PAN AHOLUKMM) и и Бе далее З Щадящее включение кинескопа. Ю</td><td>ВИДЕОТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-06.008.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.063.jpg" target="_blank" rel="noopener">b.1997-12.063</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="6" data-review="0" data-search="1997 6 24 сувоата о ен пе и радиоприем b.1997-12.065 "><td>1997</td><td>6</td><td>24</td><td class="title-cell">СУВОАТА о ен Пе и</td><td>РАДИОПРИЕМ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-06.024.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.065.jpg" target="_blank" rel="noopener">b.1997-12.065</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="6" data-review="0" data-search="1997 6 30 ответы на вопросы по статьям, опубликованным в журнале в прошлые годы коновалов е. квазирезонансный источники питания b.1997-12.066 "><td>1997</td><td>6</td><td>30</td><td class="title-cell">Ответы на вопросы по статьям, опубликованным в журнале в прошлые годы Коновалов Е. Квазирезонансный</td><td>ИСТОЧНИКИ ПИТАНИЯ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-06.030.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.066.jpg" target="_blank" rel="noopener">b.1997-12.066</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="6" data-review="0" data-search="1997 6 31 трехканальная сзетодунамическая установка. а радиоприем b.1997-12.065 "><td>1997</td><td>6</td><td>31</td><td class="title-cell">Трехканальная сзетодунамическая установка. А</td><td>РАДИОПРИЕМ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-06.031.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.065.jpg" target="_blank" rel="noopener">b.1997-12.065</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="6" data-review="0" data-search="1997 6 33 “люстра чижевского”: вопросы и ответы. б радиоприем b.1997-12.065 "><td>1997</td><td>6</td><td>33</td><td class="title-cell">“Люстра Чижевского”: вопросы и ответы. Б</td><td>РАДИОПРИЕМ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-06.033.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.065.jpg" target="_blank" rel="noopener">b.1997-12.065</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="6" data-review="0" data-search="1997 6 34 малогабаритный приемник проводного трехпрограммного вещания изнечавв + нео sien радиоприем b.1997-12.065 "><td>1997</td><td>6</td><td>34</td><td class="title-cell">Малогабаритный приемник проводного трехпрограммного вещания ИзНечавв + Нео sien</td><td>РАДИОПРИЕМ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-06.034.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.065.jpg" target="_blank" rel="noopener">b.1997-12.065</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="6" data-review="0" data-search="1997 6 35 индикатор радиоизлучений. в радиоприем b.1997-12.065 "><td>1997</td><td>6</td><td>35</td><td class="title-cell">Индикатор радиоизлучений. В</td><td>РАДИОПРИЕМ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-06.035.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.065.jpg" target="_blank" rel="noopener">b.1997-12.065</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="6" data-review="0" data-search="1997 6 36 питание плейера от сетевого адалтера, ю радиоприем b.1997-12.065 "><td>1997</td><td>6</td><td>36</td><td class="title-cell">Питание плейера от сетевого адалтера, Ю</td><td>РАДИОПРИЕМ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-06.036.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.065.jpg" target="_blank" rel="noopener">b.1997-12.065</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="6" data-review="0" data-search="1997 6 36 электронный ключ сторожевого устройства. г радиоприем b.1997-12.065 "><td>1997</td><td>6</td><td>36</td><td class="title-cell">Электронный ключ сторожевого устройства. Г</td><td>РАДИОПРИЕМ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-06.036.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.065.jpg" target="_blank" rel="noopener">b.1997-12.065</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="6" data-review="0" data-search="1997 6 38 дистанционный выключатель электроприборов. и чечавь е и, иена радиоприем b.1997-12.065 "><td>1997</td><td>6</td><td>38</td><td class="title-cell">Дистанционный выключатель электроприборов. И Чечавь Е и, Иена</td><td>РАДИОПРИЕМ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-06.038.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.065.jpg" target="_blank" rel="noopener">b.1997-12.065</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="6" data-review="0" data-search="1997 6 39 инкубатора. о. глаголев еее чении, з термостабилизатор ana инкубатора. в. яковлев 8 элоктроакупунктурный стимулятор (bp) электроника 8 6 b.1997-12.066 "><td>1997</td><td>6</td><td>39</td><td class="title-cell">инкубатора. О. Глаголев еее чении, З Термостабилизатор ana инкубатора. В. Яковлев 8 Элоктроакупунктурный стимулятор (BP)</td><td>ЭЛЕКТРОНИКА 8 6</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-06.039.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.066.jpg" target="_blank" rel="noopener">b.1997-12.066</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="6" data-review="0" data-search="1997 6 77 виноградов ю. экономичный приемник для портативной, радиостанции, радио, 1996, № 7 электроника 8 6 b.1997-12.066 "><td>1997</td><td>6</td><td>77</td><td class="title-cell">Виноградов Ю. Экономичный приемник для портативной, радиостанции, Радио, 1996, № 7</td><td>ЭЛЕКТРОНИКА 8 6</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-06.077.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.066.jpg" target="_blank" rel="noopener">b.1997-12.066</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="7" data-review="0" data-search="1997 7 3 генератор шума. а. трифонов. еее санасна 7 измерение микротоков осциллографом. н. гончаренко измерения b.1997-12.065 "><td>1997</td><td>7</td><td>3</td><td class="title-cell">Генератор шума. А. Трифонов. еее санасна 7 Измерение микротоков осциллографом. Н. Гончаренко</td><td>ИЗМЕРЕНИЯ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-07.003.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.065.jpg" target="_blank" rel="noopener">b.1997-12.065</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="7" data-review="0" data-search="1997 7 6 радио, 1989, № 10, с электроника 8 6 b.1997-12.066 "><td>1997</td><td>7</td><td>6</td><td class="title-cell">Радио, 1989, № 10, с</td><td>ЭЛЕКТРОНИКА 8 6</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-07.006.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.066.jpg" target="_blank" rel="noopener">b.1997-12.066</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="7" data-review="0" data-search="1997 7 24 речевой модуль для ibm рс. е радиоприем b.1997-12.065 "><td>1997</td><td>7</td><td>24</td><td class="title-cell">Речевой модуль для IBM РС. Е</td><td>РАДИОПРИЕМ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-07.024.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.065.jpg" target="_blank" rel="noopener">b.1997-12.065</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="7" data-review="0" data-search="1997 7 33 передатчик для управления летающими моделями. ам иен: к. keen радиоприем b.1997-12.065 "><td>1997</td><td>7</td><td>33</td><td class="title-cell">Передатчик для управления летающими моделями. АМ Иен: К. keen</td><td>РАДИОПРИЕМ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-07.033.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.065.jpg" target="_blank" rel="noopener">b.1997-12.065</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="7" data-review="0" data-search="1997 7 34 ответы на вопросы по статьям, опубликованным в журнале в прошлые годы чурин с. автоматический переключатель стереодекодера в монофонический режим. радио, 1991, № 10, с звукотехника b.1997-12.064 "><td>1997</td><td>7</td><td>34</td><td class="title-cell">Ответы на вопросы по статьям, опубликованным в журнале в прошлые годы Чурин С. Автоматический переключатель стереодекодера в монофонический режим. Радио, 1991, № 10, с</td><td>ЗВУКОТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-07.034.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.064.jpg" target="_blank" rel="noopener">b.1997-12.064</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="7" data-review="0" data-search="1997 7 37 top” (5-40), “укв приемник в пачке радиолюбителю-конструктору b.1997-12.066 "><td>1997</td><td>7</td><td>37</td><td class="title-cell">Top” (5-40), “УКВ приемник в пачке</td><td>РАДИОЛЮБИТЕЛЮ-КОНСТРУКТОРУ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-07.037.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.066.jpg" target="_blank" rel="noopener">b.1997-12.066</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="7" data-review="0" data-search="1997 7 37 восстановление люминесцентных ламп. о радиоприем b.1997-12.065 "><td>1997</td><td>7</td><td>37</td><td class="title-cell">Восстановление люминесцентных ламп. О</td><td>РАДИОПРИЕМ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-07.037.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.065.jpg" target="_blank" rel="noopener">b.1997-12.065</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="8" data-review="0" data-search="1997 8 1 ик генератор-излучатель. ю радиолюбителю-конструктору b.1997-12.066 "><td>1997</td><td>8</td><td>1</td><td class="title-cell">ИК генератор-излучатель. Ю</td><td>РАДИОЛЮБИТЕЛЮ-КОНСТРУКТОРУ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-08.001.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.066.jpg" target="_blank" rel="noopener">b.1997-12.066</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="8" data-review="0" data-search="1997 8 2 отключение бортовой сети. п. алешин 2 реле указателя поворотов. и электроника за рулем b.1997-12.066 "><td>1997</td><td>8</td><td>2</td><td class="title-cell">Отключение бортовой сети. П. Алешин 2 Реле указателя поворотов. И</td><td>ЭЛЕКТРОНИКА ЗА РУЛЕМ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-08.002.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.066.jpg" target="_blank" rel="noopener">b.1997-12.066</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="8" data-review="0" data-search="1997 8 4 радиоприемником. а электроника 8 6 b.1997-12.066 "><td>1997</td><td>8</td><td>4</td><td class="title-cell">радиоприемником. А</td><td>ЭЛЕКТРОНИКА 8 6</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-08.004.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.066.jpg" target="_blank" rel="noopener">b.1997-12.066</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="8" data-review="0" data-search="1997 8 5 ответы на вопросы по статьям, опубликованным в журнале в прошлые годы бирюков с. доработка импортных электронных часов. радио т s96 са электроника 8 6 b.1997-12.066 "><td>1997</td><td>8</td><td>5</td><td class="title-cell">Ответы на вопросы по статьям, опубликованным в журнале в прошлые годы Бирюков С. Доработка импортных электронных часов. Радио т S96 Са</td><td>ЭЛЕКТРОНИКА 8 6</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-08.005.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.066.jpg" target="_blank" rel="noopener">b.1997-12.066</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="8" data-review="0" data-search="1997 8 5 “ночной сторож&quot; пассажира. ю электроника 8 6 b.1997-12.066 "><td>1997</td><td>8</td><td>5</td><td class="title-cell">“Ночной сторож&quot; пассажира. Ю</td><td>ЭЛЕКТРОНИКА 8 6</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-08.005.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.066.jpg" target="_blank" rel="noopener">b.1997-12.066</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="8" data-review="0" data-search="1997 8 6 воза программ на бейсике в a микропроцессорная техника b.1997-12.064 "><td>1997</td><td>8</td><td>6</td><td class="title-cell">воза программ на БЕЙСИКе в A</td><td>МИКРОПРОЦЕССОРНАЯ ТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-08.006.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.064.jpg" target="_blank" rel="noopener">b.1997-12.064</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="8" data-review="0" data-search="1997 8 6 директива w в &quot;радио микропроцессорная техника b.1997-12.064 "><td>1997</td><td>8</td><td>6</td><td class="title-cell">Директива W в &quot;Радио</td><td>МИКРОПРОЦЕССОРНАЯ ТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-08.006.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.064.jpg" target="_blank" rel="noopener">b.1997-12.064</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="8" data-review="1" data-search="1997 8 6 и мо|-синтезаторов. с. кононов ен eee з электронный камертон (bp) 2.2 eee eee eee eee eee 4 гитарная приставка “qucctowwh™ с переменным ограничением уровня сигнала. м радиолюбителю-конструктору b.1997-12.066 ocr_filler"><td>1997</td><td>8</td><td>6</td><td class="title-cell">и МО|-синтезаторов. С. Кононов ен eee З Электронный камертон (BP) 2.2 eee eee eee eee eee 4 Гитарная приставка “QucCTOWwH™ с переменным ограничением уровня сигнала. М</td><td>РАДИОЛЮБИТЕЛЮ-КОНСТРУКТОРУ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-08.006.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.066.jpg" target="_blank" rel="noopener">b.1997-12.066</a></td><td><span class="flag review">ocr_filler</span></td></tr>
+          <tr data-year="1997" data-issue="8" data-review="0" data-search="1997 8 6 радио, 1996, № 8, с, 48, 49 оное ениное в электроника 8 6 b.1997-12.066 "><td>1997</td><td>8</td><td>6</td><td class="title-cell">Радио, 1996, № 8, с, 48, 49 оное ениное в</td><td>ЭЛЕКТРОНИКА 8 6</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-08.006.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.066.jpg" target="_blank" rel="noopener">b.1997-12.066</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="8" data-review="0" data-search="1997 8 8 сейнов а. измеритель частоты: сердечных сокращений, радио, 1994, № 4, с. 30-33, № 5, с. 44 электроника 8 6 b.1997-12.066 "><td>1997</td><td>8</td><td>8</td><td class="title-cell">Сейнов А. Измеритель частоты: сердечных сокращений, Радио, 1994, № 4, с. 30-33, № 5, с. 44</td><td>ЭЛЕКТРОНИКА 8 6</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-08.008.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.066.jpg" target="_blank" rel="noopener">b.1997-12.066</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="8" data-review="1" data-search="1997 8 26 ремонт шлейфа. a. кармызов -. ee eee ee й 30 точное звучание музыкального сопроцессора. с радиоприем b.1997-12.065 ocr_filler"><td>1997</td><td>8</td><td>26</td><td class="title-cell">Ремонт шлейфа. A. Кармызов -. ee eee ee Й 30 Точное звучание музыкального сопроцессора. С</td><td>РАДИОПРИЕМ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-08.026.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.065.jpg" target="_blank" rel="noopener">b.1997-12.065</a></td><td><span class="flag review">ocr_filler</span></td></tr>
+          <tr data-year="1997" data-issue="8" data-review="0" data-search="1997 8 31 долой неудобства многоблочной автоконфигурации о подключении монитора к *спектруму-48`. в радиоприем b.1997-12.065 "><td>1997</td><td>8</td><td>31</td><td class="title-cell">Долой неудобства многоблочной автоконфигурации О подключении монитора к *Спектруму-48`. В</td><td>РАДИОПРИЕМ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-08.031.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.065.jpg" target="_blank" rel="noopener">b.1997-12.065</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="8" data-review="0" data-search="1997 8 34 шесть конструкций со светодиодами алзотб радиоприем b.1997-12.065 "><td>1997</td><td>8</td><td>34</td><td class="title-cell">Шесть конструкций со светодиодами АЛЗОТБ</td><td>РАДИОПРИЕМ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-08.034.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.065.jpg" target="_blank" rel="noopener">b.1997-12.065</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="8" data-review="0" data-search="1997 8 35 доработка телефонного аппарата. а. киселев радиоприем b.1997-12.065 "><td>1997</td><td>8</td><td>35</td><td class="title-cell">Доработка телефонного аппарата. А. Киселев</td><td>РАДИОПРИЕМ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-08.035.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.065.jpg" target="_blank" rel="noopener">b.1997-12.065</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="8" data-review="0" data-search="1997 8 35 старые микросхемы еще послужат. дверной звонок. стабилизатор напряжения. простейшие реле времени для фотопечати. охранная сигнализация, юпрокопцевя лень: ть радиоприем b.1997-12.065 "><td>1997</td><td>8</td><td>35</td><td class="title-cell">Старые микросхемы еще послужат. Дверной звонок. Стабилизатор напряжения. Простейшие реле времени для фотопечати. Охранная сигнализация, ЮПрокопцевя лень: ть</td><td>РАДИОПРИЕМ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-08.035.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.065.jpg" target="_blank" rel="noopener">b.1997-12.065</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="8" data-review="0" data-search="1997 8 36 устройство управления гкч. в. жук нь, б простой широкополосный генератор измерения b.1997-12.065 "><td>1997</td><td>8</td><td>36</td><td class="title-cell">Устройство управления ГКЧ. В. Жук нь, б Простой широкополосный генератор</td><td>ИЗМЕРЕНИЯ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-08.036.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.065.jpg" target="_blank" rel="noopener">b.1997-12.065</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="8" data-review="0" data-search="1997 8 37 счетчик времени записи из часов. а радиоприем b.1997-12.065 "><td>1997</td><td>8</td><td>37</td><td class="title-cell">Счетчик времени записи из часов. А</td><td>РАДИОПРИЕМ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-08.037.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.065.jpg" target="_blank" rel="noopener">b.1997-12.065</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="8" data-review="0" data-search="1997 8 38 мини-таймер. о. долгов. ee cee ee cee радиоприем b.1997-12.065 "><td>1997</td><td>8</td><td>38</td><td class="title-cell">Мини-таймер. О. Долгов. ee cee ee cee</td><td>РАДИОПРИЕМ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-08.038.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.065.jpg" target="_blank" rel="noopener">b.1997-12.065</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="9" data-review="0" data-search="1997 9 27 микроэмулятор мем-31/1. а радиоприем b.1997-12.065 "><td>1997</td><td>9</td><td>27</td><td class="title-cell">Микроэмулятор МЕМ-31/1. А</td><td>РАДИОПРИЕМ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-09.027.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.065.jpg" target="_blank" rel="noopener">b.1997-12.065</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="9" data-review="0" data-search="1997 9 96 базилевский к. &quot;покупая, проверяй!” panuo радиолюбителю-конструктору b.1997-12.066 "><td>1997</td><td>9</td><td>96</td><td class="title-cell">Базилевский К. &quot;Покупая, проверяй!” Panuo</td><td>РАДИОЛЮБИТЕЛЮ-КОНСТРУКТОРУ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-09.096.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.066.jpg" target="_blank" rel="noopener">b.1997-12.066</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="10" data-review="0" data-search="1997 10 13 поляков в. автодинный синхронный приемник. радио, 1994, № 3, с звукотехника b.1997-12.064 "><td>1997</td><td>10</td><td>13</td><td class="title-cell">Поляков В. Автодинный синхронный приемник. Радио, 1994, № 3, с</td><td>ЗВУКОТЕХНИКА</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-10.013.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.064.jpg" target="_blank" rel="noopener">b.1997-12.064</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="10" data-review="0" data-search="1997 10 39 первое дело техника безопасности радиоприем b.1997-12.065 "><td>1997</td><td>10</td><td>39</td><td class="title-cell">Первое дело техника безопасности</td><td>РАДИОПРИЕМ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-10.039.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.065.jpg" target="_blank" rel="noopener">b.1997-12.065</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="10" data-review="1" data-search="1997 10 40 пайка депо тонкое ee eee ee ee радиоприем b.1997-12.065 ocr_filler"><td>1997</td><td>10</td><td>40</td><td class="title-cell">Пайка депо тонкое ee eee ee ee</td><td>РАДИОПРИЕМ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-10.040.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.065.jpg" target="_blank" rel="noopener">b.1997-12.065</a></td><td><span class="flag review">ocr_filler</span></td></tr>
+          <tr data-year="1997" data-issue="10" data-review="0" data-search="1997 10 42 варианты блока питания “люстры чижевского”. в. утин радиоприем b.1997-12.065 "><td>1997</td><td>10</td><td>42</td><td class="title-cell">Варианты блока питания “люстры Чижевского”. В. Утин</td><td>РАДИОПРИЕМ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-10.042.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.065.jpg" target="_blank" rel="noopener">b.1997-12.065</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="11" data-review="0" data-search="1997 11 30 эмулятор микросхем пзу/озу аео20. г. выдолоб, в. кудряшов, в радиоприем b.1997-12.065 "><td>1997</td><td>11</td><td>30</td><td class="title-cell">Эмулятор микросхем ПЗУ/ОЗУ АЕО20. Г. Выдолоб, В. Кудряшов, В</td><td>РАДИОПРИЕМ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-11.030.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.065.jpg" target="_blank" rel="noopener">b.1997-12.065</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="11" data-review="0" data-search="1997 11 38 что такое индуктивное сопротивление радиоприем b.1997-12.065 "><td>1997</td><td>11</td><td>38</td><td class="title-cell">что такое индуктивное сопротивление</td><td>РАДИОПРИЕМ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-11.038.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.065.jpg" target="_blank" rel="noopener">b.1997-12.065</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="11" data-review="0" data-search="1997 11 42 автомат световых эффектов. а радиоприем b.1997-12.065 "><td>1997</td><td>11</td><td>42</td><td class="title-cell">Автомат световых эффектов. А</td><td>РАДИОПРИЕМ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-11.042.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.065.jpg" target="_blank" rel="noopener">b.1997-12.065</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="11" data-review="0" data-search="1997 11 43 переключатель трех гирпянд. а. шитов радиоприем b.1997-12.065 "><td>1997</td><td>11</td><td>43</td><td class="title-cell">Переключатель трех гирпянд. А. Шитов</td><td>РАДИОПРИЕМ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-11.043.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.065.jpg" target="_blank" rel="noopener">b.1997-12.065</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="12" data-review="0" data-search="1997 12 18 если компьютер и принтер “не понимают&quot; друг друга. библиотека функций поддержки “мыши”. а радиоприем b.1997-12.065 "><td>1997</td><td>12</td><td>18</td><td class="title-cell">Если компьютер и принтер “не понимают&quot; друг друга. Библиотека функций поддержки “мыши”. А</td><td>РАДИОПРИЕМ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.018.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.065.jpg" target="_blank" rel="noopener">b.1997-12.065</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="12" data-review="0" data-search="1997 12 30 детекторный приемник и опыты с hum радиоприем b.1997-12.065 "><td>1997</td><td>12</td><td>30</td><td class="title-cell">Детекторный приемник и ОПЫТЫ с HUM</td><td>РАДИОПРИЕМ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.030.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.065.jpg" target="_blank" rel="noopener">b.1997-12.065</a></td><td><span class="flag ok">ok</span></td></tr>
+          <tr data-year="1997" data-issue="12" data-review="1" data-search="1997 12 32 “происки” электрического тока eee eee ete ee ee радиоприем b.1997-12.065 ocr_filler"><td>1997</td><td>12</td><td>32</td><td class="title-cell">“происки” электрического тока eee eee ete ee ee</td><td>РАДИОПРИЕМ</td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.032.jpg" target="_blank" rel="noopener">скан</a></td><td><a href="https://archive.radio.ru/web/img/1997/b.1997-12.065.jpg" target="_blank" rel="noopener">b.1997-12.065</a></td><td><span class="flag review">ocr_filler</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <script>
+    const searchInput = document.getElementById('searchInput');
+    const yearFilter = document.getElementById('yearFilter');
+    const issueFilter = document.getElementById('issueFilter');
+    const reviewFilter = document.getElementById('reviewFilter');
+    const visibleCount = document.getElementById('visibleCount');
+    const rows = Array.from(document.querySelectorAll('#contentsRows tr'));
+
+    function applyFilters() {
+      const query = searchInput.value.trim().toLowerCase();
+      const year = yearFilter.value;
+      const issue = issueFilter.value;
+      const onlyReview = reviewFilter.checked;
+      let visible = 0;
+
+      for (const row of rows) {
+        const matchesQuery = !query || row.dataset.search.includes(query);
+        const matchesYear = !year || row.dataset.year === year;
+        const matchesIssue = !issue || row.dataset.issue === issue;
+        const matchesReview = !onlyReview || row.dataset.review === '1';
+        const show = matchesQuery && matchesYear && matchesIssue && matchesReview;
+        row.hidden = !show;
+        if (show) visible += 1;
+      }
+
+      visibleCount.textContent = String(visible);
+    }
+
+    searchInput.addEventListener('input', applyFilters);
+    yearFilter.addEventListener('change', applyFilters);
+    issueFilter.addEventListener('change', applyFilters);
+    reviewFilter.addEventListener('change', applyFilters);
+  </script>
+</body>
+</html>

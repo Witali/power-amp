@@ -362,6 +362,7 @@
 - Добавлен `scripts/generate_radio_ru_contents_html.py`: он строит статическую страницу из `study/radio_ru_contents/radio_contents_all.csv` с поиском, фильтрами по году/номеру журнала, ссылками на сканы `archive.radio.ru` и бейджами `needs_review`.
 - В `scripts/project_tasks.py` и `package.json` добавлен воспроизводимый запуск `radio-contents-html` / `npm run radio:contents-html`.
 - Главный `index.html` теперь генерируется со ссылкой на `study/radio_ru_contents/index.html` в секции распознавания.
+- Генератор теперь дополнительно пишет `study/radio_ru_contents/years/<год>.html`; на главной странице оглавлений годовые ссылки ведут на эти подстраницы, а рядом отображаются ссылки на JPEG-сканы страниц, где распознано годовое оглавление.
 
 ### 2026-05-26 - Уточнение ссылок по оглавлениям номеров Радио
 
