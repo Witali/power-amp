@@ -242,9 +242,6 @@ def build_html(rows: list[dict[str, str]], input_csv: Path, output: Path) -> str
       text-align: left;
     }}
     th {{
-      position: sticky;
-      top: 61px;
-      z-index: 1;
       color: #fff;
       background: #273447;
       font-weight: 600;
@@ -270,7 +267,6 @@ def build_html(rows: list[dict[str, str]], input_csv: Path, output: Path) -> str
         grid-template-columns: 1fr;
       }}
       .links {{ justify-content: flex-start; }}
-      th {{ top: 0; }}
     }}
   </style>
 </head>
